@@ -10,36 +10,18 @@
 // ------------------------------------------------
 // prelged sifrarnika operacija
 // ------------------------------------------------
-function p_rnop(cTabela, cId, dx, dy)
+function p_rnop(cId, dx, dy)
 *{
 local nArea
 local cHeader
 
 cHeader := "Lista: operacije "
-cHeader += cTabela
 
 Private Kol
 Private ImeKol
 
+O_S_RNOP
 nArea := F_S_RNOP
-
-SELECT (F_SIFK)
-if !used()
-	O_SIFK
-endif
-
-SELECT (F_SIFV)
-if !used()
-	O_SIFV
-endif
-
-SELECT (nArea)
-
-if !used()
-	if (cTabela == "S_RNOP")
-		O_S_RNOP
-	endif
-endif	
 
 set_a_kol( @Kol, @ImeKol)
 return PostojiSifra( nArea, 1, 10, 75, cHeader, ;

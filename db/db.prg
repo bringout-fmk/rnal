@@ -192,8 +192,18 @@ local aDbf
 aDbf:={}
 
 // set polja tabele rnal
-//AADD(aDBf,{ "id"    , "D" ,   8 ,  0 })
-//AADD(aDBf,{ "brnal"      , "D" ,   8 ,  0 })
+AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
+AADD(aDBf,{ "r_br"       , "N" ,   3 ,  0 })
+AADD(aDBf,{ "datnal"     , "D" ,   8 ,  0 })
+AADD(aDBf,{ "datisp"     , "D" ,   8 ,  0 })
+AADD(aDBf,{ "vr_isp"     , "C" ,  10 ,  0 })
+AADD(aDBf,{ "vr_plac"    , "C" ,   2 ,  0 })
+AADD(aDBf,{ "idpartner"  , "C" ,   6 ,  0 })
+AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
+AADD(aDBf,{ "kolicina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "d_sirina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "d_duzina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "d_ukupno"   , "N" ,  15 ,  5 })
 
 return aDbf
 
@@ -207,8 +217,11 @@ local aDbf
 aDbf:={}
 
 // set polja tabele rnal
-//AADD(aDBf,{ "id"    , "D" ,   8 ,  0 })
-//AADD(aDBf,{ "brnal"      , "D" ,   8 ,  0 })
+AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
+AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
+AADD(aDBf,{ "id_rnop"    , "C" ,   6 ,  0 })
+AADD(aDBf,{ "id_rnka"    , "C" ,   6 ,  0 })
+AADD(aDBf,{ "rn_instr"   , "C" , 100 ,  0 })
 
 return aDbf
 
@@ -323,13 +336,13 @@ if (nArea==-1 .or. nArea == nArea2)
 
 	do case 
 		case (nArea2 == F_P_RNAL)
-			//CREATE_INDEX("brnal", "STR(br_dok,6,0)+STR(r_br,6,0)", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,8,0)+STR(r_br,3,0)", cPath + cTable)
 		case (nArea2 == F_RNAL) 
-		  	//CREATE_INDEX("brnal","STR(BR_DOK, 6, 0)+STR(r_br,6,0)", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,8,0)+STR(r_br,3,0)", cPath + cTable)
 		case (nArea2 == F_P_RNOP)
-			//CREATE_INDEX()
+			CREATE_INDEX("br_nal", "STR(br_nal,8,0)+idroba", cPath + cTable)
 		case (nArea2 == F_RNOP)
-			//CREATE_INDEX()
+			CREATE_INDEX("br_nal", "STR(br_nal,8,0)+idroba", cPath + cTable)
 		case (nArea2 == F_S_RNOP)
 		  	CREATE_INDEX("id","id", cPath + cTable)
 		case (nArea2 == F_S_RNKA)

@@ -17,20 +17,7 @@ if lPriprema == nil
 	lPriprema := .f.
 endif
 
-select F_TARIFA
-if !used()
-	O_TARIFA
-endif
-
-select F_PARTN
-if !used()
-	O_PARTN
-endif
-
-select F_ROBA
-if !used()
-	O_ROBA
-endif
+o_rn_sif()
 
 select F_S_RNKA
 if !used()
@@ -66,4 +53,22 @@ endif
 
 return
 
+
+// otvori sifrarnike
+function o_rn_sif()
+select F_TARIFA
+if !used()
+	O_TARIFA
+endif
+
+select F_PARTN
+if !used()
+	O_PARTN
+endif
+
+select F_ROBA
+if !used()
+	O_ROBA
+endif
+return
 

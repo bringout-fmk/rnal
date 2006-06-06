@@ -23,17 +23,6 @@ return
 // ---------------------------------------------
 // ---------------------------------------------
 static function read_params()
-
-/*
-O_PARAMS
-private cSection:="1"
-private cHistory:=" "
-private aHistory:={}
-Params1()
-//RPar("po",@gPotpis)
-select params
-use
-*/
 return
 
 
@@ -53,7 +42,7 @@ private ImeKol
 private Kol
 
 SELECT (F_P_RNAL)
-SET ORDER TO TAG "brnal"
+SET ORDER TO TAG "br_nal"
 GO TOP
 
 set_a_kol( @Kol, @ImeKol)
@@ -69,13 +58,13 @@ static function set_a_kol( aKol, aImeKol )
 
 aImeKol := {}
 
-AADD(aImeKol, {"Br.nal", {|| TRANSFORM(br_dok, "99999")}, "br_nal", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Br.nal", {|| TRANSFORM(br_nal, "99999")}, "br_nal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"R.br", {|| TRANSFORM(r_br, "99999")}, "r_br", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Datum", {|| datum}, "datum", {|| .t.}, {|| .t.} })
-AADD(aImeKol, { PADR("Roba", 6), {|| id_roba }, "id_roba", {|| .t.}, {|| .t.} })
-//AADD(aImeKol, {"Izn.b.pdv", {|| TRANSFORM(i_b_pdv, PIC_IZN()) }, "i_b_pdv", {|| .t.}, {|| .t.} })
-//AADD(aImeKol, {"Izn.pdv", {|| TRANSFORM(i_pdv, PIC_IZN()) }, "i_pdv", {|| .t.}, {|| .t.} })
-//AADD(aImeKol, {"Izn.s.pdv", {|| TRANSFORM(i_b_pdv+i_pdv, PIC_IZN()) }, "", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Dat.n.", {|| datnal}, "datnal", {|| .t.}, {|| .t.} })
+AADD(aImeKol, { PADR("Roba", 6), {|| idroba }, "idroba", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Kolicina", {|| TRANSFORM(kolicina, "99999.99") }, "kolicina", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Duzina", {|| TRANSFORM(d_duzina, PIC_IZN()) }, "d_duzina", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Sirina", {|| TRANSFORM(d_sirina, PIC_IZN()) }, "d_sirina", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
@@ -203,23 +192,19 @@ do case
 		endif
 		return DE_CONT
 	case (Ch == K_CTRL_N)
-		// stavke unosimo cirkularno do ESC znaka
- 		DO WHILE .t.
-		   	SELECT P_RNAL
-			APPEND BLANK
-			nTekRec := RECNO()
-        		Scatter()
-			if ed_item(.t.)
-				GO nTekRec
-				Gather()
-			else
-				// brisi necemo ovu stavku
-				SELECT P_RNAL
-				go nTekRec
-				DELETE
-				exit
-			endif
-		ENDDO 
+		SELECT P_RNAL
+		APPEND BLANK
+		nTekRec := RECNO()
+        	Scatter()
+		if ed_item(.t.)
+			GO nTekRec
+			Gather()
+		else
+			// brisi necemo ovu stavku
+			SELECT P_RNAL
+			go nTekRec
+			DELETE
+		endif
 		GO BOTTOM
 		return DE_REFRESH
 	case (Ch  == K_CTRL_F9)
