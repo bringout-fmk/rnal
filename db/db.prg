@@ -192,8 +192,23 @@ local aDbf
 aDbf:={}
 
 // set polja tabele rnal
-AADD(aDBf,{ "id"    , "D" ,   8 ,  0 })
-AADD(aDBf,{ "brnal"      , "D" ,   8 ,  0 })
+//AADD(aDBf,{ "id"    , "D" ,   8 ,  0 })
+//AADD(aDBf,{ "brnal"      , "D" ,   8 ,  0 })
+
+return aDbf
+
+
+// ----------------------------------------------
+// rnop fields
+// ----------------------------------------------
+function get_rnop_fields()
+local aDbf
+
+aDbf:={}
+
+// set polja tabele rnal
+//AADD(aDBf,{ "id"    , "D" ,   8 ,  0 })
+//AADD(aDBf,{ "brnal"      , "D" ,   8 ,  0 })
 
 return aDbf
 
