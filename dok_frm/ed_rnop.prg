@@ -174,7 +174,7 @@ static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 
 AADD(aImeKol, {"Oper."  , {|| PADR(s_operacija(id_rnop),15) }, "id_rnop", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Karakt.", {|| PADR(s_karakt(id_rnka),40) }, "id_rnka", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Karakt.", {|| PADR(s_karakt(id_rnka),40) }   , "id_rnka", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Instr." , {|| PADR(rn_instr, 15)}, "rn_instr", {|| .t.}, {|| .t.} })
 
 aKol:={}

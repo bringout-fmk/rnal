@@ -152,10 +152,13 @@ nTArea := F_P_RNOP
 
 select s_rnka
 set order to tag "id"
+go top
 seek cIdKar
 
 if Found()
 	cRet := ALLTRIM(field->naziv)
+else
+	cRet := cIdKar
 endif
 
 select (nTArea)
@@ -172,6 +175,7 @@ nTArea := F_P_RNOP
 
 select s_rnop
 set order to tag "id"
+go top
 seek cIdOper
 
 if Found()
