@@ -254,7 +254,6 @@ aDbf:={}
 // set polja sifrarnika karakteristika
 AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
 AADD(aDBf,{ "id_rnop"     , "C" ,   6 ,  0 })
-AADD(aDBf,{ "r_br"        , "C" ,   3 ,  0 })
 AADD(aDBf,{ "naziv"       , "C" , 100 ,  0 })
 AADD(aDBf,{ "opis"        , "C" , 200 ,  0 })
 return aDbf
@@ -346,8 +345,8 @@ if (nArea==-1 .or. nArea == nArea2)
 		case (nArea2 == F_S_RNOP)
 		  	CREATE_INDEX("id","id", cPath + cTable)
 		case (nArea2 == F_S_RNKA)
-		  	CREATE_INDEX("id","id+r_br", cPath + cTable)
-		  	CREATE_INDEX("idop","id_rnop+id+r_br", cPath + cTable)
+		  	CREATE_INDEX("id","id", cPath + cTable)
+		  	CREATE_INDEX("idop","id_rnop+id", cPath + cTable)
 	endcase
 endif
 return 

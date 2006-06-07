@@ -43,8 +43,7 @@ static function set_a_kol( aKol, aImeKol)
 
 aImeKol := {}
 AADD(aImeKol, {"Operacija", {|| id_rnop}, "id_rnop", {|| .t.}, {|| p_rnop(@wid_rnop)} })
-AADD(aImeKol, {"ID", {|| id}, "id", {|| auto_inc(@wid, @wr_br, @wid_rnop), .f. }, {|| .t.} })
-AADD(aImeKol, {"Rbr", {|| r_br}, "r_br", {|| .t.}, {|| !EMPTY(wr_br).and.fix_rbr(@wr_br) }, , "999" })
+AADD(aImeKol, {"ID", {|| id}, "id", {|| auto_inc(@wid, @wid_rnop), .f. }, {|| .t.} })
 AADD(aImeKol, {"Naziv", {|| naziv}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Opis", {|| opis}, "opis", {|| .t.}, {|| .t.} })
 
@@ -93,10 +92,10 @@ static function k_handler(Ch)
 return DE_CONT
 
 // ------------------------------------
-// automatski uvecava ID i RBR 
+// automatski uvecava ID 
 // na osnovu id-a operacije
 // ------------------------------------
-static function auto_inc(wId, wR_br, wIdOp)
+static function auto_inc(wId, wIdOp)
 local nRet:=.t.
 if ((Ch==K_CTRL_N) .or. (Ch==K_F4))
 	if (LastKey()==K_ESC)
@@ -104,19 +103,17 @@ if ((Ch==K_CTRL_N) .or. (Ch==K_F4))
 	endif
 	select s_rnka
 	nRecNo:=RecNo()
-	g_last_rec(@wId, @wR_br, wIdOp, nRecNo)
+	g_last_rec(@wId, wIdOp, nRecNo)
 	AEVAL(GetList,{|o| o:display()})
 endif
 
 return nRet
 
 // ------------------------------------
-// setuje varijable xId i xRbr 
+// setuje varijablu xId 
 // ------------------------------------
-static function g_last_rec(xId, xRbr, cIdOp, nRecNo)
-
+static function g_last_rec(xId, cIdOp, nRecNo)
 xId := SPACE(6)
-xRbr := SPACE(3)
 
 select s_rnka
 set order to tag "idop"
@@ -126,7 +123,6 @@ seek cIdOp
 if Found()
 	do while !EOF() .and. field->id_rnop == cIdOp
 		xId := field->id
-		xRbr := field->r_br
 		skip
 	enddo
 endif
@@ -136,13 +132,6 @@ if !EMPTY(xId)
 	xId := ALLTRIM( STR( VAL(ALLTRIM(xId)) + 1 ) )
 else
 	xId := ALLTRIM( STR( VAL(ALLTRIM(cIdOp)) + 1 ) )
-endif
-
-// uvecaj rbr
-if !EMPTY(xRbr)
-	xRbr := ALLTRIM( STR( VAL(ALLTRIM(xRbr)) + 1 ) )
-else
-	xRbr := "1"
 endif
 
 set order to tag "id"
