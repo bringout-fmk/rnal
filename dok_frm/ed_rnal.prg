@@ -129,22 +129,30 @@ endif
 
 @ m_x + nX, m_y + 2 SAY "Rbr:" GET _r_br PICT "9999"
 
-nX += 2
+nX += 1
 nRobaX := m_x + nX + 1
 
 @ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID { || !EMPTY(_idroba) .and. p_roba(@_idroba) .and. v_roba(@_idroba) .and. g_art_type(_idroba, nRobaX ) }
 
 nX += 3
 
-@ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL()
+@ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID _kolicina <> 0
  
-@ m_x + nX, col() + 2 SAY "Sirina:" GET _d_sirina PICT PIC_DIM()
+@ m_x + nX, col() + 2 SAY "Sirina (cm):" GET _d_sirina PICT PIC_DIM() VALID _d_sirina <> 0
  
-@ m_x + nX, col() + 2 SAY "Visina:" GET _d_visina PICT PIC_DIM()
+@ m_x + nX, col() + 2 SAY "Visina (cm):" GET _d_visina PICT PIC_DIM() VALID _d_visina <> 0
 
-nX += 2
+nTotX := nX + 2
+nX += 4
+nTmp := nX
 
-@ m_x + nX, m_y + 2 SAY "Unos operacija (D/N)?" GET cUnosOp VALID !EMPTY(cUnosOp) .and. cUnosOp $ "DN" PICT "@!"
+read
+
+_d_ukupno := mkvadrat( _d_sirina, _d_visina )
+
+@ m_x + nTotX, m_y + 45 SAY "UKUPNO STAVKA: " + ALLTRIM(STR(_d_ukupno, 10, 2)) + " m2"
+
+@ m_x + nTmp, m_y + 2 SAY "Unos operacija (D/N)?" GET cUnosOp VALID !EMPTY(cUnosOp) .and. cUnosOp $ "DN" PICT "@!"
 
 read
 
@@ -255,8 +263,9 @@ do case
 	case Ch==K_CTRL_P
 		return DE_REFRESH
 	case Ch==K_ALT_A
-		if Pitanje( , "Azurirati P_RNAL -> RNAL ?", "N") == "D"
+		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D"
 	  		azur_rnal()
+			SELECT P_RNAL
 			RETURN DE_REFRESH
 		else
 			RETURN DE_CONT

@@ -202,3 +202,10 @@ return 1
 
 
 
+// vraca vrijednost u m2 izmedju 2 velicine unesene u cm
+function mkvadrat(nVal1, nVal2)
+local xRet
+xRet := ( nVal1 / 100 ) * (nVal2 / 100)
+return xRet
+
+

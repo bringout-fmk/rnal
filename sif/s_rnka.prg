@@ -44,7 +44,7 @@ static function set_a_kol( aKol, aImeKol)
 aImeKol := {}
 AADD(aImeKol, {"Operacija", {|| id_rnop}, "id_rnop", {|| .t.}, {|| p_rnop(@wid_rnop)} })
 AADD(aImeKol, {"ID", {|| id}, "id", {|| auto_inc(@wid, @wid_rnop), .f. }, {|| .t.} })
-AADD(aImeKol, {"Naziv", {|| naziv}, "naziv", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Naziv", {|| PADR(naziv, 40)}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Opis", {|| opis}, "opis", {|| .t.}, {|| .t.} })
 
 aKol:={}

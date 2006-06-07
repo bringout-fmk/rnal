@@ -7,41 +7,54 @@
 function azur_rnal()
 
 o_rnal(.t.)
-// privatno podrucje
-nPArea := F_P_RNAL
-// kumulativ 
-nKArea := F_RNAL
 
-Box(, 2, 60)
-
-	SELECT (nPArea)
-	if RECCOUNT2() == 0
-		return 0
-	endif
-
-	do while !eof()
-		Scatter()
-		SELECT (nKArea)
-		APPEND BLANK
-		Gather()
-		select (nPArea)
-		SKIP
-	enddo
+MsgO("Azuriranje naloga u toku...")
 	
-	SELECT (nKArea)
-	use
+select p_rnal
+go top
 
-	// sve je ok brisi pripremu
-	SELECT (nPArea)
-	zap
-	use
+if RECCOUNT2() == 0
+	return 0
+endif
 
-	o_rnal(.t.)
-BoxC()
+do while !eof()
+	Scatter()
+	select rnal
+	append blank
+	Gather()
+	select p_rnal
+	skip
+enddo
+	
+select p_rnop
+go top
 
-// azuriran je dokument
+if RECCOUNT2() <> 0
+	do while !EOF()
+		if !EMPTY(field->rn_instr)
+			Scatter()
+			select rnop
+			append blank
+			Gather()
+		endif
+		select p_rnop
+		skip
+	enddo
+endif
 
-return
+// sve je ok brisi pripremu
+select p_rnal
+zap
+select p_rnop
+zap
+
+use
+
+o_rnal(.t.)
+
+MsgC()
+
+return 1
 
 
 
