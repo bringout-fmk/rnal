@@ -72,10 +72,7 @@ endif
 
 cIdOper := SPACE(6)
 
-Box(,1,50)
-	@ 1+m_x, 2+m_y SAY "Operacija:" GET cIdOper VALID !EMPTY(cIdOper) .and. p_rnop(@cIdOper)
-	read
-BoxC()
+get_oper(@cIdOper)
 
 select s_rnka
 cFilter := "id_rnop =" + Cm2Str(cIdOper)

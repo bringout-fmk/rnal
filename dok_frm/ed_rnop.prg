@@ -6,15 +6,25 @@
 function ed_st_oper(nBrNal, cIdRoba)
 local nArea
 local nTArea
-
+local cRNaziv
+local cFooter
 private ImeKol
 private Kol
 
 nTArea := SELECT()
+
+select roba
+go top
+seek cIdRoba
+
+cFooter := ALLTRIM(cIdRoba)
+cFooter += "-"
+cFooter += PADR(roba->naz, 40)
+
 nArea := F_P_RNOP
 
 Box(, 15, 77)
-@ m_x + 15, m_y + 2 SAY "<c-N> Nova operacija    | <F2> Ispravi operaciju    | <c-T> Brisi operaciju"
+@ m_x + 15, m_y + 2 SAY "<c-N> Nova operacija    | <c-T> Brisi operaciju"
 
 select (nArea)
 
@@ -26,12 +36,12 @@ set_a_kol(@ImeKol, @Kol)
 set order to tag "br_nal"
 go top
 
-ObjDbedit("prop", 15, 77, {|| k_handler(nBrNal, cIdRoba)}, "", "unos operacija nad artiklom...", , , , , 1)
+ObjDbedit("prop", 15, 77, {|| k_handler(nBrNal, cIdRoba)}, "", cFooter, , , , , 1)
 BoxC()
 
 select (nTArea)
-
-return .t. 
+return
+  
 
 
 static function set_f_kol(nBrNal, cIdRoba)
@@ -44,34 +54,34 @@ return
 // key handler
 static function k_handler(nBrNal, cIdRoba)
 
-if (Ch==K_CTRL_T .or. Ch==K_ENTER) .and. reccount2()==0
+if (Ch==K_CTRL_T .or. Ch==K_CTRL_F9) .and. reccount2()==0
 	return DE_CONT
 endif
 
 do case
 	case (Ch == K_CTRL_T)
-		select P_RNOP
+		//select P_RNOP
 		if Pitanje(,"Zelite izbrisati ovu stavku ?","D")=="D"
       			delete
       			return DE_REFRESH
       		endif
      		return DE_CONT
 	case (Ch == K_CTRL_N)
-		SELECT P_RNOP
-		op_item(.t., nBrNal, cIdRoba)
+		//SELECT P_RNOP
+		fill_p_rnop(nBrNal, cIdRoba)
 		return DE_REFRESH
-	case (Ch == K_F2)
-		SELECT P_RNOP
-		Scatter()
-		if op_item(.f., nBrNal, cIdRoba) == 1
-			Gather()
-			return DE_REFRESH
-		endif
-		return DE_CONT
+	case UPPER(CHR(Ch)) == "I"
+		set_rnop_instr()
+		return DE_REFRESH
 	case (Ch  == K_CTRL_F9)
         	select P_RNOP
 		if Pitanje( ,"Zelite li izbrisati sve zapise ?????","N") == "D"
-	     		zap
+	     		set order to tag "br_nal"
+			hseek STR(nBrNal,8,0) + cIdRoba
+			do while !EOF() .and. field->br_nal == nBrNal .and. field->idroba == cIdRoba
+				delete
+				skip
+			enddo
         		return DE_REFRESH
 		endif
         	return DE_CONT
@@ -80,98 +90,92 @@ endcase
 return DE_CONT
 
 
-// nova stavka...
-static function op_item(lNova, nBrNal, cIdRoba)
-local nX := 2
-local nCount 
 
-UsTipke()
+// napuni podatke p_rnop sa karakteristikama
+static function fill_p_rnop(nBrNal, cIdRoba)
+local cOper
+local nCount
 
-Box(, 10, 60, .f., "Unos novih operacija")
-
-select roba
-seek cIdRoba
-
-cPom := ALLTRIM(cIdRoba)
-cPom += SPACE(1) + "-" + SPACE(1)
-cPom += ALLTRIM(roba->naz)
-
-@ m_x + nX, m_y + 2 SAY "Artikal: " + cPom
-
-select p_rnop
-
-Scatter()
-nCount := 0
-
-do while .t.
-	if nCount > 0
-		Scatter()
-	endif
-	
-	++ nCount
-	
-	nX += 2
-	
-	@ m_x + nX, m_y + 2 SAY "uneseno stavki: " + ALLTRIM(STR(nCount))
-	
-	if g_op_item(lNova) == 0
-		exit
-	endif
-	
-	select p_rnop
-	
-	if lNova
-		append blank
-	endif
-	
-	_br_nal := nBrNal
-	_idroba := cIdRoba
-	
-	Gather()
-enddo
-
-SELECT p_rnop
-
-BoxC()
-
-return 1
-
-
-// operacija stavka
-static function g_op_item(lNova)
-local nX := 7
-
-if lNova
-	_id_rnop := SPACE(6)
-	_id_rnka := SPACE(6)
-	_rn_instr := SPACE(6)
+cOper := SPACE(6)
+// uzmi operaciju
+if get_oper(@cOper) == 0
+	return DE_CONT
 endif
 
-@ m_x + nX, m_y + 2 SAY "     Operacija:" GET _id_rnop
+select s_rnka
+set order to tag "idop"
+go top
+seek cOper
 
-nX += 1
+nCount := 0
+if Found()
+	// napuni tabelu podacima
+	do while !EOF() .and. s_rnka->id_rnop == cOper
+	
+		cRnKa := s_rnka->id
+		
+		select p_rnop
+		
+		// ako ne postoji karakteristika u pripremi dodaj
+		if !post_rnka(nBrNal, cIdRoba, cRnKa)
+			append blank
+			replace br_nal with nBrNal
+			replace idroba with cIdRoba
+			replace id_rnop with s_rnka->id_rnop
+			replace id_rnka with s_rnka->id
+		endif
+		
+		select s_rnka
+		skip
+		
+		++ nCount
+	enddo
+endif
 
-@ m_x + nX, m_y + 2 SAY "Karakteristika:" GET _id_rnka
+select p_rnop
+skip -(nCount)
 
-nX += 1
+return
 
-@ m_x + nX, m_y + 2 SAY "   Instrukcija:" GET _rn_instr PICT "@S20"
 
-read
 
-ESC_RETURN 0
+// ispituje da li postoji vec unesena karakteristika 
+function post_rnka(nBrNal, cIdRoba, cIdKa)
+local nTRec
+local xRet:=.f.
+nTRec := RecNo()
+set order to tag "rn_ka"
+go top
+seek STR(nBrNal,8,0) + cIdRoba + cIdKa
 
-return 1
+if Found()
+	xRet := .t.
+endif
 
+set order to tag "br_nal"
+go (nTRec)
+
+return xRet
+
+
+// setuj instrukciju za slog u tabeli
+function set_rnop_instr()
+Scatter()
+Box(,1,60)
+	@ m_x+1, m_y + 2 SAY "vrijednost" GET _rn_instr PICT "@S40"
+	read
+BoxC()
+Gather()
+return
 
 
 // setovanje kolona operacija
 static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 
-AADD(aImeKol, {"Oper."  , {|| id_rnop }, "id_rnop", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Karakt.", {|| id_rnka }, "id_rnka", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Instr." , {|| PADR(rn_instr, 20)}, "rn_instr", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Oper."  , {|| PADR(s_operacija(id_rnop),15) }, "id_rnop", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Karakt.", {|| PADR(s_karakt(id_rnka),40) }, "id_rnka", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Instr." , {|| PADR(rn_instr, 15)}, "rn_instr", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)

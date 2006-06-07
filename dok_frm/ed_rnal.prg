@@ -148,15 +148,14 @@ nX += 2
 
 read
 
+ESC_RETURN 0
+
 if cUnosOp == "D"
 	// unos operacija nad artiklom
 	nBrNal := _br_nal
 	cIdRoba := _idroba
 	ed_st_oper(nBrNal, cIdRoba)
-	select p_rnal
 endif
-
-ESC_RETURN 0
 
 if !lNovi
 	return 0
@@ -281,22 +280,10 @@ do case
 		ed_st_oper(p_rnal->br_nal, p_rnal->idroba)
 		select p_rnal
 		return DE_REFRESH
-	case (Ch == K_F10)
-     		t_ost_opcije()
-     		return DE_REFRESH
 
 endcase
 
 return DE_CONT
 
-
-// ---------------------------------
-// ostale opcije pripreme
-// ---------------------------------
-static function t_ost_opcije()
-
-notimp()
-
-return
 
 

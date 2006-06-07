@@ -142,3 +142,59 @@ select (nArr)
 return .t.
 
 
+
+// show karakteristika
+function s_karakt(cIdKar)
+local cRet
+local nTArea
+
+nTArea := F_P_RNOP
+
+select s_rnka
+set order to tag "id"
+seek cIdKar
+
+if Found()
+	cRet := ALLTRIM(field->naziv)
+endif
+
+select (nTArea)
+
+return cRet
+
+
+// show operacija
+function s_operacija(cIdOper)
+local cRet
+local nTArea
+
+nTArea := F_P_RNOP
+
+select s_rnop
+set order to tag "id"
+seek cIdOper
+
+if Found()
+	cRet := ALLTRIM(field->naziv)
+else
+	cRet := cIdOper
+endif
+
+select (nTArea)
+
+return cRet
+
+
+// vrati operaciju, box
+function get_oper(cOper)
+Box(,1,50)
+	@ m_x + 1, m_y + 2 SAY "operacija:" GET cOper VALID !EMPTY(cOper) .and. p_rnop(@cOper)
+	read
+BoxC()
+
+ESC_RETURN 0
+
+return 1
+
+
+
