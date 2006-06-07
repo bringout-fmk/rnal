@@ -346,8 +346,8 @@ if (nArea==-1 .or. nArea == nArea2)
 		case (nArea2 == F_S_RNOP)
 		  	CREATE_INDEX("id","id", cPath + cTable)
 		case (nArea2 == F_S_RNKA)
-		  	CREATE_INDEX("id","id", cPath + cTable)
-		  	CREATE_INDEX("idop","id_rnop+r_br", cPath + cTable)
+		  	CREATE_INDEX("id","id+r_br", cPath + cTable)
+		  	CREATE_INDEX("idop","id_rnop+id+r_br", cPath + cTable)
 	endcase
 endif
 return 

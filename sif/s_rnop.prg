@@ -12,16 +12,20 @@
 // ------------------------------------------------
 function p_rnop(cId, dx, dy)
 *{
+local nTArea
 local nArea
 local cHeader
 
 cHeader := "Lista: operacije "
+nTArea := SELECT()
 
 Private Kol
 Private ImeKol
 
 O_S_RNOP
 nArea := F_S_RNOP
+
+select (nTArea)
 
 set_a_kol( @Kol, @ImeKol)
 return PostojiSifra( nArea, 1, 10, 75, cHeader, ;
