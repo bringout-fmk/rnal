@@ -56,6 +56,7 @@ return
 
 // otvori sifrarnike
 function o_rn_sif()
+
 select F_TARIFA
 if !used()
 	O_TARIFA
@@ -66,9 +67,25 @@ if !used()
 	O_PARTN
 endif
 
+select F_OPS
+if !used()
+	O_OPS
+endif
+
 select F_ROBA
 if !used()
 	O_ROBA
 endif
+
+select F_SIFK
+if !used()
+	O_SIFK
+endif
+
+select F_SIFV
+if !used()
+	O_SIFV
+endif
+
 return
 

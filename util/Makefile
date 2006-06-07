@@ -3,7 +3,7 @@ MODUL=rnal_ut
 
 SRCDOSROOT=c:\\dev\\fmk\\rnal\\util\\
 
-PRGS=rn_zaok.prg
+PRGS=rn_zaok.prg rnal.prg
 CS=
 ASMS=
 

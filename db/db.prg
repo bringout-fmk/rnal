@@ -193,16 +193,17 @@ aDbf:={}
 
 // set polja tabele rnal
 AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
-AADD(aDBf,{ "r_br"       , "N" ,   3 ,  0 })
+AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "datnal"     , "D" ,   8 ,  0 })
 AADD(aDBf,{ "datisp"     , "D" ,   8 ,  0 })
 AADD(aDBf,{ "vr_isp"     , "C" ,  10 ,  0 })
-AADD(aDBf,{ "vr_plac"    , "C" ,   2 ,  0 })
+AADD(aDBf,{ "vr_plac"    , "C" ,   1 ,  0 })
+AADD(aDBf,{ "hitnost"    , "C" ,   1 ,  0 })
 AADD(aDBf,{ "idpartner"  , "C" ,   6 ,  0 })
 AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
 AADD(aDBf,{ "kolicina"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "d_sirina"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "d_duzina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "d_visina"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "d_ukupno"   , "N" ,  15 ,  5 })
 
 return aDbf

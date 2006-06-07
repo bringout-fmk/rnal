@@ -4,10 +4,13 @@
 // validacija
 // --------------------------
 
-function v_nazad(nNazad)
-for i:=1 to nNazad
-	KEYBOARD K_UP
-next
+
+// validacija robe
+function val_roba()
 return .t.
+
+
+
+
 
 

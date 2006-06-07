@@ -63,8 +63,8 @@ AADD(aImeKol, {"R.br", {|| TRANSFORM(r_br, "99999")}, "r_br", {|| .t.}, {|| .t.}
 AADD(aImeKol, {"Dat.n.", {|| datnal}, "datnal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, { PADR("Roba", 6), {|| idroba }, "idroba", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Kolicina", {|| TRANSFORM(kolicina, "99999.99") }, "kolicina", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Duzina", {|| TRANSFORM(d_duzina, PIC_IZN()) }, "d_duzina", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Sirina", {|| TRANSFORM(d_sirina, PIC_IZN()) }, "d_sirina", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Visina", {|| TRANSFORM(d_visina, PIC_IZN()) }, "d_visina", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
@@ -75,90 +75,145 @@ return
 
 
 // ---------------------------------------------
-// ispravka jedne stavke 
+// obrada stavke 
 // ---------------------------------------------
 static function ed_item(lNova)
-local cIspravno := "D"
-local nI_s_pdv := 0
-local nX := 2
-local nXPart := 0
-local nYPart := 22
+local nCount 
 
 UsTipke()
 
-Box(, 16, 70)
+Box(, 20, 77, .f., "Unos novih stavki")
 
-/*
-if lNova
-	_br_dok := 0
-	_r_br := next_r_br("P_KUF")
-	_id_part:= SPACE(LEN(id_part))
-	_id_tar:= PADR("PDV17", LEN(id_tar))
-	_datum := DATE()
-	_opis:= SPACE(LEN(opis))
-	_i_b_pdv := 0
-	_i_pdv := 0
-	_src_br_2 := SPACE(LEN(src_br_2))
-endif
+Scatter()
 
-@ m_x + nX, m_y+2 SAY "R.br: " GET _r_br ;
-	PICT "999999"
-	
-@ m_x + nX, col()+2 SAY "datum: " GET _datum
-nX += 2
+g_nal_header(lNova)
 
-nXPart := nX
-@ m_x + nX, m_y+2 SAY "Dobavljac: " GET _id_part ;
-	VALID v_part(@_id_part, @_id_tar, "KUF", .t.) ;
-	PICT "@!"
-	
-nX += 2
+nCount := 0
 
-@ m_x + nX, m_y+2 SAY "Broj fakture " GET _src_br_2 
-nX ++
+do while .t.
+	if nCount > 0
+		Scatter()
+	endif
+	++ nCount
+	if g_nal_item(lNova) == 0
+		exit
+	endif
+	select p_rnal
+	if lNova
+		append blank
+	endif
+	Gather()
+enddo
 
-@ m_x + nX, m_y+2 SAY "Opis stavke: " GET _opis ;
-	WHEN { || SETPOS(m_x + nXPart, m_y + nYPart), QQOUT(s_partner(_id_part)) , .t. } ;
-	PICT "@S50"
-	
-nX += 2
-
-@ m_x + nX, m_y+2 SAY "Iznos bez PDV (osnovica): " GET _i_b_pdv ;
-	PICT PIC_IZN()
-++nX
-
-@ m_x + nX, m_y+2 SAY "tarifa: " GET _id_tar ;
-	valid v_id_tar(@_id_tar, @_i_b_pdv, @_i_pdv,  col(), lNova)  ;
-	PICT "@!"
-	
-++nX
-
-@ m_x + nX, m_y+2 SAY "   Iznos PDV: " GET _i_pdv ;
-        WHEN { ||  .t. } ;
-	VALID { || nI_s_pdv := _i_b_pdv + _i_pdv, .t. } ;
-	PICT PIC_IZN()
-++nX
-
-@ m_x + nX, m_y+2 SAY "Iznos sa PDV: " GET nI_s_pdv ;
-	when { || .f. } ;
-	PICT PIC_IZN()
-nX += 2
-
-@ m_x + nX, m_y+2 SAY "Ispravno ?" GET cIspravno ;
-	pict "@!"
-++nX
-
-read
-
-SELECT F_P_KUF
-*/
+SELECT p_rnal
 
 BoxC()
 
-ESC_RETURN .f.
+return 1
 
-return .t.
-*}
+
+// stavka naloga
+function g_nal_item(lNovi)
+local nX := 11
+local nRobaX
+local cUnosOp := "D"
+
+if lNovi
+	_r_br := next_r_br()
+	_idroba := SPACE(LEN(idroba))
+	_kolicina := 0
+	_d_sirina := 0
+	_d_visina := 0
+	_d_ukupno := 0
+endif
+
+@ m_x + nX, m_y + 2 SAY "Rbr:" GET _r_br PICT "9999"
+
+nX += 2
+nRobaX := m_x + nX + 1
+
+@ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID { || !EMPTY(_idroba) .and. p_roba(@_idroba) .and. v_roba(@_idroba) .and. g_art_type(_idroba, nRobaX ) }
+
+nX += 3
+
+@ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL()
+ 
+@ m_x + nX, col() + 2 SAY "Sirina:" GET _d_sirina PICT PIC_DIM()
+ 
+@ m_x + nX, col() + 2 SAY "Visina:" GET _d_visina PICT PIC_DIM()
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY "Unos operacija (D/N)?" GET cUnosOp VALID !EMPTY(cUnosOp) .and. cUnosOp $ "DN" PICT "@!"
+
+read
+
+if cUnosOp == "D"
+	// unos operacija nad artiklom
+	nBrNal := _br_nal
+	cIdRoba := _idroba
+	ed_st_oper(nBrNal, cIdRoba)
+	select p_rnal
+endif
+
+ESC_RETURN 0
+
+if !lNovi
+	return 0
+endif
+
+return 1
+
+
+// header naloga
+function g_nal_header(lNovi)
+local nX := 2
+local nPartX 
+
+if lNovi
+	_br_nal := next_br_nal()
+	_datnal := DATE()
+	_datisp := DATE()
+	_hitnost := "2"
+	_idpartner := SPACE(LEN(idpartner))
+	_vr_isp := PADR( LEFT( TIME(), 5 ), 8 )
+	_vr_plac := "1"
+	
+endif
+
+set cursor on
+
+@ m_x + nX, m_y + 2 SAY "Broj naloga:" GET _br_nal PICT "999999999"
+
+@ m_x + nX, col() + 26 SAY "Datum naloga:" GET _datnal
+
+nX += 2
+
+nPartX := m_x + nX + 1
+
+@ m_x + nX, m_y + 2 SAY "Partner:" GET _idpartner VALID {|| !Empty(_idpartner) .and. p_firma(@_idpartner) .and. v_partn(@_idpartner, nPartX ) }
+
+nCol := col()
+
+@ m_x + nX, nCol + 25 SAY "      Datum isporuke:" GET _datisp
+
+nX += 1
+
+@ m_x + nX, nCol + 25 SAY "    Vrijeme isporuke:" GET _vr_isp
+
+nX += 2
+
+@ m_x + nX, nCol + 25 SAY "       Hitnost (1/2):" GET _hitnost VALID !Empty(_hitnost) .and. _hitnost $ "12" PICT "9"
+
+nX += 1
+
+@ m_x + nX, nCol + 25 SAY "Vrsta placanja (1/2):" GET _vr_plac VALID !Empty(_vr_plac) .and. _vr_plac $ "12" PICT "9"
+
+read
+
+ESC_RETURN 0
+
+return
 
 
 // ---------------------------------------------
@@ -182,30 +237,15 @@ do case
      		return DE_CONT
 	case (Ch == K_ENTER)
 		SELECT P_RNAL
-		nTekRec := RECNO()
   		Scatter()
-  		if ed_item(.f.)
-			SELECT P_RNAL
-			GO nTekRec
+  		if ed_item(.f.) == 1
 			Gather()
 			RETURN DE_REFRESH
 		endif
 		return DE_CONT
 	case (Ch == K_CTRL_N)
 		SELECT P_RNAL
-		APPEND BLANK
-		nTekRec := RECNO()
-        	Scatter()
-		if ed_item(.t.)
-			GO nTekRec
-			Gather()
-		else
-			// brisi necemo ovu stavku
-			SELECT P_RNAL
-			go nTekRec
-			DELETE
-		endif
-		GO BOTTOM
+		ed_item(.t.)
 		return DE_REFRESH
 	case (Ch  == K_CTRL_F9)
         	if Pitanje( ,"Zelite li izbrisati pripremu !!????","N") == "D"
@@ -214,19 +254,7 @@ do case
 		endif
         	return DE_CONT
 	case Ch==K_CTRL_P
-		nBrDokP := 0
-   		Box( , 2, 60)
-			@ m_x+1, m_y+2 SAY "Dokument (0-stampaj pripremu) " GET nBrDokP PICT "999999"
-		READ
-		BoxC()
-		if LASTKEY() <> K_ESC
-	     		rpt_rnal(nBrDokP)
-		endif
-		close all
-		o_rnal(.t.)
-		SELECT P_RNAL
-		SET ORDER TO TAG "br_dok"
-     		return DE_REFRESH
+		return DE_REFRESH
 	case Ch==K_ALT_A
 		if Pitanje( , "Azurirati P_RNAL -> RNAL ?", "N") == "D"
 	  		azur_rnal()
@@ -248,7 +276,11 @@ do case
 		endif
 		SELECT P_RNAL
 		RETURN DE_REFRESH
-
+	case UPPER(CHR(Ch)) == "O"
+		select p_rnop
+		ed_st_oper(p_rnal->br_nal, p_rnal->idroba)
+		select p_rnal
+		return DE_REFRESH
 	case (Ch == K_F10)
      		t_ost_opcije()
      		return DE_REFRESH
