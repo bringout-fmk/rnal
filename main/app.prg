@@ -92,6 +92,9 @@ endif
 AADD(opc, "3. izvjestaji")
 AADD(opcexe, {|| m_rpt()})
 
+AADD(opc, "4. pregled naloga ")
+AADD(opcexe, {|| m_lst_rnal()})
+
 
 AADD(opc, "------------------------------------")
 AADD(opcexe, {|| nil})

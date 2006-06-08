@@ -1,8 +1,9 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
-
-// edit operacija stakla
+// ------------------------------------------
+// unos operacija stakla
+// ------------------------------------------
 function ed_st_oper(nBrNal, cIdRoba)
 local nArea
 local nTArea
@@ -24,7 +25,7 @@ cFooter += PADR(roba->naz, 40)
 nArea := F_P_RNOP
 
 Box(, 15, 77)
-@ m_x + 15, m_y + 2 SAY "<c-N> Nova operacija    | <c-T> Brisi operaciju"
+@ m_x + 15, m_y + 2 SAY "<c-N> Nova operacija   | <c-T> Brisi operaciju  | <I> Unos instrukcije "
 
 select (nArea)
 
@@ -44,6 +45,9 @@ return
   
 
 
+// ------------------------------------------
+// set filter na tabeli P_RNOP
+// ------------------------------------------
 static function set_f_kol(nBrNal, cIdRoba)
 local cFilter
 cFilter := "br_nal == " + STR(nBrNal, 8, 0) + ".and. idroba ==" + Cm2Str(cIdRoba)
@@ -51,7 +55,9 @@ set filter to &cFilter
 return
 
 
-// key handler
+// ------------------------------------------
+// key handler tabele P_RNOP
+// ------------------------------------------
 static function k_handler(nBrNal, cIdRoba)
 
 if (Ch==K_CTRL_T .or. Ch==K_CTRL_F9) .and. reccount2()==0
@@ -60,19 +66,20 @@ endif
 
 do case
 	case (Ch == K_CTRL_T)
-		//select P_RNOP
 		if Pitanje(,"Zelite izbrisati ovu stavku ?","D")=="D"
       			delete
       			return DE_REFRESH
       		endif
      		return DE_CONT
+		
 	case (Ch == K_CTRL_N)
-		//SELECT P_RNOP
 		fill_p_rnop(nBrNal, cIdRoba)
 		return DE_REFRESH
+		
 	case UPPER(CHR(Ch)) == "I"
 		set_rnop_instr()
 		return DE_REFRESH
+		
 	case (Ch  == K_CTRL_F9)
         	select P_RNOP
 		if Pitanje( ,"Zelite li izbrisati sve zapise ?????","N") == "D"
@@ -90,15 +97,18 @@ endcase
 return DE_CONT
 
 
-
+// -------------------------------------------------------
 // napuni podatke p_rnop sa karakteristikama
-static function fill_p_rnop(nBrNal, cIdRoba)
-local cOper
+// -------------------------------------------------------
+static function fill_p_rnop(nBrNal, cIdRoba, cOper)
 local nCount
 
-cOper := SPACE(6)
+if ( cOper == nil )
+	cOper := SPACE(6)
+endif
+
 // uzmi operaciju
-if get_oper(@cOper) == 0
+if EMPTY(cOper) .and. get_oper(@cOper) == 0
 	return DE_CONT
 endif
 
@@ -107,30 +117,30 @@ set order to tag "idop"
 go top
 seek cOper
 
-nCount := 0
-if Found()
-	// napuni tabelu podacima
-	do while !EOF() .and. s_rnka->id_rnop == cOper
-	
-		cRnKa := s_rnka->id
-		
-		select p_rnop
-		
-		// ako ne postoji karakteristika u pripremi dodaj
-		if !post_rnka(nBrNal, cIdRoba, cRnKa)
-			append blank
-			replace br_nal with nBrNal
-			replace idroba with cIdRoba
-			replace id_rnop with s_rnka->id_rnop
-			replace id_rnka with s_rnka->id
-		endif
-		
-		select s_rnka
-		skip
-		
-		++ nCount
-	enddo
+if !Found()
+	return
 endif
+	
+nCount := 0
+
+do while !EOF() .and. s_rnka->id_rnop == cOper
+	cRnKa := s_rnka->id
+	select p_rnop
+		
+	// ako ne postoji karakteristika u pripremi dodaj
+	if !post_rnka(nBrNal, cIdRoba, cRnKa)
+		append blank
+		replace br_nal with nBrNal
+		replace idroba with cIdRoba
+		replace id_rnop with s_rnka->id_rnop
+		replace id_rnka with s_rnka->id
+	endif
+		
+	select s_rnka
+	skip
+		
+	++ nCount
+enddo
 
 select p_rnop
 skip -(nCount)
@@ -139,11 +149,15 @@ return
 
 
 
+// -------------------------------------------------------
 // ispituje da li postoji vec unesena karakteristika 
-function post_rnka(nBrNal, cIdRoba, cIdKa)
+// -------------------------------------------------------
+static function post_rnka(nBrNal, cIdRoba, cIdKa)
 local nTRec
 local xRet:=.f.
+
 nTRec := RecNo()
+
 set order to tag "rn_ka"
 go top
 seek STR(nBrNal,8,0) + cIdRoba + cIdKa
@@ -158,8 +172,11 @@ go (nTRec)
 return xRet
 
 
-// setuj instrukciju za slog u tabeli
-function set_rnop_instr()
+// -------------------------------------------------------
+// setuj instrukciju za slog u tabeli, opcija "I"
+// -------------------------------------------------------
+static function set_rnop_instr()
+
 Scatter()
 Box(,1,60)
 	@ m_x+1, m_y + 2 SAY "vrijednost" GET _rn_instr PICT "@S40"
@@ -169,7 +186,9 @@ Gather()
 return
 
 
-// setovanje kolona operacija
+// -------------------------------------------------------
+// setovanje kolona tabele za unos operacija
+// -------------------------------------------------------
 static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 

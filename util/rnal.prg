@@ -6,30 +6,6 @@
  * ----------------------------------------------------------------
  */
 
-// vraca sljedeci redni broj naloga
-function next_r_br()
-
-PushWa()
-select p_rnal
-set order to tag "br_nal"
-go bottom
-nLastRbr := r_br
-PopWa()
-return nLastRbr + 1
-
-
-
-// vraca sljedeci broj radnog naloga
-function next_br_nal()
-
-PushWa()
-select rnal
-set order to tag "br_nal"
-go bottom
-nLastRbr := br_nal
-PopWa()
-
-return nLastRbr + 1
 
 
 
@@ -77,25 +53,58 @@ cPom += cType
 
 return .t.
 
-
+// ----------------------------------
 // prikazi info o robi
-function v_roba(cId)
+// ----------------------------------
+function s_roba_info(cId, nX, nY)
 local nArr
+local nRazmak := 2
+local nRobaLen := 40
+
 nArr := SELECT()
 select roba
 hseek cId
 
 if Found()
-	?? SPACE(4), ALLTRIM(roba->naz)
+	@ nX, nY SAY PADR(ALLTRIM(roba->naz), nRobaLen)
+else
+	@ nX, nY SAY SPACE(nRobaLen)
 endif
 
 select (nArr)
 
 return .t.
 
+// --------------------------------------
+// prikazi partner naziv + adresa
+// --------------------------------------
+function s_partner( cId )
+local xRet
+local nArea
 
-// prikazi info o partneru
-function v_partn(cId, nX)
+nArea := SELECT()
+
+select partn
+seek cId
+
+if Found()
+	xRet := ALLTRIM(partn->naz)
+	xRet += SPACE(1)
+	xRet += ALLTRIM(partn->adresa)
+else
+	xRet := cId
+endif
+
+select (nArea)
+
+return xRet
+
+
+
+// -------------------------------------
+// prikazi box sa podacima partnera
+// -------------------------------------
+function s_part_box(cId, nX)
 local cPAdresa
 local cPNaziv
 local cPMjesto
@@ -192,7 +201,7 @@ return cRet
 // vrati operaciju, box
 function get_oper(cOper)
 Box(,1,50)
-	@ m_x + 1, m_y + 2 SAY "operacija:" GET cOper VALID !EMPTY(cOper) .and. p_rnop(@cOper)
+	@ m_x + 1, m_y + 2 SAY "Unesi operaciju:" GET cOper VALID !EMPTY(cOper) .and. p_rnop(@cOper)
 	read
 BoxC()
 
@@ -201,11 +210,44 @@ ESC_RETURN 0
 return 1
 
 
+// -------------------------------------- 
+// vraca opis hitnosti
+// -------------------------------------- 
+function s_hitnost(cVal)
+local xVal
+do case
+	case cVal == "1"
+		xVal := "LOW"
+	case cVal == "2"
+		xVal := "NORMAL"
+	case cVal == "3"
+		xVal := "HIGH"
+endcase 
+return xVal
 
+
+
+// -------------------------------------- 
+// vraca opis vrste placanja
+// -------------------------------------- 
+function s_placanje(cVal)
+local xVal
+do case
+	case cVal == "1"
+		xVal := "KES"
+	case cVal == "2"
+		xVal := "ZIRO RACUN"
+endcase 
+return xVal
+
+
+// -----------------------------------------------------
 // vraca vrijednost u m2 izmedju 2 velicine unesene u cm
-function mkvadrat(nVal1, nVal2)
+// -----------------------------------------------------
+function mkvadrat(nKol, nDim1, nDim2)
 local xRet
-xRet := ( nVal1 / 100 ) * (nVal2 / 100)
+xRet := ( nDim1 / 100 ) * (nDim2 / 100)
+xRet := nKol * xRet
 return xRet
 
 
