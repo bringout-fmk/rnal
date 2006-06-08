@@ -50,7 +50,7 @@ return
 // ------------------------------------------
 static function set_f_kol(nBrNal, cIdRoba)
 local cFilter
-cFilter := "br_nal == " + STR(nBrNal, 8, 0) + ".and. idroba ==" + Cm2Str(cIdRoba)
+cFilter := "br_nal == " + STR(nBrNal, 10, 0) + ".and. idroba ==" + Cm2Str(cIdRoba)
 set filter to &cFilter
 return
 
@@ -84,7 +84,8 @@ do case
         	select P_RNOP
 		if Pitanje( ,"Zelite li izbrisati sve zapise ?????","N") == "D"
 	     		set order to tag "br_nal"
-			hseek STR(nBrNal,8,0) + cIdRoba
+			go top
+			seek STR(nBrNal, 10, 0) + cIdRoba
 			do while !EOF() .and. field->br_nal == nBrNal .and. field->idroba == cIdRoba
 				delete
 				skip
@@ -160,7 +161,7 @@ nTRec := RecNo()
 
 set order to tag "rn_ka"
 go top
-seek STR(nBrNal,8,0) + cIdRoba + cIdKa
+seek STR(nBrNal, 10, 0) + cIdRoba + cIdKa
 
 if Found()
 	xRet := .t.

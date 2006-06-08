@@ -9,7 +9,12 @@ local nBr_nal
 
 o_rnal(.t.)
 
+select p_rnop
+set filter to
+
 select p_rnal
+set filter to
+
 go top
 
 if RECCOUNT2() == 0
@@ -26,9 +31,9 @@ endif
 MsgO("Azuriranje naloga u toku...")
 
 // azuriraj stavke RNAL
-a_rnal()
+a_rnal( nBr_nal )
 // azuriraj stavke RNOP
-a_rnop()
+a_rnop( nBr_nal )
 
 // sve je ok brisi pripremu
 select p_rnal
@@ -49,8 +54,14 @@ return 1
 // ------------------------------------------
 // azuriranje RNAL
 // ------------------------------------------
-static function a_rnal()
-do while !eof()
+static function a_rnal( nBr_nal )
+
+select p_rnal
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+do while !eof() .and. ( p_rnal->br_nal == nBr_nal )
 	Scatter()
 	select rnal
 	append blank
@@ -58,26 +69,33 @@ do while !eof()
 	select p_rnal
 	skip
 enddo
+
 return
 
 
 // ------------------------------------------
 // azuriranje RNOP
 // ------------------------------------------
-static function a_rnop()
+static function a_rnop( nBr_nal )
 
 select p_rnop
-go top
 
 if RECCOUNT2() == 0
 	return
 endif
 
-do while !EOF()
-	if !EMPTY(field->rn_instr)
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+do while !EOF() .and. ( p_rnop->br_nal == nBr_nal )
+	if !EMPTY(p_rnop->rn_instr)
+		
 		Scatter()
+		
 		select rnop
 		append blank
+		
 		Gather()
 	endif
 	select p_rnop
@@ -98,7 +116,7 @@ o_rnal(.t.)
 select rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 8, 0)
+seek STR(nBr_nal, 10, 0)
 
 if !Found()
 	MsgBeep("Nalog " + ALLTRIM(STR(nBr_nal)) + " ne postoji !!!")
@@ -141,19 +159,25 @@ return 1
 static function p_rnal(nBr_nal)
 
 select rnal
-// dodaj u pripremu dokument
-do while !EOF() .and. (br_nal == nBr_nal)
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+if Found()
+	// dodaj u pripremu dokument
+	do while !EOF() .and. (br_nal == nBr_nal)
 	
-	select rnal
-	Scatter()
+		select rnal
+		Scatter()
 	
-	select p_rnal
-	APPEND BLANK
-	Gather()
+		select p_rnal
+		APPEND BLANK
+		Gather()
 	
-	select rnal
-	skip
-enddo
+		select rnal
+		skip
+	enddo
+endif
 
 return
 
@@ -164,19 +188,25 @@ return
 static function p_rnop(nBr_nal)
 
 select rnop
-// dodaj u pripremu dokument
-do while !EOF() .and. (br_nal == nBr_nal)
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+if Found()
+	// dodaj u pripremu dokument
+	do while !EOF() .and. (br_nal == nBr_nal)
 	
-	select rnop
-	Scatter()
+		select rnop
+		Scatter()
 	
-	select p_rnop
-	APPEND BLANK
-	Gather()
+		select p_rnop
+		APPEND BLANK
+		Gather()
 	
-	select rnop
-	skip
-enddo
+		select rnop
+		skip
+	enddo
+endif
 
 return
 
@@ -185,39 +215,30 @@ return
 // brisi nalog iz kumulativa
 //----------------------------------------
 static function b_kumulativ(nBr_nal)
-local nTRec
 
 // RNAL
 select rnal
-hseek STR(nBr_nal, 8, 0)
-do while !eof() .and. (br_nal == nBr_nal)
-	
-	SKIP
-	// sljedeci zapis
-	nTRec := RECNO()
-	SKIP -1
-	
-	DELETE
-	// idi na sljedeci
-	go nTRec
-	
-enddo
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+if Found()
+	do while !eof() .and. (br_nal == nBr_nal)
+		DELETE
+		SKIP	
+	enddo
+endif
 
 // RNOP
 select rnop
-hseek STR(nBr_nal, 8, 0)
-do while !eof() .and. (br_nal == nBr_nal)
-	
-	SKIP
-	// sljedeci zapis
-	nTRec := RECNO()
-	SKIP -1
-	
-	DELETE
-	// idi na sljedeci
-	go nTRec
-	
-enddo
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+if Found()
+	do while !eof() .and. (br_nal == nBr_nal)
+		DELETE
+		SKIP
+	enddo
+endif
 
 return
 
@@ -264,7 +285,7 @@ nArea := SELECT()
 
 select RNAL
 set order to tag "br_nal"
-hseek STR(nBrNal,8,0)
+hseek STR(nBrNal, 10, 0)
 
 if Found()
 	lRet := .t.
@@ -281,14 +302,19 @@ return lRet
 function g_nal_ukupno( nBr_nal )
 local xRet
 local nTRec
+local cFilter 
+
+cFilter := DBFilter()
 
 nTRec := RecNo()
 xRet := 0
 
+set filter to
+
 select rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 8, 0)
+seek STR(nBr_nal, 10, 0)
 
 if Found()
 	do while !EOF() .and. ( field->br_nal == nBr_nal )
@@ -296,6 +322,8 @@ if Found()
 		skip
 	enddo
 endif
+
+set filter to &cFilter
 
 go (nTRec)
 

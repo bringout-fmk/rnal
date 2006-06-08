@@ -151,7 +151,16 @@ local nBr_nal
 do case
 
 	case (Ch == K_ENTER)
-		MsgBeep("stampa naloga")
+		if Pitanje(, "Stampati nalog (D/N) ?", "D") == "D"
+			nBr_nal := rnal->br_nal
+			nTRec := RecNo()
+			stamp_nalog( .t., nBr_nal )
+			SELECT RNAL
+			set_f_kol(cFilter)
+			GO (nTRec)
+			return DE_REFRESH
+		endif
+		SELECT RNAL
 		return DE_CONT
 			
 	case ( UPPER(CHR(Ch)) == "O")
@@ -162,13 +171,14 @@ do case
 		if Pitanje(, "Nalog povuci u pripremu ?", "N") == "D"
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
+			set filter to
 			if pov_nalog(nBr_nal) == 1
 				MsgBeep("Nalog se nalazi u pripremi !")
-				SELECT RNAL
-				set_f_kol(cFilter)
-				GO (nTRec)
-				RETURN DE_REFRESH
 			endif
+			SELECT RNAL
+			set_f_kol(cFilter)
+			GO (nTRec)
+			RETURN DE_REFRESH
 		endif
 		SELECT RNAL
 		RETURN DE_CONT

@@ -82,19 +82,26 @@ else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
-AADD(opc, "2. generacija dokumenata")
+AADD(opc, "2. izvjestaji")
+if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","IZVJ"))
+	AADD(opcexe, {|| m_rpt()})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
+AADD(opc, "3. pregled naloga ")
+if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","DOKLST"))
+	AADD(opcexe, {|| m_lst_rnal()})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
+AADD(opc, "4. generacija dokumenata")
 if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","GENDOK"))
 	AADD(opcexe, {|| notimp()})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
-
-AADD(opc, "3. izvjestaji")
-AADD(opcexe, {|| m_rpt()})
-
-AADD(opc, "4. pregled naloga ")
-AADD(opcexe, {|| m_lst_rnal()})
-
 
 AADD(opc, "------------------------------------")
 AADD(opcexe, {|| nil})

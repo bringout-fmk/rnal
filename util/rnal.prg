@@ -251,3 +251,15 @@ xRet := nKol * xRet
 return xRet
 
 
+// -----------------------------------------------------
+// get broja radnog naloga
+// -----------------------------------------------------
+function g_br_nal( nBr_nal )
+Box(, 1, 40)
+	@ m_x+1, m_y+2 SAY "Radni nalog br:" GET nBr_nal PICT "99999999"
+	READ
+BoxC()
+ESC_RETURN .f.
+return .t.
+
+

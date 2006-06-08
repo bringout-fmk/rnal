@@ -245,7 +245,9 @@ return
 static function k_handler()
 local nBr_nal
 
-if (Ch==K_CTRL_T .or. Ch==K_ENTER) .and. reccount2()==0
+if (Ch==K_CTRL_T .or. Ch==K_ENTER;
+	.or. Ch==K_CTRL_P;
+	.or. Ch==K_CTRL_F9) .and. reccount2()==0
 	return DE_CONT
 endif
 
@@ -279,7 +281,12 @@ do case
 		return DE_CONT
 		
 	case Ch==K_CTRL_P
+		select p_rnal
+		go top
+		nBr_nal := p_rnal->br_nal
+		stamp_nalog( .f., nBr_nal )
 		return DE_REFRESH
+		
 	case Ch==K_ALT_A
 		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D"
 	  		if azur_nalog() == 1
@@ -292,12 +299,8 @@ do case
 	case Ch==K_ALT_P
 		if Pitanje(, "Povrat naloga u pripremu ?", "N") == "D"
 			nBr_nal := 0
-			Box(, 1, 40)
-		  		@ m_x+1, m_y+2 SAY "Radni nalog br:" GET nBr_nal PICT "99999999"
-				READ
-			BoxC()
-			if LASTKEY()<> K_ESC
-				if pov_nalog(nBr_nal) == 1
+			if g_br_nal( @nBr_Nal )
+				if pov_nalog( nBr_nal ) == 1
 					SELECT P_RNAL
 					GO TOP
 					RETURN DE_REFRESH
@@ -374,7 +377,7 @@ nArea := SELECT()
 select p_rnop
 set order to tag "br_nal"
 go top
-seek STR(nBrNal, 8, 0) + cIdRoba
+seek STR(nBrNal, 10, 0) + cIdRoba
 
 if !Found()
 	return
