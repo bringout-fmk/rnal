@@ -1,6 +1,7 @@
 liball: 
 	make -C main
 	make -C db
+	make -C dok
 	make -C dok_gen
 	make -C dok_frm
 	make -C rpt
@@ -13,6 +14,7 @@ liball:
 cleanall:
 	make -C main clean
 	make -C db clean
+	make -C dok clean
 	make -C dok_gen clean
 	make -C dok_frm clean
 	make -C rpt clean
