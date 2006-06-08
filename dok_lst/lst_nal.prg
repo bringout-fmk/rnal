@@ -11,12 +11,15 @@
 // lista azuriranih naloga
 // ------------------------------
 function frm_lst_nalog()
+local nTblRet
 
 o_rnal(.f.)
 
-if tbl_lista() == 1
+nTblRet := tbl_lista()
+
+if nTblRet == 1
 	return
-else
+elseif nTblRet == 2
 	MsgBeep("report: lista naloga...")
 	//rpt_lista()
 endif
@@ -32,9 +35,14 @@ static function tbl_lista()
 local cFooter
 local nArea
 local cFilter 
+local nLstRet
 
-if lst_uslovi( @cFilter ) == 2
+nLstRet := lst_uslovi( @cFilter )
+
+if nLstRet == 2
 	return 2
+elseif nLstRet == 0
+	return 0
 endif
 
 private ImeKol
@@ -49,6 +57,7 @@ Box(, 20, 77)
 
 select (nArea)
 set order to tag "br_nal"
+//set relation to idpartner into partn
 go top
 
 set_a_kol(@ImeKol, @Kol)
@@ -74,18 +83,18 @@ local cPartSif := SPACE(40)
 local cTblLista := "D"
 local nRet := 1
 
-Box( ,10, 60)
+Box( ,10, 70)
 	
 @ m_x + nX, m_y + 2 SAY "Datum od " GET dDatOd
 @ m_x + nX, col() + 2 SAY "do" GET dDatDo
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Ime partnera pocinje sa (prazno svi) " GET cPartNaz PICT "@S20"
+@ m_x + nX, m_y + 2 SAY "Naziv partnera pocinje sa (prazno svi) " GET cPartNaz PICT "@S20"
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Uslov po sifri partnera (prazno svi) " GET cPartSif PICT "@S20"
+@ m_x + nX, m_y + 2 SAY "Uslov po sifri partnera   (prazno svi) " GET cPartSif PICT "@S20"
 
 nX += 2
 
@@ -102,6 +111,9 @@ endif
 if LastKey() == K_ESC
 	return 0
 endif
+
+cPartNaz := ALLTRIM(cPartNaz)
+cPartSif := ALLTRIM(cPartSif)
 
 gen_filter(@cFilter, dDatOd, dDatDo, cPartNaz, cPartSif)
 
@@ -124,6 +136,12 @@ endif
 if !Empty(dDatDo)
 	cFilter += " .and. datnal <= " + Cm2Str(dDatDo)
 endif
+if !Empty(cPartNaz)
+	cFilter += " .and. PARTN->naz = " + Cm2Str(cPartNaz)
+endif
+if !Empty(cPartSif)
+	cFilter += " .and. idpartner = " + Cm2Str(cPartSif)
+endif
 
 return
 
@@ -136,6 +154,7 @@ static function set_f_kol(cFilter)
 select rnal
 set order to tag "br_nal"
 set filter to &cFilter
+set relation to idpartner into partn
 go top
 
 return
