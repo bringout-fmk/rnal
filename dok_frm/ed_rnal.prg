@@ -89,9 +89,17 @@ Box(, 20, 77, .f., "Unos novih stavki")
 Scatter()
 
 if RECCOUNT2() == 0
-	g_nal_header(lNova)
+	if g_nal_header(lNova) == 0
+		select p_rnal
+		BoxC()
+		return 1
+	endif
 else
-	g_nal_header(.f.)
+	if g_nal_header(.f.) == 0
+		select p_rnal
+		BoxC()
+		return 1
+	endif
 endif
 
 nCount := 0
@@ -165,6 +173,8 @@ nUnOpX := nX
 
 read
 
+ESC_RETURN 0
+
 _d_ukupno := mkvadrat( _kolicina, _d_sirina, _d_visina )
 
 @ m_x + nUkX, m_y + 45 SAY "UKUPNO STAVKA: " + ALLTRIM(STR(_d_ukupno, 10, 2)) + " m2"
@@ -186,6 +196,7 @@ endif
 if !lNovi
 	return 0
 endif
+
 
 return 1
 
@@ -240,7 +251,7 @@ read
 
 ESC_RETURN 0
 
-return
+return 1
 
 
 // ---------------------------------------------

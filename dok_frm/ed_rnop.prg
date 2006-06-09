@@ -174,6 +174,8 @@ do while !EOF() .and. s_rnka->id_rnop == cOper
 enddo
 
 select p_rnop
+// pozicioniraj se na nove zapise
+go bottom
 skip -(nCount)
 
 return

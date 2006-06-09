@@ -26,8 +26,9 @@ return
 
 
 // --------------------------------------
+// parametri zaokruzenja, formata prikaza
 // --------------------------------------
-function ed_g_params()
+function ed_zf_params()
 
 gPIC_IZN:= PADR(gPIC_IZN, 20)
 gPIC_DIM:= PADR(gPIC_DIM, 20)

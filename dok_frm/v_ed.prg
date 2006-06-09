@@ -58,10 +58,13 @@ return .f.
 // -----------------------------
 function val_kunos(xVal, cKeys)
 
-if !EMPTY(xVal)
+if !EMPTY(xVal) .and. !EMPTY(cKeys)
 	if xVal $ cKeys
 		return .t.
 	endif
+elseif EMPTY(cKeys) 
+	// ako je valid uslov prazan - nista
+	return .t.
 endif
 MsgBeep("Moguce unjeti nesto od sljedeceg: " + cKeys + " !!!")
 
