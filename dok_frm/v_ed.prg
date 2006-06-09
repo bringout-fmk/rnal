@@ -67,5 +67,13 @@ MsgBeep("Moguce unjeti nesto od sljedeceg: " + cKeys + " !!!")
 
 return .f.
 
+// -----------------------------------------
+// validacija instrukcije 
+// -----------------------------------------
+function val_instr(cRn_ka, xVal)
+if !Empty(xVal)
+	return .t.
+endif
+return .t.
 
 

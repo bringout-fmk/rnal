@@ -256,6 +256,8 @@ aDbf:={}
 AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
 AADD(aDBf,{ "id_rnop"     , "C" ,   6 ,  0 })
 AADD(aDBf,{ "naziv"       , "C" , 100 ,  0 })
+AADD(aDBf,{ "ka_def"      , "C" , 100 ,  0 })
+AADD(aDBf,{ "ka_val"      , "C" ,  20 ,  0 })
 AADD(aDBf,{ "opis"        , "C" , 200 ,  0 })
 return aDbf
 

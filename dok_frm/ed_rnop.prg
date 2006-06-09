@@ -31,8 +31,21 @@ select (nArea)
 
 // setuj filter
 set_f_kol(nBrNal, cIdRoba)
-
 set_a_kol(@ImeKol, @Kol)
+
+// setuj varijable direktnog moda....
+private bGoreRed:=NIL
+private bDoleRed:=NIL
+private bDodajRed:=NIL
+private fTBNoviRed:=.f. 
+private TBCanClose:=.t. 
+private TBAppend:="N"  
+private bZaglavlje:=NIL
+private TBSkipBlock:={|nSkip| SkipDB(nSkip, @nTBLine)}
+private nTBLine:=1      
+private nTBLastLine:=1  
+private TBPomjerise:="" 
+private TBScatter:="N"  
 
 set order to tag "br_nal"
 go top
@@ -40,7 +53,6 @@ go top
 ObjDbedit("prop", 15, 77, {|| k_handler(nBrNal, cIdRoba)}, "", cFooter, , , , , 1)
 BoxC()
 
-select (nTArea)
 return
   
 
@@ -64,7 +76,19 @@ if (Ch==K_CTRL_T .or. Ch==K_CTRL_F9) .and. reccount2()==0
 	return DE_CONT
 endif
 
+// setuj direktni edit mod
+if gTBDir=="N"
+	gTBDir:="D"
+        select P_RNOP
+        DaTBDirektni()
+endif
+
 do case
+	case (Ch == K_ESC) 
+		// prilikom zatvaranja forme vrati na st.mod unosa
+		gTBDir:="N"
+        	NeTBDirektni()
+
 	case (Ch == K_CTRL_T)
 		if Pitanje(,"Zelite izbrisati ovu stavku ?","D")=="D"
       			delete
@@ -76,7 +100,7 @@ do case
 		fill_p_rnop(nBrNal, cIdRoba)
 		return DE_REFRESH
 		
-	case UPPER(CHR(Ch)) == "I"
+	case UPPER(CHR(Ch)) == "I" .and. gTbDir == "N"
 		set_rnop_instr()
 		return DE_REFRESH
 		
@@ -135,6 +159,9 @@ do while !EOF() .and. s_rnka->id_rnop == cOper
 		replace idroba with cIdRoba
 		replace id_rnop with s_rnka->id_rnop
 		replace id_rnka with s_rnka->id
+		if !EMPTY(s_rnka->ka_def)
+			replace rn_instr with s_rnka->ka_def
+		endif
 	endif
 		
 	select s_rnka
@@ -193,9 +220,9 @@ return
 static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 
-AADD(aImeKol, {"Oper."  , {|| PADR(s_operacija(id_rnop),15) }, "id_rnop", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Karakt.", {|| PADR(s_karakt(id_rnka),40) }   , "id_rnka", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Instr." , {|| PADR(rn_instr, 15)}, "rn_instr", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Operacija"  , {|| PADR(s_operacija(id_rnop),15) }  })
+AADD(aImeKol, {"Karakteristika", {|| PADR(s_karakt(id_rnka),40) }  })
+AADD(aImeKol, {"Instrukcija" , {|| PADR(rn_instr, 15)}, "rn_instr", {|| .t.}, {|| val_instr( id_rnka, @wrn_instr ) }, "V" })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
