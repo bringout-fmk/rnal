@@ -219,6 +219,7 @@ aDbf:={}
 
 // set polja tabele rnal
 AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
+AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
 AADD(aDBf,{ "id_rnop"    , "C" ,   6 ,  0 })
 AADD(aDBf,{ "id_rnka"    , "C" ,   6 ,  0 })
@@ -338,14 +339,14 @@ if (nArea==-1 .or. nArea == nArea2)
 
 	do case 
 		case (nArea2 == F_P_RNAL)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,3,0)", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
 		case (nArea2 == F_RNAL) 
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,3,0)", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
 		case (nArea2 == F_P_RNOP)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+idroba", cPath + cTable)
-			CREATE_INDEX("rn_ka", "STR(br_nal,10,0)+idroba+id_rnka", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba", cPath + cTable)
+			CREATE_INDEX("rn_ka", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba+id_rnka", cPath + cTable)
 		case (nArea2 == F_RNOP)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+idroba", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba", cPath + cTable)
 		case (nArea2 == F_S_RNOP)
 		  	CREATE_INDEX("id","id", cPath + cTable)
 		case (nArea2 == F_S_RNKA)

@@ -128,6 +128,9 @@ local nRobaOpX
 local nUkX
 local nUnOpX
 local cUnosOp := "D"
+local nBrNal
+local nRBr
+local cIdRoba
 
 if lNovi
 	_r_br := next_r_br()
@@ -175,8 +178,9 @@ ESC_RETURN 0
 if cUnosOp == "D"
 	// unos operacija nad artiklom
 	nBrNal := _br_nal
+	nRBr := _r_br
 	cIdRoba := _idroba
-	ed_st_oper(nBrNal, cIdRoba)
+	ed_st_oper(nBrNal, nRBr, cIdRoba)
 endif
 
 if !lNovi
@@ -312,7 +316,7 @@ do case
 		
 	case UPPER(CHR(Ch)) == "O"
 		select p_rnop
-		ed_st_oper(p_rnal->br_nal, p_rnal->idroba)
+		ed_st_oper(p_rnal->br_nal, p_rnal->r_br, p_rnal->idroba)
 		select p_rnal
 		return DE_REFRESH
 
@@ -326,6 +330,7 @@ return DE_CONT
 // ---------------------------------------
 static function br_stavku()
 local nBrNal
+local nRbr
 local cIdRoba
 
 // kod brisanja stavke je bitno da se izbrise stavka iz P_RNAL
@@ -336,12 +341,13 @@ if Pitanje(, "Zelite izbrisati ovu stavku ?", "D") == "N"
 endif
 
 nBrNal := field->br_nal
+nRBr := field->r_br
 cIdRoba := field->idroba
 
 delete
 
 // sada izbrisi ako ima sta i u P_RNOP
-br_prnop(nBrNal, cIdRoba)
+br_prnop(nBrNal, nRBr, cIdRoba)
 
 select p_rnal
 
@@ -370,21 +376,21 @@ return .t.
 // ---------------------------------------
 // brisi stavke iz p_rnop
 // ---------------------------------------
-static function br_prnop(nBrNal, cIdRoba)
+static function br_prnop(nBrNal, nR_br, cIdRoba)
 local nArea
 nArea := SELECT()
 
 select p_rnop
 set order to tag "br_nal"
 go top
-seek STR(nBrNal, 10, 0) + cIdRoba
+seek STR(nBrNal, 10, 0) + STR(nR_br) + cIdRoba
 
 if !Found()
 	return
 endif
 
 // brisi sve stavke iz P_RNOP za dati uslov
-do while !EOF() .and. field->br_nal == nBrNal .and. field->idroba == cIdRoba
+do while !EOF() .and. field->br_nal == nBrNal .and. field->r_br == nR_br .and. field->idroba == cIdRoba
 	delete
 	skip
 enddo

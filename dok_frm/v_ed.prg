@@ -71,9 +71,22 @@ return .f.
 // validacija instrukcije 
 // -----------------------------------------
 function val_instr(cRn_ka, xVal)
-if !Empty(xVal)
+local nArea
+local cValid
+
+nArea := SELECT()
+select s_rnka
+set order to tag "id"
+seek cRn_ka
+
+if Found()
+	cValid := ALLTRIM(field->ka_val)
+else
+	select (nArea)
 	return .t.
 endif
-return .t.
+select (nArea)
+
+return val_kunos(ALLTRIM(xVal), cValid)
 
 

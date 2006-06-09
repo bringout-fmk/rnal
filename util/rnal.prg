@@ -189,6 +189,9 @@ seek cIdOper
 
 if Found()
 	cRet := ALLTRIM(field->naziv)
+	if LEN(cRet) > 8
+		cRet := PADR(cRet, 8) + ".."
+	endif
 else
 	cRet := cIdOper
 endif
