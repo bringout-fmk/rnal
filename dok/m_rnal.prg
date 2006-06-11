@@ -17,10 +17,10 @@ private opcexe:={}
 private Izbor:=1
 
 AADD(opc, "1. lista otvorenih naloga          ")
-AADD(opcexe, {|| frm_lst_nalog("O") })
+AADD(opcexe, {|| frm_lst_nalog(1) })
 
 AADD(opc, "2. lista zatvorenih naloga  ")
-AADD(opcexe, {|| frm_lst_nalog("Z") })
+AADD(opcexe, {|| frm_lst_nalog(2) })
 
 Menu_SC("lst")
 

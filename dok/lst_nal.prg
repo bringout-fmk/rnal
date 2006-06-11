@@ -7,16 +7,16 @@
 */
 
 
-// ------------------------------
+// ------------------------------------------
 // lista naloga
-//  cStatus - "Z" ili "O"
-// ------------------------------
-function frm_lst_nalog( cStatus )
+//  nStatus - "1" otoreni ili "2" zatvoreni
+// ------------------------------------------
+function frm_lst_nalog( nStatus )
 local nTblRet
 
 o_rnal(.f.)
 
-nTblRet := tbl_lista(cStatus)
+nTblRet := tbl_lista(nStatus)
 
 if nTblRet == 1
 	return
@@ -31,11 +31,11 @@ return
 // -------------------------------------------------
 // otvori tabelu pregleda
 // -------------------------------------------------
-static function tbl_lista(cStatus)
+static function tbl_lista(nStatus)
 local cFooter
 local nLstRet
 
-nLstRet := lst_uslovi()
+nLstRet := lst_uslovi(nStatus)
 
 if nLstRet == 2
 	return 2
@@ -49,8 +49,10 @@ private Kol
 cFooter := "Pregled azuriranih naloga..."
 
 Box(, 20, 77)
-@ m_x + 19, m_y + 2 SAY "<ENT> Stampa naloga   | <c-O> Stampa otpremnice  | ??? "
-@ m_x + 20, m_y + 2 SAY "<a-P> Povrat naloga   | ???                      | ??? "
+
+set_box_dno(nStatus)
+
+
 
 select rnal
 set order to tag "br_nal"
@@ -66,12 +68,46 @@ BoxC()
 close all
 return 1
 
+// ------------------------------------------
+// setovanje dna boxa
+// ------------------------------------------
+static function set_box_dno(nStatus)
+local cLine1 := ""
+local cLine2 := ""
+local nOpcLen := 24
+local cOpcSep := "|"
+
+// otvoreni nalozi
+if nStatus == 1
+	cLine1 := PADR("<Z> Zatvori nalog", nOpcLen)
+	cLine1 += cOpcSep
+
+	cLine1 := PADR("<L> Lista promjena", nOpcLen)
+	cLine1 += cOpcSep
+else
+	cLine1 := PADR("<O> Otvori zatv.nalog", nOpcLen)
+	cLine1 += cOpcSep
+
+	cLine1 := PADR("<L> Lista promjena", nOpcLen)
+	cLine1 += cOpcSep
+endif
+
+// druga linija je zajednicka
+cLine2 := PADR("<c-P> Stampa naloga", nOpcLen)
+cLine2 += cOpcSep
+cLine2 += PADR("<c-O> Stampa otpremnice", nOpcLen)
+
+@ m_x + 19, m_y + 2 SAY cLine1
+@ m_x + 20, m_y + 2 SAY cLine2
+
+return
+
 
 
 // -------------------------------------------------
 // otvori formu sa uslovima te postavi filtere
 // -------------------------------------------------
-static function lst_uslovi()
+static function lst_uslovi(nStatus)
 local nX := 2
 local dDatOd := CToD("")
 local dDatDo := DATE()
@@ -113,7 +149,7 @@ endif
 cPartNaz := ALLTRIM(cPartNaz)
 cPartSif := ALLTRIM(cPartSif)
 
-cFilter := gen_filter(dDatOd, dDatDo, cPartNaz, cPartSif)
+cFilter := gen_filter(nStatus, dDatOd, dDatDo, cPartNaz, cPartSif)
 
 set_f_kol(cFilter)
 
@@ -124,9 +160,17 @@ return nRet
 // ---------------------------------
 // generise string filtera
 // ---------------------------------
-static function gen_filter(dDatOd, dDatDo, cPartNaz, cPartSif)
+static function gen_filter(nStatus, dDatOd, dDatDo, cPartNaz, cPartSif)
+local cZatvStatus := "Z"
 
 cFilter := "r_br = 1"
+cFilter += " .and. "
+
+if nStatus == 1
+	cFilter += "rn_status <> " + Cm2Str(cZatvStatus)
+else
+	cFilter += "rn_status == " + Cm2Str(cZatvStatus)
+endif
 
 if !EMPTY(dDatOd)
 	cFilter += " .and. datnal >= " + Cm2Str(dDatOd)
@@ -167,8 +211,8 @@ local nBr_nal
 local cTblFilt
 		
 do case
-
-	case (Ch == K_ENTER)
+	// stampa naloga
+	case (Ch == K_CTRL_P)
 		if Pitanje(, "Stampati nalog (D/N) ?", "D") == "D"
 			nBr_nal := rnal->br_nal
 			nTRec := RecNo()
@@ -182,7 +226,7 @@ do case
 		endif
 		SELECT RNAL
 		return DE_CONT
-			
+	// stampa otpremnice
 	case ( Ch == K_CTRL_O )
 		if Pitanje(,"Stampati otpremicu (D/N ?)", "D") == "D"
 			nBr_nal := rnal->br_nal
@@ -197,15 +241,15 @@ do case
 		endif
 		SELECT RNAL
 		RETURN DE_CONT
-	
-	case (Ch == K_ALT_P)
-		if Pitanje(, "Nalog povuci u pripremu ?", "N") == "D"
+	// otvaranje naloga koji je zatvoren
+	case (UPPER(CHR(Ch)) == "O")
+		if Pitanje(, "Otvoriti zatvoreni nalog radi dorade ?", "N") == "D"
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
 			cTblFilt := DBFilter()
 			set filter to
 			if pov_nalog(nBr_nal) == 1
-				MsgBeep("Nalog se nalazi u pripremi !")
+				MsgBeep("Nalog opet otvoren !")
 			endif
 			SELECT RNAL
 			set_f_kol(cTblFilt)
@@ -213,6 +257,27 @@ do case
 			RETURN DE_REFRESH
 		endif
 		SELECT RNAL
+		RETURN DE_CONT
+	// zatvaranje naloga
+	case (UPPER(CHR(Ch)) == "Z")
+		if Pitanje(, "Zatvoriti nalog (D/N) ?", "N") == "D"
+			nTRec := RecNo()
+			nBr_nal := rnal->br_nal
+			cTblFilt := DBFilter()
+			set filter to
+			if z_rnal(nBr_nal) == 1
+				MsgBeep("Nalog zatvoren !")
+			endif
+			SELECT RNAL
+			set_f_kol(cTblFilt)
+			GO (nTRec)
+			RETURN DE_REFRESH
+		endif
+		SELECT RNAL
+		RETURN DE_CONT
+	// lista promjena na nalogu
+	case (UPPER(CHR(Ch)) == "L")
+		MsgBeep("Lista promjena na nalogu!")
 		RETURN DE_CONT
 
 endcase
