@@ -5,10 +5,45 @@
 // --------------------------
 
 
-// validacija robe
-function val_roba(xVal)
+// ----------------------------------------
+// validacija partnera
+// ----------------------------------------
+function val_partner(cId, nX, nY)
+// partner ne moze biti prazno
+if Empty(cId)
+	MsgBeep("Unos narucioca obavezan !")
+	return .f.
+endif
 
-if !EMPTY(xVal)
+// iz sifrarnika
+p_firma(@cId)
+
+s_part_box(cId, nX)
+
+return .t.
+
+
+// -------------------------------------------
+// validacija robe te prikaz info-a
+// -------------------------------------------
+function val_roba(cId, nX, nY)
+
+if Empty(cId)
+	MsgBeep("Unos artikla obavezan!")
+	return .f.
+endif
+
+// iz sifrarnika
+p_roba(@cId)
+
+// provjeri da li je rijec o staklu
+if is_staklo(cId)
+	// ispisi odmah pored naziv artikla
+	s_roba_naz(cId, nX, nY)
+	
+	// ispod ispisi opis stakla
+	nX += 1
+	s_staklo_info(_idroba, nX )
 	return .t.
 endif
 

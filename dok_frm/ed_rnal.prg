@@ -132,7 +132,7 @@ return 1
 function g_nal_item(lNovi)
 local nX := 9
 local nRobaX
-local nRobaOpX
+local nRobaY
 local nUkX
 local nUnOpX
 local cUnosOp := "D"
@@ -159,9 +159,8 @@ endif
 nX += 1
 nRobaX := m_x + nX
 nRobaY := m_y + 25
-nRobaOpX := nRobaX + 1
 
-@ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID { || !EMPTY(_idroba) .and. p_roba(@_idroba) .and. s_roba_info(@_idroba, nRobaX, nRobaY) .and. s_staklo_info(_idroba, nRobaOpX ) }
+@ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID val_roba(@_idroba, nRobaX, nRobaY)
 
 nX += 3
 
@@ -197,10 +196,14 @@ nYRekap := m_y + 2
 // prikazi rekapitulaciju
 s_rekap_stavka(nXRekap, nYRekap, _z_sirina, _z_visina, _d_ukupno, _z_ukupno, _neto)
 
+// ako je IZO staklo - kolete ?!?
+if lIZOStaklo
+	// unos koleta
+	// ToDo - ovo provjeriti
+endif
+
 // unos operacija
-
-nUnOpX := 20
-
+nUnOpX := 21
 @ m_x + nUnOpX, m_y + 2 SAY "Unos operacija (D/N)?" GET cUnosOp VALID val_d_n( cUnosOp ) PICT "@!"
 
 read
@@ -229,6 +232,7 @@ return 1
 function g_nal_header(lNovi)
 local nX := 1
 local nPartX 
+local nPartY
 
 if lNovi
 	_br_nal := next_br_nal()
@@ -252,8 +256,9 @@ set cursor on
 nX += 2
 
 nPartX := m_x + nX + 1
+nPartY := m_y + 2
 
-@ m_x + nX, m_y + 2 SAY "Partner:" GET _idpartner VALID {|| !Empty(_idpartner) .and. p_firma(@_idpartner) .and. s_part_box(@_idpartner, nPartX ) }
+@ m_x + nX, m_y + 2 SAY "Partner:" GET _idpartner VALID val_partner(@_idpartner, nPartX, nPartY)
 
 nCol := col()
 

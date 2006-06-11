@@ -213,7 +213,7 @@ aImeKol := {}
 
 AADD(aImeKol, {"Operacija"  , {|| PADR(s_operacija(id_rnop, .t.),10) }  })
 AADD(aImeKol, {"Karakteristika", {|| PADR(s_karakt(id_rnka, .t.),40) }  })
-AADD(aImeKol, {"Instrukcija" , {|| PADR(rn_instr, 20)}, "rn_instr", {|| .t.}, {|| val_instr( id_rnka, @wrn_instr ) }, "V" })
+AADD(aImeKol, {"Unesi instrukciju" , {|| PADR(rn_instr, 20)}, "rn_instr", {|| .t.}, {|| val_instr( id_rnka, @wrn_instr ) }, "V" })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
