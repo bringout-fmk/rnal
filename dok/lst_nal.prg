@@ -8,20 +8,20 @@
 
 
 // ------------------------------
-// lista azuriranih naloga
+// lista naloga
+//  cStatus - "Z" ili "O"
 // ------------------------------
-function frm_lst_nalog()
+function frm_lst_nalog( cStatus )
 local nTblRet
 
 o_rnal(.f.)
 
-nTblRet := tbl_lista()
+nTblRet := tbl_lista(cStatus)
 
 if nTblRet == 1
 	return
 elseif nTblRet == 2
 	MsgBeep("report: lista naloga...")
-	//rpt_lista()
 endif
 
 return
@@ -31,13 +31,11 @@ return
 // -------------------------------------------------
 // otvori tabelu pregleda
 // -------------------------------------------------
-static function tbl_lista()
+static function tbl_lista(cStatus)
 local cFooter
-local nArea
-local cFilter 
 local nLstRet
 
-nLstRet := lst_uslovi( @cFilter )
+nLstRet := lst_uslovi()
 
 if nLstRet == 2
 	return 2
@@ -49,20 +47,19 @@ private ImeKol
 private Kol
 
 cFooter := "Pregled azuriranih naloga..."
-nArea := F_RNAL
 
 Box(, 20, 77)
-@ m_x + 19, m_y + 2 SAY "<ENT> Stampa naloga   | <O> Stampa otpremnice  | ??? "
-@ m_x + 20, m_y + 2 SAY "<a-P> Povrat naloga   | ???                    | ??? "
+@ m_x + 19, m_y + 2 SAY "<ENT> Stampa naloga   | <c-O> Stampa otpremnice  | ??? "
+@ m_x + 20, m_y + 2 SAY "<a-P> Povrat naloga   | ???                      | ??? "
 
-select (nArea)
+select rnal
 set order to tag "br_nal"
 //set relation to idpartner into partn
 go top
 
 set_a_kol(@ImeKol, @Kol)
 
-ObjDbedit("lstnal", 20, 77, {|| k_handler(cFilter) }, "", cFooter, , , , , 2)
+ObjDbedit("lstnal", 20, 77, {|| k_handler() }, "", cFooter, , , , , 2)
 
 BoxC()
 
@@ -74,7 +71,7 @@ return 1
 // -------------------------------------------------
 // otvori formu sa uslovima te postavi filtere
 // -------------------------------------------------
-static function lst_uslovi( cFilter )
+static function lst_uslovi()
 local nX := 2
 local dDatOd := CToD("")
 local dDatDo := DATE()
@@ -82,6 +79,7 @@ local cPartNaz := SPACE(40)
 local cPartSif := SPACE(40)
 local cTblLista := "D"
 local nRet := 1
+local cFilter
 
 Box( ,10, 70)
 	
@@ -115,7 +113,7 @@ endif
 cPartNaz := ALLTRIM(cPartNaz)
 cPartSif := ALLTRIM(cPartSif)
 
-gen_filter(@cFilter, dDatOd, dDatDo, cPartNaz, cPartSif)
+cFilter := gen_filter(dDatOd, dDatDo, cPartNaz, cPartSif)
 
 set_f_kol(cFilter)
 
@@ -126,7 +124,7 @@ return nRet
 // ---------------------------------
 // generise string filtera
 // ---------------------------------
-static function gen_filter(cFilter, dDatOd, dDatDo, cPartNaz, cPartSif)
+static function gen_filter(dDatOd, dDatDo, cPartNaz, cPartSif)
 
 cFilter := "r_br = 1"
 
@@ -143,7 +141,7 @@ if !Empty(cPartSif)
 	cFilter += " .and. idpartner = " + Cm2Str(cPartSif)
 endif
 
-return
+return cFilter
 
 
 
@@ -164,38 +162,53 @@ return
 // ---------------------------------------------
 // pregled - key handler
 // ---------------------------------------------
-static function k_handler(cFilter)
+static function k_handler()
 local nBr_nal
-
+local cTblFilt
+		
 do case
 
 	case (Ch == K_ENTER)
 		if Pitanje(, "Stampati nalog (D/N) ?", "D") == "D"
 			nBr_nal := rnal->br_nal
 			nTRec := RecNo()
-			stamp_nalog( .t., nBr_nal )
+			cTblFilt := DBFilter()
+			set filter to
+			st_nalpr( .f., nBr_nal )
 			SELECT RNAL
-			set_f_kol(cFilter)
+			set_f_kol(cTblFilt)
 			GO (nTRec)
 			return DE_REFRESH
 		endif
 		SELECT RNAL
 		return DE_CONT
 			
-	case ( UPPER(CHR(Ch)) == "O")
-		MsgBeep("stampa otpremnice")
+	case ( Ch == K_CTRL_O )
+		if Pitanje(,"Stampati otpremicu (D/N ?)", "D") == "D"
+			nBr_nal := rnal->br_nal
+			nTRec := RecNo()
+			cTblFilt := DBFilter()
+			set filter to
+			st_otpremnica(.f., nBr_nal)
+			SELECT RNAL
+			set_f_kol(cTblFilt)
+			GO (nTRec)
+			return DE_REFRESH
+		endif
+		SELECT RNAL
 		RETURN DE_CONT
 	
 	case (Ch == K_ALT_P)
 		if Pitanje(, "Nalog povuci u pripremu ?", "N") == "D"
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
+			cTblFilt := DBFilter()
 			set filter to
 			if pov_nalog(nBr_nal) == 1
 				MsgBeep("Nalog se nalazi u pripremi !")
 			endif
 			SELECT RNAL
-			set_f_kol(cFilter)
+			set_f_kol(cTblFilt)
 			GO (nTRec)
 			RETURN DE_REFRESH
 		endif

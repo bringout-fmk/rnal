@@ -16,13 +16,13 @@ private opc:={}
 private opcexe:={}
 private Izbor:=1
 
-AADD(opc, "1. lista azuriranih naloga                ")
-AADD(opcexe, {|| frm_lst_nalog() })
+AADD(opc, "1. lista otvorenih naloga          ")
+AADD(opcexe, {|| frm_lst_nalog("O") })
 
-AADD(opc, "2. stampa azuriranog naloga ")
-AADD(opcexe, {|| stamp_nalog(.t.) })
+AADD(opc, "2. lista zatvorenih naloga  ")
+AADD(opcexe, {|| frm_lst_nalog("Z") })
 
-Menu_SC("rpt")
+Menu_SC("lst")
 
 return
 
