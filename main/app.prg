@@ -75,16 +75,23 @@ private opcexe:={}
 
 say_fmk_ver()
 
-AADD(opc, "1. unos naloga za proizvodnju              ")
+AADD(opc, "1. unos/dorada naloga za proizvodnju ")
 if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","EDIT"))
 	AADD(opcexe, {|| ed_rnal()})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
-AADD(opc, "2. lista naloga ")
-if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","DOKLST"))
-	AADD(opcexe, {|| m_lst_rnal()})
+AADD(opc, "2. lista otvorenih naloga ")
+if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","DOKLSTO"))
+	AADD(opcexe, {|| frm_lst_nalog(1)})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
+AADD(opc, "3. lista zatorenih naloga ")
+if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","DOKLSTZ"))
+	AADD(opcexe, {|| frm_lst_nalog(2)})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
