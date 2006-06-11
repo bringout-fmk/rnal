@@ -84,7 +84,7 @@ local nCount
 
 UsTipke()
 
-Box(, 20, 77, .f., "Unos novih stavki")
+Box(, 21, 77, .f., "Unos novih stavki")
 
 Scatter()
 
@@ -130,7 +130,7 @@ return 1
 // obradi stavka naloga
 // ---------------------------------------
 function g_nal_item(lNovi)
-local nX := 11
+local nX := 9
 local nRobaX
 local nRobaOpX
 local nUkX
@@ -139,6 +139,10 @@ local cUnosOp := "D"
 local nBrNal
 local nRBr
 local cIdRoba
+local nDebStakla
+local nXRekap
+local nYRekap
+local lIzoStaklo := .f.
 
 if lNovi
 	_r_br := next_r_br()
@@ -157,7 +161,7 @@ nRobaX := m_x + nX
 nRobaY := m_y + 25
 nRobaOpX := nRobaX + 1
 
-@ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID { || !EMPTY(_idroba) .and. p_roba(@_idroba) .and. s_roba_info(@_idroba, nRobaX, nRobaY) .and. g_art_type(_idroba, nRobaOpX ) }
+@ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID { || !EMPTY(_idroba) .and. p_roba(@_idroba) .and. s_roba_info(@_idroba, nRobaX, nRobaY) .and. s_staklo_info(_idroba, nRobaOpX ) }
 
 nX += 3
 
@@ -167,17 +171,35 @@ nX += 3
  
 @ m_x + nX, col() + 2 SAY "Visina (cm):" GET _d_visina PICT PIC_DIM() VALID val_dimenzija( _d_visina )
 
-nUkX := nX + 2
-nX += 4
-nUnOpX := nX
-
 read
 
 ESC_RETURN 0
 
-_d_ukupno := mkvadrat( _kolicina, _d_sirina, _d_visina )
+// debljina stakla
+nDebStakla := g_deb_stakla( _idroba )
+lIzoStaklo := izo_staklo(_idroba)
 
-@ m_x + nUkX, m_y + 45 SAY "UKUPNO STAVKA: " + ALLTRIM(STR(_d_ukupno, 10, 2)) + " m2"
+// zaokruzenja po gn-u
+_z_sirina := z_po_gnu(nDebStakla, _d_sirina)
+_z_visina := z_po_gnu(nDebStakla, _d_visina)
+
+// ukupno bez zaokruzenja
+_d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
+// ukupno sa zaokruzenjima
+_z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _d_visina )
+
+// racunaj neto (kilaza)
+_neto := c_netto( nDebStakla, _d_ukupno, lIZOStaklo )
+
+nXRekap := m_x + nX + 1
+nYRekap := m_y + 2
+
+// prikazi rekapitulaciju
+s_rekap_stavka(nXRekap, nYRekap, _z_sirina, _z_visina, _d_ukupno, _z_ukupno, _neto)
+
+// unos operacija
+
+nUnOpX := 20
 
 @ m_x + nUnOpX, m_y + 2 SAY "Unos operacija (D/N)?" GET cUnosOp VALID val_d_n( cUnosOp ) PICT "@!"
 
@@ -205,7 +227,7 @@ return 1
 // obradi header naloga
 // ---------------------------------------
 function g_nal_header(lNovi)
-local nX := 2
+local nX := 1
 local nPartX 
 
 if lNovi
@@ -216,14 +238,16 @@ if lNovi
 	_idpartner := SPACE(LEN(idpartner))
 	_vr_isp := PADR( LEFT( TIME(), 5 ), 8 )
 	_vr_plac := "1"
-	
+	if _rn_status == " "
+		_rn_status := "O"
+	endif
 endif
 
 set cursor on
 
 @ m_x + nX, m_y + 2 SAY "Broj naloga:" GET _br_nal PICT "999999999"
 
-@ m_x + nX, col() + 26 SAY "Datum naloga:" GET _datnal
+@ m_x + nX, col() + 30 SAY "Datum naloga:" GET _datnal
 
 nX += 2
 
@@ -233,19 +257,19 @@ nPartX := m_x + nX + 1
 
 nCol := col()
 
-@ m_x + nX, nCol + 25 SAY "      Datum isporuke:" GET _datisp
+@ m_x + nX, nCol + 29 SAY "      Datum isporuke:" GET _datisp
 
 nX += 1
 
-@ m_x + nX, nCol + 25 SAY "    Vrijeme isporuke:" GET _vr_isp
+@ m_x + nX, nCol + 29 SAY "    Vrijeme isporuke:" GET _vr_isp
 
 nX += 2
 
-@ m_x + nX, nCol + 24 SAY "Prioritet hitnosti (1/2/3):" GET _hitnost VALID val_kunos( _hitnost, "123" ) PICT "9"
+@ m_x + nX, nCol + 30 SAY "Prioritet hitnosti (1/2/3):" GET _hitnost VALID val_kunos( _hitnost, "123" ) PICT "9"
 
 nX += 1
 
-@ m_x + nX, nCol + 24 SAY "  Vr.placanja 1-kes 2-z.r.:" GET _vr_plac VALID val_kunos( _vr_plac, "12") PICT "9"
+@ m_x + nX, nCol + 30 SAY "  Vr.placanja 1-kes 2-z.r.:" GET _vr_plac VALID val_kunos( _vr_plac, "12") PICT "9"
 
 read
 
@@ -299,7 +323,8 @@ do case
 		select p_rnal
 		go top
 		nBr_nal := p_rnal->br_nal
-		stamp_nalog( .f., nBr_nal )
+		st_nalpr( .t., nBr_nal )
+		select p_rnal
 		return DE_REFRESH
 		
 	case Ch==K_ALT_A
@@ -411,4 +436,45 @@ select (nArea)
 return
 
 
+// ----------------------------------------
+// ispisuje rekapitulaciju stavke GN
+// ----------------------------------------
+static function s_rekap_stavka(nX, nY, nGNSirina, nGNVisina, nUkupno, nGNUkupno, nNeto)
+local cLine 
 
+cLine := REPLICATE("-", 70)
+
+@ nX, nY SAY cLine
+
+nX += 1
+
+@ nX, nY SAY "Zaokruzenje po GN:"
+@ nX, col() + 4 SAY "Sirina (cm)"
+@ nX, col() + 2 SAY nGNSirina PICT PIC_DIM()
+
+@ nX, col() + 2 SAY "Visina (cm)"
+@ nX, col() + 2 SAY nGNVisina PICT PIC_DIM()
+
+nX += 1
+
+@ nX, nY SAY PADL("UKUPNO:", 15)
+@ nX, col() + 2 SAY nUkupno PICT PIC_IZN()
+@ nX, col() + 1 SAY "m2"
+
+nX += 1
+
+@ nX, nY SAY PADL("UKUPNO PO GN-u:", 15)
+@ nX, col() + 2 SAY nGNUkupno PICT PIC_IZN()
+@ nX, col() + 1 SAY "m2"
+
+nX += 1
+
+@ nX, nY SAY PADL("NETO:", 15)
+@ nX, col() + 2 SAY nNeto PICT PIC_IZN()
+@ nX, col() + 1 SAY "kg"
+
+nX += 1
+
+@ nX, nY SAY cLine
+
+return
