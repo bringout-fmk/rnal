@@ -468,4 +468,24 @@ go (nTRec)
 return xRet
 
 
+// ------------------------------------------
+// vraca string broj dana isteka naloga
+// ------------------------------------------
+function s_nal_expired(nBr_nal)
+local xRet:=""
+local nTArea := SELECT()
+local nExpired:=0
+select rnlog
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
 
+do while !EOF() .and. (field->br_nal == nBr_nal)
+	nExpired := field->rn_expired
+	skip
+enddo
+
+xRet := ALLTRIM(STR(nExpired))
+
+select (nTArea)
+return xRet
