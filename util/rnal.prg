@@ -249,3 +249,16 @@ return xRet
 
 
 
+// -------------------------------------------
+// vraca naziv statusa relizacije naloga
+// -------------------------------------------
+function s_real_stat(cStatus)
+local xRet 
+if cStatus == "R"
+	xRet := "real."
+endif
+if cStatus == "X"
+	xRet := "poni."
+endif
+return xRet
+
