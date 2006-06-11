@@ -189,7 +189,7 @@ _d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
 _z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _d_visina )
 
 // racunaj neto (kilaza)
-_neto := c_netto( nDebStakla, _d_ukupno, lIZOStaklo )
+_neto := c_netto( nDebStakla, _z_ukupno, lIZOStaklo )
 
 nXRekap := m_x + nX + 1
 nYRekap := m_y + 2
@@ -454,12 +454,6 @@ nX += 1
 
 @ nX, col() + 2 SAY "Visina (cm)"
 @ nX, col() + 2 SAY nGNVisina PICT PIC_DIM()
-
-nX += 1
-
-@ nX, nY SAY PADL("UKUPNO:", 15)
-@ nX, col() + 2 SAY nUkupno PICT PIC_IZN()
-@ nX, col() + 1 SAY "m2"
 
 nX += 1
 
