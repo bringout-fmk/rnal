@@ -34,7 +34,7 @@ if nalog_exist( nBr_nal )
 endif
 
 MsgO("Azuriranje naloga u toku...")
-
+Beep(1)
 // azuriraj stavke RNAL
 a_rnal( nBr_nal )
 // azuriraj stavke RNOP
@@ -49,6 +49,8 @@ select p_rnop
 zap
 
 use
+
+Beep(1)
 
 o_rnal(.t.)
 
@@ -117,10 +119,13 @@ return
 static function a_rnlog( nBr_nal, cLOGOpis )
 local dLog_date := DATE()
 local cLog_time := TIME()
+local dDat_isp 
 local nU_neto:=0
+local nExpire:=0
 local nU_ukupno:=0
 local nLOGR_br
 local cPom:=""
+local cRn_status
 
 select rnal
 
@@ -132,11 +137,17 @@ do while !EOF() .and. ( rnal->br_nal == nBr_nal )
 	nU_neto += rnal->neto
 	nU_ukupno += rnal->z_ukupno
 	cRn_status := rnal->rn_status
+	dDat_isp := rnal->datisp
 	skip
 enddo
 
 // nadji sljedeci redni broj u log tabeli za nalog
 nLOGR_br := n_log_rbr( nBr_nal )
+
+// provjeri datum isporuke
+if ( dLOG_date > dDat_isp ) .and. cRn_status <> "O"
+	nExpired := dLog_date - dDat_isp
+endif
 
 select rnlog
 append blank
@@ -145,6 +156,7 @@ replace r_br with nLOGR_br
 replace log_datum with dLog_date
 replace log_time with cLog_time
 replace rn_status with cRn_status
+replace rn_expired with nExpired
 replace rn_ukupno with nU_ukupno
 replace rn_neto with nU_neto
 
@@ -152,7 +164,7 @@ replace rn_neto with nU_neto
 if cRn_status == "O"
 	cPom := "Otvoren nalog"
 elseif cRn_status == "R"
-	cPom := "Razrada naloga"
+	cPom := "Dorada, opis:"
 elseif cRn_status == "Z"
 	cPom := "Zatvoren nalog"
 endif
@@ -164,10 +176,7 @@ endif
 cPom := cPom + " " + cLOGOpis
 replace log_opis with cPom
 
-
 return
-
-
 
 
 // -------------------------------------------
@@ -319,7 +328,7 @@ return
 //----------------------------------------------
 // Zatvaranje naloga rnal->rn_status == "Z"
 //----------------------------------------------
-function z_rnal(nBr_nal, cLog_opis)
+function z_rnal(nBr_nal, cLog_opis, cRealise)
 local nTArea
 
 if (cLog_opis == nil)
@@ -338,6 +347,7 @@ if Found()
 	do while !EOF() .and. (field->br_nal == nBr_nal)
 		Scatter()
 		_rn_status := "Z"
+		_rn_realise := cRealise
 		Gather()
 		skip
 	enddo

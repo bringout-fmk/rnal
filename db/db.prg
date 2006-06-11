@@ -213,6 +213,7 @@ AADD(aDBf,{ "d_ukupno"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "z_ukupno"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "neto"       , "N" ,  15 ,  5 })
 AADD(aDBf,{ "rn_status"  , "C" ,   1 ,  0 })
+AADD(aDBf,{ "rn_realise" , "C" ,   1 ,  0 })
 
 return aDbf
 
@@ -225,13 +226,14 @@ local aDbf
 
 aDbf:={}
 
-// set polja tabele rlog
+// set polja tabele rnlog
 AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
 AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "log_datum"  , "D" ,   8 ,  0 })
 AADD(aDBf,{ "log_time"   , "C" ,   8 ,  0 })
 AADD(aDBf,{ "log_opis"   , "C" , 100 ,  5 })
 AADD(aDBf,{ "rn_status"  , "C" ,   1 ,  0 })
+AADD(aDBf,{ "rn_expired" , "N" ,   6 ,  0 })
 AADD(aDBf,{ "rn_ukupno"  , "N" ,  15 ,  5 })
 AADD(aDBf,{ "rn_neto"    , "N" ,  15 ,  5 })
 
