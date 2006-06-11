@@ -39,6 +39,11 @@ if !used()
 	O_RNOP
 endif
 
+select F_RNLOG
+if !used()
+	O_RNLOG
+endif
+
 if lPriprema == .t.
 	SELECT (F_P_RNAL)
 	if !used()

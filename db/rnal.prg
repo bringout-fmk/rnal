@@ -3,9 +3,14 @@
 
 // -------------------------------------------
 // procedura azuriranja naloga
+// cLog_opis - opis za tabelu loga
 // -------------------------------------------
-function azur_nalog()
+function azur_nalog(cLog_opis)
 local nBr_nal
+
+if (cLog_opis == nil)
+	cLog_opis := ""
+endif
 
 o_rnal(.t.)
 
@@ -34,6 +39,8 @@ MsgO("Azuriranje naloga u toku...")
 a_rnal( nBr_nal )
 // azuriraj stavke RNOP
 a_rnop( nBr_nal )
+// dodaj u RNLOG
+a_rnlog( nBr_nal, cLog_opis )
 
 // sve je ok brisi pripremu
 select p_rnal
@@ -104,6 +111,63 @@ enddo
 
 return
 
+// ------------------------------------------
+// azuriranje RNLOG
+// ------------------------------------------
+static function a_rnlog( nBr_nal, cLOGOpis )
+local dLog_date := DATE()
+local cLog_time := TIME()
+local nU_neto:=0
+local nU_ukupno:=0
+local nLOGR_br
+local cPom:=""
+
+select rnal
+
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+do while !EOF() .and. ( rnal->br_nal == nBr_nal )
+	nU_neto += rnal->neto
+	nU_ukupno += rnal->z_ukupno
+	cRn_status := rnal->rn_status
+	skip
+enddo
+
+// nadji sljedeci redni broj u log tabeli za nalog
+nLOGR_br := n_log_rbr( nBr_nal )
+
+select rnlog
+append blank
+replace br_nal with nBr_nal
+replace r_br with nLOGR_br
+replace log_datum with dLog_date
+replace log_time with cLog_time
+replace rn_status with cRn_status
+replace rn_ukupno with nU_ukupno
+replace rn_neto with nU_neto
+
+// obrada opisa pri azuriranju
+if cRn_status == "O"
+	cPom := "Otvoren nalog"
+elseif cRn_status == "R"
+	cPom := "Razrada naloga"
+elseif cRn_status == "Z"
+	cPom := "Zatvoren nalog"
+endif
+
+if cLOGOpis == nil
+	cLOGOpis := ""
+endif
+
+cPom := cPom + " " + cLOGOpis
+replace log_opis with cPom
+
+
+return
+
+
 
 
 // -------------------------------------------
@@ -139,6 +203,10 @@ p_rnal( nBr_nal )
 // povrat RNOP
 p_rnop( nBr_nal ) 
 
+// logiranje dogadjaja
+// ovdje to ne treba ??????
+// a_rnlog( nBr_nal, cLog_opis )
+
 // brisi kumulativ
 b_kumulativ( nBr_nal )
 
@@ -169,7 +237,12 @@ if Found()
 	
 		select rnal
 		Scatter()
-	
+		
+		// ako je rn otvoreni ili zatvoreni, setuj R - razrada
+		if _rn_status $ "OZ"
+			_rn_status := "R"
+		endif
+		
 		select p_rnal
 		APPEND BLANK
 		Gather()
@@ -243,9 +316,49 @@ endif
 return
 
 
-//-----------------------------------------
-// vraca sljedeci redni broj naloga
-//-----------------------------------------
+//----------------------------------------------
+// Zatvaranje naloga rnal->rn_status == "Z"
+//----------------------------------------------
+function z_rnal(nBr_nal, cLog_opis)
+local nTArea
+
+if (cLog_opis == nil)
+	cLog_opis := ""
+endif
+
+nTArea := SELECT()
+
+select rnal
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+if Found()
+	// setuj status na zatvoreno
+	do while !EOF() .and. (field->br_nal == nBr_nal)
+		Scatter()
+		_rn_status := "Z"
+		Gather()
+		skip
+	enddo
+else
+	return 0
+endif
+
+// logiraj dogadjaj
+a_rnlog(nBr_nal, cLog_opis)
+
+select (nTArea)
+
+return 1
+
+
+
+
+
+//---------------------------------------------
+// vraca sljedeci redni broj naloga, generalni
+//---------------------------------------------
 function next_r_br()
 
 PushWa()
@@ -255,6 +368,26 @@ go bottom
 nLastRbr := r_br
 PopWa()
 return nLastRbr + 1
+
+
+//------------------------------------------------
+// vraca sljedeci redni broj naloga u LOG tabeli
+//------------------------------------------------
+function n_log_rbr(nBr_nal)
+local nLastRbr:=0
+PushWa()
+select rnlog
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+do while !EOF() .and. (field->br_nal == nBr_nal)
+	nLastRbr := field->r_br
+	skip
+enddo
+PopWa()
+
+return nLastRbr + 1
+
 
 
 
@@ -300,31 +433,26 @@ return lRet
 // vraca ukupno m2 za nalog nBr_nal
 // --------------------------------------------
 function g_nal_ukupno( nBr_nal )
-local xRet
+local xRet:=0
 local nTRec
-local cFilter 
+local nTArea
 
-cFilter := DBFilter()
-
+nTArea := SELECT()
 nTRec := RecNo()
-xRet := 0
 
-set filter to
-
-select rnal
+select rnlog
 set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0)
 
 if Found()
 	do while !EOF() .and. ( field->br_nal == nBr_nal )
-		xRet += field->d_ukupno
+		xRet := field->rn_ukupno
 		skip
 	enddo
 endif
 
-set filter to &cFilter
-
+select (nTArea)
 go (nTRec)
 
 return xRet
