@@ -52,16 +52,14 @@ Box(, 20, 77)
 
 set_box_dno(nStatus)
 
-
-
 select rnal
 set order to tag "br_nal"
 //set relation to idpartner into partn
 go top
 
-set_a_kol(@ImeKol, @Kol)
+set_a_kol(@ImeKol, @Kol, nStatus)
 
-ObjDbedit("lstnal", 20, 77, {|| k_handler() }, "", cFooter, , , , , 2)
+ObjDbedit("lstnal", 20, 77, {|| k_handler(nStatus) }, "", cFooter, , , , , 2)
 
 BoxC()
 
@@ -77,19 +75,14 @@ local cLine2 := ""
 local nOpcLen := 24
 local cOpcSep := "|"
 
-// otvoreni nalozi
-if nStatus == 1
-	cLine1 := PADR("<Z> Zatvori nalog", nOpcLen)
-	cLine1 += cOpcSep
+cLine1 := PADR("<D> Dorada naloga", nOpcLen)
+cLine1 += cOpcSep
 
-	cLine1 := PADR("<L> Lista promjena", nOpcLen)
-	cLine1 += cOpcSep
-else
-	cLine1 := PADR("<O> Otvori zatv.nalog", nOpcLen)
-	cLine1 += cOpcSep
+cLine1 += PADR("<L> Lista promjena", nOpcLen)
+cLine1 += cOpcSep
 
-	cLine1 := PADR("<L> Lista promjena", nOpcLen)
-	cLine1 += cOpcSep
+if ( nStatus == 1 )
+	cLine1 += PADR("<Z> Zatvori nalog", nOpcLen)
 endif
 
 // druga linija je zajednicka
@@ -112,7 +105,6 @@ local nX := 2
 local dDatOd := CToD("")
 local dDatDo := DATE()
 local cPartNaz := SPACE(40)
-local cPartSif := SPACE(40)
 local cTblLista := "D"
 local nRet := 1
 local cFilter
@@ -125,10 +117,6 @@ Box( ,10, 70)
 nX += 2
 
 @ m_x + nX, m_y + 2 SAY "Naziv partnera pocinje sa (prazno svi) " GET cPartNaz PICT "@S20"
-
-nX += 1
-
-@ m_x + nX, m_y + 2 SAY "Uslov po sifri partnera   (prazno svi) " GET cPartSif PICT "@S20"
 
 nX += 2
 
@@ -147,9 +135,8 @@ if LastKey() == K_ESC
 endif
 
 cPartNaz := ALLTRIM(cPartNaz)
-cPartSif := ALLTRIM(cPartSif)
 
-cFilter := gen_filter(nStatus, dDatOd, dDatDo, cPartNaz, cPartSif)
+cFilter := gen_filter(nStatus, dDatOd, dDatDo, cPartNaz)
 
 set_f_kol(cFilter)
 
@@ -160,15 +147,17 @@ return nRet
 // ---------------------------------
 // generise string filtera
 // ---------------------------------
-static function gen_filter(nStatus, dDatOd, dDatDo, cPartNaz, cPartSif)
+static function gen_filter(nStatus, dDatOd, dDatDo, cPartNaz)
 local cZatvStatus := "Z"
 
 cFilter := "r_br = 1"
 cFilter += " .and. "
 
 if nStatus == 1
+	// samo otvoreni nalozi
 	cFilter += "rn_status <> " + Cm2Str(cZatvStatus)
 else
+	// samo zatvoreni nalozi
 	cFilter += "rn_status == " + Cm2Str(cZatvStatus)
 endif
 
@@ -180,9 +169,6 @@ if !Empty(dDatDo)
 endif
 if !Empty(cPartNaz)
 	cFilter += " .and. PARTN->naz = " + Cm2Str(cPartNaz)
-endif
-if !Empty(cPartSif)
-	cFilter += " .and. idpartner = " + Cm2Str(cPartSif)
 endif
 
 return cFilter
@@ -206,10 +192,17 @@ return
 // ---------------------------------------------
 // pregled - key handler
 // ---------------------------------------------
-static function k_handler()
+static function k_handler(nStatus)
 local nBr_nal
+local cNal_real
 local cTblFilt
-		
+	
+if ( nStatus == 2 )
+	if ( UPPER(CHR(Ch)) $ "Z")
+		return DE_CONT
+	endif
+endif
+	
 do case
 	// stampa naloga
 	case (Ch == K_CTRL_P)
@@ -241,16 +234,22 @@ do case
 		endif
 		SELECT RNAL
 		RETURN DE_CONT
-	// otvaranje naloga koji je zatvoren
-	case (UPPER(CHR(Ch)) == "O")
-		if Pitanje(, "Otvoriti zatvoreni nalog radi dorade ?", "N") == "D"
+		
+	// otvaranje naloga za doradu
+	case (UPPER(CHR(Ch)) == "D")
+		if Pitanje(, "Otvoriti nalog radi dorade (D/N) ?", "N") == "D"
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
 			cTblFilt := DBFilter()
 			set filter to
 			if pov_nalog(nBr_nal) == 1
-				MsgBeep("Nalog opet otvoren !")
+				MsgBeep("Nalog otvoren!")
 			endif
+			SELECT RNAL
+			set_f_kol(cTblFilt)
+			GO (nTRec)
+			// otvori i obradi pripremu
+			ed_rnal(.t.)
 			SELECT RNAL
 			set_f_kol(cTblFilt)
 			GO (nTRec)
@@ -258,14 +257,16 @@ do case
 		endif
 		SELECT RNAL
 		RETURN DE_CONT
+
 	// zatvaranje naloga
 	case (UPPER(CHR(Ch)) == "Z")
 		if Pitanje(, "Zatvoriti nalog (D/N) ?", "N") == "D"
+			g_nal_status(@cNal_real)
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
 			cTblFilt := DBFilter()
 			set filter to
-			if z_rnal(nBr_nal) == 1
+			if z_rnal(nBr_nal, "", cNal_real) == 1
 				MsgBeep("Nalog zatvoren !")
 			endif
 			SELECT RNAL
@@ -285,21 +286,46 @@ endcase
 return DE_CONT
 
 
+// ------------------------------------------------
+// setuj status naloga realizovan, ponisten
+// ------------------------------------------------
+static function g_nal_status(cNalStatus)
+cNalStatus := "R"
+Beep(2)
+Box(,4, 50)
+	@ m_x + 1, m_y + 2 SAY "Trenutni status naloga je:"
+	@ m_x + 2, m_y + 2 SAY "   - realizovan (R)"
+	@ m_x + 3, m_y + 2 SAY "   -   ponisten (X)"
+	@ m_x + 4, m_y + 2 SAY "postavi trenutni status na:" GET cNalStatus VALID val_kunos(cNalStatus, "RX") PICT "@!"
+	read
+BoxC()
+
+return
+
 
 // -------------------------------------------------------
 // setovanje kolona tabele za unos operacija
 // -------------------------------------------------------
-static function set_a_kol(aImeKol, aKol)
+static function set_a_kol(aImeKol, aKol, nStatus)
 aImeKol := {}
 
 AADD(aImeKol, {"Nalog br.", {|| br_nal }, "br_nal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Partner", {|| PADR(s_partner(idpartner), 40) }, "idpartner", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Partner", {|| PADR(s_partner(idpartner), 30) }, "idpartner", {|| .t.}, {|| .t.} })
+
+if nStatus == 2
+	// status naloga u zatvorenim
+	AADD(aImeKol, {"Status", {|| PADR(s_real_stat(rn_realise),5) }, "rn_realise", {|| .t.}, {|| .t.} })
+else
+	// istek naloga u otvorenim nalozima
+	AADD(aImeKol, {"Istek.", {|| PADR(s_nal_expired(br_nal),5) } })
+endif
+
 AADD(aImeKol, {"Datum", {|| datnal }, "datnal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Ukupno", {|| TRANSFORM( g_nal_ukupno( br_nal ), PIC_IZN() ) }, "d_ukupno", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp." , {|| datisp }, "datisp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| vr_isp }, "vr_isp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Placanje" , {|| PADR(s_placanje(vr_plac),10) }, "vr_plac", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Hitnost" , {|| PADR(s_hitnost(hitnost),10) }, "hitnost", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Ukupno", {|| TRANSFORM( g_nal_ukupno( br_nal ), PIC_IZN() ) }, "d_ukupno", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
@@ -307,5 +333,8 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
+
+
 
 
