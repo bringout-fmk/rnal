@@ -6,6 +6,8 @@
  * ----------------------------------------------------------------
  */
 
+// staklo jedinice mjere
+static ST_JMJ_STR := "#M2#"
 // vrsta stakla
 static IZO_ST_STR := "#22#33#"
 static OB_ST_STR := "#1#2#3#"
@@ -16,9 +18,34 @@ static TYPE_PROF_S := "PROF"
 // dodatne karakteristike
 static DK_ARMIRANO := "A"
 static DK_OGLEDALO := "OG"
-// kilaza stakla
+// kilaza stakla, koeficienti, procenti
 static NETTO_KOEF := 2.5
 static NETTO_IZO_PROC := 3
+
+
+
+// ---------------------------------------
+// provjerava da li je roba staklo 
+// ---------------------------------------
+function is_staklo(cId)
+local nTArea
+local cJmj
+local cPom
+
+nTArea := SELECT()
+select roba
+seek cId
+select (nTArea)
+
+cJmj := UPPER(ALLTRIM(roba->jmj))
+cPom := "#" + cJmj + "#"
+
+if cPom $ ST_JMJ_STR
+	return .t.
+endif
+
+return .f.
+
 
 // -----------------------------------------------------
 // kalkulise kvadratne metre
@@ -291,21 +318,38 @@ local cTip
 local cVrsta
 local cDodKarakt
 local nDebljina
+local cPom
 
-xRet := "Tip stakla: "
+xRet := "Osobine: "
 
 cTip := g_tip_stakla(cId)
 cVrsta := g_vrsta_stakla(cId)
 cDodK := g_dodk_stakla(cId)
 nDebljina := g_deb_stakla(cId)
 
-xRet += g_vs_opis(cVrsta)
+// vrsta stakla
+cPom := g_vs_opis(cVrsta)
+if !EMPTY(cPom)
+	xRet += cPom
+endif
+
+// tip stakla
+cPom := g_ts_opis(cTip)
+if !EMPTY(cPom)
+	xRet += ", "
+	xRet += cPom
+endif
+
+// dod.karakt.
+cPom := g_dk_opis(cDodK)
+if !EMPTY(cPom)
+	xRet += ", " 
+	xRet += cPom
+endif
+
+// debiljina stakla
 xRet += ", "
-xRet += g_ts_opis(cTip)
-xRet += ", " 
-xRet += g_dk_opis(cDodK)
-xRet += ", "
-xRet += ALLTRIM(STR(nDebljina)) + " mm"
+xRet += ALLTRIM(STR(nDebljina)) + " (mm)"
 
 return xRet
 

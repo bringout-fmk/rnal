@@ -10,17 +10,21 @@
 // ----------------------------------
 // prikazi info o robi
 // ----------------------------------
-function s_roba_info(cId, nX, nY)
+function s_roba_naz(cId, nX, nY)
 local nArr
 local nRazmak := 2
 local nRobaLen := 40
+local cPom
 
 nArr := SELECT()
 select roba
 hseek cId
 
 if Found()
-	@ nX, nY SAY PADR(ALLTRIM(roba->naz), nRobaLen)
+	cPom := ALLTRIM(roba->naz)
+	cPom += "(" + ALLTRIM(roba->jmj) + ")"
+	cPom := PADR(cPom, nRobaLEN)
+	@ nX, nY SAY cPom
 else
 	@ nX, nY SAY SPACE(nRobaLen)
 endif
