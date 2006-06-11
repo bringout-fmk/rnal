@@ -7,8 +7,8 @@
  */
 
 // vrsta stakla
-static IZO_ST_STR := "22#33"
-static OB_ST_STR := "1#2#3"
+static IZO_ST_STR := "#22#33#"
+static OB_ST_STR := "#1#2#3#"
 // tip stakla
 static TYPE_OB_S := "S"
 static TYPE_TI_S := "T"
@@ -81,9 +81,9 @@ if !EMPTY(cDodK)
 endif
 
 // npr: 2X2
-cPom := LEFT(cSifra, 3)
+cPom := RIGHT(cSifra, 3)
 // izbaci distancer
-cPom := STRTRAN(cSifra, "X", "")
+cPom := STRTRAN(cPom, "X", "")
 
 for i:=1 to LEN(cPom)
 	nDeb += VAL( SUBSTR(cPom, i, 1) )
@@ -109,7 +109,7 @@ if !EMPTY(cDodK)
 	cSifra := ALLTRIM(cSifra)
 endif
 
-nDeb := VAL(LEFT(cSifra, 2))
+nDeb := VAL(RIGHT(cSifra, 2))
 
 return nDeb
 
@@ -130,10 +130,15 @@ return .f.
 // vraca tip stakla
 function g_tip_stakla(cSifra)
 local nPoc
-local cPom 
+local cPom
+local cVrst
+
+cVrst := g_vrsta_stakla(cSifra)
+
+cVrst := "#" + cVrst + "#"
 
 // da li je IZO
-if g_vrsta_stakla(cSifra) $ IZO_ST_STR
+if cVrst $ IZO_ST_STR
 	nPoc := 3
 	cPom := SUBSTR(cSifra, nPoc, 1)
 else
@@ -181,6 +186,7 @@ return cPom
 
 // da li je staklo izo
 static function is_izo_staklo( cKarakt )
+cKarakt := "#" + cKarakt + "#"
 if cKarakt $ IZO_ST_STR
 	return .t.
 endif
@@ -284,18 +290,22 @@ local xRet
 local cTip
 local cVrsta
 local cDodKarakt
+local nDebljina
 
 xRet := "Tip stakla: "
 
 cTip := g_tip_stakla(cId)
 cVrsta := g_vrsta_stakla(cId)
 cDodK := g_dodk_stakla(cId)
+nDebljina := g_deb_stakla(cId)
 
 xRet += g_vs_opis(cVrsta)
 xRet += ", "
 xRet += g_ts_opis(cTip)
 xRet += ", " 
 xRet += g_dk_opis(cDodK)
+xRet += ", "
+xRet += ALLTRIM(STR(nDebljina)) + " mm"
 
 return xRet
 

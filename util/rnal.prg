@@ -64,7 +64,7 @@ local cPNaziv
 local cPMjesto
 local cLine
 
-cLine := REPLICATE("-", 35)
+cLine := REPLICATE("=", 35)
 
 if g_part_info(cId, @cPNaziv, @cPAdresa, @cPMjesto)
 
