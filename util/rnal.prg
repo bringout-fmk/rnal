@@ -7,52 +7,6 @@
  */
 
 
-
-
-
-// vraca tip stakla
-function st_type(cId)
-local nRet
-
-do case
-	case LEFT(cId, 2) $ "22#33"
-		nRet := 2
-	case LEFT(cId, 1) $ "1#2#3"
-		nRet := 1
-	case AT(cId, "PROF") <> 0
-		nRet := 3
-	otherwise
-		nRet := 0
-endcase
-
-return nRet
-
-
-
-function g_art_type(cId, nX)
-local nType 
-local cType
-
-nType := st_type(cId)
-
-do case
-	case nType == 0
-		cType := ""
-	case nType == 1
-		cType := "Obicno staklo"
-	case nType == 2
-		cType := "IZO staklo"
-	case nType == 3
-		cType := "PROFILIT staklo"
-endcase
-
-cPom := "Tip stakla: "
-cPom += cType
-
-@ nX, m_y + 2 SAY cPom
-
-return .t.
-
 // ----------------------------------
 // prikazi info o robi
 // ----------------------------------
@@ -152,12 +106,19 @@ return .t.
 
 
 
+// ---------------------------------------
 // show karakteristika
-function s_karakt(cIdKar)
+// lBrowse - iz brows-a
+// ---------------------------------------
+function s_karakt(cIdKar, lBrowse)
 local cRet
 local nTArea
 
-nTArea := F_P_RNOP
+if (lBrowse == nil)
+	lBrowse := .f.
+endif
+
+nTArea := SELECT()
 
 select s_rnka
 set order to tag "id"
@@ -175,12 +136,19 @@ select (nTArea)
 return cRet
 
 
+// ------------------------------------------
 // show operacija
-function s_operacija(cIdOper)
+// lBrowse - iz browsa
+// ------------------------------------------
+function s_operacija(cIdOper, lBrowse)
 local cRet
 local nTArea
 
-nTArea := F_P_RNOP
+if (lBrowse == nil)
+	lBrowse := .f.
+endif
+
+nTArea := SELECT()
 
 select s_rnop
 set order to tag "id"
@@ -189,7 +157,7 @@ seek cIdOper
 
 if Found()
 	cRet := ALLTRIM(field->naziv)
-	if LEN(cRet) > 8
+	if (lBrowse .and. LEN(cRet) > 8)
 		cRet := PADR(cRet, 8) + ".."
 	endif
 else
@@ -245,16 +213,6 @@ return xVal
 
 
 // -----------------------------------------------------
-// vraca vrijednost u m2 izmedju 2 velicine unesene u cm
-// -----------------------------------------------------
-function mkvadrat(nKol, nDim1, nDim2)
-local xRet
-xRet := ( nDim1 / 100 ) * (nDim2 / 100)
-xRet := nKol * xRet
-return xRet
-
-
-// -----------------------------------------------------
 // get broja radnog naloga
 // -----------------------------------------------------
 function g_br_nal( nBr_nal )
@@ -264,5 +222,26 @@ Box(, 1, 40)
 BoxC()
 ESC_RETURN .f.
 return .t.
+
+
+// ------------------------------------
+// konvertuje broj naloga u string
+// lijevo poravnat
+// ------------------------------------
+function str_nal(nBrNal)
+local xRet
+xRet := PADL( ALLTRIM(STR(nBrNal)), 10)
+return xRet
+
+
+// ------------------------------------
+// konvertuje rbr naloga u string
+// lijevo poravnat
+// ------------------------------------
+function str_rbr(nRbr)
+local xRet
+xRet := PADL( ALLTRIM(STR(nRbr)), 4)
+return xRet
+
 
 

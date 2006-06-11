@@ -7,60 +7,58 @@
  */
 
 
-// zaokruzenje dimenzije
-// 
-function dim_zaok(xVal, cArtikal)
-local xRet
-local cZaokType 
 
-// odredi vrstu zaokruzenja za odredjeno staklo
-cZaokType := g_z_type(cArtikal)
+// -------------------------------------
+// zaokruzi xVal po GNU tabeli
+// -------------------------------------
+function z_po_gnu(nDeb, xVal)
+local nRet
+local aGN
 
+// ako je staklo debljine manje od 3mm ne zaokruzuj
+if nDeb < 3
+	return xVal
+endif
 
-do case
-	case cZaokType == "GN"
-		// zaokruzenje pomocu tabele "GN"
-		xRet := g_z_gn(xVal)
-	case cZaokType == "PROFILIT"
-		// zaokruzenje profilit stakla
-		xRet := g_z_profilit(xVal)
-	case cZaokType == "3M"
-		// zaokruzenje stakla malog promjera
-		xRet := g_z_3m(xVal)
-endcase
+// definisi matricu GN-a
+aGN := arr_gn()
+// zaokruzi vrijednost xVal
+nRet := seek_gn(aGN, xVal)
 
-return xRet
+return nRet
 
 
-// odredjivanje tipa stakla
-function g_z_type(cRoba)
-local xRet
-do case
-	// profilit staklo
-	case AT(cRoba, "SPROF") <> 0
-		xRet := "PROFILIT"
-	otherwise
-		xRet := "GN"	
-endcase
 
-return xRet
+// --------------------------------------
+// napuni matricu sa GNU zaokruzenjima
+// 21...240
+// --------------------------------------
+function arr_gn()
+local aGN:={}
 
+for i:=21 to 240 step 3
+	AADD(aGN, {i})
+next
 
-// zaokruzenje po GN tabeli
-function g_z_gn(nVal)
-
-return nVal
+return aGN
 
 
-// zaokruzenje 3m stakla
-function g_z_3m(nVal)
+// ---------------------------------------------------
+// pretrazi vrijednost u GN matrici i vrati zaokruzenu
+// ---------------------------------------------------
+function seek_gn(aGN, nVal)
+local nRet
+local nPom
 
-return nVal
+for i:=1 to LEN(aGN)
+	nPom := aGN[i, 1]
+	if nPom > nVal
+		nRet := nPom
+		exit
+	endif
+next
 
-// zaokruzenje profilit stakla
-function g_z_profilit(nVal)
-
-return nVal
+return nRet
 
 
 
