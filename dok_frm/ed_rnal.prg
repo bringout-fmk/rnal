@@ -3,27 +3,20 @@
 
 // ---------------------------------------------
 // edit radni nalog
+// lDorada - dorada naloga
 // ---------------------------------------------
-function ed_rnal()
-*{
+function ed_rnal(lDorada)
 
-// procitaj parametre
-read_params()
+if (lDorada == nil)
+	lDorada := .f.
+endif
 
 // otvori tabele
 o_rnal(.t.)
 
 // prikazi tabelu pripreme
-tbl_priprema()
+tbl_priprema(lDorada)
 
-return
-*}
-
-
-// ---------------------------------------------
-// citanje parametara
-// ---------------------------------------------
-static function read_params()
 return
 
 
@@ -31,13 +24,20 @@ return
 // ---------------------------------------------
 // prikazi tabelu pripreme
 // ---------------------------------------------
-static function tbl_priprema()
+static function tbl_priprema(lDorada)
+local cHeader
+local cFooter
 
+cHeader := "Novi nalog"
+if (lDorada == .t.)
+	cHeader := "Dorada naloga"
+endif
+cFooter := "Unos/dorada naloga za proizvodnju..."
 
 Box(,20,77)
-@ m_x+18,m_y+2 SAY "<c-N>  Nove Stavke    | <ENT> Ispravi stavku   | <c-T> Brisi Stavku         "
-@ m_x+19,m_y+2 SAY "<c-A>  Ispravka Naloga| <c-P> Stampa dokumenta | <a-A> Azuriranje           "
-@ m_x+20,m_y+2 SAY "<a-P>  Povrat dok.    |"
+@ m_x+18,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
+@ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  |"
+@ m_x+20,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
 
 private ImeKol
 private Kol
@@ -47,8 +47,14 @@ SET ORDER TO TAG "br_nal"
 GO TOP
 
 set_a_kol( @Kol, @ImeKol)
-ObjDbedit("prnal", 20, 77, {|| k_handler()}, "", "priprema radnog naloga...", , , , , 3)
+
+ObjDbedit("prnal", 20, 77, {|| k_handler()}, cHeader, cFooter, , , , , 3)
 BoxC()
+
+if (lDorada == .t.)
+	return
+endif
+
 closeret
 
 
@@ -64,7 +70,7 @@ AADD(aImeKol, {"R.br", {|| TRANSFORM(r_br, "99999")}, "r_br", {|| .t.}, {|| .t.}
 AADD(aImeKol, {"Dat.n.", {|| datnal}, "datnal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp", {|| datisp}, "datisp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, { PADR("Roba", 6), {|| idroba }, "idroba", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Kolicina", {|| TRANSFORM(kolicina, "99999.99") }, "kolicina", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Kolicina", {|| TRANSFORM(kolicina, PIC_KOL()) }, "kolicina", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Sirina", {|| TRANSFORM(d_sirina, PIC_DIM()) }, "d_sirina", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Visina", {|| TRANSFORM(d_visina, PIC_DIM()) }, "d_visina", {|| .t.}, {|| .t.} })
 
@@ -79,7 +85,7 @@ return
 // ---------------------------------------------
 // obrada sve stavke 
 // ---------------------------------------------
-static function ed_item(lNova)
+static function nalog_item(lNova)
 local nCount 
 
 UsTipke()
@@ -288,6 +294,7 @@ return 1
 // ---------------------------------------------
 static function k_handler()
 local nBr_nal
+local cLOG_opis
 
 if (Ch==K_CTRL_T .or. Ch==K_ENTER;
 	.or. Ch==K_CTRL_P;
@@ -306,7 +313,7 @@ do case
 	case (Ch == K_ENTER)
 		SELECT P_RNAL
   		Scatter()
-  		if ed_item(.f.) == 1
+  		if nalog_item(.f.) == 1
 			Gather()
 			RETURN DE_REFRESH
 		endif
@@ -314,7 +321,7 @@ do case
 		
 	case (Ch == K_CTRL_N)
 		SELECT P_RNAL
-		ed_item(.t.)
+		nalog_item(.t.)
 		return DE_REFRESH
 		
 	case (Ch  == K_CTRL_F9)
@@ -334,25 +341,13 @@ do case
 		
 	case Ch==K_ALT_A
 		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D"
-	  		if azur_nalog() == 1
+	  		// trazi opis prije azuriranja
+			g_log_opis(@cLOG_opis, p_rnal->rn_status)
+			if azur_nalog(cLOG_opis) == 1
 				SELECT P_RNAL
 				RETURN DE_REFRESH
 			endif
 		endif
-		RETURN DE_CONT
-		
-	case Ch==K_ALT_P
-		if Pitanje(, "Povrat naloga u pripremu ?", "N") == "D"
-			nBr_nal := 0
-			if g_br_nal( @nBr_Nal )
-				if pov_nalog( nBr_nal ) == 1
-					SELECT P_RNAL
-					GO TOP
-					RETURN DE_REFRESH
-				endif
-			endif
-		endif
-		SELECT P_RNAL
 		RETURN DE_CONT
 		
 	case UPPER(CHR(Ch)) == "O"
@@ -360,11 +355,46 @@ do case
 		ed_st_oper(p_rnal->br_nal, p_rnal->r_br, p_rnal->idroba)
 		select p_rnal
 		return DE_REFRESH
+	
+	case ( Ch == K_ESC )
+		select p_rnal
+		if RECCOUNT2() <> 0
+			MsgBeep("Nalog u pripremi ostavljen za doradu!")
+		endif
+		return DE_CONT 
 
 endcase
 
 return DE_CONT
 
+// ---------------------------------------
+// dodaj opis pri azuriranju
+// ---------------------------------------
+static function g_log_opis(cLog_opis, cStatus)
+local cUnos_dn := "D"
+cLog_opis := SPACE(100)
+
+if (cStatus == "O")
+	return
+endif
+
+Beep(2)
+Box(,3,60)
+do while .t.
+	@ m_x + 1, m_y + 2 SAY "Unesi opis promjene:" COLOR "I"
+	@ m_x + 2, m_y + 2 SAY "->" GET cLog_opis PICT "@S50"
+	read
+	@ m_x + 3, m_y + 2 SAY "unos ispravan (D/N)" GET cUnos_dn PICT "@!" VALID val_kunos(cUnos_dn, "DN")
+	read
+	
+	if (cUnos_dn == "D")
+		exit
+	endif
+	
+enddo
+BoxC()
+
+return
 
 // ---------------------------------------
 // brisi stavku iz pripreme
