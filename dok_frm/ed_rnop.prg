@@ -104,7 +104,11 @@ do case
      		return DE_CONT
 		
 	case (Ch == K_CTRL_N)
+		gTbDir:="N"
+		NeTBDirektni()
 		fill_p_rnop(nBrNal, nRBr, cIdRoba)
+		gTbDir:="D"
+		DaTBDirektni()
 		return DE_REFRESH
 		
 	case (Ch  == K_CTRL_F9)

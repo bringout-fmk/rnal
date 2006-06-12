@@ -272,7 +272,8 @@ local nPartX
 local nPartY
 
 if lNovi
-	_br_nal := next_br_nal()
+	//_br_nal := next_br_nal()
+	_br_nal := 0
 	_datnal := DATE()
 	_datisp := DATE()
 	_hitnost := "2"
@@ -365,7 +366,17 @@ do case
 	case Ch==K_CTRL_P
 		select p_rnal
 		go top
-		nBr_nal := p_rnal->br_nal
+		
+		//nBr_nal := p_rnal->br_nal
+		
+		// ------------------------
+		// nove funkcije mrezni rad
+		
+		nBr_nal := _n_br_nal()
+		f_p_br_nal( nBr_nal )
+		
+		// ------------------------
+		
 		st_nalpr( .t., nBr_nal )
 		select p_rnal
 		return DE_REFRESH
@@ -374,6 +385,8 @@ do case
 		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D"
 	  		// trazi opis prije azuriranja
 			g_log_opis(@cLOG_opis, p_rnal->rn_status)
+			nBr_nal := _n_br_nal()
+			f_p_br_nal( nBr_nal )
 			if azur_nalog(cLOG_opis) == 1
 				SELECT P_RNAL
 				RETURN DE_REFRESH
@@ -453,6 +466,14 @@ br_prnop(nBrNal, nRBr, cIdRoba)
 
 select p_rnal
 
+// provjeri ima li zapisa....
+if RECCOUNT2() == 0
+	// ako nema, pregledaj ima li u RNAL zapisa markiranih sa "Z"
+	del_rnal_z( nBrNal )
+endif
+
+select p_rnal
+
 return .t.
 
 
@@ -461,15 +482,21 @@ return .t.
 // brisanje kompletne pripreme
 // ---------------------------------------
 static function br_sve_zapise()
+local nBr_nal
 
 if Pitanje( ,"Zelite li izbrisati pripremu !!????","N") == "N"
 	return .f.
 endif
 
 select p_rnal
+nBr_nal := field->br_nal
 zap        
+
 select p_rnop
 zap
+
+del_rnal_z( nBr_nal )
+
 select p_rnal
 
 return .t.
