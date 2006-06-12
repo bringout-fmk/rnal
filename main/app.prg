@@ -149,9 +149,29 @@ private cSection:="1"
 private cHistory:=" "
 private aHistory:={}
 
-public gFirma:="10"
-public gNFirma:=space(20)  
+public gFirma := "10"
+public gNFirma := SPACE(20)
 public gPicVrijednost := "9999999.99"
+
+// rnal - specif params section
+// firma podaci
+public gFNaziv:=SPACE(40)
+public gFAdresa:=SPACE(40)
+public gFIdBroj:=SPACE(13)
+public gFTelefon:=SPACE(40)
+public gFEmail:=SPACE(40)
+public gFBanka1:=SPACE(50)
+public gFBanka2:=SPACE(50)
+public gFBanka3:=SPACE(50)
+public gFBanka4:=SPACE(50)
+public gFBanka5:=SPACE(50)
+public gFPrRed1:=SPACE(50)
+public gFPrRed2:=SPACE(50)
+
+// izgled dokumenta
+public gDl_margina := 5
+public gDd_redovi := 11
+public gDg_margina := 0
 
 ::super:setTGVars()
 
@@ -160,14 +180,15 @@ Rpar("ff",@gFirma)
 Rpar("fn",@gNFirma)
 Rpar("p1",@gPicVrijednost)
 
-if empty(gNFirma)
+if Empty(gNFirma)
 	Beep(1)
-  	Box(,1,50)
-    		@ m_x+1,m_y+2 SAY "Unesi naziv firme:" GET gNFirma pict "@!"
-    		read
-  	BoxC()
-  	WPar("fn",gNFirma)
+	Box(,1,50)
+		@ m_x+1, m_y+2 SAY "Unesi naziv firme:" GET gNFirma PICT "@!"
+		read
+	BoxC()
+	Wpar("fn", gNFirma)
 endif
+
 select (F_PARAMS)
 
 use

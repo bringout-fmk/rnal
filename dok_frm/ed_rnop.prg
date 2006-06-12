@@ -53,6 +53,9 @@ go top
 ObjDbedit("prop", 15, 77, {|| k_handler(nBrNal, nRBr, cIdRoba)}, "", cFooter, , , , , 1)
 BoxC()
 
+select p_rnop
+set filter to
+
 return
   
 
@@ -145,6 +148,8 @@ go top
 seek cOper
 
 if !Found()
+	MsgBeep("Karakteristike ove operacije ne postoje!!!")
+	select p_rnop
 	return
 endif
 	
