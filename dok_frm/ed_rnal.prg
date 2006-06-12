@@ -181,6 +181,8 @@ nX += 1
 
 @ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM() VALID val_dimenzija( _debljina )
 
+@ m_x + nX, col() + 1 SAY "(mm)"
+
 read
 
 ESC_RETURN 0
