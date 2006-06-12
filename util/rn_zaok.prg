@@ -6,27 +6,82 @@
  * ----------------------------------------------------------------
  */
 
-
+static TS_OBICNO := 1
+static TS_TI := 2
+static TS_PROF := 3
 
 // -------------------------------------
 // zaokruzi xVal po GNU tabeli
 // -------------------------------------
-function z_po_gnu(nDeb, xVal)
+function dim_zaokruzi(nDeb, xVal, nTipStakla)
 local nRet
-local aGN
 
-// ako je staklo debljine manje od 3mm ne zaokruzuj
-if nDeb < 3
-	return xVal
+// zaokruzenje profilit staklo
+if nTipStakla == TS_PROF
+	return z_prof_staklo(xVal)
 endif
 
-// definisi matricu GN-a
-aGN := arr_gn()
-// zaokruzi vrijednost xVal
-nRet := seek_gn(aGN, xVal)
+// ako je staklo ove debljine idi po GN-u
+if nDeb <= 3
+	return z_3mm_staklo(xVal)
+endif
+
+// ostalo staklo ... po GN tabeli
+nRet := z_po_gn(xVal)
 
 return nRet
 
+
+// --------------------------------------------
+// zaokruzenje stakla profilit
+// --------------------------------------------
+static function z_prof_staklo(nDimenzija)
+local nPom
+local xRet
+nPom := nDimenzija
+do while .t.
+	if nPom%26 == 0
+		xRet := nPom
+		exit
+	endif
+	++ nPom
+enddo
+return xRet
+
+
+// --------------------------------------------
+// zaokruzenje stakla promjera do 3mm
+// --------------------------------------------
+static function z_3mm_staklo(nDimenzija)
+local nPom
+local xRet
+nPom := nDimenzija
+do while .t.
+	++ nPom
+	if nPom%2 == 0
+		xRet := nPom
+		exit
+	endif
+enddo
+return xRet
+
+
+
+
+// -------------------------------------------
+// zaokruzenje po GN tabeli
+// -------------------------------------------
+static function z_po_gn(nDimenzija)
+local aGN := {}
+local nRet := 0
+
+// definisi matricu GN-a
+aGN := arr_gn()
+
+// zaokruzi vrijednost nDimenzija
+nRet := seek_gn(aGN, nDimenzija)
+
+return nRet
 
 
 // --------------------------------------
@@ -46,10 +101,9 @@ return aGN
 // ---------------------------------------------------
 // pretrazi vrijednost u GN matrici i vrati zaokruzenu
 // ---------------------------------------------------
-function seek_gn(aGN, nVal)
+static function seek_gn(aGN, nVal)
 local nRet
 local nPom
-
 for i:=1 to LEN(aGN)
 	nPom := aGN[i, 1]
 	if nPom > nVal
@@ -57,8 +111,10 @@ for i:=1 to LEN(aGN)
 		exit
 	endif
 next
-
 return nRet
+
+
+
 
 
 

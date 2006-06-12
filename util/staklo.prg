@@ -24,6 +24,48 @@ static NETTO_IZO_PROC := 3
 
 
 
+// -----------------------------------------
+// otvara box sa dostupnim tipovima stakla
+// -----------------------------------------
+function box_tip_stakla(nReturn)
+local nSaveX
+local nSaveY
+private opc:={}
+private opcexe:={}
+private Izbor:=1
+
+
+nSaveX := m_x
+nSaveY := m_y
+
+if ( nReturn <> 0 )
+	return .t.
+endif
+
+AADD(opc, "1 - obicno staklo              ")
+AADD(opcexe, {|| nReturn := Izbor, Izbor := 0 })
+AADD(opc, "2 - termo-izolaciono staklo    ")
+AADD(opcexe, {|| nReturn := Izbor, Izbor := 0 })
+AADD(opc, "3 - PROFILIT staklo            ")
+AADD(opcexe, {|| nReturn := Izbor, Izbor := 0 })
+AADD(opc, "4 - LAMISTAL staklo            ")
+AADD(opcexe, {|| nReturn := Izbor, Izbor := 0 })
+
+Menu_SC("ts")
+
+if LastKey() == K_ESC
+	MsgBeep("Unos tipa stakla obavezan!")
+	m_x := nSaveX
+	m_y := nSaveY
+	return .f.
+endif
+
+m_x := nSaveX
+m_y := nSaveY
+
+return .t.
+
+
 // ---------------------------------------
 // provjerava da li je roba staklo 
 // ---------------------------------------

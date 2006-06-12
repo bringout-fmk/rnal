@@ -154,6 +154,7 @@ if lNovi
 	_r_br := next_r_br()
 	_idroba := SPACE(LEN(idroba))
 	_kolicina := 0
+	_tip_stakla := 0
 	_debljina := 0
 	_d_sirina := 0
 	_d_visina := 0
@@ -169,14 +170,15 @@ nRobaY := m_y + 25
 
 @ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID val_roba(@_idroba, nRobaX, nRobaY)
 
-ESC_RETURN 0
-
 read
 
+ESC_RETURN 0
+
+// izo staklo .t. ???
 lIzoStaklo := izo_staklo(_idroba)
 
-// ponudi odgovor
-if (lIzoStaklo == .t.)
+// ponudi odgovor ako vec nije popunjeno polje
+if (lIzoStaklo == .t.) .and. !EMPTY(_izo_staklo)
 	_izo_staklo := "D"
 else
 	_izo_staklo := "N"
@@ -185,6 +187,9 @@ endif
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY "IZO staklo (D/N)" GET _izo_staklo VALID val_kunos(_izo_staklo, "DN") PICT "@!"
+
+// tip stakla, 1, 2 ili 3
+@ m_x + nX, col() + 2 SAY "Tip stakla ???:" GET _tip_stakla VALID box_tip_stakla(@_tip_stakla) PICT "99"
 
 nX += 2
 
@@ -210,10 +215,9 @@ else
 	lIzoStaklo := .f.
 endif
 
-
-// zaokruzenja po gn-u
-_z_sirina := z_po_gnu(_debljina, _d_sirina)
-_z_visina := z_po_gnu(_debljina, _d_visina)
+// zaokruzenja dimenzija
+_z_sirina := dim_zaokruzi(_debljina, _d_sirina, _tip_stakla)
+_z_visina := dim_zaokruzi(_debljina, _d_visina, _tip_stakla)
 
 // ukupno bez zaokruzenja
 _d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
@@ -510,7 +514,7 @@ cLine := REPLICATE("-", 70)
 
 nX += 1
 
-@ nX, nY SAY "Zaokruzenje po GN:"
+@ nX, nY SAY "      Zaokruzenja:"
 @ nX, col() + 4 SAY "Sirina (cm)"
 @ nX, col() + 2 SAY nGNSirina PICT PIC_DIM()
 
