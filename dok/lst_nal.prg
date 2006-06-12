@@ -153,6 +153,8 @@ local cZatvStatus := "Z"
 
 cFilter := "r_br = 1"
 cFilter += " .and. "
+cFilter += "rec_zak <> " + Cm2Str("Z")
+cFilter += " .and. "
 
 if nStatus == 1
 	// samo otvoreni nalozi
