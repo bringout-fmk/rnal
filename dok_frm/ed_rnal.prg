@@ -169,6 +169,23 @@ nRobaY := m_y + 25
 
 @ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID val_roba(@_idroba, nRobaX, nRobaY)
 
+ESC_RETURN 0
+
+read
+
+lIzoStaklo := izo_staklo(_idroba)
+
+// ponudi odgovor
+if (lIzoStaklo == .t.)
+	_izo_staklo := "D"
+else
+	_izo_staklo := "N"
+endif
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "IZO staklo (D/N)" GET _izo_staklo VALID val_kunos(_izo_staklo, "DN") PICT "@!"
+
 nX += 2
 
 @ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina )
@@ -187,7 +204,12 @@ read
 
 ESC_RETURN 0
 
-lIzoStaklo := izo_staklo(_idroba)
+if _izo_staklo == "D"
+	lIzoStaklo := .t.
+else
+	lIzoStaklo := .f.
+endif
+
 
 // zaokruzenja po gn-u
 _z_sirina := z_po_gnu(_debljina, _d_sirina)
