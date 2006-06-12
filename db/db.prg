@@ -217,6 +217,7 @@ AADD(aDBf,{ "z_ukupno"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "neto"       , "N" ,  15 ,  5 })
 AADD(aDBf,{ "rn_status"  , "C" ,   1 ,  0 })
 AADD(aDBf,{ "rn_realise" , "C" ,   1 ,  0 })
+AADD(aDBf,{ "rec_zak"    , "C" ,   1 ,  0 })
 
 return aDbf
 
@@ -380,6 +381,7 @@ if (nArea==-1 .or. nArea == nArea2)
 			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
 		case (nArea2 == F_RNAL) 
 			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
+			CREATE_INDEX("br_nal_z", "STR(br_nal,10,0)+rec_zak", cPath + cTable)
 		case (nArea2 == F_P_RNOP)
 			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba+id_rnop+id_rnka", cPath + cTable)
 			CREATE_INDEX("rn_ka", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba+id_rnka", cPath + cTable)

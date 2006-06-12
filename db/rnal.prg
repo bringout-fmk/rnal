@@ -28,13 +28,14 @@ endif
 
 nBr_nal := p_rnal->br_nal
 
-if nalog_exist( nBr_nal )
-	MsgBeep("Nalog " + ALLTRIM(STR( nBr_nal )) + " vec postoji azuriran !!!")
+if !nalog_exist( nBr_nal )
+	MsgBeep("Nalog " + ALLTRIM(STR( nBr_nal )) + " nije moguce azurirati !!!")
 	return 0
 endif
 
 MsgO("Azuriranje naloga u toku...")
 Beep(1)
+
 // azuriraj stavke RNAL
 a_rnal( nBr_nal )
 // azuriraj stavke RNOP
@@ -64,11 +65,32 @@ return 1
 // azuriranje RNAL
 // ------------------------------------------
 static function a_rnal( nBr_nal )
+local nPTrec
+local nKTrec
 
 select p_rnal
 set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0)
+
+skip
+nPTrec := RecNo()
+skip -1
+Scatter("z")
+
+// pronadji
+select rnal
+set order to tag "br_nal_z"
+go top
+seek STR(nBr_nal, 10, 0) + "Z"
+select rnal
+Scatter()
+_rec_zak := ""
+Gather("z")
+
+// idi na sljedeci zapis u pripremi
+select p_rnal
+go (nPTrec)
 
 do while !eof() .and. ( p_rnal->br_nal == nBr_nal )
 	Scatter()
@@ -427,8 +449,8 @@ local lRet := .f.
 nArea := SELECT()
 
 select RNAL
-set order to tag "br_nal"
-hseek STR(nBrNal, 10, 0)
+set order to tag "br_nal_z"
+hseek STR(nBrNal, 10, 0) + "Z"
 
 if Found()
 	lRet := .t.
@@ -489,3 +511,135 @@ xRet := ALLTRIM(STR(nExpired))
 
 select (nTArea)
 return xRet
+
+
+// novi broj naloga
+// mrezni rad....
+function _n_br_nal(lNovi)
+local nTArea
+local nNoviBroj
+
+nTArea := SELECT()
+select p_rnal
+go top
+
+if ( p_rnal->br_nal <> 0 .or. EOF() )
+	// vec postoji odredjen broj
+   	return p_rnal->br_nal
+endif
+
+// novi nalog
+// koji nema svog broja, u pripremi
+select rnal
+
+if !rnal->(FLOCK())
+	nTime := 80     
+	// daj mu 10 sekundi
+      	do while nTime > 0
+        	InkeySc(.125)
+         	nTime --
+         	if rnal->(FLOCK())
+            		exit
+         	endif
+      	enddo
+      	if nTime == 0 .AND. ! rnal->(FLOCK())
+        	Beep (4)
+         	Msg ("Nemoguce odrediti broj dokumenta!#Ne mogu pristupiti bazi!")
+         	return 0
+      	endif
+endif
+
+nNoviBroj := next_br_nal()
+
+// pravi se fizicki append u bazi dokumenata da bi se sacuvalo mjesto
+// za ovaj dokument
+select rnal
+appblank2( .f., .f. )   
+_rec_zak := "Z"
+_br_nal := nNoviBroj
+Gather2 ()
+DBUnlock()
+
+select (nTArea)
+
+return nNoviBroj
+
+
+// napuni pripremne tabele sa brojem naloga
+function f_p_br_nal( nBr_nal )
+local nTRec
+local nTArea
+local nAPPRec
+
+// ako je broj 0 ne poduzimaj nista....
+if ( nBr_nal == 0 )
+	return
+endif
+
+nTArea := SELECT()
+nTRec := RecNo()
+
+// P_RNAL
+select p_rnal
+set order to tag "br_nal"
+go top
+
+// ako je u pripremi isti broj naloga
+if ( p_rnal->br_nal == nBr_nal )
+	// nemam sta raditi nista se nije mjenjalo...
+	return 
+endif
+
+do while !EOF()
+	skip
+	nAPPRec := RecNo()
+	skip -1
+	
+	Scatter()
+	_br_nal := nBr_nal
+	Gather()
+	
+	go (nAPPRec)
+enddo
+
+// P_RNOP
+select p_rnop
+go top
+do while !EOF()
+	skip
+	nAPPRec := RecNo()
+	skip -1
+	
+	Scatter()
+	_br_nal := nBr_nal
+	Gather()
+	
+	go (nAPPRec)
+enddo
+
+select (nTArea)
+go (nTRec)
+
+return
+
+
+// pronadji i brisi RNAL "Z" zapis
+function del_rnal_z( nBr_nal )
+select rnal
+set order to tag "br_nal_z"
+go top
+
+seek STR(nBr_nal, 10, 0) + "Z"
+
+// ako sam pronasao, brisi
+if Found()
+	do while !EOF() .and. field->br_nal == nBr_nal .and. field->rec_zak == "Z"
+		delete
+		skip
+	enddo
+endif
+
+set order to
+
+return
+
