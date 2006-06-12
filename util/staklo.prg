@@ -8,16 +8,15 @@
 
 // staklo jedinice mjere
 static ST_JMJ_STR := "#M2#"
+
 // vrsta stakla
 static IZO_ST_STR := "#22#33#"
 static OB_ST_STR := "#1#2#3#"
-// tip stakla
-static TYPE_OB_S := "S"
-static TYPE_TI_S := "T"
-static TYPE_PROF_S := "PROF"
+
 // dodatne karakteristike
 static DK_ARMIRANO := "A"
 static DK_OGLEDALO := "OG"
+
 // kilaza stakla, koeficienti, procenti
 static NETTO_KOEF := 2.5
 static NETTO_IZO_PROC := 3
@@ -116,73 +115,6 @@ endif
 return xRet
 
 
-// ----------------------------------------
-// vraca debljinu stakla na osnovu sifre
-// ----------------------------------------
-function g_deb_stakla(cSifra)
-local xRet
-
-// IZO STAKLO
-if izo_staklo(cSifra)
-	xRet := g_deb_izo(cSifra)
-else
-	xRet := g_deb_obicno(cSifra)
-endif
-
-return xRet
-
-// ------------------------------------
-// vraca debljinu IZO stakla
-// ------------------------------------
-static function g_deb_izo(cSifra)
-local nDeb:=0
-local cDodK:=""
-local cPom
-
-cSifra := ALLTRIM(cSifra)
-
-// vidi ima li dodatnih karakteristika
-cDodK := g_dodk_stakla(cSifra)
-if !EMPTY(cDodK)
-	// skloni zadnje karakteristike ako postoje
-	cSifra := STRTRAN(cSifra, cDodK, "")
-	cSifra := ALLTRIM(cSifra)
-endif
-
-// npr: 2X2
-cPom := RIGHT(cSifra, 3)
-// izbaci distancer
-cPom := STRTRAN(cPom, "X", "")
-
-for i:=1 to LEN(cPom)
-	nDeb += VAL( SUBSTR(cPom, i, 1) )
-next
-
-return nDeb
-
-
-// ------------------------------------
-// vraca debljinu obicnog stakla
-// ------------------------------------
-static function g_deb_obicno(cSifra)
-local nDeb:=0
-local cDodK:=""
-
-cSifra := ALLTRIM(cSifra)
-
-// vidi ima li dodatnih karakteristika
-cDodK := g_dodk_stakla(cSifra)
-if !EMPTY(cDodK)
-	// skloni zadnje karakteristike ako postoje
-	cSifra := STRTRAN(cSifra, cDodK, "")
-	cSifra := ALLTRIM(cSifra)
-endif
-
-nDeb := VAL(RIGHT(cSifra, 2))
-
-return nDeb
-
-
 
 // ----------------------------------------
 // da li staklo izo 
@@ -196,44 +128,10 @@ endif
 return .f.
 
 
-// vraca tip stakla
-function g_tip_stakla(cSifra)
-local nPoc
-local cPom
-local cVrst
 
-cVrst := g_vrsta_stakla(cSifra)
-
-cVrst := "#" + cVrst + "#"
-
-// da li je IZO
-if cVrst $ IZO_ST_STR
-	nPoc := 3
-	cPom := SUBSTR(cSifra, nPoc, 1)
-else
-	nPoc := 2
-	cPom := SUBSTR(cSifra, nPoc, 1)
-endif
-
-// termo izolaciono
-if cPom == TYPE_TI_S
-	return TYPE_TI_S
-endif
-
-if cPom == TYPE_OB_S
-	// provjeri da li je profilit
-	if AT(cSifra, TYPE_PROF_S) <> 0
-		return TYPE_PROF_S
-	else
-		return TYPE_OB_S
-	endif
-endif
-
-return
-
-
-
+// --------------------------------------------
 // vraca vrstu stakla
+// --------------------------------------------
 function g_vrsta_stakla(cSifra)
 local cPom
 local nIZOleft := 2
@@ -308,15 +206,17 @@ return .f.
 
 
 // vraca opis tipa stakla
-function g_ts_opis( cType )
+function g_ts_opis( nType )
 local xRet:=""
 do case
-	case cType == "S"
-		xRet := "obicno"	
-	case cType == "T"
-		xRet := "termo-izolaciono"
-	case cType == "PROF"
-		xRet := "PROFILIT"
+	case nType == 1
+		xRet := "obicno staklo"	
+	case nType == 2
+		xRet := "termo-izolaciono staklo"
+	case nType == 3
+		xRet := "PROFILIT staklo"
+	case nType == 4
+		xRet := "LAMISTAL staklo"
 	
 endcase
 return xRet
@@ -352,60 +252,5 @@ endcase
 return xRet
 
 
-
-// Vraca info o staklu
-function g_staklo_info(cId)
-local xRet
-local cTip
-local cVrsta
-local cDodKarakt
-local nDebljina
-local cPom
-
-xRet := "Osobine: "
-
-cTip := g_tip_stakla(cId)
-cVrsta := g_vrsta_stakla(cId)
-cDodK := g_dodk_stakla(cId)
-//nDebljina := g_deb_stakla(cId)
-
-// vrsta stakla
-cPom := g_vs_opis(cVrsta)
-if !EMPTY(cPom)
-	xRet += cPom
-endif
-
-// tip stakla
-cPom := g_ts_opis(cTip)
-if !EMPTY(cPom)
-	xRet += ", "
-	xRet += cPom
-endif
-
-// dod.karakt.
-cPom := g_dk_opis(cDodK)
-if !EMPTY(cPom)
-	xRet += ", " 
-	xRet += cPom
-endif
-
-// debiljina stakla
-//xRet += ", "
-//xRet += ALLTRIM(STR(nDebljina)) + " (mm)"
-
-return xRet
-
-
-// prikazuje info o staklu na koordinati nX
-function s_staklo_info(cId, nX)
-local cShow
-
-@ nX, m_y + 2 SAY PADR("", 70)
-
-cShow := g_staklo_info(cId)
-
-@ nX, m_y + 2 SAY cShow
-
-return .t.
 
 
