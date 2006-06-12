@@ -276,9 +276,11 @@ do case
 		endif
 		SELECT RNAL
 		RETURN DE_CONT
+	
 	// lista promjena na nalogu
 	case (UPPER(CHR(Ch)) == "L")
-		MsgBeep("Lista promjena na nalogu!")
+		nBr_nal := rnal->br_nal
+		frm_lst_rnlog(nBr_nal)
 		RETURN DE_CONT
 
 endcase

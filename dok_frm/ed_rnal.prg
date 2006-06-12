@@ -386,7 +386,7 @@ endif
 Beep(2)
 Box(,3,60)
 do while .t.
-	@ m_x + 1, m_y + 2 SAY "Unesi opis promjene:" COLOR "I"
+	@ m_x + 1, m_y + 2 SAY "Unesi opis dorade:" COLOR "I"
 	@ m_x + 2, m_y + 2 SAY "->" GET cLog_opis PICT "@S50"
 	read
 	@ m_x + 3, m_y + 2 SAY "unos ispravan (D/N)" GET cUnos_dn PICT "@!" VALID val_kunos(cUnos_dn, "DN")
