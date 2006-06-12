@@ -154,6 +154,7 @@ if lNovi
 	_r_br := next_r_br()
 	_idroba := SPACE(LEN(idroba))
 	_kolicina := 0
+	_debljina := 0
 	_d_sirina := 0
 	_d_visina := 0
 	_d_ukupno := 0
@@ -168,25 +169,27 @@ nRobaY := m_y + 25
 
 @ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID val_roba(@_idroba, nRobaX, nRobaY)
 
-nX += 3
+nX += 2
 
 @ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina )
- 
+
 @ m_x + nX, col() + 2 SAY "Sirina (cm):" GET _d_sirina PICT PIC_DIM() VALID val_dimenzija( _d_sirina )
  
 @ m_x + nX, col() + 2 SAY "Visina (cm):" GET _d_visina PICT PIC_DIM() VALID val_dimenzija( _d_visina )
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM() VALID val_dimenzija( _debljina )
 
 read
 
 ESC_RETURN 0
 
-// debljina stakla
-nDebStakla := g_deb_stakla( _idroba )
 lIzoStaklo := izo_staklo(_idroba)
 
 // zaokruzenja po gn-u
-_z_sirina := z_po_gnu(nDebStakla, _d_sirina)
-_z_visina := z_po_gnu(nDebStakla, _d_visina)
+_z_sirina := z_po_gnu(_debljina, _d_sirina)
+_z_visina := z_po_gnu(_debljina, _d_visina)
 
 // ukupno bez zaokruzenja
 _d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
@@ -194,7 +197,7 @@ _d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
 _z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _d_visina )
 
 // racunaj neto (kilaza)
-_neto := c_netto( nDebStakla, _z_ukupno, lIZOStaklo )
+_neto := c_netto( _debljina, _z_ukupno, lIZOStaklo )
 
 nXRekap := m_x + nX + 1
 nYRekap := m_y + 2

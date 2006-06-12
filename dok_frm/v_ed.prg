@@ -42,9 +42,13 @@ if is_staklo(cId)
 	s_roba_naz(cId, nX, nY)
 	
 	// ispod ispisi opis stakla
-	nX += 1
-	s_staklo_info(_idroba, nX )
+	// hm... ovo ne treba...
+	//nX += 1
+	//s_staklo_info(_idroba, nX )
 	return .t.
+else
+	MsgBeep("Uneseni artikal ne pripada kategoriji stakla!")
+	return .f.
 endif
 
 return .f.

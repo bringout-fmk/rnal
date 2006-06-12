@@ -325,7 +325,7 @@ xRet := "Osobine: "
 cTip := g_tip_stakla(cId)
 cVrsta := g_vrsta_stakla(cId)
 cDodK := g_dodk_stakla(cId)
-nDebljina := g_deb_stakla(cId)
+//nDebljina := g_deb_stakla(cId)
 
 // vrsta stakla
 cPom := g_vs_opis(cVrsta)
@@ -348,8 +348,8 @@ if !EMPTY(cPom)
 endif
 
 // debiljina stakla
-xRet += ", "
-xRet += ALLTRIM(STR(nDebljina)) + " (mm)"
+//xRet += ", "
+//xRet += ALLTRIM(STR(nDebljina)) + " (mm)"
 
 return xRet
 

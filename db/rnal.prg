@@ -119,9 +119,9 @@ return
 static function a_rnlog( nBr_nal, cLOGOpis )
 local dLog_date := DATE()
 local cLog_time := TIME()
-local dDat_isp 
+local dDat_isp := DATE() 
 local nU_neto:=0
-local nExpire:=0
+local nExpired:=0
 local nU_ukupno:=0
 local nLOGR_br
 local cPom:=""
