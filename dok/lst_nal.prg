@@ -73,22 +73,23 @@ static function set_box_dno(nStatus)
 local cLine1 := ""
 local cLine2 := ""
 local nOpcLen := 24
-local cOpcSep := "|"
+local cOpcSep := "| "
 
 cLine1 := PADR("<D> Dorada naloga", nOpcLen)
 cLine1 += cOpcSep
 
-cLine1 += PADR("<L> Lista promjena", nOpcLen)
-cLine1 += cOpcSep
-
 if ( nStatus == 1 )
 	cLine1 += PADR("<Z> Zatvori nalog", nOpcLen)
+	cLine1 += cOpcSep
+	cLine1 += PADR("<S> Unesi status naloga", nOpcLen)
 endif
 
 // druga linija je zajednicka
 cLine2 := PADR("<c-P> Stampa naloga", nOpcLen)
 cLine2 += cOpcSep
 cLine2 += PADR("<c-O> Stampa otpremnice", nOpcLen)
+cLine2 += cOpcSep
+cLine2 += PADR("<L> Lista promjena", nOpcLen)
 
 @ m_x + 19, m_y + 2 SAY cLine1
 @ m_x + 20, m_y + 2 SAY cLine2

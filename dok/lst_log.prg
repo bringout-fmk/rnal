@@ -35,8 +35,8 @@ local cHeader
 private ImeKol
 private Kol
 
-cHeader := "Nalog broj: " + STR(nBr_nal, 10, 0)
-cFooter := "Pregled lista statusa naloga... "
+cHeader := " Nalog broj: " + STR(nBr_nal, 10, 0) + " "
+cFooter := " Pregled lista statusa naloga... "
 
 Box(, 20, 77)
 
@@ -48,6 +48,8 @@ set order to tag "br_nal"
 go top
 
 set_a_kol(@ImeKol, @Kol)
+
+Beep(2)
 
 ObjDbedit("lstlog", 20, 77, {|| k_handler(nBr_nal) }, cHeader, cFooter, , , , , 5)
 
