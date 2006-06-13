@@ -75,7 +75,7 @@ local cLine2 := ""
 local nOpcLen := 24
 local cOpcSep := "| "
 
-cLine1 := PADR("<D> Dorada naloga", nOpcLen)
+cLine1 := PADR("<O> Obrada naloga", nOpcLen)
 cLine1 += cOpcSep
 
 if ( nStatus == 1 )
@@ -239,8 +239,8 @@ do case
 		RETURN DE_CONT
 		
 	// otvaranje naloga za doradu
-	case (UPPER(CHR(Ch)) == "D")
-		if Pitanje(, "Otvoriti nalog radi dorade (D/N) ?", "N") == "D"
+	case (UPPER(CHR(Ch)) == "O")
+		if Pitanje(, "Otvoriti nalog radi obrade (D/N) ?", "N") == "D"
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
 			cTblFilt := DBFilter()
