@@ -35,6 +35,5 @@ oRNal:init(NIL, cModul, D_RN_VERZIJA, D_RN_PERIOD , cKorisn, cSifra, p3, p4, p5,
 oRNal:run()
 
 return
-*}
 
 
