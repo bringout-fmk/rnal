@@ -44,7 +44,11 @@ endif
 return xRet
 
 
-
+// ------------------------------------------
+// pretvara iznos u cent. u milimetr.
+// ------------------------------------------
+function cm_2_mm(nVal)
+return nVal * 100
 
 
 

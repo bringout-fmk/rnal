@@ -368,6 +368,7 @@ do case
 			g_log_opis(@cLOG_opis, p_rnal->rn_status)
 			nBr_nal := _n_br_nal()
 			f_p_br_nal( nBr_nal )
+			del_op_error()
 			if azur_nalog(cLOG_opis) == 1
 				SELECT P_RNAL
 				RETURN DE_REFRESH

@@ -402,7 +402,7 @@ if (nArea==-1 .or. nArea == nArea2)
 
 	do case 
 		case (nArea2 == F_P_RNAL)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba", cPath + cTable)
 		case (nArea2 == F_RNAL) 
 			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
 			CREATE_INDEX("br_nal_z", "STR(br_nal,10,0)+rec_zak", cPath + cTable)

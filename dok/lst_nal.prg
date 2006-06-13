@@ -322,7 +322,7 @@ if nStatus == 2
 	AADD(aImeKol, {"Status", {|| PADR(s_real_stat(rn_real), 4) + "." }, "rn_real", {|| .t.}, {|| .t.} })
 else
 	// istek naloga u otvorenim nalozima
-	AADD(aImeKol, {"Istek.", {|| PADR(s_nal_expired(br_nal), 5) } })
+	AADD(aImeKol, {"Kasnjenje", {|| PADR(s_nal_expired(g_nal_expired(br_nal)), 10) } })
 endif
 
 AADD(aImeKol, {"Datum", {|| datnal }, "datnal", {|| .t.}, {|| .t.} })

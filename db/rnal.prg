@@ -497,10 +497,10 @@ return xRet
 
 
 // ------------------------------------------
-// vraca string broj dana isteka naloga
+// vraca broj dana isteka naloga
 // ------------------------------------------
-function s_nal_expired(nBr_nal)
-local xRet:=""
+function g_nal_expired(nBr_nal)
+local xRet:=0
 local nTArea := SELECT()
 local nExpired:=0
 select rnlog
@@ -513,7 +513,7 @@ do while !EOF() .and. (field->br_nal == nBr_nal)
 	skip
 enddo
 
-xRet := ALLTRIM(STR(nExpired))
+xRet := nExpired
 
 select (nTArea)
 return xRet
@@ -648,4 +648,53 @@ endif
 set order to
 
 return
+
+
+// ----------------------------------
+// brisi operacije viska
+// ----------------------------------
+function del_op_error()
+local nTArea
+local nBr_nal
+local nR_br
+local cIdRoba
+local cPom
+
+nTArea := SELECT()
+
+// selektuj p_rnal
+select p_rnal
+set order to tag "br_nal"
+// selektuj p_rnop
+select p_rnop
+set order to tag "br_nal"
+go top
+
+do while !EOF() 
+	
+	nBr_Nal := p_rnop->br_nal
+	nR_br := p_rnop->r_br
+	cIdRoba := p_rnop->idroba
+	
+	cPom := STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + cIdRoba
+	
+	select p_rnal
+	go top
+	seek cPom
+	
+	if !Found()
+		select p_rnop
+		delete
+	endif
+	
+	select p_rnop
+	skip
+	
+enddo
+
+select (nTArea)
+
+return
+
+
 

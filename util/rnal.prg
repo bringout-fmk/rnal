@@ -300,3 +300,16 @@ endif
 return xRet
 
 
+// ---------------------------------------
+// vraca opis roka
+// ---------------------------------------
+function s_nal_expired(nExpired)
+local cRet := ""
+if nExpired == 0
+	cRet := "u roku"
+else
+	cRet := ALLTRIM(STR(nExpired)) + " dana"
+endif
+return cRet
+
+
