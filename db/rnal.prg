@@ -190,7 +190,7 @@ replace rn_neto with nU_neto
 if cRn_status == "O"
 	cPom := "Otvoren nalog"
 elseif cRn_status == "R"
-	cPom := "Dorada, opis:"
+	cPom := ""
 elseif cRn_status == "Z"
 	cPom := "Zatvoren nalog"
 endif

@@ -143,7 +143,7 @@ do case
 	case cStatus == "O"
 		xRet := "OTVOREN"
 	case cStatus == "R"
-		xRet := "U DORADI"
+		xRet := "OBRADA"
 	case cStatus == "Z"
 		xRet := "ZATOVREN"
 endcase
