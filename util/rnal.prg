@@ -52,7 +52,7 @@ seek cId
 if Found()
 	cPom := ALLTRIM(s_tipovi->naziv)
 	cPom += ", "
-	cPom += "Tip: "
+	cPom += "Oznaka: "
 	cPom += ALLTRIM(s_tipovi->vrsta)
 	?? SPACE(2) + cPom
 endif
