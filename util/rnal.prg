@@ -7,6 +7,8 @@
  */
 
 
+
+
 // ----------------------------------
 // prikazi info o robi
 // ----------------------------------
@@ -114,7 +116,9 @@ endif
 return .t.
 
 
+// -------------------------------------
 // setuj podatke partnera
+// -------------------------------------
 static function g_part_info(cId, cNaziv, cAdresa, cMjesto)
 local nArr
 local xRet
@@ -139,7 +143,7 @@ return .t.
 
 
 // ---------------------------------------
-// show karakteristika
+// prikazi karakteristiku
 // lBrowse - iz brows-a
 // ---------------------------------------
 function s_karakt(cIdKar, lBrowse)
@@ -168,8 +172,9 @@ select (nTArea)
 return cRet
 
 
+
 // ------------------------------------------
-// show operacija
+// prikazi operaciju
 // lBrowse - iz browsa
 // ------------------------------------------
 function s_operacija(cIdOper, lBrowse)
@@ -201,7 +206,9 @@ select (nTArea)
 return cRet
 
 
-// vrati operaciju, box
+// -----------------------------------
+// vraca id operacije, kroz box unos
+// -----------------------------------
 function get_oper(cOper)
 Box(,1,50)
 	@ m_x + 1, m_y + 2 SAY "Unesi operaciju:" GET cOper VALID !EMPTY(cOper) .and. p_rnop(@cOper)
@@ -237,9 +244,9 @@ function s_placanje(cVal)
 local xVal
 do case
 	case cVal == "1"
-		xVal := "KES"
+		xVal := "Kes"
 	case cVal == "2"
-		xVal := "ZIRO RACUN"
+		xVal := "Ziro racun"
 endcase 
 return xVal
 
@@ -256,6 +263,7 @@ ESC_RETURN .f.
 return .t.
 
 
+
 // ------------------------------------
 // konvertuje broj naloga u string
 // lijevo poravnat
@@ -264,6 +272,7 @@ function str_nal(nBrNal)
 local xRet
 xRet := PADL( ALLTRIM(STR(nBrNal)), 10)
 return xRet
+
 
 
 // ------------------------------------
@@ -283,10 +292,11 @@ return xRet
 function s_real_stat(cStatus)
 local xRet 
 if cStatus == "R"
-	xRet := "real."
+	xRet := "realizovan"
 endif
 if cStatus == "X"
-	xRet := "poni."
+	xRet := "ponisten"
 endif
 return xRet
+
 

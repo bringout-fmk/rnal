@@ -11,6 +11,8 @@ static GN_ZAOKR := 1
 static PROF_ZAOKR := 2
 static S3M_ZAOKR := 3
 
+
+
 // -------------------------------------
 // zaokruzi xVal po GNU tabeli
 // -------------------------------------

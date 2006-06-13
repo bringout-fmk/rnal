@@ -7,6 +7,7 @@
 // -------------------------------------------
 function azur_nalog(cLog_opis)
 local nBr_nal
+local cStat
 
 if (cLog_opis == nil)
 	cLog_opis := ""
@@ -27,8 +28,9 @@ if RECCOUNT2() == 0
 endif
 
 nBr_nal := p_rnal->br_nal
+cStat := p_rnal->rec_zak
 
-if !nalog_exist( nBr_nal )
+if cStat <> "P" .and. !nalog_exist( nBr_nal )
 	MsgBeep("Nalog " + ALLTRIM(STR( nBr_nal )) + " nije moguce azurirati !!!")
 	return 0
 endif
@@ -37,7 +39,7 @@ MsgO("Azuriranje naloga u toku...")
 Beep(1)
 
 // azuriraj stavke RNAL
-a_rnal( nBr_nal )
+a_rnal( nBr_nal , cStat )
 // azuriraj stavke RNOP
 a_rnop( nBr_nal )
 // dodaj u RNLOG
@@ -64,7 +66,7 @@ return 1
 // ------------------------------------------
 // azuriranje RNAL
 // ------------------------------------------
-static function a_rnal( nBr_nal )
+static function a_rnal( nBr_nal , cStat )
 local nPTrec
 local nKTrec
 
@@ -73,29 +75,31 @@ set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0)
 
-skip
-nPTrec := RecNo()
-skip -1
-Scatter("z")
+// ako je bio povrat
+if cStat <> "P"
+	skip
+	nPTrec := RecNo()
+	skip -1
+	Scatter("z")
 
-// pronadji
-select rnal
-set order to tag "br_nal_z"
-go top
-seek STR(nBr_nal, 10, 0) + "Z"
-select rnal
-Scatter()
-_rec_zak := ""
-Gather("z")
-
-// idi na sljedeci zapis u pripremi
-select p_rnal
-go (nPTrec)
+	// pronadji
+	select rnal
+	set order to tag "br_nal_z"
+	go top
+	seek STR(nBr_nal, 10, 0) + "Z"
+	select rnal
+	Scatter()
+	_rec_zak := ""
+	Gather("z")
+	select p_rnal
+	go (nPTrec)
+endif
 
 do while !eof() .and. ( p_rnal->br_nal == nBr_nal )
 	Scatter()
 	select rnal
 	append blank
+	_rec_zak := ""
 	Gather()
 	select p_rnal
 	skip
@@ -273,6 +277,8 @@ if Found()
 		if _rn_status $ "OZ"
 			_rn_status := "R"
 		endif
+		
+		_rec_zak := "P"
 		
 		select p_rnal
 		APPEND BLANK

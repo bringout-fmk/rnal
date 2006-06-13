@@ -188,13 +188,13 @@ nX += 2
 
 @ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina )
 
-@ m_x + nX, col() + 2 SAY "Sirina (cm):" GET _d_sirina PICT PIC_DIM() VALID val_dimenzija( _d_sirina )
+@ m_x + nX, col() + 2 SAY "Sirina (cm):" GET _d_sirina PICT PIC_DIM() VALID val_dim_sirina( _d_sirina )
  
-@ m_x + nX, col() + 2 SAY "Visina (cm):" GET _d_visina PICT PIC_DIM() VALID val_dimenzija( _d_visina )
+@ m_x + nX, col() + 2 SAY "Visina (cm):" GET _d_visina PICT PIC_DIM() VALID val_dim_visina( _d_visina )
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM() VALID val_dimenzija( _debljina )
+@ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM() VALID val_debljina( _debljina )
 
 @ m_x + nX, col() + 1 SAY "(mm)"
 
@@ -209,7 +209,7 @@ _z_visina := dim_zaokruzi(_d_visina, nZaokruzenje)
 // ukupno bez zaokruzenja
 _d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
 // ukupno sa zaokruzenjima
-_z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _d_visina )
+_z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _z_visina )
 
 // racunaj neto (kilaza)
 _neto := c_netto( _debljina, _z_ukupno, cRobaVrsta, nNetoKoef, nNetoProc )

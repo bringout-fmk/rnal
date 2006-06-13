@@ -319,10 +319,10 @@ AADD(aImeKol, {"Partner", {|| PADR(s_partner(idpartner), 30) }, "idpartner", {||
 
 if nStatus == 2
 	// status naloga u zatvorenim
-	AADD(aImeKol, {"Status", {|| PADR(s_real_stat(rn_real),5) }, "rn_real", {|| .t.}, {|| .t.} })
+	AADD(aImeKol, {"Status", {|| PADR(s_real_stat(rn_real), 4) + "." }, "rn_real", {|| .t.}, {|| .t.} })
 else
 	// istek naloga u otvorenim nalozima
-	AADD(aImeKol, {"Istek.", {|| PADR(s_nal_expired(br_nal),5) } })
+	AADD(aImeKol, {"Istek.", {|| PADR(s_nal_expired(br_nal), 5) } })
 endif
 
 AADD(aImeKol, {"Datum", {|| datnal }, "datnal", {|| .t.}, {|| .t.} })
