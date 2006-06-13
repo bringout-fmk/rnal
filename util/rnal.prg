@@ -33,6 +33,34 @@ select (nArr)
 
 return .t.
 
+
+
+// ----------------------------------
+// prikazi info o tipu artikla 
+// ----------------------------------
+function s_rtip_naz(cId)
+local nArr
+local cPom
+
+nArr := SELECT()
+select s_tipovi
+set order to tag "id"
+seek cId
+
+if Found()
+	cPom := ALLTRIM(s_tipovi->naziv)
+	cPom += ", "
+	cPom += "Tip: "
+	cPom += ALLTRIM(s_tipovi->vrsta)
+	?? SPACE(2) + cPom
+endif
+
+select (nArr)
+
+return .t.
+
+
+
 // --------------------------------------
 // prikazi partner naziv + adresa
 // --------------------------------------

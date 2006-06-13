@@ -369,7 +369,7 @@ if Found()
 	do while !EOF() .and. (field->br_nal == nBr_nal)
 		Scatter()
 		_rn_status := "Z"
-		_rn_realise := cRealise
+		_rn_real := cRealise
 		Gather()
 		skip
 	enddo

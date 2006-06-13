@@ -29,6 +29,11 @@ if !used()
 	O_S_RNOP
 endif
 
+select F_S_TIPOVI
+if !used()
+	O_S_TIPOVI
+endif
+
 select F_RNAL
 if !used()
 	O_RNAL

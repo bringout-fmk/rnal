@@ -15,4 +15,5 @@
 // sifrarnik tabele
 #xcommand O_S_RNKA   => select(F_S_RNKA);  use  (SIFPATH+"S_RNKA") ; set order to tag "id"
 #xcommand O_S_RNOP   => select(F_S_RNOP);  use  (SIFPATH+"S_RNOP") ; set order to tag "id"
+#xcommand O_S_TIPOVI => select(F_S_TIPOVI);  use  (SIFPATH+"S_TIPOVI") ; set order to tag "id"
 

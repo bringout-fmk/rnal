@@ -36,22 +36,27 @@ endif
 // iz sifrarnika
 p_roba(@cId)
 
-// provjeri da li je rijec o staklu
-if is_staklo(cId)
-	// ispisi odmah pored naziv artikla
-	s_roba_naz(cId, nX, nY)
+// prikazi naziv robe
+s_roba_naz(cId, nX, nY)
 	
-	// ispod ispisi opis stakla
-	// hm... ovo ne treba...
-	//nX += 1
-	//s_staklo_info(_idroba, nX )
-	return .t.
-else
-	MsgBeep("Uneseni artikal ne pripada kategoriji stakla!")
+return .t.
+
+
+// ------------------------------------
+// validacija polja tip artikla
+// ------------------------------------
+function val_rtip(cId)
+if EMPTY(cId)
+	MsgBeep("Unos tipa artikla obavezan!")
 	return .f.
 endif
 
-return .f.
+p_rtip(@cId)
+
+s_rtip_naz(cId)
+
+return .t.
+
 
 
 // -----------------------------

@@ -120,6 +120,7 @@ Skloni(KUMPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 // sifrarnik
 Skloni(SIFPATH,"S_RNOP.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"S_RNKA.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"S_TIPOVI.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
 ?
@@ -149,6 +150,7 @@ AADD(gaDBFs, { F_RNLOG, "RNLOG", P_KUMPATH  } )
 // sifpath
 AADD(gaDBFs, { F_S_RNOP, "S_RNOP", P_SIFPATH } )
 AADD(gaDBFs, { F_S_RNKA, "S_RNKA", P_SIFPATH } )
+AADD(gaDBFs, { F_S_RNKA, "S_TIPOVI", P_SIFPATH } )
 
 return
 
@@ -181,6 +183,7 @@ cre_tbls(nArea, "P_RNAL")
 cre_tbls(nArea, "P_RNOP")
 cre_tbls(nArea, "S_RNOP")
 cre_tbls(nArea, "S_RNKA")
+cre_tbls(nArea, "S_TIPOVI")
 cre_sifk(nArea)
 
 return
@@ -204,8 +207,7 @@ AADD(aDBf,{ "vr_plac"    , "C" ,   1 ,  0 })
 AADD(aDBf,{ "hitnost"    , "C" ,   1 ,  0 })
 AADD(aDBf,{ "idpartner"  , "C" ,   6 ,  0 })
 AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
-AADD(aDBf,{ "izo_staklo" , "C" ,   1 ,  0 })
-AADD(aDBf,{ "tip_stakla" , "N" ,   2 ,  0 })
+AADD(aDBf,{ "roba_tip"   , "C" ,   6 ,  0 })
 AADD(aDBf,{ "kolicina"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "debljina"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "d_sirina"   , "N" ,  15 ,  5 })
@@ -216,7 +218,7 @@ AADD(aDBf,{ "d_ukupno"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "z_ukupno"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "neto"       , "N" ,  15 ,  5 })
 AADD(aDBf,{ "rn_status"  , "C" ,   1 ,  0 })
-AADD(aDBf,{ "rn_realise" , "C" ,   1 ,  0 })
+AADD(aDBf,{ "rn_real"    , "C" ,   1 ,  0 })
 AADD(aDBf,{ "rec_zak"    , "C" ,   1 ,  0 })
 
 return aDbf
@@ -298,6 +300,24 @@ AADD(aDBf,{ "opis"        , "C" , 200 ,  0 })
 return aDbf
 
 
+
+// ----------------------------------------------
+// s_tipovi fields
+// ----------------------------------------------
+function g_stip_fields()
+local aDbf
+aDbf:={}
+// set polja sifrarnika tipova
+AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
+AADD(aDBf,{ "grupa"       , "C" ,   3 ,  0 })
+AADD(aDBf,{ "vrsta"       , "C" ,   5 ,  0 })
+AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
+AADD(aDBf,{ "tip_zaok"    , "N" ,   2 ,  0 })
+AADD(aDBf,{ "neto_koef"   , "N" ,  10 ,  5 })
+AADD(aDBf,{ "neto_proc"   , "N" ,  10 ,  5 })
+return aDbf
+
+
 // ---------------------------------------------
 // sifk fields
 // ---------------------------------------------
@@ -343,6 +363,8 @@ do case
 		nArea2 := F_S_RNOP
 	case cTable == "S_RNKA"
 		nArea2 := F_S_RNKA
+	case cTable == "S_TIPOVI"
+		nArea2 := F_S_TIPOVI
 	case cTable == "P_RNAL"
 		nArea2 := F_P_RNAL
 	case cTable == "P_RNOP"
@@ -361,6 +383,8 @@ if (nArea==-1 .or. nArea == nArea2)
 			aDbf := g_srnop_fields()
 		case cTable == "S_RNKA"
 			aDbf := g_srnka_fields()
+		case cTable == "S_TIPOVI"
+			aDbf := g_stip_fields()
 	endcase
 
 	do case 
@@ -394,6 +418,8 @@ if (nArea==-1 .or. nArea == nArea2)
 		case (nArea2 == F_S_RNKA)
 		  	CREATE_INDEX("id","id", cPath + cTable)
 		  	CREATE_INDEX("idop","id_rnop+id", cPath + cTable)
+		case (nArea2 == F_S_TIPOVI)
+			CREATE_INDEX("id","id", cPath + cTable)
 	endcase
 endif
 return 
@@ -439,7 +465,7 @@ if i==F_RNLOG
 	lIdiDalje:=.t.
 endif
 
-if i==F_S_RNOP .or. i==F_S_RNKA
+if i==F_S_RNOP .or. i==F_S_RNKA .or. i==F_S_TIPOVI
 	lIdiDalje:=.t.
 endif
 
@@ -527,7 +553,7 @@ endif
  
 aKum  := { F_RNAL, F_RNOP, F_RNLOG }
 aPriv := { F_P_RNAL, F_P_RNOP }
-aSif  := { F_ROBA, F_PARTN, F_S_RNKA, F_S_RNOP }
+aSif  := { F_ROBA, F_PARTN, F_S_RNKA, F_S_RNOP, F_S_TIPOVI }
 
 if cSif == "N"
 	aSif := {}

@@ -6,30 +6,36 @@
  * ----------------------------------------------------------------
  */
 
-static TS_OBICNO := 1
-static TS_TI := 2
-static TS_PROF := 3
+static BEZ_ZAOKR := 0
+static GN_ZAOKR := 1
+static PROF_ZAOKR := 2
+static S3M_ZAOKR := 3
 
 // -------------------------------------
 // zaokruzi xVal po GNU tabeli
 // -------------------------------------
-function dim_zaokruzi(nDeb, xVal, nTipStakla)
-local nRet
+function dim_zaokruzi(xVal, nTipZaok)
+
+// ako je bez zaokruzenja
+if nTipZaok == BEZ_ZAOKR
+	return xVal
+endif
 
 // zaokruzenje profilit staklo
-if nTipStakla == TS_PROF
+if nTipZaok == PROF_ZAOKR
 	return z_prof_staklo(xVal)
 endif
 
 // ako je staklo ove debljine idi po GN-u
-if nDeb <= 3
+if nTipZaok == S3M_ZAOKR
 	return z_3mm_staklo(xVal)
 endif
 
-// ostalo staklo ... po GN tabeli
-nRet := z_po_gn(xVal)
+if nTipZaok == GN_ZAOKR
+	return z_po_gn(xVal)
+endif
 
-return nRet
+return
 
 
 // --------------------------------------------

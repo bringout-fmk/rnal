@@ -148,13 +148,16 @@ local cIdRoba
 local nDebStakla
 local nXRekap
 local nYRekap
-local lIzoStaklo := .f.
+local cRobaVrsta:=""
+local nZaokruzenje := 0
+local nNetoKoef := 0
+local nNetoProc := 0
 
 if lNovi
 	_r_br := next_r_br()
 	_idroba := SPACE(LEN(idroba))
 	_kolicina := 0
-	_tip_stakla := 0
+	_roba_tip := SPACE(6)
 	_debljina := 0
 	_d_sirina := 0
 	_d_visina := 0
@@ -170,26 +173,16 @@ nRobaY := m_y + 25
 
 @ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID val_roba(@_idroba, nRobaX, nRobaY)
 
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Tip artikla:" GET _roba_tip VALID val_rtip(@_roba_tip)
+
 read
 
 ESC_RETURN 0
 
-// izo staklo .t. ???
-lIzoStaklo := izo_staklo(_idroba)
-
-// ponudi odgovor ako vec nije popunjeno polje
-if (lIzoStaklo == .t.) .and. !EMPTY(_izo_staklo)
-	_izo_staklo := "D"
-else
-	_izo_staklo := "N"
-endif
-
-nX += 1
-
-@ m_x + nX, m_y + 2 SAY "IZO staklo (D/N)" GET _izo_staklo VALID val_kunos(_izo_staklo, "DN") PICT "@!"
-
-// tip stakla, 1, 2 ili 3
-@ m_x + nX, col() + 2 SAY "Tip stakla ???:" GET _tip_stakla VALID box_tip_stakla(@_tip_stakla) PICT "99"
+// pronadji zaokruzenje
+g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
 
 nX += 2
 
@@ -209,15 +202,9 @@ read
 
 ESC_RETURN 0
 
-if _izo_staklo == "D"
-	lIzoStaklo := .t.
-else
-	lIzoStaklo := .f.
-endif
-
 // zaokruzenja dimenzija
-_z_sirina := dim_zaokruzi(_debljina, _d_sirina, _tip_stakla)
-_z_visina := dim_zaokruzi(_debljina, _d_visina, _tip_stakla)
+_z_sirina := dim_zaokruzi(_d_sirina, nZaokruzenje)
+_z_visina := dim_zaokruzi(_d_visina, nZaokruzenje)
 
 // ukupno bez zaokruzenja
 _d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
@@ -225,19 +212,13 @@ _d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
 _z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _d_visina )
 
 // racunaj neto (kilaza)
-_neto := c_netto( _debljina, _z_ukupno, lIZOStaklo )
+_neto := c_netto( _debljina, _z_ukupno, cRobaVrsta, nNetoKoef, nNetoProc )
 
 nXRekap := m_x + nX + 1
 nYRekap := m_y + 2
 
 // prikazi rekapitulaciju
 s_rekap_stavka(nXRekap, nYRekap, _z_sirina, _z_visina, _d_ukupno, _z_ukupno, _neto)
-
-// ako je IZO staklo - kolete ?!?
-if lIZOStaklo
-	// unos koleta
-	// ToDo - ovo provjeriti
-endif
 
 // unos operacija
 nUnOpX := 21
