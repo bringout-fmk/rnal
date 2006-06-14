@@ -154,6 +154,7 @@ local cPom:=""
 local cRn_status
 
 select rnal
+set filter to
 set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0)
