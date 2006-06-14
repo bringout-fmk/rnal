@@ -21,5 +21,7 @@ cleanall:
 	make -C sif clean
 	make -C util clean
 	make -C param clean
+	make -C exe clean
 
 rnal: cleanall liball
+

@@ -3,7 +3,7 @@
 #endif
 
 #define D_RN_VERZIJA "02.22"
-#define D_RN_PERIOD '06.06-06.06.06'
+#define D_RN_PERIOD "06.06-14.06.06"
 
 #ifndef FMK_DEFINED
 	#include "\dev\fmk\af\cl-af\fmk.ch"

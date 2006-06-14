@@ -75,7 +75,7 @@ local cLine2 := ""
 local nOpcLen := 24
 local cOpcSep := "| "
 
-cLine1 := PADR("<O> Obrada naloga", nOpcLen)
+cLine1 := PADR("<D> Dorada naloga", nOpcLen)
 cLine1 += cOpcSep
 
 if ( nStatus == 1 )
@@ -199,9 +199,10 @@ static function k_handler(nStatus)
 local nBr_nal
 local cNal_real
 local cTblFilt
+local cLOG_opis
 	
 if ( nStatus == 2 )
-	if ( UPPER(CHR(Ch)) $ "Z")
+	if ( UPPER(CHR(Ch)) $ "ZS")
 		return DE_CONT
 	endif
 endif
@@ -239,8 +240,8 @@ do case
 		RETURN DE_CONT
 		
 	// otvaranje naloga za doradu
-	case (UPPER(CHR(Ch)) == "O")
-		if Pitanje(, "Otvoriti nalog radi obrade (D/N) ?", "N") == "D"
+	case (UPPER(CHR(Ch)) == "D")
+		if Pitanje(, "Otvoriti nalog radi dorade (D/N) ?", "N") == "D"
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
 			cTblFilt := DBFilter()
@@ -285,6 +286,16 @@ do case
 		nBr_nal := rnal->br_nal
 		frm_lst_rnlog(nBr_nal)
 		RETURN DE_CONT
+
+	// setovanje statusa
+	case (UPPER(CHR(Ch)) == "S" )
+		// trazi opis prije azuriranja
+		nBr_nal := rnal->br_nal
+		if g_log_opis(@cLOG_opis, rnal->rn_status) == 1
+			log_new_status(nBr_nal, cLOG_opis)
+		endif
+		select rnal
+		return DE_CONT
 
 endcase
 

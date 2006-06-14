@@ -36,7 +36,7 @@ cFooter := "Unos/dorada naloga za proizvodnju..."
 
 Box(,20,77)
 @ m_x+18,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
-@ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  |"
+@ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  | <O> Pregled operacija"
 @ m_x+20,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
 
 private ImeKol
@@ -365,7 +365,7 @@ do case
 	case Ch==K_ALT_A
 		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D"
 	  		// trazi opis prije azuriranja
-			g_log_opis(@cLOG_opis, p_rnal->rn_status)
+			g_log_opis(@cLOG_opis, p_rnal->rn_status, .t.)
 			nBr_nal := _n_br_nal()
 			f_p_br_nal( nBr_nal )
 			del_op_error()
@@ -393,15 +393,22 @@ endcase
 
 return DE_CONT
 
+
+
 // ---------------------------------------
-// dodaj opis pri azuriranju
+// uzmi opis pri azuriranju
 // ---------------------------------------
-static function g_log_opis(cLog_opis, cStatus)
+function g_log_opis(cLog_opis, cStatus, lAzur)
 local cUnos_dn := "D"
 cLog_opis := SPACE(100)
 
-if (cStatus == "O")
-	return
+if ( lAzur == nil )
+	lAzur := .f.
+endif
+
+// ako je tek azuriranje i status O ne treba opis
+if (lAzur .and. cStatus == "O")
+	return 0
 endif
 
 Beep(2)
@@ -413,6 +420,8 @@ do while .t.
 	@ m_x + 3, m_y + 2 SAY "unos ispravan (D/N)" GET cUnos_dn PICT "@!" VALID val_kunos(cUnos_dn, "DN")
 	read
 	
+	ESC_RETURN 0
+	
 	if (cUnos_dn == "D")
 		exit
 	endif
@@ -420,7 +429,7 @@ do while .t.
 enddo
 BoxC()
 
-return
+return 1
 
 // ---------------------------------------
 // brisi stavku iz pripreme

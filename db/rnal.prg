@@ -154,7 +154,6 @@ local cPom:=""
 local cRn_status
 
 select rnal
-
 set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0)
@@ -187,7 +186,7 @@ replace rn_ukupno with nU_ukupno
 replace rn_neto with nU_neto
 
 // obrada opisa pri azuriranju
-if cRn_status == "O"
+if cRn_status $ "O"
 	cPom := "Otvoren nalog"
 elseif cRn_status == "R"
 	cPom := ""
@@ -199,7 +198,12 @@ if cLOGOpis == nil
 	cLOGOpis := ""
 endif
 
-cPom := cPom + " " + cLOGOpis
+cPom += cLOGOpis
+
+if EMPTY(cPom)
+	cPom := "-"
+endif
+
 replace log_opis with cPom
 
 return
@@ -349,6 +353,63 @@ if Found()
 		SKIP
 	enddo
 endif
+
+return
+
+
+// azuriranje novog statusa direktno u tabelu RNLOG
+function log_new_status(nBr_nal, cLOGopis)
+local nTArea
+local nTRec
+local cDbFilt
+
+nTArea := SELECT()
+nTRec := recno()
+cDbFilt := DBFilter()
+
+// privremeno skini filter
+if !Empty(cDbFilt)
+	set filter to
+endif
+
+select rnlog
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+// ako si pronasao
+if Found()
+	
+	select rnal
+	set order to tag "br_nal"
+	go top
+	seek STR(nBr_nal, 10, 0)
+	
+	cRn_status := field->rn_status
+	// ako je status otvoren, promjeni ga na "R"
+	if cRn_status == "O"
+		// procesljaj rnal
+		do while !EOF() .and. field->br_nal == nBr_nal
+			Scatter()
+			_rn_status := "R"
+			Gather()
+			skip
+		enddo
+	endif
+	
+	select rnlog
+	// dodaj log
+	a_rnlog(nBr_nal, cLOGOpis)
+endif
+
+select (nTArea)
+
+// vrati filter
+if !Empty(cDbFilt)
+	set filter to &cDbFilt
+endif
+
+go (nTRec)
 
 return
 
