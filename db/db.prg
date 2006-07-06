@@ -151,6 +151,11 @@ AADD(gaDBFs, { F_RNLOG, "RNLOG", P_KUMPATH  } )
 AADD(gaDBFs, { F_S_RNOP, "S_RNOP", P_SIFPATH } )
 AADD(gaDBFs, { F_S_RNKA, "S_RNKA", P_SIFPATH } )
 AADD(gaDBFs, { F_S_RNKA, "S_TIPOVI", P_SIFPATH } )
+AADD(gaDBFs, { F_SAST, "SAST", P_SIFPATH } )
+AADD(gaDBFs, { F_ROBA, "ROBA", P_SIFPATH } )
+AADD(gaDBFs, { F_SIFK, "SIFK", P_SIFPATH } )
+AADD(gaDBFs, { F_SIFV, "SIFV", P_SIFPATH } )
+AADD(gaDBFs, { F_PARTN, "PARTN", P_SIFPATH } )
 
 return
 
@@ -466,6 +471,14 @@ if i==F_RNLOG
 endif
 
 if i==F_S_RNOP .or. i==F_S_RNKA .or. i==F_S_TIPOVI
+	lIdiDalje:=.t.
+endif
+
+if i==F_ROBA .or. i==F_SIFK .or. i==F_SIFV
+	lIdiDalje:=.t.
+endif
+
+if i==F_PARTN .or. i==F_SAST
 	lIdiDalje:=.t.
 endif
 

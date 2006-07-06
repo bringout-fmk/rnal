@@ -87,6 +87,11 @@ if !used()
 	O_ROBA
 endif
 
+select F_SAST
+if !used()
+	O_SAST
+endif
+
 select F_SIFK
 if !used()
 	O_SIFK

@@ -11,7 +11,6 @@
 // meni sifranici
 // ------------------------------
 function m_sif()
-*{
 private opc:={}
 private opcexe:={}
 private Izbor:=1
@@ -22,6 +21,8 @@ AADD(opc, "1. partneri                    ")
 AADD(opcexe, {|| p_firma()})
 AADD(opc, "2. roba")
 AADD(opcexe, {|| p_roba()})
+AADD(opc, "3. sastavnice")
+AADD(opcexe, {|| p_sast()})
 AADD(opc, "-------------------------")
 AADD(opcexe, {|| nil})
 AADD(opc, "O. operacije")
@@ -35,7 +36,11 @@ AADD(opcexe, {|| nil})
 AADD(opc, "S. sifk")
 AADD(opcexe, {|| p_sifk()})
 
-Menu_SC("sif")
+Izbor := 1
+
+gMeniSif:=.t.
+Menu_SC("rsif")
+gMeniSif:=.f.
 
 return
 
