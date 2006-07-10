@@ -1,12 +1,6 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
-/*
- * ----------------------------------------------------------------
- *                                     Copyright Sigma-com software 
- * ----------------------------------------------------------------
- */
  
-
 function TDBRNalNew()
 local oObj
 
@@ -213,6 +207,7 @@ AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
 AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "datnal"     , "D" ,   8 ,  0 })
 AADD(aDBf,{ "datisp"     , "D" ,   8 ,  0 })
+AADD(aDBf,{ "proizvod"   , "C" ,  10 ,  0 })
 AADD(aDBf,{ "vr_isp"     , "C" ,   8 ,  0 })
 AADD(aDBf,{ "mj_isp"     , "C" ,  40 ,  0 })
 AADD(aDBf,{ "operater"   , "C" ,  20 ,  0 })
@@ -237,7 +232,6 @@ aDbf:={}
 // set polja tabele rnlog
 AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
 AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
-AADD(aDBf,{ "p_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "log_datum"  , "D" ,   8 ,  0 })
 AADD(aDBf,{ "log_time"   , "C" ,   8 ,  0 })
 AADD(aDBf,{ "log_opis"   , "C" , 100 ,  5 })
@@ -276,7 +270,7 @@ local aDbf
 
 aDbf:={}
 
-// set polja tabele rnal
+// set polja tabele rnst
 AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
 AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "p_br"       , "N" ,   4 ,  0 })
@@ -307,6 +301,7 @@ aDbf:={}
 
 // set polja sifrarnika operacija
 AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
+add_f_mcode(@aDbf)
 AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
 AADD(aDBf,{ "opis"        , "C" , 100 ,  0 })
 AADD(aDBf,{ "tip_stakla"  , "C" ,  60 ,  0 })
@@ -324,6 +319,7 @@ aDbf:={}
 
 // set polja sifrarnika karakteristika
 AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
+add_f_mcode(@aDbf)
 AADD(aDBf,{ "id_rnop"     , "C" ,   6 ,  0 })
 AADD(aDBf,{ "naziv"       , "C" , 100 ,  0 })
 AADD(aDBf,{ "ka_def"      , "C" , 100 ,  0 })
@@ -341,6 +337,7 @@ local aDbf
 aDbf:={}
 // set polja sifrarnika tipova
 AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
+add_f_mcode(@aDbf)
 AADD(aDBf,{ "grupa"       , "C" ,   3 ,  0 })
 AADD(aDBf,{ "vrsta"       , "C" ,   5 ,  0 })
 AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
