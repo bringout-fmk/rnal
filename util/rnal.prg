@@ -1,13 +1,5 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
-/*
- * ----------------------------------------------------------------
- *                                     Copyright Sigma-com software 
- * ----------------------------------------------------------------
- */
-
-
-
 
 // ----------------------------------
 // prikazi info o robi
@@ -23,7 +15,7 @@ select roba
 hseek cId
 
 if Found()
-	cPom := ALLTRIM(roba->naz)
+	cPom := ALLTRIM(LEFT(roba->naz,40))
 	cPom += "(" + ALLTRIM(roba->jmj) + ")"
 	cPom := PADR(cPom, nRobaLEN)
 	@ nX, nY SAY cPom
@@ -276,7 +268,7 @@ return xRet
 
 
 // ------------------------------------
-// konvertuje rbr naloga u string
+// konvertuje r_br naloga u string
 // lijevo poravnat
 // ------------------------------------
 function str_rbr(nRbr)
@@ -284,6 +276,15 @@ local xRet
 xRet := PADL( ALLTRIM(STR(nRbr)), 4)
 return xRet
 
+
+// ------------------------------------
+// konvertuje p_br naloga u string
+// lijevo poravnat
+// ------------------------------------
+function str_pbr(nPbr)
+local xRet
+xRet := PADL( ALLTRIM(STR(nPbr)), 4)
+return xRet
 
 
 // -------------------------------------------
@@ -311,5 +312,7 @@ else
 	cRet := ALLTRIM(STR(nExpired)) + " dana"
 endif
 return cRet
+
+
 
 
