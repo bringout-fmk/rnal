@@ -90,6 +90,7 @@ endif
 fnul:=.f.
 Skloni(PRIVPATH,"P_RNAL.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"P_RNOP.DBF",cSezona,finverse,fda,fnul)
+Skloni(PRIVPATH,"P_RNST.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
 if fRS
@@ -114,6 +115,7 @@ endif
 fNul := .f.
 Skloni(KUMPATH,"RNAL.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"RNOP.DBF",cSezona,finverse,fda,fnul)
+Skloni(KUMPATH,"RNST.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"RNLOG.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
@@ -140,10 +142,12 @@ PUBLIC gaDBFs:={}
 
 // privpath
 AADD(gaDBFs, { F_P_RNAL, "P_RNAL", P_PRIVPATH  } )
+AADD(gaDBFs, { F_P_RNST, "P_RNAL", P_PRIVPATH  } )
 AADD(gaDBFs, { F_P_RNOP, "P_RNOP", P_PRIVPATH  } )
 
 // kumpath
 AADD(gaDBFs, { F_RNAL, "RNAL", P_KUMPATH  } )
+AADD(gaDBFs, { F_RNST, "RNAL", P_KUMPATH  } )
 AADD(gaDBFs, { F_RNOP, "RNOP", P_KUMPATH  } )
 AADD(gaDBFs, { F_RNLOG, "RNLOG", P_KUMPATH  } )
 
@@ -182,9 +186,11 @@ CreRoba()
 CreFmkPi()
 
 cre_tbls(nArea, "RNAL")
+cre_tbls(nArea, "RNST")
 cre_tbls(nArea, "RNOP")
 cre_tbls(nArea, "RNLOG")
 cre_tbls(nArea, "P_RNAL")
+cre_tbls(nArea, "P_RNST")
 cre_tbls(nArea, "P_RNOP")
 cre_tbls(nArea, "S_RNOP")
 cre_tbls(nArea, "S_RNKA")
@@ -208,20 +214,11 @@ AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "datnal"     , "D" ,   8 ,  0 })
 AADD(aDBf,{ "datisp"     , "D" ,   8 ,  0 })
 AADD(aDBf,{ "vr_isp"     , "C" ,   8 ,  0 })
+AADD(aDBf,{ "mj_isp"     , "C" ,  40 ,  0 })
+AADD(aDBf,{ "operater"   , "C" ,  20 ,  0 })
 AADD(aDBf,{ "vr_plac"    , "C" ,   1 ,  0 })
 AADD(aDBf,{ "hitnost"    , "C" ,   1 ,  0 })
 AADD(aDBf,{ "idpartner"  , "C" ,   6 ,  0 })
-AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
-AADD(aDBf,{ "roba_tip"   , "C" ,   6 ,  0 })
-AADD(aDBf,{ "kolicina"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "debljina"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "d_sirina"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "z_sirina"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "d_visina"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "z_visina"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "d_ukupno"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "z_ukupno"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "neto"       , "N" ,  15 ,  5 })
 AADD(aDBf,{ "rn_status"  , "C" ,   1 ,  0 })
 AADD(aDBf,{ "rn_real"    , "C" ,   1 ,  0 })
 AADD(aDBf,{ "rec_zak"    , "C" ,   1 ,  0 })
@@ -240,6 +237,7 @@ aDbf:={}
 // set polja tabele rnlog
 AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
 AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
+AADD(aDBf,{ "p_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "log_datum"  , "D" ,   8 ,  0 })
 AADD(aDBf,{ "log_time"   , "C" ,   8 ,  0 })
 AADD(aDBf,{ "log_opis"   , "C" , 100 ,  5 })
@@ -262,12 +260,41 @@ aDbf:={}
 // set polja tabele rnal
 AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
 AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
+AADD(aDBf,{ "p_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
 AADD(aDBf,{ "id_rnop"    , "C" ,   6 ,  0 })
 AADD(aDBf,{ "id_rnka"    , "C" ,   6 ,  0 })
 AADD(aDBf,{ "rn_instr"   , "C" , 100 ,  0 })
 
 return aDbf
+
+// ----------------------------------------------
+// rnst fields
+// ----------------------------------------------
+function g_rnst_fields()
+local aDbf
+
+aDbf:={}
+
+// set polja tabele rnal
+AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
+AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
+AADD(aDBf,{ "p_br"       , "N" ,   4 ,  0 })
+AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
+AADD(aDBf,{ "roba_tip"   , "C" ,   6 ,  0 })
+AADD(aDBf,{ "kolicina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "debljina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "d_visina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "z_visina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "d_sirina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "z_sirina"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "d_ukupno"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "z_ukupno"   , "N" ,  15 ,  5 })
+AADD(aDBf,{ "d_netto"    , "N" ,  15 ,  5 })
+AADD(aDBf,{ "z_netto"    , "N" ,  15 ,  5 })
+
+return aDbf
+
 
 
 // ----------------------------------------------
@@ -362,6 +389,8 @@ do case
 		nArea2 := F_RNAL
 	case cTable == "RNOP"
 		nArea2 := F_RNOP
+	case cTable == "RNST"
+		nArea2 := F_RNST
 	case cTable == "RNLOG"
 		nArea2 := F_RNLOG
 	case cTable == "S_RNOP"
@@ -374,6 +403,8 @@ do case
 		nArea2 := F_P_RNAL
 	case cTable == "P_RNOP"
 		nArea2 := F_P_RNOP
+	case cTable == "P_RNST"
+		nArea2 := F_P_RNST
 endcase
 
 if (nArea==-1 .or. nArea == nArea2)
@@ -382,6 +413,8 @@ if (nArea==-1 .or. nArea == nArea2)
 			aDbf := g_rnal_fields()
 		case cTable == "RNOP" .or. cTable == "P_RNOP"
 			aDbf := g_rnop_fields()
+		case cTable == "RNST" .or. cTable == "P_RNST"
+			aDbf := g_rnst_fields()
 		case cTable == "RNLOG"
 			aDbf := g_rlog_fields()
 		case cTable == "S_RNOP"
@@ -407,15 +440,19 @@ if (nArea==-1 .or. nArea == nArea2)
 
 	do case 
 		case (nArea2 == F_P_RNAL)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
 		case (nArea2 == F_RNAL) 
 			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
 			CREATE_INDEX("br_nal_z", "STR(br_nal,10,0)+rec_zak", cPath + cTable)
 		case (nArea2 == F_P_RNOP)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba+id_rnop+id_rnka", cPath + cTable)
-			CREATE_INDEX("rn_ka", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba+id_rnka", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)+idroba+id_rnop+id_rnka", cPath + cTable)
+			CREATE_INDEX("rn_ka", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)+idroba+id_rnka", cPath + cTable)
 		case (nArea2 == F_RNOP)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba+id_rnop+id_rnka", cPath + cTable)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)+idroba+id_rnop+id_rnka", cPath + cTable)
+		case (nArea2 == F_RNST)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)+idroba", cPath + cTable)
+		case (nArea2 == F_P_RNST)
+			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba", cPath + cTable)
 		case (nArea2 == F_RNLOG)
 			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
 		case (nArea2 == F_S_RNOP)
@@ -459,6 +496,10 @@ local cDbfName
 lIdiDalje:=.f.
 
 if i==F_RNAL .or. i==F_P_RNAL
+	lIdiDalje:=.t.
+endif
+
+if i==F_RNST .or. i==F_P_RNST
 	lIdiDalje:=.t.
 endif
 
@@ -564,8 +605,8 @@ else
 	cPriv:="D"
 endif
  
-aKum  := { F_RNAL, F_RNOP, F_RNLOG }
-aPriv := { F_P_RNAL, F_P_RNOP }
+aKum  := { F_RNAL, F_RNST, F_RNOP, F_RNLOG }
+aPriv := { F_P_RNAL, F_P_RNST, F_P_RNOP }
 aSif  := { F_ROBA, F_PARTN, F_S_RNKA, F_S_RNOP, F_S_TIPOVI }
 
 if cSif == "N"
