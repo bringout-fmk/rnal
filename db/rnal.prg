@@ -15,7 +15,11 @@ endif
 
 o_rnal(.t.)
 
+// skloni filtere
 select p_rnop
+set filter to
+
+select p_rnst
 set filter to
 
 select p_rnal
@@ -38,9 +42,11 @@ endif
 MsgO("Azuriranje naloga u toku...")
 Beep(1)
 
-// azuriraj stavke RNAL
+// azuriraj maticnu tabelu RNAL
 a_rnal( nBr_nal , cStat )
-// azuriraj stavke RNOP
+// azuriranje stavki RNST
+a_rnst( nBr_nal )
+// azuriraj operacije RNOP
 a_rnop( nBr_nal )
 // dodaj u RNLOG
 a_rnlog( nBr_nal, cLog_opis )
@@ -49,6 +55,8 @@ a_rnlog( nBr_nal, cLog_opis )
 select p_rnal
 zap
 select p_rnop
+zap
+select p_rnst
 zap
 
 use
@@ -106,6 +114,36 @@ do while !eof() .and. ( p_rnal->br_nal == nBr_nal )
 enddo
 
 return
+
+// ------------------------------------------
+// azuriranje RNST
+// ------------------------------------------
+static function a_rnst( nBr_nal )
+
+select p_rnst
+
+if RECCOUNT2() == 0
+	return
+endif
+
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+do while !EOF() .and. ( p_rnst->br_nal == nBr_nal )
+	Scatter()
+	
+	select rnst
+	append blank
+		
+	Gather()
+	
+	select p_rnst
+	skip
+enddo
+
+return
+
 
 
 // ------------------------------------------
@@ -237,15 +275,14 @@ endif
 
 MsgO("Vrsim povrat dokumenta u pripremu....")
 
-// povrat RNAL
+// povrat maticne tabele RNAL
 p_rnal( nBr_nal )
 
-// povrat RNOP
-p_rnop( nBr_nal ) 
+// povrat stavki RNST
+p_rnst( nBr_nal )
 
-// logiranje dogadjaja
-// ovdje to ne treba ??????
-// a_rnlog( nBr_nal, cLog_opis )
+// povrat operacija RNOP
+p_rnop( nBr_nal ) 
 
 // brisi kumulativ
 b_kumulativ( nBr_nal )
@@ -296,6 +333,35 @@ endif
 
 return
 
+//----------------------------------------------
+// povrat RNST
+//----------------------------------------------
+static function p_rnst(nBr_nal)
+
+select rnst
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+if Found()
+	// dodaj u pripremu dokument
+	do while !EOF() .and. (br_nal == nBr_nal)
+	
+		select rnst
+		Scatter()
+	
+		select p_rnst
+		APPEND BLANK
+		Gather()
+	
+		select rnst
+		skip
+	enddo
+endif
+
+return
+
+
 
 //----------------------------------------------
 // povrat RNOP
@@ -343,6 +409,19 @@ if Found()
 	enddo
 endif
 
+// RNST
+select rnst
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+if Found()
+	do while !eof() .and. (br_nal == nBr_nal)
+		DELETE
+		SKIP
+	enddo
+endif
+
 // RNOP
 select rnop
 set order to tag "br_nal"
@@ -354,6 +433,8 @@ if Found()
 		SKIP
 	enddo
 endif
+
+
 
 return
 
@@ -670,6 +751,22 @@ do while !EOF()
 	go (nAPPRec)
 enddo
 
+
+// P_RNST
+select p_rnst
+go top
+do while !EOF()
+	skip
+	nAPPRec := RecNo()
+	skip -1
+	
+	Scatter()
+	_br_nal := nBr_nal
+	Gather()
+	
+	go (nAPPRec)
+enddo
+
 // P_RNOP
 select p_rnop
 go top
@@ -725,7 +822,7 @@ local cPom
 nTArea := SELECT()
 
 // selektuj p_rnal
-select p_rnal
+select p_rnst
 set order to tag "br_nal"
 // selektuj p_rnop
 select p_rnop
@@ -740,7 +837,7 @@ do while !EOF()
 	
 	cPom := STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + cIdRoba
 	
-	select p_rnal
+	select p_rnst
 	go top
 	seek cPom
 	
@@ -751,7 +848,6 @@ do while !EOF()
 	
 	select p_rnop
 	skip
-	
 enddo
 
 select (nTArea)

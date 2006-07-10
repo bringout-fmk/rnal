@@ -39,6 +39,11 @@ if !used()
 	O_RNAL
 endif
 
+select F_RNST
+if !used()
+	O_RNST
+endif
+
 select F_RNOP
 if !used()
 	O_RNOP
@@ -53,6 +58,11 @@ if lPriprema == .t.
 	SELECT (F_P_RNAL)
 	if !used()
 		O_P_RNAL
+	endif
+
+	SELECT (F_P_RNST)
+	if !used()
+		O_P_RNST
 	endif
 
 	SELECT (F_P_RNOP)
@@ -103,4 +113,5 @@ if !used()
 endif
 
 return
+
 
