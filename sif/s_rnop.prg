@@ -41,6 +41,7 @@ static function set_a_kol( aKol, aImeKol )
 aImeKol := {}
 
 AADD(aImeKol, {"ID", {|| id}, "id", {|| .t.}, {|| .t.} })
+add_mcode(@aImeKol)
 AADD(aImeKol, {"Naziv", {|| naziv}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Opis", {|| opis}, "opis", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Tip stakla", {|| tip_stakla}, "tip_stakla", {|| .t.}, {|| .t.} })

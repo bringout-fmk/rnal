@@ -42,6 +42,7 @@ return PostojiSifra( nArea, 1, 10, 75, cHeader, ;
 static function set_a_kol( aKol, aImeKol)
 
 aImeKol := {}
+add_mcode(@aImeKol)
 AADD(aImeKol, {"Operacija", {|| id_rnop}, "id_rnop", {|| .t.}, {|| p_rnop(@wid_rnop)} })
 AADD(aImeKol, {"ID", {|| id}, "id", {|| auto_inc(@wid, @wid_rnop), .f. }, {|| .t.} })
 AADD(aImeKol, {"Naziv", {|| PADR(naziv, 40)}, "naziv", {|| .t.}, {|| .t.} })
