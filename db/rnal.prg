@@ -892,6 +892,48 @@ if !EMPTY(cR_id)
 endif
 return .t.
 
+// --------------------------------------------
+// provjerava da li postoji identican proizvod
+// --------------------------------------------
+function ck_id_exist(nBr_nal, nR_br)
+local nTArea
+local lExist:=.f.
+local cRoba
+
+nTArea := SELECT()
+
+select p_rnst
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal;
+		.and. field->r_br == nR_br
+
+	cRoba := field->idroba
+
+	select sast
+	set order to tag "ID2"
+	go top
+	seek cProizvod + cRoba
+	
+	if FOUND()
+		lExist := .t.
+	else
+		lExist := .f.
+		exit
+	endif
+	
+	select p_rnst
+	skip
+enddo
+
+
+select (nTArea)
+
+return lExist
+
+
 // --------------------------------
 // generisi novu sifru robe
 // --------------------------------
@@ -911,14 +953,22 @@ go top
 
 do while !EOF()
 	
-	if !r_new_id(field->proizvod)
+	// ako treba generisati novi ID
+	if r_new_id(field->proizvod)
+		
+		// provjeri da li postoji identican artikal, pa ga preuzeti
+		//if ck_id_exist() == 0
+		//	select p_rnal
+		//	skip
+		//	loop
+		//endif
 		
 		nBr_nal := field->br_nal
 		nR_br := field->r_br
 		
 		cMCode := gen_r_mc()
 		cNewId := gen_r_id()
-		cNaziv := gen_r_naz()
+		cNaziv := gen_r_naz(nBr_nal, nR_br)
 
 		// dodaj u roba
 		select roba
@@ -978,13 +1028,25 @@ return
 // ---------------------------------
 function gen_r_mc()
 local cRet := ""
+
+Box(, 1, 60)
+	private GetList:={}
+	cMCode := SPACE(10)
+	@ m_x + 1, m_y + 2 SAY "Unesi match code:" GET cMCode
+	read
+BoxC()
+
+if LastKey() <> K_ESC
+	cRet := cMCode
+endif
+
 return cRet
 
 // ----------------------------
 // generisi naziv artikla
 // ----------------------------
-function gen_r_naz()
-local cRet := ""
+function gen_r_naz(nBr_nal, nR_br)
+local cRet := "TEST...."
 return cRet
 
 
@@ -994,16 +1056,15 @@ return cRet
 function gen_r_id()
 local cRet := ""
 local nTArea 
-local nPom
+local nPom:=0
 
 nTArea := SELECT()
 
 select roba
 go top
-seek "X"
 
 do while !EOF() .and. LEFT(field->id, 1) == "X"
-	if VARTYPE(SUBSTR(field->id, 2, 1)) == "C"
+	if TYPE(SUBSTR(field->id, 2, 1)) == "C"
 		skip
 		loop
 	endif

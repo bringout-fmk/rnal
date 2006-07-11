@@ -311,7 +311,9 @@ do case
 		
 	case Ch==K_ALT_A
 		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D"
-	  		// trazi opis prije azuriranja
+	  		// generisi sifru robe + match code
+			gen_r_sif()
+			// trazi opis prije azuriranja
 			g_log_opis(@cLOG_opis, p_rnal->rn_status, .t.)
 			nBr_nal := _n_br_nal()
 			f_p_br_nal( nBr_nal )

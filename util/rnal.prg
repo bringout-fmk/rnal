@@ -363,9 +363,13 @@ return
 // ----------------------------------------
 // dodaj sastavnice u P_RNST
 // ----------------------------------------
-function dodaj_sastavnice(nBr_nal, nR_br)
+function dodaj_sastavnice(cProizvod, nBr_nal, nR_br)
 local nTArea
 local nCount
+
+if EMPTY(cProizvod)
+	return
+endif
 
 nTArea := SELECT()
 
