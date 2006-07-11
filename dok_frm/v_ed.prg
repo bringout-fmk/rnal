@@ -31,8 +31,22 @@ return .t.
 // -------------------------------------------
 function val_roba(cId, nX, nY)
 
-if Empty(cId)
-	MsgBeep("Unos artikla obavezan!")
+// iz sifrarnika
+p_roba(@cId)
+
+// prikazi naziv robe
+s_roba_naz(cId, nX, nY)
+	
+return .t.
+
+
+// -------------------------------------------
+// validacija sastavnice te prikaz info-a
+// -------------------------------------------
+function val_sast(cId, nX, nY)
+
+if EMPTY(cId)
+	MsgBeep("Unos sirovine obavezan !!!")
 	return .f.
 endif
 

@@ -15,7 +15,7 @@ endif
 o_rnal(.t.)
 
 // prikazi tabelu pripreme
-tbl_priprema(lDorada)
+rnal_priprema(lDorada)
 
 return
 
@@ -24,11 +24,11 @@ return
 // ---------------------------------------------
 // prikazi tabelu pripreme
 // ---------------------------------------------
-static function tbl_priprema(lDorada)
+static function rnal_priprema(lDorada)
 local cHeader
 local cFooter
 
-cHeader := "Novi nalog"
+cHeader := "NOVI NALOG ZA PROIZVODNJU"
 if (lDorada == .t.)
 	cHeader := "Dorada naloga"
 endif
@@ -36,7 +36,7 @@ cFooter := "Unos/dorada naloga za proizvodnju..."
 
 Box(,20,77)
 @ m_x+18,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
-@ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  | <O> Pregled operacija"
+@ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  | <S> Pregled sirovina "
 @ m_x+20,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
 
 private ImeKol
@@ -67,9 +67,11 @@ aImeKol := {}
 
 AADD(aImeKol, {"Br.nal", {|| TRANSFORM(br_nal, "99999")}, "br_nal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"R.br", {|| TRANSFORM(r_br, "99999")}, "r_br", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Proizvod", {|| proizvod}, "proizvod", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.n.", {|| datnal}, "datnal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp", {|| datisp}, "datisp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Mj.isp", {|| mj_isp}, "mj_isp", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Vr.isp", {|| vr_isp}, "vr_isp", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
@@ -107,7 +109,70 @@ endif
 
 SELECT p_rnal
 
+nCount := 0
+
+do while .t.
+	if nCount > 0
+		Scatter()
+	endif
+	++ nCount
+	if g_nal_item(lNova) == 0
+		exit
+	endif
+	select p_rnal
+	if lNova
+		append blank
+	endif
+	Gather()
+enddo
+
+SELECT p_rnal
+
 BoxC()
+
+return 1
+
+
+// ---------------------------------------
+// obradi stavku naloga
+// ---------------------------------------
+function g_nal_item(lNovi)
+local nX := 13
+local nRobaX
+local nRobaY
+local cDefSast:="N"
+
+if lNovi
+	_r_br := next_r_br()
+	_proizvod := SPACE(LEN(proizvod))
+endif
+
+@ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999"
+
+nX += 2
+nRobaX := m_x + nX
+nRobaY := m_y + 25
+
+@ m_x + nX, m_y + 2 SAY "Proizvod:" GET _proizvod VALID val_roba(@_proizvod, nRobaX, nRobaY)
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY "Definisi sastavnice proizvoda (D/N)" GET cDefSast VALID val_d_n(@cDefSast)
+
+read
+
+ESC_RETURN 0
+
+// definisanje sastavnica
+if cDefSast == "D"
+	nBr_nal := _br_nal
+	nR_br := _r_br
+	rnst_priprema(nBr_nal, nR_br)
+endif
+
+if !lNovi
+	return 0
+endif
 
 return 1
 
@@ -211,7 +276,14 @@ do case
 			return DE_REFRESH
 		endif
 		return DE_CONT
-		
+	
+	case ( UPPER(CHR(Ch)) == "S" )
+		// pregled sirovina / operacija
+		SELECT P_RNAL
+		rnst_priprema(p_rnal->br_nal, p_rnal->r_br)
+		SELECT P_RNAL
+		return DE_CONT
+
 	case Ch==K_CTRL_P
 		select p_rnal
 		go top

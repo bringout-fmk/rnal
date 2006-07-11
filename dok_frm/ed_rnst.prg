@@ -2,42 +2,19 @@
 
 
 // ---------------------------------------------
-// edit radni nalog - stavke
-// lDorada - dorada naloga
-// ---------------------------------------------
-function ed_rnst(lDorada)
-
-if (lDorada == nil)
-	lDorada := .f.
-endif
-
-// otvori tabele
-o_rnal(.t.)
-
-// prikazi tabelu pripreme
-rnst_priprema(lDorada)
-
-return
-
-
-
-// ---------------------------------------------
 // prikazi tabelu pripreme
 // ---------------------------------------------
-static function rnst_priprema(lDorada)
+function rnst_priprema(nBr_nal, nR_br)
 local cHeader
 local cFooter
 
-cHeader := "Unos stavki naloga"
-if (lDorada == .t.)
-	cHeader := "Dorada stavki naloga"
-endif
+cHeader := "SIROVINE / OPERACIJE STAVKE NALOGA"
 cFooter := "Unos/dorada stavki naloga za proizvodnju..."
 
-Box(,20,77)
-@ m_x+18,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
-@ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  | <O> Pregled operacija"
-@ m_x+20,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
+Box(,18,77)
+@ m_x+16,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
+@ m_x+17,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  | <O> Pregled operacija"
+@ m_x+18,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
 
 private ImeKol
 private Kol
@@ -48,14 +25,10 @@ GO TOP
 
 set_a_kol(@Kol, @ImeKol)
 
-ObjDbedit("prnst", 20, 77, {|| k_handler()}, cHeader, cFooter, , , , , 3)
+ObjDbedit("prnst", 18, 77, {|| k_handler(nBr_nal, nR_br)}, cHeader, cFooter, , , , , 3)
 BoxC()
 
-if (lDorada == .t.)
-	return
-endif
-
-closeret
+return
 
 
 // ---------------------------------------------
@@ -68,7 +41,7 @@ aImeKol := {}
 AADD(aImeKol, {"Br.nal", {|| TRANSFORM(br_nal, "99999")}, "br_nal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"R.br", {|| TRANSFORM(r_br, "99999")}, "r_br", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"P.br", {|| TRANSFORM(p_br, "99999")}, "p_br", {|| .t.}, {|| .t.} })
-AADD(aImeKol, { PADR("Roba", 6), {|| idroba }, "idroba", {|| .t.}, {|| .t.} })
+AADD(aImeKol, { PADR("Sirovina", 10), {|| idroba }, "idroba", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Kolicina", {|| TRANSFORM(kolicina, PIC_KOL()) }, "kolicina", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Sirina", {|| TRANSFORM(d_sirina, PIC_DIM()) }, "d_sirina", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Visina", {|| TRANSFORM(d_visina, PIC_DIM()) }, "d_visina", {|| .t.}, {|| .t.} })
@@ -84,29 +57,37 @@ return
 // ---------------------------------------------
 // obrada sve stavke 
 // ---------------------------------------------
-static function stavke_item(lNova)
-local nCount 
+static function stavke_item(nBr_nal, nR_br, lNova)
+local nCount
 
 UsTipke()
 
-Box(, 21, 77, .f., "Unos novih stavki")
+Box(, 20, 77, .f., "Unos novih stavki")
+
+select p_rnst
 
 Scatter()
 
 nCount := 0
 
 do while .t.
+	
 	if nCount > 0
 		Scatter()
 	endif
+	
 	++ nCount
-	if g_st_item(lNova) == 0
+	
+	if g_st_item(nBr_nal, nR_br, lNova) == 0
 		exit
 	endif
+	
 	select p_rnst
+	
 	if lNova
 		append blank
 	endif
+	
 	Gather()
 enddo
 
@@ -120,15 +101,13 @@ return 1
 // ---------------------------------------
 // obradi stavka naloga
 // ---------------------------------------
-function g_st_item(lNovi)
-local nX := 9
+static function g_st_item(nBr_nal, nR_br, lNovi)
+local nX := 3
 local nRobaX
 local nRobaY
 local nUkX
 local nUnOpX
 local cUnosOp := "D"
-local nBrNal
-local nRBr
 local cIdRoba
 local nDebStakla
 local nXRekap
@@ -139,8 +118,9 @@ local nNetoKoef := 0
 local nNetoProc := 0
 
 if lNovi
-	_r_br := 0
-	_p_br := next_p_br()
+	_br_nal := nBr_nal
+	_r_br := nR_br
+	_p_br := next_p_br(nBr_nal, nR_br)
 	_idroba := SPACE(LEN(idroba))
 	_kolicina := 0
 	_roba_tip := SPACE(6)
@@ -151,17 +131,14 @@ if lNovi
 	cUnosOp := "D"
 endif
 
-@ m_x + nX, m_y + 2 SAY "P.br:" GET _p_br PICT "9999"
+@ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999"
+@ m_x + nX, col() + 2 SAY "P.br:" GET _p_br PICT "9999"
 
 nX += 1
 nRobaX := m_x + nX
 nRobaY := m_y + 25
 
-@ m_x + nX, m_y + 2 SAY "Artikal:" GET _idroba VALID val_roba(@_idroba, nRobaX, nRobaY)
-
-nX += 1
-
-@ m_x + nX, m_y + 2 SAY "Tip artikla:" GET _roba_tip VALID val_rtip(@_roba_tip)
+@ m_x + nX, m_y + 2 SAY "Sirovina / operacija:" GET _idroba VALID val_sast(@_idroba, nRobaX, nRobaY)
 
 read
 
@@ -170,19 +147,21 @@ ESC_RETURN 0
 // pronadji zaokruzenje
 g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
 
+select p_rnst
+
 nX += 2
-
-@ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina )
-
-@ m_x + nX, col() + 2 SAY "Sirina (cm):" GET _d_sirina PICT PIC_DIM() VALID val_dim_sirina( _d_sirina )
- 
-@ m_x + nX, col() + 2 SAY "Visina (cm):" GET _d_visina PICT PIC_DIM() VALID val_dim_visina( _d_visina )
-
-nX += 1
 
 @ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM() VALID val_debljina( _debljina )
 
 @ m_x + nX, col() + 1 SAY "(mm)"
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina )
+
+@ m_x + nX, col() + 2 SAY "Sirina (mm):" GET _d_sirina PICT PIC_DIM() VALID val_dim_sirina( _d_sirina )
+ 
+@ m_x + nX, col() + 2 SAY "Visina (mm):" GET _d_visina PICT PIC_DIM() VALID val_dim_visina( _d_visina )
 
 read
 
@@ -207,8 +186,8 @@ nYRekap := m_y + 2
 s_rekap_stavka(nXRekap, nYRekap, _z_sirina, _z_visina, _d_ukupno, _z_ukupno, _neto)
 
 // unos operacija
-nUnOpX := 21
-@ m_x + nUnOpX, m_y + 2 SAY "Unos operacija (D/N)?" GET cUnosOp VALID val_d_n( cUnosOp ) PICT "@!"
+nUnOpX := 18
+@ m_x + nUnOpX, m_y + 2 SAY "Unos instrukcija (D/N)?" GET cUnosOp VALID val_d_n( cUnosOp ) PICT "@!"
 
 read
 
@@ -216,17 +195,14 @@ ESC_RETURN 0
 
 if cUnosOp == "D"
 	// unos operacija nad artiklom
-	nBrNal := _br_nal
-	nRBr := _r_br
-	nPBr := _p_br
+	nP_br := _p_br
 	cIdRoba := _idroba
-	ed_st_oper(nBrNal, nRBr, nPBr, cIdRoba)
+	ed_st_instr(nBr_Nal, nR_Br, nP_Br, cIdRoba)
 endif
 
 if !lNovi
 	return 0
 endif
-
 
 return 1
 
@@ -234,9 +210,7 @@ return 1
 // ---------------------------------------------
 // tabela RNAL keyboard handler 
 // ---------------------------------------------
-static function k_handler()
-local nBr_nal
-local cLOG_opis
+static function k_handler(nBr_nal, nR_br)
 
 if (Ch==K_CTRL_T .or. Ch==K_ENTER;
 	.or. Ch==K_CTRL_P;
@@ -246,24 +220,27 @@ endif
 
 do case
 	case (Ch == K_CTRL_T)
-		select P_RNST
+		SELECT P_RNST
 		if br_stavku()
 			return DE_REFRESH
 		endif
+		SELECT P_RNST
 		return DE_CONT
 		
 	case (Ch == K_ENTER)
 		SELECT P_RNST
   		Scatter()
-  		if stavke_item(.f.) == 1
+  		if stavke_item(nBr_nal, nR_br, .f.) == 1
 			Gather()
 			RETURN DE_REFRESH
 		endif
+		SELECT P_RNST
 		return DE_CONT
 		
 	case (Ch == K_CTRL_N)
 		SELECT P_RNST
-		stavke_item(.t.)
+		stavke_item(nBr_nal, nR_br, .t.)
+		SELECT P_RNST
 		return DE_REFRESH
 		
 	case (Ch  == K_CTRL_F9)
@@ -271,11 +248,12 @@ do case
 		if br_sve_zapise()
 			return DE_REFRESH
 		endif
+		SELECT P_RNST
 		return DE_CONT
 		
 	case UPPER(CHR(Ch)) == "O"
 		select p_rnop
-		ed_st_oper(p_rnst->br_nal, p_rnst->r_br, p_rnst->p_br, p_rnst->idroba)
+		ed_st_instr(p_rnst->br_nal, p_rnst->r_br, p_rnst->p_br, p_rnst->idroba)
 		select p_rnst
 		return DE_REFRESH
 	
@@ -312,7 +290,7 @@ cIdRoba := field->idroba
 delete
 
 // sada izbrisi ako ima sta i u P_RNOP
-br_prnop(nBrNal, nRBr, nPBr cIdRoba)
+br_prnop(nBrNal, nRBr, nPBr, cIdRoba)
 
 select p_rnst
 
@@ -336,6 +314,8 @@ zap
 
 select p_rnop
 zap
+
+select p_rnst
 
 return .t.
 

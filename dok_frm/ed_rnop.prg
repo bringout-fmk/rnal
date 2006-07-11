@@ -2,9 +2,9 @@
 
 
 // ------------------------------------------
-// unos operacija stakla
+// unos instrukcija za sirovinu / operaciju
 // ------------------------------------------
-function ed_st_oper(nBrNal, nRBr, nPBr, cIdRoba)
+function ed_st_instr(nBrNal, nRBr, nPBr, cIdRoba)
 local nArea
 local nTArea
 local cRNaziv
@@ -118,7 +118,7 @@ do case
 		if Pitanje( ,"Zelite li izbrisati sve zapise ?????","N") == "D"
 	     		set order to tag "br_nal"
 			go top
-			seek STR(nBrNal, 10, 0) + STR(nRBr, 4, 0) + STR(nPBrm 4, 0) + cIdRoba
+			seek STR(nBrNal, 10, 0) + STR(nRBr, 4, 0) + STR(nPBrm, 4, 0) + cIdRoba
 			do while !EOF() .and. field->br_nal == nBrNal;
 			     .and. field->r_br == nRBr;
 			     .and. field->p_br == nPBr;

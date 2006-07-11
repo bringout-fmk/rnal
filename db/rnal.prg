@@ -191,19 +191,28 @@ local nLOGR_br
 local cPom:=""
 local cRn_status
 
+// NETO, UKUPNO
+select rnst
+set filter to
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+do while !EOF() .and. ( rnst->br_nal == nBr_nal )
+	nU_neto += rnst->z_netto
+	nU_ukupno += rnst->z_ukupno
+	skip
+enddo
+
+// OSTALI PODACI
 select rnal
 set filter to
 set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0)
 
-do while !EOF() .and. ( rnal->br_nal == nBr_nal )
-	nU_neto += rnal->neto
-	nU_ukupno += rnal->z_ukupno
-	cRn_status := rnal->rn_status
-	dDat_isp := rnal->datisp
-	skip
-enddo
+cRn_status := rnal->rn_status
+dDat_isp := rnal->datisp
 
 // nadji sljedeci redni broj u log tabeli za nalog
 nLOGR_br := n_log_rbr( nBr_nal )
@@ -541,14 +550,33 @@ return 1
 // vraca sljedeci redni broj naloga, generalni
 //---------------------------------------------
 function next_r_br()
-
+local nLastRbr
 PushWa()
 select p_rnal
 set order to tag "br_nal"
 go bottom
-nLastRbr := r_br
+nLastRbr := field->r_br
 PopWa()
 return nLastRbr + 1
+
+
+// -------------------------------------------
+// vraca sljedeci podbroj u tabeli
+// -------------------------------------------
+function next_p_br(nBr_nal, nR_br)
+local nLastPbr := 0
+PushWa()
+select p_rnst
+set order to tag "br_nal"
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+do while !EOF() .and. field->br_nal == nBr_nal;
+                .and. field->r_br == nR_br
+
+	nLastPbr := field->p_br
+	skip
+enddo
+PopWa()
+return nLastPBr + 1
 
 
 //------------------------------------------------

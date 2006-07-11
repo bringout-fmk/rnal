@@ -15,7 +15,7 @@ select roba
 hseek cId
 
 if Found()
-	cPom := ALLTRIM(LEFT(roba->naz,40))
+	cPom := ALLTRIM( LEFT(roba->naz,40) )
 	cPom += "(" + ALLTRIM(roba->jmj) + ")"
 	cPom := PADR(cPom, nRobaLEN)
 	@ nX, nY SAY cPom
