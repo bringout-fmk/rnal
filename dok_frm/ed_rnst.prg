@@ -12,9 +12,10 @@ cHeader := "SIROVINE / OPERACIJE STAVKE NALOGA"
 cFooter := "Unos/dorada stavki naloga za proizvodnju..."
 
 Box(,18,77)
-@ m_x+16,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
-@ m_x+17,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  | <O> Pregled operacija"
-@ m_x+18,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
+
+@ m_x+16,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <O> Pregled operacija"
+@ m_x+17,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
+@ m_x+18,m_y+2 SAY ""
 
 private ImeKol
 private Kol
@@ -144,6 +145,9 @@ read
 
 ESC_RETURN 0
 
+_debljina := g_roba_debljina(_idroba)
+_roba_tip := g_roba_tip(_idroba)
+
 // pronadji zaokruzenje
 g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
 
@@ -151,7 +155,7 @@ select p_rnst
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM() VALID val_debljina( _debljina )
+@ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM() VALID val_debljina( _debljina ) WHEN _debljina == 0
 
 @ m_x + nX, col() + 1 SAY "(mm)"
 

@@ -140,7 +140,7 @@ function g_nal_item(lNovi)
 local nX := 13
 local nRobaX
 local nRobaY
-local cDefSast:="N"
+local cDefSast:="D"
 
 if lNovi
 	_r_br := next_r_br()
@@ -155,9 +155,16 @@ nRobaY := m_y + 25
 
 @ m_x + nX, m_y + 2 SAY "Proizvod:" GET _proizvod VALID val_roba(@_proizvod, nRobaX, nRobaY)
 
+read
+
+ESC_RETURN 0
+
+// prebaci sastavnice u rnst ako postoje
+sast_to_rnst(_proizvod, _br_nal, _r_br)
+
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Definisi sastavnice proizvoda (D/N)" GET cDefSast VALID val_d_n(@cDefSast)
+@ m_x + nX, m_y + 2 SAY "Definisi sastavnice proizvoda (D/N)" GET cDefSast VALID val_d_n(@cDefSast) PICT "@!"
 
 read
 

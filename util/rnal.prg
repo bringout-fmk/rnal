@@ -301,6 +301,40 @@ endif
 return xRet
 
 
+// ----------------------------
+// get roba tip
+// ----------------------------
+function g_roba_tip(cRoba)
+local nTArea := SELECT()
+local cRet := ""
+select roba
+if roba->(fieldpos("R_TIP")) == 0
+	select (nTArea)
+	return cRet
+endif
+hseek cRoba
+if FOUND()
+	cRet := field->r_tip
+endif
+select (nTArea)
+return cRet
+
+
+// ----------------------------
+// get roba debljina
+// ----------------------------
+function g_roba_debljina(cRoba)
+local nTArea := SELECT()
+local nRet := 0
+select roba
+hseek cRoba
+if FOUND()
+	nRet := field->debljina
+endif
+select (nTArea)
+return nRet
+
+
 // ---------------------------------------
 // vraca opis roka
 // ---------------------------------------
@@ -313,6 +347,124 @@ else
 endif
 return cRet
 
+
+// --------------------------------------------------------
+// automatski prebacuje sastavnice proizvoda u tabelu RNST
+// --------------------------------------------------------
+function sast_to_rnst(cProizvod, nBr_nal, nR_br)
+local nTArea
+local nCount
+
+// da li vec postoje sastavnice ???
+if sast_exist(nBr_nal, nR_br)
+	cSUpit := "P"
+	Box(, 8, 60)
+	@ m_x + 1, m_y + 2 SAY "PROVJERA SASTAVNICA...." 
+	@ m_x + 3, m_y + 2 SAY "Vec postoje unesene sastavnice !" 
+	@ m_x + 5, m_y + 2 SAY "X - nista" 
+	@ m_x + 6, m_y + 2 SAY "P - pobrisati ih i staviti nove" 
+	@ m_x + 7, m_y + 2 SAY "D - dodati nove na postojece   " GET cSUpit VALID val_kunos(@cSUpit, "XPD") PICT "@!" 
+	read
+	BoxC()
+	 
+	// izadji skroz necu nista od ponudjenog
+	if cSUpit == "X" .or. LastKey() == K_ESC
+		return
+	endif
+
+	if cSUpit == "P"
+		// pobrisi sastavnice 
+		brisi_sastavnice(nBr_nal, nR_br)
+	endif
+
+endif
+
+nTArea := SELECT()
+
+select sast
+set order to tag "IDRBR"
+go top
+seek cProizvod
+
+nCount := 0
+
+// prodji kroz sastavnice
+do while !EOF() .and. sast->id == cProizvod
+	
+	select p_rnst
+	append blank
+	
+	Scatter()
+	
+	_br_nal := nBr_nal
+	_r_br := nR_br
+	_p_br := next_p_br(nBr_nal, nR_br)
+	_idroba := sast->id2
+	_kolicina := sast->kolicina
+	_debljina := g_roba_debljina(_idroba)
+	_roba_tip := g_roba_tip(_idroba)
+	
+	Gather()
+	
+	++ nCount
+	
+	select sast
+	skip
+enddo
+
+MsgBeep("Generisao sastavnica: " + ALLTRIM(STR(nCount)) )
+
+select (nTArea)
+
+return
+
+// --------------------------------------
+// da li vec postoje sastavnice
+// --------------------------------------
+function sast_exist(nBr_nal, nR_br)
+local nTArea
+local nCount := 0
+
+nTArea := SELECT()
+
+select p_rnst
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal ;
+                .and. field->r_br == nR_br
+	
+	++ nCount
+	skip
+enddo
+
+select (nTArea)
+
+if nCount > 0
+	return .t.
+endif
+
+return .f.
+
+// -------------------------------------------
+// brisi sastavnice za broj naloga + r_br
+// -------------------------------------------
+function brisi_sastavnice(nBr_nal, nR_br)
+local nTArea := SELECT()
+select p_rnst
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal ;
+		.and. field->r_br == nR_br
+	delete
+	skip
+enddo
+
+select (nTArea)
+return
 
 
 
