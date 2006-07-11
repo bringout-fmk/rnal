@@ -883,4 +883,141 @@ select (nTArea)
 return
 
 
+// ------------------------------
+// roba, novi ID
+// ------------------------------
+function r_new_id(cR_id)
+if !EMPTY(cR_id)
+	return .f.
+endif
+return .t.
+
+// --------------------------------
+// generisi novu sifru robe
+// --------------------------------
+function gen_r_sif()
+local nTArea
+local cNewId
+local cNaziv
+local cMCode
+local nBr_nal
+local nR_br
+
+nTArea := SELECT()
+
+select p_rnal
+set order to tag "br_nal"
+go top
+
+do while !EOF()
+	
+	if !r_new_id(field->proizvod)
+		
+		nBr_nal := field->br_nal
+		nR_br := field->r_br
+		
+		cMCode := gen_r_mc()
+		cNewId := gen_r_id()
+		cNaziv := gen_r_naz()
+
+		// dodaj u roba
+		select roba
+		append blank
+		Scatter()
+
+		_id := cNewId
+		_naz := cNaziv
+		_match_code := cMCode
+		_jmj := "KOM"
+		_idtarifa := "PDV17 "
+		_tip := "P"
+
+		Gather()
+
+		// dodaj i u sastavnice
+		select p_rnst
+		set order to tag "br_nal"
+		go top
+		seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+		
+		do while !EOF() .and. field->br_nal == nBr_nal ;
+		                .and. field->r_br == nR_br
+			
+			select sast
+			append blank
+			Scatter()
+			_id := cNewId
+			_r_br := field->p_br
+			_id2 := field->idroba
+			_kolicina := field->kolicina
+
+			Gather()
+			
+			select p_rnst
+			skip
+		enddo
+		
+	endif
+	
+	select p_rnal
+	skip
+enddo
+
+select sast
+append blank
+Scatter()
+
+Gather()
+
+select (nTArea)
+
+return
+
+// ---------------------------------
+// generisi roba match code
+// ---------------------------------
+function gen_r_mc()
+local cRet := ""
+return cRet
+
+// ----------------------------
+// generisi naziv artikla
+// ----------------------------
+function gen_r_naz()
+local cRet := ""
+return cRet
+
+
+// ------------------------------
+// generisi novi id robe
+// ------------------------------
+function gen_r_id()
+local cRet := ""
+local nTArea 
+local nPom
+
+nTArea := SELECT()
+
+select roba
+go top
+seek "X"
+
+do while !EOF() .and. LEFT(field->id, 1) == "X"
+	if VARTYPE(SUBSTR(field->id, 2, 1)) == "C"
+		skip
+		loop
+	endif
+	nPom := RIGHT(field->id, 9)
+	skip
+enddo
+
+select (nTArea)
+
+nPom += 1
+
+cRet := PADL(ALLTRIM(STR(nPom)), 9, "0")
+
+return cRet
+
+
 

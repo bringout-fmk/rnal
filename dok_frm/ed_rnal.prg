@@ -164,7 +164,7 @@ sast_to_rnst(_proizvod, _br_nal, _r_br)
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Definisi sastavnice proizvoda (D/N)" GET cDefSast VALID val_d_n(@cDefSast) PICT "@!"
+@ m_x + nX, m_y + 2 SAY "Definisi-pregledaj sastavnice proizvoda (D/N)" GET cDefSast VALID val_d_n(@cDefSast) PICT "@!"
 
 read
 

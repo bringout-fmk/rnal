@@ -352,32 +352,20 @@ return cRet
 // automatski prebacuje sastavnice proizvoda u tabelu RNST
 // --------------------------------------------------------
 function sast_to_rnst(cProizvod, nBr_nal, nR_br)
-local nTArea
-local nCount
 
 // da li vec postoje sastavnice ???
-if sast_exist(nBr_nal, nR_br)
-	cSUpit := "P"
-	Box(, 8, 60)
-	@ m_x + 1, m_y + 2 SAY "PROVJERA SASTAVNICA...." 
-	@ m_x + 3, m_y + 2 SAY "Vec postoje unesene sastavnice !" 
-	@ m_x + 5, m_y + 2 SAY "X - nista" 
-	@ m_x + 6, m_y + 2 SAY "P - pobrisati ih i staviti nove" 
-	@ m_x + 7, m_y + 2 SAY "D - dodati nove na postojece   " GET cSUpit VALID val_kunos(@cSUpit, "XPD") PICT "@!" 
-	read
-	BoxC()
-	 
-	// izadji skroz necu nista od ponudjenog
-	if cSUpit == "X" .or. LastKey() == K_ESC
-		return
-	endif
-
-	if cSUpit == "P"
-		// pobrisi sastavnice 
-		brisi_sastavnice(nBr_nal, nR_br)
-	endif
-
+if !sast_exist(nBr_nal, nR_br)
+	dodaj_sastavnice(nBr_nal, nR_br)
 endif
+
+return
+
+// ----------------------------------------
+// dodaj sastavnice u P_RNST
+// ----------------------------------------
+function dodaj_sastavnice(nBr_nal, nR_br)
+local nTArea
+local nCount
 
 nTArea := SELECT()
 
@@ -412,7 +400,7 @@ do while !EOF() .and. sast->id == cProizvod
 	skip
 enddo
 
-MsgBeep("Generisao sastavnica: " + ALLTRIM(STR(nCount)) )
+MsgBeep("Prebacio sastavnica: " + ALLTRIM(STR(nCount)) )
 
 select (nTArea)
 
