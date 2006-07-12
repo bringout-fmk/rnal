@@ -140,6 +140,7 @@ return DE_CONT
 static function fill_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
 local nCount
 local aRealacije:={}
+local aPom := {}
 
 if ( cOper == nil )
 	cOper := SPACE(6)
@@ -150,20 +151,13 @@ if EMPTY(cOper) .and. get_oper(@cOper) == 0
 	return DE_CONT
 endif
 
+// daj relacije prve stavke
 aRelacije := g_relacije(cOper)
+// dodaj i baznu operaciju
+AADD(aRelacije, cOper)
 
-select s_rnka
-set order to tag "idop"
-go top
-seek cOper
-
-if !Found()
-	MsgBeep("Karakteristike ove operacije ne postoje!!!")
-	select p_rnop
-	return
-endif
-
-add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
+// napuni i ostale relacije
+//n_ost_relacije(@aRelacije)
 
 // ako ima relacija
 if LEN(aRelacije) > 0
@@ -174,6 +168,18 @@ endif
 
 return
 
+// ----------------------------------
+// napuni ostale relacije
+// ----------------------------------
+static function n_ost_relacije(@aRelacije)
+local aPom := {}
+local i
+
+for i:=1 to LEN(aRelacije)
+	//
+next
+
+return
 
 
 // -----------------------------
