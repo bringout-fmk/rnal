@@ -1041,7 +1041,37 @@ return cRet
 // generisi naziv artikla
 // ----------------------------
 function gen_r_naz(nBr_nal, nR_br)
-local cRet := "TEST...."
+local cRet := ""
+local nTArea
+local cRoba
+
+select p_rnst
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal ;
+		.and. field->r_br == nR_br
+	
+	cRoba := field->idroba
+	select roba
+	hseek cRoba
+	
+	if LEN(cRet) == 250
+		exit
+	endif
+	
+	if !EMPTY(cRet)
+		cRet += " + "
+	endif
+	
+	cRet += ALLTRIM(LEFT(roba->naz, 40))
+	
+	select p_rnst
+	skip 
+enddo
+
+select (nTArea)
 return cRet
 
 

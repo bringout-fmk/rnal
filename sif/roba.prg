@@ -84,7 +84,7 @@ AADD(aImeKol, {PADC("JMJ", 3), {|| jmj}, "jmj"})
 // DEBLJINA i TIP
 if roba->(fieldpos("DEBLJINA")) <> 0
 	AADD(aImeKol, {PADC("Debljina", 10), {|| transform(debljina, "999999.99")}, "debljina", nil, nil, "999999.99" })
-	AADD(aImeKol, {PADC("Roba tip", 10), {|| roba_tip}, "roba_tip", {|| .t.}, {|| .t. } })
+	AADD(aImeKol, {PADC("Roba tip", 10), {|| roba_tip}, "roba_tip", {|| .t.}, {|| p_rtip(@wroba_tip) } })
 endif
 
 AADD(aImeKol, {"Tarifa", {|| IdTarifa}, "IdTarifa", {|| .t. }, {|| P_Tarifa(@wIdTarifa) }})

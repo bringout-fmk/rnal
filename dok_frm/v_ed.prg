@@ -32,7 +32,7 @@ return .t.
 function val_roba(cId, nX, nY)
 
 // iz sifrarnika
-p_roba(@cId)
+get_artikal(@cId)
 
 // prikazi naziv robe
 s_roba_naz(cId, nX, nY)
@@ -46,10 +46,10 @@ return .t.
 function val_sast(cId, cFilt, nX, nY)
 
 if EMPTY(cId)
-	get_sast(@cId, cFilt)
+	get_artikal(@cId, cFilt)
 else
 	// iz sifrarnika
-	p_roba(@cId)
+	get_artikal(@cId)
 endif
 
 // prikazi naziv robe

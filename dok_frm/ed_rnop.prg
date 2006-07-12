@@ -151,33 +151,18 @@ if EMPTY(cOper) .and. get_oper(@cOper) == 0
 	return DE_CONT
 endif
 
+// maticna operacija
+add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
 // daj relacije prve stavke
 aRelacije := g_relacije(cOper)
-// dodaj i baznu operaciju
-AADD(aRelacije, cOper)
-
-// napuni i ostale relacije
-//n_ost_relacije(@aRelacije)
 
 // ako ima relacija
 if LEN(aRelacije) > 0
 	for i:=1 to LEN(aRelacije)
+		// dodaj i njih
 		add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, PADR(aRelacije[i], 6))
 	next
 endif
-
-return
-
-// ----------------------------------
-// napuni ostale relacije
-// ----------------------------------
-static function n_ost_relacije(aRelacije)
-local aPom := {}
-local i
-
-for i:=1 to LEN(aRelacije)
-	//
-next
 
 return
 
