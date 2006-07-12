@@ -12,7 +12,6 @@
 function p_rnka(cId, dx, dy)
 *{
 local nTArea
-local nArea
 local cHeader
 local cOperacija
 private Kol
@@ -22,7 +21,6 @@ cHeader := "Lista: karakteristike "
 nTArea := SELECT()
 
 O_S_RNKA
-nArea := F_S_RNKA
 
 // postavi filter za operaciju
 set_f_kol()
@@ -31,7 +29,7 @@ set_a_kol( @Kol, @ImeKol)
 
 select (nTArea)
 
-return PostojiSifra( nArea, 1, 10, 75, cHeader, ;
+return PostojiSifra( F_S_RNKA, 1, 10, 75, cHeader, ;
        @cId, dx, dy, ;
 	{|Ch| k_handler(Ch)} )
 	
@@ -42,9 +40,9 @@ return PostojiSifra( nArea, 1, 10, 75, cHeader, ;
 static function set_a_kol( aKol, aImeKol)
 
 aImeKol := {}
-add_mcode(@aImeKol)
 AADD(aImeKol, {"Operacija", {|| id_rnop}, "id_rnop", {|| .t.}, {|| p_rnop(@wid_rnop)} })
 AADD(aImeKol, {"ID", {|| id}, "id", {|| auto_inc(@wid, @wid_rnop), .f. }, {|| .t.} })
+add_mcode(@aImeKol)
 AADD(aImeKol, {"Naziv", {|| PADR(naziv, 40)}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Def.vrijednost", {|| PADR(ka_def, 40)}, "ka_def", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Validacija", {|| ka_val}, "ka_val", {|| .t.}, {|| .t.} })

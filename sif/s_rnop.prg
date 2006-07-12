@@ -11,24 +11,22 @@
 // prelged sifrarnika operacija
 // ------------------------------------------------
 function p_rnop(cId, dx, dy)
-*{
 local nTArea
-local nArea
 local cHeader
 
 cHeader := "Lista: operacije "
 nTArea := SELECT()
 
-Private Kol
-Private ImeKol
+private Kol
+private ImeKol
 
 O_S_RNOP
-nArea := F_S_RNOP
+
+set_a_kol( @Kol, @ImeKol)
 
 select (nTArea)
 
-set_a_kol( @Kol, @ImeKol)
-return PostojiSifra( nArea, 1, 10, 75, cHeader, ;
+return PostojiSifra( F_S_RNOP, 1, 10, 75, cHeader, ;
        @cId, dx, dy, ;
 	{|Ch| k_handler(Ch)} )
 	
@@ -43,7 +41,8 @@ aImeKol := {}
 AADD(aImeKol, {"ID", {|| id}, "id", {|| .t.}, {|| .t.} })
 add_mcode(@aImeKol)
 AADD(aImeKol, {"Naziv", {|| naziv}, "naziv", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Opis", {|| opis}, "opis", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Relacija", {|| PADR(relacija,20)}, "relacija", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Opis", {|| PADR(opis,20)}, "opis", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Tip stakla", {|| tip_stakla}, "tip_stakla", {|| .t.}, {|| .t.} })
 
 aKol:={}
@@ -59,5 +58,6 @@ return
 // ------------------------------------
 static function k_handler(Ch)
 return DE_CONT
+
 
 
