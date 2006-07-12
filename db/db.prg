@@ -111,7 +111,7 @@ Skloni(KUMPATH,"RNAL.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"RNOP.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"RNST.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"RNLOG.DBF",cSezona,finverse,fda,fnul)
-Skloni(KUMPATH,"LOGIT.DBF",cSezona,finverse,fda,fnul)
+Skloni(KUMPATH,"RNLOG_IT.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
 // sifrarnik
@@ -145,7 +145,7 @@ AADD(gaDBFs, { F_RNAL, "RNAL", P_KUMPATH  } )
 AADD(gaDBFs, { F_RNST, "RNAL", P_KUMPATH  } )
 AADD(gaDBFs, { F_RNOP, "RNOP", P_KUMPATH  } )
 AADD(gaDBFs, { F_RNLOG, "RNLOG", P_KUMPATH  } )
-AADD(gaDBFs, { F_LOGIT, "LOGIT", P_KUMPATH  } )
+AADD(gaDBFs, { F_LOGIT, "RNLOG_IT", P_KUMPATH  } )
 
 // sifpath
 AADD(gaDBFs, { F_S_RNOP, "S_RNOP", P_SIFPATH } )
@@ -185,7 +185,7 @@ cre_tbls(nArea, "RNAL")
 cre_tbls(nArea, "RNST")
 cre_tbls(nArea, "RNOP")
 cre_tbls(nArea, "RNLOG")
-cre_tbls(nArea, "LOGIT")
+cre_tbls(nArea, "RNLOG_IT")
 cre_tbls(nArea, "P_RNAL")
 cre_tbls(nArea, "P_RNST")
 cre_tbls(nArea, "P_RNOP")
@@ -420,7 +420,7 @@ do case
 		nArea2 := F_RNST
 	case cTable == "RNLOG"
 		nArea2 := F_RNLOG
-	case cTable == "LOGIT"
+	case cTable == "RNLOG_IT"
 		nArea2 := F_LOGIT
 	case cTable == "S_RNOP"
 		nArea2 := F_S_RNOP
@@ -446,7 +446,7 @@ if (nArea==-1 .or. nArea == nArea2)
 			aDbf := g_rnst_fields()
 		case cTable == "RNLOG"
 			aDbf := g_rlog_fields()
-		case cTable == "LOGIT"
+		case cTable == "RNLOG_IT"
 			aDbf := g_logit_fields()
 		case cTable == "S_RNOP"
 			aDbf := g_srnop_fields()
