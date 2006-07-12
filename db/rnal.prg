@@ -162,7 +162,7 @@ go top
 seek STR(nBr_nal, 10, 0)
 
 do while !EOF() .and. ( p_rnop->br_nal == nBr_nal )
-	if !EMPTY(p_rnop->rn_instr)
+	if !EMPTY(ALLTRIM(p_rnop->rn_instr))
 		
 		Scatter()
 		
@@ -844,6 +844,7 @@ function del_op_error()
 local nTArea
 local nBr_nal
 local nR_br
+local nP_br
 local cIdRoba
 local cPom
 
@@ -861,9 +862,10 @@ do while !EOF()
 	
 	nBr_Nal := p_rnop->br_nal
 	nR_br := p_rnop->r_br
+	nP_br := p_rnop->p_br
 	cIdRoba := p_rnop->idroba
 	
-	cPom := STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + cIdRoba
+	cPom := STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + STR(nP_br, 4, 0) + cIdRoba
 	
 	select p_rnst
 	go top
@@ -954,22 +956,19 @@ go top
 do while !EOF()
 	
 	// ako treba generisati novi ID
-	if r_new_id(field->proizvod)
+	if r_new_id(p_rnal->proizvod)
 		
-		// provjeri da li postoji identican artikal, pa ga preuzeti
-		//if ck_id_exist() == 0
-		//	select p_rnal
-		//	skip
-		//	loop
-		//endif
+		nBr_nal := p_rnal->br_nal
+		nR_br := p_rnal->r_br
 		
-		nBr_nal := field->br_nal
-		nR_br := field->r_br
-		
-		cMCode := gen_r_mc()
+		cMCode := gen_r_mc(nR_br)
 		cNewId := gen_r_id()
 		cNaziv := gen_r_naz(nBr_nal, nR_br)
-
+		
+		// dodaj u samu pripremu novi id
+		select p_rnal
+		replace proizvod with cNewId
+		
 		// dodaj u roba
 		select roba
 		append blank
@@ -990,16 +989,17 @@ do while !EOF()
 		go top
 		seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 		
-		do while !EOF() .and. field->br_nal == nBr_nal ;
-		                .and. field->r_br == nR_br
+		do while !EOF() .and. p_rnst->br_nal == nBr_nal ;
+		                .and. p_rnst->r_br == nR_br
 			
 			select sast
 			append blank
+			
 			Scatter()
 			_id := cNewId
-			_r_br := field->p_br
-			_id2 := field->idroba
-			_kolicina := field->kolicina
+			_r_br := p_rnst->p_br
+			_id2 := p_rnst->idroba
+			_kolicina := p_rnst->kolicina
 
 			Gather()
 			
@@ -1013,12 +1013,6 @@ do while !EOF()
 	skip
 enddo
 
-select sast
-append blank
-Scatter()
-
-Gather()
-
 select (nTArea)
 
 return
@@ -1026,13 +1020,14 @@ return
 // ---------------------------------
 // generisi roba match code
 // ---------------------------------
-function gen_r_mc()
+function gen_r_mc(nStavka)
 local cRet := ""
 
-Box(, 1, 60)
+Box(, 2, 60)
 	private GetList:={}
 	cMCode := SPACE(10)
-	@ m_x + 1, m_y + 2 SAY "Unesi match code:" GET cMCode
+	@ m_x + 1, m_y + 2 SAY "Stavka br. " + ALLTRIM(STR(nStavka))
+	@ m_x + 2, m_y + 2 SAY "Unesi match code:" GET cMCode
 	read
 BoxC()
 
@@ -1061,6 +1056,8 @@ local nPom:=0
 nTArea := SELECT()
 
 select roba
+set filter to id = "X"
+set order to tag "ID"
 go top
 
 do while !EOF() .and. LEFT(field->id, 1) == "X"
@@ -1068,15 +1065,18 @@ do while !EOF() .and. LEFT(field->id, 1) == "X"
 		skip
 		loop
 	endif
-	nPom := RIGHT(field->id, 9)
+	nPom := VAL(RIGHT(field->id, 9))
 	skip
 enddo
+
+select roba
+set filter to
 
 select (nTArea)
 
 nPom += 1
 
-cRet := PADL(ALLTRIM(STR(nPom)), 9, "0")
+cRet := "X" + PADL(ALLTRIM(STR(nPom)), 9, "0")
 
 return cRet
 
