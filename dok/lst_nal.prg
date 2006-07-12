@@ -291,9 +291,6 @@ do case
 	case (UPPER(CHR(Ch)) == "S" )
 		// trazi opis prije azuriranja
 		nBr_nal := rnal->br_nal
-		if g_log_opis(@cLOG_opis, rnal->rn_status) == 1
-			log_new_status(nBr_nal, cLOG_opis)
-		endif
 		select rnal
 		return DE_CONT
 
@@ -331,9 +328,6 @@ AADD(aImeKol, {"Partner", {|| PADR(s_partner(idpartner), 30) }, "idpartner", {||
 if nStatus == 2
 	// status naloga u zatvorenim
 	AADD(aImeKol, {"Status", {|| PADR(s_real_stat(rn_real), 4) + "." }, "rn_real", {|| .t.}, {|| .t.} })
-else
-	// istek naloga u otvorenim nalozima
-	AADD(aImeKol, {"Kasnjenje", {|| PADR(s_nal_expired(g_nal_expired(br_nal)), 10) } })
 endif
 
 AADD(aImeKol, {"Datum", {|| datnal }, "datnal", {|| .t.}, {|| .t.} })
@@ -341,7 +335,6 @@ AADD(aImeKol, {"Dat.isp." , {|| datisp }, "datisp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| vr_isp }, "vr_isp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Placanje" , {|| PADR(s_placanje(vr_plac),10) }, "vr_plac", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Hitnost" , {|| PADR(s_hitnost(hitnost),10) }, "hitnost", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Ukupno", {|| TRANSFORM( g_nal_ukupno( br_nal ), PIC_IZN() ) }, "d_ukupno", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)

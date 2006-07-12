@@ -341,12 +341,17 @@ do case
 		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D" .and. nal_integritet()
 	  		// generisi sifru robe + match code
 			gen_r_sif()
-			// trazi opis prije azuriranja
-			g_log_opis(@cLOG_opis, p_rnal->rn_status, .t.)
+			
+			// uzmi broj naloga
 			nBr_nal := _n_br_nal()
+			
 			f_p_br_nal( nBr_nal )
+			
+			// brisi viska operacije
 			del_op_error()
-			if azur_nalog(cLOG_opis) == 1
+			
+			// azuriraj nalog
+			if azur_nalog() == 1
 				SELECT P_RNAL
 				RETURN DE_REFRESH
 			endif
@@ -363,44 +368,6 @@ do case
 endcase
 
 return DE_CONT
-
-
-
-// ---------------------------------------
-// uzmi opis pri azuriranju
-// ---------------------------------------
-function g_log_opis(cLog_opis, cStatus, lAzur)
-local cUnos_dn := "D"
-cLog_opis := SPACE(100)
-
-if ( lAzur == nil )
-	lAzur := .f.
-endif
-
-// ako je tek azuriranje i status O ne treba opis
-if (lAzur .and. cStatus == "O")
-	return 0
-endif
-
-Beep(2)
-Box(,3,60)
-do while .t.
-	@ m_x + 1, m_y + 2 SAY "Unesi opis obrade:" COLOR "I"
-	@ m_x + 2, m_y + 2 SAY "->" GET cLog_opis PICT "@S50"
-	read
-	@ m_x + 3, m_y + 2 SAY "unos ispravan (D/N)" GET cUnos_dn PICT "@!" VALID val_kunos(cUnos_dn, "DN")
-	read
-	
-	ESC_RETURN 0
-	
-	if (cUnos_dn == "D")
-		exit
-	endif
-	
-enddo
-BoxC()
-
-return 1
 
 
 // ---------------------------------------

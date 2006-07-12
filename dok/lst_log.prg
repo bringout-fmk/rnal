@@ -98,7 +98,7 @@ static function k_handler(nBr_nal)
 local nTblFilt
 
 // prikazi opis na formi
-s_log_opis_on_form()
+//s_log_opis_on_form()
 
 do case
 	// stampa liste log-a
@@ -121,11 +121,10 @@ return DE_CONT
 static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 
-AADD(aImeKol, {"Datum", {|| log_datum }, "log_datum", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Vrijeme" , {|| PADR(log_time, 5) }, "log_time", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Status" , {|| PADR(s_status(rn_status),10) }, "rn_status", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Dana van roka" , {|| TRANSFORM(rn_expired, "999") }, "rn_expired", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Opis" , {|| PADR(log_opis, 25) + ".." }, "log_opis", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Datum", {|| datum }, "datum", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Vrijeme" , {|| PADR(vrijeme, 5) }, "vrijeme", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Tip" , {|| tip }, "tip", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Akcija" , {|| akcija }, "akcija", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
