@@ -171,7 +171,7 @@ return
 // ----------------------------------
 // napuni ostale relacije
 // ----------------------------------
-static function n_ost_relacije(@aRelacije)
+static function n_ost_relacije(aRelacije)
 local aPom := {}
 local i
 
