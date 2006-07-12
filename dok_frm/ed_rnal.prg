@@ -137,7 +137,7 @@ return 1
 // obradi stavku naloga
 // ---------------------------------------
 function g_nal_item(lNovi)
-local nX := 15
+local nX := 16
 local nRobaX
 local nRobaY
 local cDefSast:="D"
@@ -244,7 +244,9 @@ nX += 1
 
 @ m_x + nX, m_y + 2 SAY "Mjesto isporuke:" GET _mj_isp VALID !EMPTY(_mj_isp) PICT "@S20"
 
-@ m_x + nX, col() + 2 SAY "Kontakt telefon:" GET _kontakt VALID !EMPTY(_kontakt) PICT "@S20"
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Kontakt telefon:" GET _kontakt VALID !EMPTY(_kontakt) PICT "@S20"
 
 nX += 1
 
@@ -320,25 +322,23 @@ do case
 		return DE_CONT
 
 	case Ch==K_CTRL_P
-		select p_rnal
-		go top
-		
-		//nBr_nal := p_rnal->br_nal
-		
-		// ------------------------
-		// nove funkcije mrezni rad
-		
-		nBr_nal := _n_br_nal()
-		f_p_br_nal( nBr_nal )
-		
-		// ------------------------
-		
-		st_nalpr( .t., nBr_nal )
-		select p_rnal
-		return DE_REFRESH
+		if nal_integritet()
+			select p_rnal
+			go top
+			// generisi sifru proizvoda 
+			gen_r_sif()
+			
+			nBr_nal := _n_br_nal()
+			f_p_br_nal( nBr_nal )
+			
+			st_nalpr( .t., nBr_nal )
+			select p_rnal
+			return DE_REFRESH
+		endif
+		return DE_CONT
 		
 	case Ch==K_ALT_A
-		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D"
+		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D" .and. nal_integritet()
 	  		// generisi sifru robe + match code
 			gen_r_sif()
 			// trazi opis prije azuriranja

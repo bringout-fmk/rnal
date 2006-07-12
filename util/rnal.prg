@@ -451,5 +451,49 @@ enddo
 select (nTArea)
 return
 
+// -------------------------------------
+// provjera integriteta podataka 
+// pri azuriranju ili stampanju naloga
+// -------------------------------------
+function nal_integritet()
+local nTArea
+local nBr_nal
+local nR_br
+
+nTArea := SELECT()
+
+// provjeri rnal
+select p_rnal
+if RECCOUNT2() == 0
+	MsgBeep("Nalog mora sadrzati najmanje jednu stavku!!!##Azuriranje onemoguceno!")
+	return .f.
+endif
+
+// provjeri rnst
+select p_rnal
+set order to tag "br_nal"
+go top
+
+do while !EOF()
+	nBr_nal := field->br_nal
+	nR_br := field->r_br
+	
+	select p_rnst
+	set order to tag "br_nal"
+	go top
+	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+	if !FOUND()
+		MsgBeep("Stavka br. " + ALLTRIM(STR(nR_br)) + " nema sastavnica!##Azuriranje onemoguceno!")
+		return .f.
+	endif
+
+	select p_rnal
+	skip
+enddo
+
+select (nTArea)
+return .t.
+
 
 
