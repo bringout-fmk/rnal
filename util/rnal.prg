@@ -84,25 +84,18 @@ return xRet
 // -------------------------------------
 // prikazi box sa podacima partnera
 // -------------------------------------
-function s_part_box(cId, nX)
+function s_part_box(cId, nX, nY)
 local cPAdresa
 local cPNaziv
 local cPMjesto
-local cLine
-
-cLine := REPLICATE("=", 35)
 
 if g_part_info(cId, @cPNaziv, @cPAdresa, @cPMjesto)
 
-	@ nX, m_y + 2 SAY cLine
+	@ nX, nY SAY cPNaziv
 	nX += 1
-	@ nX, m_y + 2 SAY cPNaziv
+	@ nX, nY SAY cPAdresa
 	nX += 1
-	@ nX, m_y + 2 SAY cPAdresa
-	nX += 1
-	@ nX, m_y + 2 SAY cPMjesto
-	nX += 1
-	@ nX, m_y + 2 SAY cLine
+	@ nX, nY SAY cPMjesto
 endif
 
 return .t.
@@ -125,7 +118,7 @@ if !Found()
 	return .f.
 endif
  
-cNaziv := ALLTRIM(partn->naz)
+cNaziv := ALLTRIM(LEFT(partn->naz, 25))
 cAdresa := ALLTRIM(partn->adresa)
 cMjesto := ALLTRIM(partn->mjesto)
 
@@ -459,4 +452,58 @@ select (nTArea)
 return
 
 
+// -------------------------------
+// prikazi browse sastavnice
+// -------------------------------
+function get_sast(cId, cFilter, dx, dy)
+local cPom := nil
+private ImeKol
+private Kol
+select roba
+set order to tag "id"
+set filter to &cFilter
+go top
+
+// setuj kolone sastavnice tabele
+sast_a_kol(@ImeKol, @Kol)
+	
+PostojiSifra(F_ROBA, "ID" , 15, 77, "Lista sastavnica", @cPom, dx, dy,,,,,,{"ID"})
+
+cId := cPom
+
+// ukini filter
+set filter to
+
+return
+
+// ---------------------------------
+// setovanje kolona tabele
+// ---------------------------------
+static function sast_a_kol(aImeKol, aKol)
+
+aImeKol := {}
+aKol := {}
+
+AADD(aImeKol, {PADC("ID", 10), {|| id}, "id", {|| .t.}, {|| vpsifra(wId)}})
+
+add_mcode(@aImeKol)
+
+AADD(aImeKol, {PADC("Naziv", 20), {|| PADR(naz,20)}, "naz"})
+AADD(aImeKol, {PADC("JMJ", 3), {|| jmj}, "jmj"})
+
+// DEBLJINA i TIP
+if roba->(fieldpos("DEBLJINA")) <> 0
+	AADD(aImeKol, {PADC("Debljina", 10), {|| transform(debljina, "999999.99")}, "debljina", nil, nil, "999999.99" })
+	AADD(aImeKol, {PADC("Roba tip", 10), {|| roba_tip}, "roba_tip", {|| .t.}, {|| .t. } })
+endif
+
+AADD(aImeKol, {"Tarifa", {|| IdTarifa}, "IdTarifa", {|| .t. }, {|| P_Tarifa(@wIdTarifa) }})
+
+AADD(aImeKol, {"Tip", {|| " " + Tip + " "}, "Tip", {|| .t.}, {|| .t. }})
+
+for i:=1 TO LEN(aImeKol)
+	AADD(aKol, i)
+next
+
+return
 
