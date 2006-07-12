@@ -731,10 +731,10 @@ nNoviBroj := next_br_nal()
 // pravi se fizicki append u bazi dokumenata da bi se sacuvalo mjesto
 // za ovaj dokument
 select rnal
-appblank2( .f., .f. )   
+appblank2(.f., .f.)   
 _rec_zak := "Z"
 _br_nal := nNoviBroj
-Gather2 ()
+Gather2()
 DBUnlock()
 
 select (nTArea)

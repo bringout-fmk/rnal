@@ -154,7 +154,7 @@ endif
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Tip:" GET _roba_tip 
+@ m_x + nX, m_y + 2 SAY "Tip:" GET _roba_tip VALID p_rtip(@_roba_tip) 
 
 nX += 1
 
@@ -245,6 +245,7 @@ if !lNovi
 endif
 
 return 1
+
 
 // -----------------------------------
 // sastavlja filter za tabelu robe
