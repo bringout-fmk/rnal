@@ -21,7 +21,7 @@ endif
 // iz sifrarnika
 p_firma(@cId)
 
-s_part_box(cId, nX)
+s_part_box(cId, nX, nY)
 
 return .t.
 
@@ -43,15 +43,14 @@ return .t.
 // -------------------------------------------
 // validacija sastavnice te prikaz info-a
 // -------------------------------------------
-function val_sast(cId, nX, nY)
+function val_sast(cId, cFilt, nX, nY)
 
 if EMPTY(cId)
-	MsgBeep("Unos sirovine obavezan !!!")
-	return .f.
+	get_sast(@cId, cFilt)
+else
+	// iz sifrarnika
+	p_roba(@cId)
 endif
-
-// iz sifrarnika
-p_roba(@cId)
 
 // prikazi naziv robe
 s_roba_naz(cId, nX, nY)

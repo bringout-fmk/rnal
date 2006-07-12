@@ -118,7 +118,7 @@ do case
 		if Pitanje( ,"Zelite li izbrisati sve zapise ?????","N") == "D"
 	     		set order to tag "br_nal"
 			go top
-			seek STR(nBrNal, 10, 0) + STR(nRBr, 4, 0) + STR(nPBrm, 4, 0) + cIdRoba
+			seek STR(nBrNal, 10, 0) + STR(nRBr, 4, 0) + STR(nPBr, 4, 0) + cIdRoba
 			do while !EOF() .and. field->br_nal == nBrNal;
 			     .and. field->r_br == nRBr;
 			     .and. field->p_br == nPBr;
@@ -139,6 +139,7 @@ return DE_CONT
 // -------------------------------------------------------
 static function fill_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
 local nCount
+local aRealacije:={}
 
 if ( cOper == nil )
 	cOper := SPACE(6)
@@ -148,6 +149,8 @@ endif
 if EMPTY(cOper) .and. get_oper(@cOper) == 0
 	return DE_CONT
 endif
+
+aRelacije := g_relacije(cOper)
 
 select s_rnka
 set order to tag "idop"
@@ -159,8 +162,31 @@ if !Found()
 	select p_rnop
 	return
 endif
-	
+
+add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
+
+// ako ima relacija
+if LEN(aRelacije) > 0
+	for i:=1 to LEN(aRelacije)
+		add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, PADR(aRelacije[i], 6))
+	next
+endif
+
+return
+
+
+
+// -----------------------------
+// dodaj operacije
+// -----------------------------
+static function add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
+local nCount
 nCount := 0
+
+select s_rnka
+set order to tag "idop"
+go top
+seek cOper
 
 do while !EOF() .and. s_rnka->id_rnop == cOper
 	cRnKa := s_rnka->id
@@ -194,6 +220,29 @@ skip -(nCount)
 return
 
 
+// ---------------------------------------
+// vraca matricu napunjenu relacijama
+// ---------------------------------------
+static function g_relacije(cOper)
+local aRet
+local nTArea
+local cPom
+
+nTArea := SELECT()
+
+select s_rnop
+set order to tag "id"
+go top
+seek cOper
+
+cPom := ALLTRIM(s_rnop->relacija)
+
+aRet := ReadHashString(cPom)
+
+select (nTArea)
+
+return aRet
+
 
 // -------------------------------------------------------
 // ispituje da li postoji vec unesena karakteristika 
@@ -202,8 +251,8 @@ static function post_rnka(nBrNal, nRBr, nPBr, cIdRoba, cIdKa)
 local nTRec
 local xRet:=.f.
 
+select p_rnop
 nTRec := RecNo()
-
 set order to tag "rn_ka"
 go top
 seek STR(nBrNal, 10, 0) + STR(nRBr, 4, 0) + cIdRoba + cIdKa

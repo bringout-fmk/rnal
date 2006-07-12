@@ -65,12 +65,12 @@ static function set_a_kol( aKol, aImeKol )
 
 aImeKol := {}
 
-AADD(aImeKol, {"Br.nal", {|| TRANSFORM(br_nal, "99999")}, "br_nal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"R.br", {|| TRANSFORM(r_br, "99999")}, "r_br", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Br.nal", {|| PADR(TRANSFORM(br_nal, "99999"),7)}, "br_nal", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"R.br", {|| PADR(TRANSFORM(r_br, "99999"),7)}, "r_br", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Proizvod", {|| proizvod}, "proizvod", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.n.", {|| datnal}, "datnal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp", {|| datisp}, "datisp", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Mj.isp", {|| mj_isp}, "mj_isp", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Mj.isp", {|| PADR(mj_isp,20)}, "mj_isp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp", {|| vr_isp}, "vr_isp", {|| .t.}, {|| .t.} })
 
 aKol:={}
@@ -137,7 +137,7 @@ return 1
 // obradi stavku naloga
 // ---------------------------------------
 function g_nal_item(lNovi)
-local nX := 13
+local nX := 15
 local nRobaX
 local nRobaY
 local cDefSast:="D"
@@ -188,9 +188,10 @@ return 1
 // obradi header naloga
 // ---------------------------------------
 function g_nal_header(lNovi)
-local nX := 1
+local nX := 2
 local nPartX 
 local nPartY
+local cLine
 
 if lNovi
 	//_br_nal := next_br_nal()
@@ -200,6 +201,9 @@ if lNovi
 	_hitnost := "2"
 	_idpartner := SPACE(LEN(idpartner))
 	_vr_isp := PADR( LEFT( TIME(), 5 ), 8 )
+	_mj_isp := SPACE(40)
+	_operater := SPACE(20)
+	_kontakt := SPACE(40)
 	_vr_plac := "1"
 	if _rn_status == " "
 		_rn_status := "O"
@@ -208,32 +212,53 @@ endif
 
 set cursor on
 
-@ m_x + nX, m_y + 2 SAY "Broj naloga:" GET _br_nal PICT "999999999"
+@ m_x + nX, m_y + 2 SAY "Broj naloga:" GET _br_nal PICT "999999999" WHEN _br_nal <> 0
 
-@ m_x + nX, col() + 30 SAY "Datum naloga:" GET _datnal
+@ m_x + nX, col() + 4 SAY "Datum naloga:" GET _datnal VALID !EMPTY(_datnal)
 
 nX += 2
 
-nPartX := m_x + nX + 1
-nPartY := m_y + 2
+nPartX := m_x + nX
+nPartY := m_y + 20
 
 @ m_x + nX, m_y + 2 SAY "Partner:" GET _idpartner VALID val_partner(@_idpartner, nPartX, nPartY)
 
-nCol := col()
+nX += 3
 
-@ m_x + nX, nCol + 29 SAY "      Datum isporuke:" GET _datisp
+cLine := REPLICATE(CHR(205), 78)
+
+@ m_x + nX, m_y + 1 SAY cLine
+
+read
+
+ESC_RETURN 0
+
 
 nX += 1
 
-@ m_x + nX, nCol + 29 SAY "    Vrijeme isporuke:" GET _vr_isp
+@ m_x + nX, m_y + 2 SAY "Datum isporuke:" GET _datisp VALID !EMPTY(_datisp)
+
+@ m_x + nX, col() + 4 SAY "Vrijeme isporuke:" GET _vr_isp VALID !EMPTY(_vr_isp)
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Mjesto isporuke:" GET _mj_isp VALID !EMPTY(_mj_isp) PICT "@S20"
+
+@ m_x + nX, col() + 2 SAY "Kontakt telefon:" GET _kontakt VALID !EMPTY(_kontakt) PICT "@S20"
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Operater/nalog izdao:" GET _operater VALID !EMPTY(_operater) PICT "@S20"
 
 nX += 2
 
-@ m_x + nX, nCol + 30 SAY "Prioritet hitnosti (1/2/3):" GET _hitnost VALID val_kunos( _hitnost, "123" ) PICT "9"
+@ m_x + nX, m_y + 2 SAY "Prioritet hitnosti (1/2/3):" GET _hitnost VALID val_kunos( _hitnost, "123" ) PICT "9"
 
-nX += 1
+@ m_x + nX, col() + 2 SAY "Vr.placanja 1-kes 2-ziro racun:" GET _vr_plac VALID val_kunos( _vr_plac, "12") PICT "9"
 
-@ m_x + nX, nCol + 30 SAY "  Vr.placanja 1-kes 2-z.r.:" GET _vr_plac VALID val_kunos( _vr_plac, "12") PICT "9"
+nX += 2
+
+@ m_x + nX, m_y + 1 SAY cLine
 
 read
 
@@ -287,6 +312,9 @@ do case
 	case ( UPPER(CHR(Ch)) == "S" )
 		// pregled sirovina / operacija
 		SELECT P_RNAL
+		if RECCOUNT2() == 0
+			return DE_CONT
+		endif
 		rnst_priprema(p_rnal->br_nal, p_rnal->r_br)
 		SELECT P_RNAL
 		return DE_CONT

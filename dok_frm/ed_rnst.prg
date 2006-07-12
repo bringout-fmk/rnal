@@ -24,6 +24,7 @@ SELECT (F_P_RNST)
 SET ORDER TO TAG "br_nal"
 GO TOP
 
+set_f_kol(nBr_nal, nR_br)
 set_a_kol(@Kol, @ImeKol)
 
 ObjDbedit("prnst", 18, 77, {|| k_handler(nBr_nal, nR_br)}, cHeader, cFooter, , , , , 3)
@@ -31,6 +32,20 @@ BoxC()
 
 return
 
+// ------------------------------------------
+// postavlja filter na brnal i rbr
+// ------------------------------------------
+static function set_f_kol(nBr_nal, nR_br)
+local cFilter
+
+cFilter := "br_nal == " + STR(nBr_nal, 10, 0)
+cFilter += " .and. "
+cFilter += "r_br == " + STR(nR_br, 4, 0)
+
+set filter to &cFilter
+go top
+
+return
 
 // ---------------------------------------------
 // postavi matrice ImeKol, Kol
@@ -103,7 +118,7 @@ return 1
 // obradi stavka naloga
 // ---------------------------------------
 static function g_st_item(nBr_nal, nR_br, lNovi)
-local nX := 3
+local nX := 2
 local nRobaX
 local nRobaY
 local nUkX
@@ -117,12 +132,14 @@ local cRobaVrsta:=""
 local nZaokruzenje := 0
 local nNetoKoef := 0
 local nNetoProc := 0
+local cRFilt := ""
 
 if lNovi
 	_br_nal := nBr_nal
 	_r_br := nR_br
 	_p_br := next_p_br(nBr_nal, nR_br)
 	_idroba := SPACE(LEN(idroba))
+	_roba_vrsta := "S"
 	_kolicina := 0
 	_roba_tip := SPACE(6)
 	_debljina := 0
@@ -132,21 +149,46 @@ if lNovi
 	cUnosOp := "D"
 endif
 
-@ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999"
+@ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999" WHEN _r_br == 0
 @ m_x + nX, col() + 2 SAY "P.br:" GET _p_br PICT "9999"
 
-nX += 1
-nRobaX := m_x + nX
-nRobaY := m_y + 25
+nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Sirovina / operacija:" GET _idroba VALID val_sast(@_idroba, nRobaX, nRobaY)
+@ m_x + nX, m_y + 2 SAY "Tip:" GET _roba_tip 
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM()  
+@ m_x + nX, col() + 1 SAY "(mm)"
 
 read
 
 ESC_RETURN 0
 
-_debljina := g_roba_debljina(_idroba)
-_roba_tip := g_roba_tip(_idroba)
+// sastavi filter za tabelu robe
+cRFilt := g_sast_filter(_roba_tip, _debljina)
+
+nX += 2
+nRobaX := m_x + nX
+nRobaY := m_y + 35
+
+@ m_x + nX, m_y + 2 SAY "Sirovina / operacija:" GET _idroba VALID val_sast(@_idroba, cRFilt, nRobaX, nRobaY)
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY "Vrsta [S] - sirovina [K] - kupac:" GET _roba_vrsta VALID val_kunos(@_roba_vrsta, "KS")
+
+read
+
+ESC_RETURN 0
+
+if _debljina == 0
+	_debljina := g_roba_debljina(_idroba)
+endif
+
+if EMPTY(_roba_tip)
+	_roba_tip := g_roba_tip(_idroba)
+endif
 
 // pronadji zaokruzenje
 g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
@@ -154,12 +196,6 @@ g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
 select p_rnst
 
 nX += 2
-
-@ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM() VALID val_debljina( _debljina ) WHEN _debljina == 0
-
-@ m_x + nX, col() + 1 SAY "(mm)"
-
-nX += 1
 
 @ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina )
 
@@ -209,6 +245,30 @@ if !lNovi
 endif
 
 return 1
+
+// -----------------------------------
+// sastavlja filter za tabelu robe
+// -----------------------------------
+static function g_sast_filter(cTip, nDebljina)
+local cRet := ""
+
+if EMPTY(cTip)
+	cRet += ".t."
+else
+	cRet += "roba_tip == " + Cm2Str(PADR(cTip,6))
+endif
+
+cRet += " .and. "
+
+// ako je uneseno 999 idi sve debljine...
+if nDebljina == 999
+	cRet += ".t."
+else
+	cRet += "debljina == " + STR(nDebljina, 15, 5)
+endif
+
+return cRet
+
 
 
 // ---------------------------------------------
@@ -357,7 +417,7 @@ return
 static function s_rekap_stavka(nX, nY, nGNSirina, nGNVisina, nUkupno, nGNUkupno, nNeto)
 local cLine 
 
-cLine := REPLICATE("-", 70)
+cLine := REPLICATE(CHR(205), 76)
 
 @ nX, nY SAY cLine
 
