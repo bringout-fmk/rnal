@@ -13,6 +13,7 @@
 #xcommand O_RNST     => select (F_RNST);   use (KUMPATH+"RNST") ; set order to tag "br_nal"
 #xcommand O_RNOP     => select (F_RNOP);   use (KUMPATH+"RNOP") ; set order to tag "br_nal"
 #xcommand O_RNLOG    => select (F_RNLOG);  use (KUMPATH+"RNLOG") ; set order to tag "br_nal"
+#xcommand O_LOGIT    => select (F_LOGIT);  use (KUMPATH+"RNLOG_IT") ; set order to tag "br_nal"
 
 // sifrarnik tabele
 #xcommand O_S_RNKA   => select(F_S_RNKA);  use  (SIFPATH+"S_RNKA") ; set order to tag "id"
