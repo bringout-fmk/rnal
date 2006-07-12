@@ -3,15 +3,10 @@
 
 // -------------------------------------------
 // procedura azuriranja naloga
-// cLog_opis - opis za tabelu loga
 // -------------------------------------------
-function azur_nalog(cLog_opis)
+function azur_nalog()
 local nBr_nal
 local cStat
-
-if (cLog_opis == nil)
-	cLog_opis := ""
-endif
 
 o_rnal(.t.)
 
@@ -49,7 +44,7 @@ a_rnst( nBr_nal )
 // azuriraj operacije RNOP
 a_rnop( nBr_nal )
 // dodaj u RNLOG
-a_rnlog( nBr_nal, cLog_opis )
+a_rnlog( nBr_nal )
 
 // sve je ok brisi pripremu
 select p_rnal
@@ -176,86 +171,6 @@ do while !EOF() .and. ( p_rnop->br_nal == nBr_nal )
 enddo
 
 return
-
-// ------------------------------------------
-// azuriranje RNLOG
-// ------------------------------------------
-static function a_rnlog( nBr_nal, cLOGOpis )
-local dLog_date := DATE()
-local cLog_time := TIME()
-local dDat_isp := DATE() 
-local nU_neto:=0
-local nExpired:=0
-local nU_ukupno:=0
-local nLOGR_br
-local cPom:=""
-local cRn_status
-
-// NETO, UKUPNO
-select rnst
-set filter to
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0)
-
-do while !EOF() .and. ( rnst->br_nal == nBr_nal )
-	nU_neto += rnst->z_netto
-	nU_ukupno += rnst->z_ukupno
-	skip
-enddo
-
-// OSTALI PODACI
-select rnal
-set filter to
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0)
-
-cRn_status := rnal->rn_status
-dDat_isp := rnal->datisp
-
-// nadji sljedeci redni broj u log tabeli za nalog
-nLOGR_br := n_log_rbr( nBr_nal )
-
-// provjeri datum isporuke
-if ( dLOG_date > dDat_isp ) .and. cRn_status <> "O"
-	nExpired := dLog_date - dDat_isp
-endif
-
-select rnlog
-append blank
-replace br_nal with nBr_nal
-replace r_br with nLOGR_br
-replace log_datum with dLog_date
-replace log_time with cLog_time
-replace rn_status with cRn_status
-replace rn_expired with nExpired
-replace rn_ukupno with nU_ukupno
-replace rn_neto with nU_neto
-
-// obrada opisa pri azuriranju
-if cRn_status $ "O"
-	cPom := "Otvoren nalog"
-elseif cRn_status == "R"
-	cPom := ""
-elseif cRn_status == "Z"
-	cPom := "Zatvoren nalog"
-endif
-
-if cLOGOpis == nil
-	cLOGOpis := ""
-endif
-
-cPom += cLOGOpis
-
-if EMPTY(cPom)
-	cPom := "-"
-endif
-
-replace log_opis with cPom
-
-return
-
 
 // -------------------------------------------
 // procedura povrata naloga u pripremu
@@ -443,65 +358,6 @@ if Found()
 	enddo
 endif
 
-
-
-return
-
-
-// azuriranje novog statusa direktno u tabelu RNLOG
-function log_new_status(nBr_nal, cLOGopis)
-local nTArea
-local nTRec
-local cDbFilt
-
-nTArea := SELECT()
-nTRec := recno()
-cDbFilt := DBFilter()
-
-// privremeno skini filter
-if !Empty(cDbFilt)
-	set filter to
-endif
-
-select rnlog
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0)
-
-// ako si pronasao
-if Found()
-	
-	select rnal
-	set order to tag "br_nal"
-	go top
-	seek STR(nBr_nal, 10, 0)
-	
-	cRn_status := field->rn_status
-	// ako je status otvoren, promjeni ga na "R"
-	if cRn_status == "O"
-		// procesljaj rnal
-		do while !EOF() .and. field->br_nal == nBr_nal
-			Scatter()
-			_rn_status := "R"
-			Gather()
-			skip
-		enddo
-	endif
-	
-	select rnlog
-	// dodaj log
-	a_rnlog(nBr_nal, cLOGOpis)
-endif
-
-select (nTArea)
-
-// vrati filter
-if !Empty(cDbFilt)
-	set filter to &cDbFilt
-endif
-
-go (nTRec)
-
 return
 
 
@@ -543,9 +399,6 @@ select (nTArea)
 return 1
 
 
-
-
-
 //---------------------------------------------
 // vraca sljedeci redni broj naloga, generalni
 //---------------------------------------------
@@ -577,27 +430,6 @@ do while !EOF() .and. field->br_nal == nBr_nal;
 enddo
 PopWa()
 return nLastPBr + 1
-
-
-//------------------------------------------------
-// vraca sljedeci redni broj naloga u LOG tabeli
-//------------------------------------------------
-function n_log_rbr(nBr_nal)
-local nLastRbr:=0
-PushWa()
-select rnlog
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0)
-do while !EOF() .and. (field->br_nal == nBr_nal)
-	nLastRbr := field->r_br
-	skip
-enddo
-PopWa()
-
-return nLastRbr + 1
-
-
 
 
 //-----------------------------------------
@@ -636,58 +468,6 @@ endif
 select (nArea)
 
 return lRet
-
-
-// --------------------------------------------
-// vraca ukupno m2 za nalog nBr_nal
-// --------------------------------------------
-function g_nal_ukupno( nBr_nal )
-local xRet:=0
-local nTRec
-local nTArea
-
-nTArea := SELECT()
-nTRec := RecNo()
-
-select rnlog
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0)
-
-if Found()
-	do while !EOF() .and. ( field->br_nal == nBr_nal )
-		xRet := field->rn_ukupno
-		skip
-	enddo
-endif
-
-select (nTArea)
-go (nTRec)
-
-return xRet
-
-
-// ------------------------------------------
-// vraca broj dana isteka naloga
-// ------------------------------------------
-function g_nal_expired(nBr_nal)
-local xRet:=0
-local nTArea := SELECT()
-local nExpired:=0
-select rnlog
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0)
-
-do while !EOF() .and. (field->br_nal == nBr_nal)
-	nExpired := field->rn_expired
-	skip
-enddo
-
-xRet := nExpired
-
-select (nTArea)
-return xRet
 
 
 // novi broj naloga
