@@ -81,7 +81,7 @@ cLine1 += cOpcSep
 if ( nStatus == 1 )
 	cLine1 += PADR("<Z> Zatvori nalog", nOpcLen)
 	cLine1 += cOpcSep
-	cLine1 += PADR("<S> Unesi status naloga", nOpcLen)
+	cLine1 += PADR("<P> Promjene", nOpcLen)
 endif
 
 // druga linija je zajednicka
@@ -202,7 +202,7 @@ local cTblFilt
 local cLOG_opis
 	
 if ( nStatus == 2 )
-	if ( UPPER(CHR(Ch)) $ "ZS")
+	if ( UPPER(CHR(Ch)) $ "ZP")
 		return DE_CONT
 	endif
 endif
@@ -287,10 +287,11 @@ do case
 		frm_lst_rnlog(nBr_nal)
 		RETURN DE_CONT
 
-	// setovanje statusa
-	case (UPPER(CHR(Ch)) == "S" )
+	// promjene na nalogu
+	case (UPPER(CHR(Ch)) == "P" )
 		// trazi opis prije azuriranja
 		nBr_nal := rnal->br_nal
+		m_prom(nBr_nal)
 		select rnal
 		return DE_CONT
 
@@ -324,12 +325,6 @@ aImeKol := {}
 
 AADD(aImeKol, {"Nalog br.", {|| br_nal }, "br_nal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Partner", {|| PADR(s_partner(idpartner), 30) }, "idpartner", {|| .t.}, {|| .t.} })
-
-if nStatus == 2
-	// status naloga u zatvorenim
-	AADD(aImeKol, {"Status", {|| PADR(s_real_stat(rn_real), 4) + "." }, "rn_real", {|| .t.}, {|| .t.} })
-endif
-
 AADD(aImeKol, {"Datum", {|| datnal }, "datnal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp." , {|| datisp }, "datisp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| vr_isp }, "vr_isp", {|| .t.}, {|| .t.} })

@@ -64,8 +64,11 @@ static function g_t_st_fields(aArr)
 
 AADD(aArr,{ "br_nal"     , "C" ,  10 ,  0 })
 AADD(aArr,{ "r_br"       , "C" ,   4 ,  0 })
+AADD(aArr,{ "p_br"       , "C" ,   4 ,  0 })
+AADD(aArr,{ "idproizvod" , "C" ,  10 ,  0 })
+AADD(aArr,{ "pro_naz"    , "C" , 250 ,  0 })
 AADD(aArr,{ "idroba"     , "C" ,  10 ,  0 })
-AADD(aArr,{ "robanaz"    , "C" ,  40 ,  0 })
+AADD(aArr,{ "roba_naz"   , "C" , 250 ,  0 })
 AADD(aArr,{ "jmj"        , "C" ,   3 ,  0 })
 AADD(aArr,{ "kolicina"   , "N" ,  15 ,  5 })
 AADD(aArr,{ "d_sirina"   , "N" ,  15 ,  5 })
@@ -74,7 +77,7 @@ AADD(aArr,{ "d_visina"   , "N" ,  15 ,  5 })
 AADD(aArr,{ "z_visina"   , "N" ,  15 ,  5 })
 AADD(aArr,{ "d_ukupno"   , "N" ,  15 ,  5 })
 AADD(aArr,{ "z_ukupno"   , "N" ,  15 ,  5 })
-AADD(aArr,{ "neto"       , "N" ,  15 ,  5 })
+AADD(aArr,{ "z_netto"    , "N" ,  15 ,  5 })
 
 return
 
@@ -83,6 +86,7 @@ static function g_t_op_fields(aArr)
 
 AADD(aArr,{ "br_nal"     , "C" ,  10 ,  0 })
 AADD(aArr,{ "r_br"       , "C" ,   4 ,  0 })
+AADD(aArr,{ "p_br"       , "C" ,   4 ,  0 })
 AADD(aArr,{ "idroba"     , "C" ,  10 ,  0 })
 AADD(aArr,{ "rn_op"      , "C" ,   6 ,  0 })
 AADD(aArr,{ "rn_op_naz"  , "C" ,  40 ,  0 })
@@ -178,18 +182,22 @@ return xRet
 
 
 // dodaj stavke u tabelu T_RNST
-function a_t_rnst( cBr_nal, cR_br, cId_roba, cRoba_naz, cJmj, ;
+function a_t_rnst( cBr_nal, cR_br, cP_br, cId_pro, cPro_naz, ;
+		   cId_roba, cRoba_naz, cJmj, ;
                    nKolicina, nD_sirina, nD_visina, ;
 		   nZ_sirina, nZ_visina, nD_ukupno, ;
-		   nZ_ukupno, nNetto )
+		   nZ_ukupno, nZ_Netto )
 
 O_T_RNST
 select t_rnst
 append blank
 replace br_nal with cBr_nal
 replace r_br with cR_br
+replace p_br with cP_br
+replace idproizvod with cId_pro
+replace pro_naz with cPro_naz
 replace idroba with cId_roba
-replace robanaz with cRoba_naz
+replace roba_naz with cRoba_naz
 replace jmj with cJmj
 replace kolicina with nKolicina
 replace d_sirina with nD_sirina
@@ -198,13 +206,13 @@ replace z_sirina with nZ_sirina
 replace z_visina with nZ_visina
 replace d_ukupno with nD_ukupno
 replace z_ukupno with nZ_ukupno
-replace neto with nNetto
+replace z_netto with nZ_Netto
 
 return
 
 
 // dodaj stavke u tabelu T_RNOP
-function a_t_rnop( cBr_nal, cR_br, cId_roba, ;
+function a_t_rnop( cBr_nal, cR_br, cP_br, cId_roba, ;
                    cRn_op, cRn_op_naz, ;
 		   cRn_ka, cRn_ka_naz, cRn_in)
 
@@ -214,6 +222,7 @@ append blank
 
 replace br_nal with cBr_nal
 replace r_br with cR_br
+replace p_br with cP_br
 replace idroba with cId_roba
 replace rn_op with cRn_op
 replace rn_op_naz with cRn_op_naz
@@ -222,4 +231,5 @@ replace rn_ka_naz with cRn_ka_naz
 replace rn_instr with cRn_in
 
 return
+
 

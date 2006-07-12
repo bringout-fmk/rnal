@@ -63,7 +63,8 @@ return DE_REFRESH
 // filuj tabele za stampu
 // ----------------------------------
 static function fill_stavke( lPriprema, nBr_Nal )
-local nTb_ST := F_RNAL
+local nTb_nal := F_RNAL
+local nTb_st := F_RNST
 local cIdRoba
 local cRobaNaz
 local cRobaJmj
@@ -76,16 +77,17 @@ local nZ_sirina
 local nZ_visina
 local nD_ukupno
 local nZ_ukupno
-local nNetto
+local nZ_Netto
 local nNUZTotal := 0
 local nNUDTotal := 0
 local nNUNeto := 0
 
 if ( lPriprema == .t. )
-	nTb_ST := F_P_RNAL
+	nTb_nal := F_P_RNAL
+	nTb_st := F_P_RNST
 endif
 
-select (nTb_ST)
+select (nTb_nal)
 set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0)
@@ -93,39 +95,63 @@ seek STR(nBr_nal, 10, 0)
 // filuj stavke
 do while !EOF() .and. field->br_nal == nBr_nal
 	
-	// pronadji robu
-	cIdRoba := field->idroba
-	select roba
-	seek cIdRoba
-	
-	select (nTb_ST)
-	
-	cRobaNaz := ALLTRIM(roba->naz)
-	cRobaJmj := ALLTRIM(roba->jmj)
-	
-	cBr_nal := str_nal( field->br_nal )
-	cR_br := str_rbr( field->r_br )
-	
-	nKolicina := field->kolicina
-	nD_sirina := field->d_sirina
-	nD_visina := field->d_visina
-	nZ_sirina := field->z_sirina
-	nZ_visina := field->z_visina
-	nD_ukupno := field->d_ukupno
-	nZ_ukupno := field->z_ukupno
-	nNetto    := field->neto
+	cProizvod := field->proizvod
+	nR_br := field->r_br
 
-	nNUZTotal += nZ_ukupno
-	nNUDTotal += nD_ukupno
-	nNUNeto  += nNetto
+	// nadji proizvod
+	select roba
+	hseek cProizvod
+
+	cProNaz := ALLTRIM(roba->naz)
 	
-	a_t_rnst( cBr_nal, cR_br, cIdroba, cRobanaz, cRobaJmj, ;
-                   nKolicina, nD_sirina, nD_visina, ;
-		   nZ_sirina, nZ_visina, nD_ukupno, ;
-		   nZ_ukupno, nNetto )
+	select (nTb_st)
+	set order to tag "br_nal"
+	go top
+	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+	do while !EOF() .and. field->br_nal == nBr_nal;
+			.and. field->r_br == nR_br
+			
+		// pronadji robu
+		cIdRoba := field->idroba
+		select roba
+		seek cIdRoba
 	
-	select (nTb_ST)
+		select (nTb_st)
+	
+		cRobaNaz := ALLTRIM(roba->naz)
+		cRobaJmj := ALLTRIM(roba->jmj)
+	
+		cBr_nal := str_nal( field->br_nal )
+		cR_br := str_rbr( field->r_br )
+		cP_br := str_rbr( field->p_br )
+	
+		nKolicina := field->kolicina
+		nD_sirina := field->d_sirina
+		nD_visina := field->d_visina
+		nZ_sirina := field->z_sirina
+		nZ_visina := field->z_visina
+		nD_ukupno := field->d_ukupno
+		nZ_ukupno := field->z_ukupno
+		nZ_Netto  := field->z_netto
+
+		nNUZTotal += nZ_ukupno
+		nNUDTotal += nD_ukupno
+		nNUNeto  += nNetto
+	
+		a_t_rnst( cBr_nal, cR_br, cP_br, cProizvod, cProNaz, ;
+		          cIdroba, cRobanaz, cRobaJmj, ;
+                          nKolicina, nD_sirina, nD_visina, ;
+		          nZ_sirina, nZ_visina, nD_ukupno, ;
+		          nZ_ukupno, nZ_Netto )
+	
+		select (nTb_ST)
+		skip
+	enddo
+	
+	select (nTb_nal)
 	skip
+
 enddo
 
 // dodaj i nalog ukupno itd...
@@ -169,6 +195,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	
 	cBr_nal := str_nal(field->br_nal)
 	cR_br := str_rbr(field->r_br)
+	cP_br := str_rbr(field->p_br)
 	cIdRoba := field->idroba
 	cRn_op := field->id_rnop
 	cRn_op_naz := s_operacija(cRn_op)
@@ -176,7 +203,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	cRn_ka_naz := s_karakt(cRn_ka)
 	cRn_instr := field->rn_instr
 	
-	a_t_rnop( cBr_nal, cR_br, cIdroba, ;
+	a_t_rnop( cBr_nal, cR_br, cP_br, cIdroba, ;
                    cRn_op, cRn_op_naz, ;
 		   cRn_ka, cRn_ka_naz, cRn_instr)
 
@@ -223,7 +250,6 @@ add_tpars("N04", PADR(field->vr_isp, 5))
 add_tpars("N05", s_hitnost(field->hitnost))
 // nalog vrsta placanja
 add_tpars("N06", s_placanje(field->vr_plac))
-
 
 return
 
