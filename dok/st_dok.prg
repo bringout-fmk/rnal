@@ -137,7 +137,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 
 		nNUZTotal += nZ_ukupno
 		nNUDTotal += nD_ukupno
-		nNUNeto  += nNetto
+		nNUNeto  += nZ_Netto
 	
 		a_t_rnst( cBr_nal, cR_br, cP_br, cProizvod, cProNaz, ;
 		          cIdroba, cRobanaz, cRobaJmj, ;

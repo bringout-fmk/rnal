@@ -134,7 +134,7 @@ do while !EOF()
 	cIdRoba := t_rnst->idroba
 	
 	// uzmi naziv u matricu
-	cRobaNaz := NazivDobra(t_rnst->idroba, t_rnst->robanaz, t_rnst->jmj)
+	cRobaNaz := NazivDobra(t_rnst->idroba, t_rnst->roba_naz, t_rnst->jmj)
 	aRobaNaz := SjeciStr(cRobaNaz, LEN_NAZIV)
 	
 	// PRVI RED
