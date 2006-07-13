@@ -21,7 +21,9 @@ endif
 // iz sifrarnika
 p_firma(@cId)
 
-s_part_box(cId, nX, nY)
+if ( nX <> nil )
+	s_part_box(cId, nX, nY)
+endif
 
 return .t.
 

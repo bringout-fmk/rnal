@@ -364,12 +364,10 @@ return
 //----------------------------------------------
 // Zatvaranje naloga rnal->rn_status == "Z"
 //----------------------------------------------
-function z_rnal(nBr_nal, cLog_opis, cRealise)
+function z_rnal(nBr_nal, cOperater, cRealise)
 local nTArea
-
-if (cLog_opis == nil)
-	cLog_opis := ""
-endif
+local dDatum:=DATE()
+local cVrijeme:=TIME()
 
 nTArea := SELECT()
 
@@ -391,8 +389,8 @@ else
 	return 0
 endif
 
-// logiraj dogadjaj
-a_rnlog(nBr_nal, cLog_opis)
+// zatvaranje naloga....
+log_zatvori(nBr_nal, cOperater, cRealise)
 
 select (nTArea)
 
