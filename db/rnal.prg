@@ -4,7 +4,7 @@
 // -------------------------------------------
 // procedura azuriranja naloga
 // -------------------------------------------
-function azur_nalog()
+function azur_nalog(cOpis)
 local nBr_nal
 local cStat
 
@@ -44,7 +44,7 @@ a_rnst( nBr_nal )
 // azuriraj operacije RNOP
 a_rnop( nBr_nal )
 // dodaj u RNLOG
-a_rnlog( nBr_nal )
+a_rnlog( nBr_nal, cOpis )
 
 // sve je ok brisi pripremu
 select p_rnal

@@ -98,7 +98,7 @@ static function k_handler(nBr_nal)
 local nTblFilt
 
 // prikazi opis na formi
-//s_log_opis_on_form()
+s_log_opis_on_form()
 
 do case
 	// stampa liste log-a
@@ -123,8 +123,9 @@ aImeKol := {}
 
 AADD(aImeKol, {"Datum", {|| datum }, "datum", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vrijeme" , {|| PADR(vrijeme, 5) }, "vrijeme", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Tip" , {|| tip }, "tip", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Akcija" , {|| akcija }, "akcija", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Tip" , {|| PADR(s_prom_tip(tip), 15) }, "tip", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Akcija" , {|| PADR(s_prom_akcija(akcija), 10) }, "akcija", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Operater" , {|| PADR(operater, 20) }, "operater", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
@@ -134,19 +135,43 @@ next
 return
 
 // --------------------------------------------
-// prikaz opisa statusa u tabeli rnlog
+// prikaz tipa loga
 // --------------------------------------------
-static function s_status(cStatus)
+static function s_prom_tip(cTip)
 local xRet:=""
 do case
-	case cStatus == "O"
-		xRet := "OTVOREN"
-	case cStatus == "R"
-		xRet := "OBRADA"
-	case cStatus == "Z"
-		xRet := "ZATOVREN"
+	case cTip == "01"
+		xRet := "otvaranje"
+	case cTip == "99"
+		xRet := "zatvaranje"
+	case cTip == "10"
+		xRet := "osn.podaci"
+	case cTip == "11"
+		xRet := "pod.isporuka"
+	case cTip == "12"
+		xRet := "kontakti"
+	case cTip == "20"
+		xRet := "artikli"
+	case cTip == "30"
+		xRet := "instrukcije"
 endcase
 return xRet
+
+// --------------------------------------------
+// prikaz akcije promjene
+// --------------------------------------------
+static function s_prom_akcija(cAkc)
+local xRet:=""
+do case
+	case cAkc == "+"
+		xRet := "dodavanje"
+	case cAkc == "-"
+		xRet := "brisanje"
+	case cAkc == "E"
+		xRet := "ispravka"
+endcase
+return xRet
+
 
 
 // -------------------------------------------
@@ -156,30 +181,43 @@ static function s_log_opis_on_form()
 local aOpisArr:={}
 local cRow1
 local cRow2
+local cRow3
 local nLenText:=76
 local cOpis
 
 cRow1 := SPACE(nLenText)
 cRow2 := SPACE(nLenText)
+cRow3 := SPACE(nLenText)
 
-cOpis := rnlog->log_opis
+cOpis := g_log_opis( rnlog->tip )
 
 aOpisArr := SjeciStr(cOpis, nLenText)
 if LEN(aOpisArr) > 0
 	cRow1 := aOpisArr[1]
-	if LEN(aOpisArr) == 2
+	if LEN(aOpisArr) > 1
 		cRow2 := aOpisArr[2]
+	endif
+	if LEN(aOpisArr) > 2
+		cRow3 := aOpisArr[3]
 	endif
 endif
 
 // separator
-@ m_x + 16, m_y + 2 SAY PADR("OPIS STAVKE", nLenText)
+@ m_x + 16, m_y + 2 SAY SPACE(nLenText)
+@ m_x + 16, m_y + 2 SAY PADR(cRow1, nLenText) COLOR "I"
 // prvi red
 @ m_x + 17, m_y + 2 SAY SPACE(nLenText)
-@ m_x + 17, m_y + 2 SAY PADR(cRow1, nLenText) COLOR "I"
+@ m_x + 17, m_y + 2 SAY PADR(cRow2, nLenText) COLOR "I"
 // drugi red
 @ m_x + 18, m_y + 2 SAY SPACE(nLenText)
-@ m_x + 18, m_y + 2 SAY PADR(cRow2, nLenText) COLOR "I"
+@ m_x + 18, m_y + 2 SAY PADR(cRow3, nLenText) COLOR "I"
 
 return
+
+
+// vraca opisno polje
+static function g_log_opis(cTip)
+local cRet := ""
+return cRet
+
 

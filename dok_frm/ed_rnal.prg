@@ -137,7 +137,7 @@ return 1
 // obradi stavku naloga
 // ---------------------------------------
 function g_nal_item(lNovi)
-local nX := 16
+local nX := 17
 local nRobaX
 local nRobaY
 local cDefSast:="D"
@@ -201,9 +201,11 @@ if lNovi
 	_hitnost := "2"
 	_idpartner := SPACE(LEN(idpartner))
 	_vr_isp := PADR( LEFT( TIME(), 5 ), 8 )
-	_mj_isp := SPACE(40)
-	_operater := SPACE(20)
-	_kontakt := SPACE(40)
+	_mj_isp := SPACE(100)
+	_operater := goModul:oDatabase:cUser
+	_k_ime := SPACE(40)
+	_k_tel := SPACE(60)
+	_k_opis := SPACE(100)
 	_vr_plac := "1"
 	if _rn_status == " "
 		_rn_status := "O"
@@ -211,6 +213,8 @@ if lNovi
 endif
 
 set cursor on
+
+@ m_x, m_y + 45 SAY "Operater: " + PADR( _operater , 20)
 
 @ m_x + nX, m_y + 2 SAY "Broj naloga:" GET _br_nal PICT "999999999" WHEN _br_nal <> 0
 
@@ -233,24 +237,27 @@ read
 
 ESC_RETURN 0
 
-
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Datum isporuke:" GET _datisp VALID !EMPTY(_datisp)
+@ m_x + nX, m_y + 2 SAY "  Datum isporuke:" GET _datisp VALID !EMPTY(_datisp)
 
 @ m_x + nX, col() + 4 SAY "Vrijeme isporuke:" GET _vr_isp VALID !EMPTY(_vr_isp)
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Mjesto isporuke:" GET _mj_isp VALID !EMPTY(_mj_isp) PICT "@S20"
+@ m_x + nX, m_y + 2 SAY " Mjesto isporuke:" GET _mj_isp VALID !EMPTY(_mj_isp) PICT "@S40"
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("Kontakt, ime:", 20) GET _k_ime VALID !EMPTY(_k_ime) PICT "@S40"
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Kontakt telefon:" GET _kontakt VALID !EMPTY(_kontakt) PICT "@S20"
+@ m_x + nX, m_y + 2 SAY PADL("Kontakt, telefon:", 20) GET _k_tel VALID !EMPTY(_k_tel) PICT "@S40"
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Operater/nalog izdao:" GET _operater VALID !EMPTY(_operater) PICT "@S20"
+@ m_x + nX, m_y + 2 SAY PADL("Kontakt, dod.opis:", 20) GET _k_opis VALID !EMPTY(_k_opis) PICT "@S40"
 
 nX += 2
 
@@ -258,7 +265,7 @@ nX += 2
 
 @ m_x + nX, col() + 2 SAY "Vr.placanja 1-kes 2-ziro racun:" GET _vr_plac VALID val_kunos( _vr_plac, "12") PICT "9"
 
-nX += 2
+nX += 1
 
 @ m_x + nX, m_y + 1 SAY cLine
 
