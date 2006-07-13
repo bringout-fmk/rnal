@@ -17,8 +17,6 @@ AADD(opc, "3. dodaj novi kontakt ")
 AADD(opcexe, {|| add_kontakt(nBr_nal) })
 AADD(opc, "4. promjena kontakta na nalogu")
 AADD(opcexe, {|| prom_kontakt(nBr_nal) })
-AADD(opc, "5. promjena stavki naloga ")
-AADD(opcexe, {|| prom_artikli(nBr_nal) })
 
 Menu_sc("prom")
 
@@ -306,13 +304,6 @@ endif
 return 1
 
 
-// ---------------------------------
-// promjena stavki naloga, artikli
-// ---------------------------------
-function prom_artikli(nBr_nal)
-
-return
-
 // -------------------------------------------
 // logiranje promjena pri operaciji azuriranja
 // naloga
@@ -565,10 +556,8 @@ f99_stavke(nBr_nal, nLOGR_br, cReal)
 return
 
 
-
-
 // filuje stavku u RNLOG
-static function f_rnlog(nBr_nal, nR_br, cTip, cAkcija,;
+function f_rnlog(nBr_nal, nR_br, cTip, cAkcija,;
  		      dDatum, cVrijeme, cOperater, cOpis)
 select rnlog
 append blank
@@ -588,7 +577,7 @@ return
 // filovanje stavki tip 10
 // partner, vrsta placanja, prioritet
 // -----------------------------------
-static function f10_stavke(nBr_nal, nR_br, cPartn, cVrPlac, cPrioritet)
+function f10_stavke(nBr_nal, nR_br, cPartn, cVrPlac, cPrioritet)
 
 select rnlog_it
 append blank
@@ -606,7 +595,7 @@ return
 // filovanje stavki tip 11
 // mjesto, datum i vrijeme isporuke
 // --------------------------------
-static function f11_stavke(nBr_nal, nR_br, cMjIsp, cDatIsp, cVrIsp)
+function f11_stavke(nBr_nal, nR_br, cMjIsp, cDatIsp, cVrIsp)
 
 select rnlog_it
 append blank
@@ -624,7 +613,7 @@ return
 // filovanje stavki tip 12
 // kontakti
 // --------------------------------
-static function f12_stavke(nBr_nal, nR_br, cK_ime, cK_tel, cK_opis)
+function f12_stavke(nBr_nal, nR_br, cK_ime, cK_tel, cK_opis)
 
 select rnlog_it
 append blank
@@ -642,7 +631,7 @@ return
 // filovanje stavki tip 20
 // stavke.... sastavnice
 // --------------------------------
-static function f20_stavke(nBr_nal, nR_br, nSt_Rbr,;
+function f20_stavke(nBr_nal, nR_br, nSt_Rbr,;
 			   cRoba, cRoba2, nKol, nVis, nSir)
 local nP_br
 
@@ -668,7 +657,7 @@ return
 // filovanje stavki tip 30
 // stavke.... instrukcije
 // --------------------------------
-static function f30_stavke(nBr_nal, nR_br, nSt_rbr,;
+function f30_stavke(nBr_nal, nR_br, nSt_rbr,;
 			   cRoba1, cRoba2, nRnOper,;
 			   cRnKa, nInstr)
 local nP_br
@@ -695,7 +684,7 @@ return
 // filovanje stavki tip 99
 // zatvori nalog....
 // --------------------------------
-static function f99_stavke(nBr_nal, nR_br, cReal)
+function f99_stavke(nBr_nal, nR_br, cReal)
 
 select rnlog_it
 append blank
@@ -711,7 +700,7 @@ return
 //------------------------------------------------
 // vraca sljedeci redni broj naloga u LOG tabeli
 //------------------------------------------------
-static function n_log_rbr(nBr_nal)
+function n_log_rbr(nBr_nal)
 local nLastRbr:=0
 PushWa()
 select rnlog

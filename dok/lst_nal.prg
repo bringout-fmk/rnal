@@ -198,8 +198,8 @@ return
 static function k_handler(nStatus)
 local nBr_nal
 local cNal_real
+local cOpis
 local cTblFilt
-local cLOG_opis
 	
 if ( nStatus == 2 )
 	if ( UPPER(CHR(Ch)) $ "ZP")
@@ -244,19 +244,36 @@ do case
 		if Pitanje(, "Otvoriti nalog radi dorade (D/N) ?", "N") == "D"
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
+			cStat := rnal->rec_zak
+			
+			if cStat == "D"
+				MsgBeep("Nalog je vec u doradi !!!")
+				return DE_CONT
+			else
+				// markiraj doradu naloga
+				// zakljucaj ga!
+				Scatter()
+				_rec_zak := "D"
+				Gather()
+			endif
+			
 			cTblFilt := DBFilter()
 			set filter to
-			if pov_nalog(nBr_nal) == 1
-				MsgBeep("Nalog otvoren!")
+			
+			nal_dorada(nBr_nal)
+			
+			SELECT RNAL
+			set_f_kol(cTblFilt)
+			GO (nTRec)
+			cStat := field->rec_zak
+			
+			// otkljucaj nalog
+			if cStat == "D"
+				Scatter()
+				_rec_zak := " "
+				Gather()
 			endif
-			SELECT RNAL
-			set_f_kol(cTblFilt)
-			GO (nTRec)
-			// otvori i obradi pripremu
-			ed_rnal(.t.)
-			SELECT RNAL
-			set_f_kol(cTblFilt)
-			GO (nTRec)
+			
 			RETURN DE_REFRESH
 		endif
 		SELECT RNAL
@@ -265,12 +282,12 @@ do case
 	// zatvaranje naloga
 	case (UPPER(CHR(Ch)) == "Z")
 		if Pitanje(, "Zatvoriti nalog (D/N) ?", "N") == "D"
-			g_nal_status(@cNal_real)
+			g_nal_status(@cNal_real, @cOpis)
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
 			cTblFilt := DBFilter()
 			set filter to
-			if z_rnal(nBr_nal, "", cNal_real) == 1
+			if z_rnal(nBr_nal, "", cNal_real, cOpis) == 1
 				MsgBeep("Nalog zatvoren !")
 			endif
 			SELECT RNAL
@@ -289,7 +306,6 @@ do case
 
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )
-		// trazi opis prije azuriranja
 		nBr_nal := rnal->br_nal
 		m_prom(nBr_nal)
 		select rnal
@@ -303,14 +319,16 @@ return DE_CONT
 // ------------------------------------------------
 // setuj status naloga realizovan, ponisten
 // ------------------------------------------------
-static function g_nal_status(cNalStatus)
+static function g_nal_status(cNalStatus, cOpis)
 cNalStatus := "R"
+cOpis := SPACE(150)
 Beep(2)
-Box(,4, 50)
+Box(,6, 50)
 	@ m_x + 1, m_y + 2 SAY "Trenutni status naloga je:"
 	@ m_x + 2, m_y + 2 SAY "   - realizovan (R)"
 	@ m_x + 3, m_y + 2 SAY "   -   ponisten (X)"
 	@ m_x + 4, m_y + 2 SAY "postavi trenutni status na:" GET cNalStatus VALID val_kunos(cNalStatus, "RX") PICT "@!"
+	@ m_x + 6, m_y + 2 SAY "Opis:" GET cOpis VALID !EMPTY(cOpis) PICT "@S40"
 	read
 BoxC()
 

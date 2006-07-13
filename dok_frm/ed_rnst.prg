@@ -2,14 +2,28 @@
 
 
 // ---------------------------------------------
-// prikazi tabelu pripreme
+// stavke obrada
 // ---------------------------------------------
-function rnst_priprema(nBr_nal, nR_br)
+function rnst_obrada(nBr_nal, nR_br, lPrip)
 local cHeader
 local cFooter
+local nF_RNST := F_P_RNST
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNST := F_RNST
+endif
 
 cHeader := "SIROVINE / OPERACIJE STAVKE NALOGA"
-cFooter := "Unos/dorada stavki naloga za proizvodnju..."
+
+if lPrip == .t.
+	cFooter := "Unos stavki naloga za proizvodnju..."
+else
+	cFooter := "Dorada stavki naloga za proizvodnju..."
+endif
 
 Box(,18,77)
 
@@ -20,14 +34,14 @@ Box(,18,77)
 private ImeKol
 private Kol
 
-SELECT (F_P_RNST)
+SELECT (nF_RNST)
 SET ORDER TO TAG "br_nal"
 GO TOP
 
 set_f_kol(nBr_nal, nR_br)
 set_a_kol(@Kol, @ImeKol)
 
-ObjDbedit("prnst", 18, 77, {|| k_handler(nBr_nal, nR_br)}, cHeader, cFooter, , , , , 3)
+ObjDbedit("prnst", 18, 77, {|| k_handler(nBr_nal, nR_br, lPrip)}, cHeader, cFooter, , , , , 3)
 BoxC()
 
 return
@@ -73,14 +87,22 @@ return
 // ---------------------------------------------
 // obrada sve stavke 
 // ---------------------------------------------
-static function stavke_item(nBr_nal, nR_br, lNova)
+static function stavke_item(nBr_nal, nR_br, lNova, lPrip)
 local nCount
+local nF_RNST := F_P_RNST
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+if (lPrip == .f.)
+	nF_RNST := F_RNST
+endif
 
 UsTipke()
 
 Box(, 20, 77, .f., "Unos novih stavki")
 
-select p_rnst
+select (nF_RNST)
 
 Scatter()
 
@@ -94,11 +116,11 @@ do while .t.
 	
 	++ nCount
 	
-	if g_st_item(nBr_nal, nR_br, lNova) == 0
+	if g_st_item(nBr_nal, nR_br, lNova, lPrip) == 0
 		exit
 	endif
 	
-	select p_rnst
+	select (nF_RNST)
 	
 	if lNova
 		append blank
@@ -107,7 +129,7 @@ do while .t.
 	Gather()
 enddo
 
-SELECT p_rnst
+SELECT (nF_RNST)
 
 BoxC()
 
@@ -117,7 +139,7 @@ return 1
 // ---------------------------------------
 // obradi stavka naloga
 // ---------------------------------------
-static function g_st_item(nBr_nal, nR_br, lNovi)
+static function g_st_item(nBr_nal, nR_br, lNovi, lPrip)
 local nX := 2
 local nRobaX
 local nRobaY
@@ -133,11 +155,20 @@ local nZaokruzenje := 0
 local nNetoKoef := 0
 local nNetoProc := 0
 local cRFilt := ""
+local nF_RNST := F_P_RNST
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNST := F_RNST
+endif
 
 if lNovi
 	_br_nal := nBr_nal
 	_r_br := nR_br
-	_p_br := next_p_br(nBr_nal, nR_br)
+	_p_br := next_p_br(nBr_nal, nR_br, lPrip )
 	_idroba := SPACE(LEN(idroba))
 	_roba_vrsta := "S"
 	_kolicina := 0
@@ -193,7 +224,7 @@ endif
 // pronadji zaokruzenje
 g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
 
-select p_rnst
+select (nF_RNST)
 
 nX += 2
 
@@ -237,7 +268,7 @@ if cUnosOp == "D"
 	// unos operacija nad artiklom
 	nP_br := _p_br
 	cIdRoba := _idroba
-	ed_st_instr(nBr_Nal, nR_Br, nP_Br, cIdRoba)
+	ed_st_instr(nBr_Nal, nR_Br, nP_Br, cIdRoba, lPrip)
 endif
 
 if !lNovi
@@ -275,7 +306,18 @@ return cRet
 // ---------------------------------------------
 // tabela RNAL keyboard handler 
 // ---------------------------------------------
-static function k_handler(nBr_nal, nR_br)
+static function k_handler(nBr_nal, nR_br, lPrip)
+local nF_RNST := F_P_RNST
+local nF_RNOP := F_P_RNOP
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNST := F_RNST
+	nF_RNOP := F_RNOP
+endif
 
 if (Ch==K_CTRL_T .or. Ch==K_ENTER;
 	.or. Ch==K_CTRL_P;
@@ -285,45 +327,50 @@ endif
 
 do case
 	case (Ch == K_CTRL_T)
-		SELECT P_RNST
-		if br_stavku()
+		SELECT (nF_RNST)
+		if br_stavku(lPrip)
 			return DE_REFRESH
 		endif
-		SELECT P_RNST
+		SELECT (nF_RNST)
 		return DE_CONT
 		
 	case (Ch == K_ENTER)
-		SELECT P_RNST
+		SELECT (nF_RNST)
   		Scatter()
-  		if stavke_item(nBr_nal, nR_br, .f.) == 1
+  		if stavke_item(nBr_nal, nR_br, .f. ,lPrip) == 1
 			Gather()
 			RETURN DE_REFRESH
 		endif
-		SELECT P_RNST
+		SELECT (nF_RNST)
 		return DE_CONT
 		
 	case (Ch == K_CTRL_N)
-		SELECT P_RNST
-		stavke_item(nBr_nal, nR_br, .t.)
-		SELECT P_RNST
+		SELECT (nF_RNST)
+		stavke_item(nBr_nal, nR_br, .t., lPrip)
+		SELECT (nF_RNST)
 		return DE_REFRESH
 		
 	case (Ch  == K_CTRL_F9)
-        	SELECT P_RNST
-		if br_sve_zapise()
+        	SELECT (nF_RNST)
+		nBr_nal := field->br_nal
+		if br_sve_zapise(nBr_nal, lPrip)
 			return DE_REFRESH
 		endif
-		SELECT P_RNST
+		SELECT (nF_RNST)
 		return DE_CONT
 		
 	case UPPER(CHR(Ch)) == "O"
-		select p_rnop
-		ed_st_instr(p_rnst->br_nal, p_rnst->r_br, p_rnst->p_br, p_rnst->idroba)
-		select p_rnst
+		nBr_nal := field->br_nal
+		nR_br := field->r_br
+		nP_br := field->p_br
+		cIdRoba := field->idroba
+		select (nF_RNOP)
+		ed_st_instr(nBr_nal, nR_br, nP_br, cIdRoba, lPrip)
+		select (nF_RNST)
 		return DE_REFRESH
 	
 	case ( Ch == K_ESC )
-		select p_rnst
+		select (nF_RNST)
 		return DE_CONT 
 
 endcase
@@ -334,13 +381,31 @@ return DE_CONT
 // ---------------------------------------
 // brisi stavku iz pripreme
 // ---------------------------------------
-static function br_stavku()
+static function br_stavku(lPrip)
 local nBrNal
 local nRbr
 local nPbr
 local cIdRoba
+local nF_RNST := F_P_RNST
+local nF_RNAL := F_P_RNAL
+local dDatum := DATE()
+local cVrijeme := TIME()
+local cAkcija := "-"
+local cTipArt := "20"
+local cOperater := goModul:oDataBase:cUser
+local cOpis := SPACE(150)
+local nLOGR_br 
 
-// kod brisanja stavke je bitno da se izbrise stavka iz P_RNAL
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNST := F_RNST
+	nF_RNAL := F_RNAL
+endif
+
+// kod brisanja stavke je bitno da se izbrise stavka iz P_RNST
 // kao i sve stavke iz P_RNOP
 
 if Pitanje(, "Zelite izbrisati ovu stavku ?", "D") == "N"
@@ -351,13 +416,40 @@ nBrNal := field->br_nal
 nRBr := field->r_br
 nPBr := field->p_br
 cIdRoba := field->idroba
+nKolicina := field->kolicina
+nSirina := field->sirina
+nVisina := field->visina
+
+if lPrip == .f.
+	// uzmi opis
+	if g_opis_box(@cOpis) == 0
+		return .f.
+	endif
+	
+	select (nF_RNAL)
+	set order to tag "br_nal"
+	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+	
+	cProizvod := field->proizvod
+	
+	select (nF_RNST)
+endif
 
 delete
 
-// sada izbrisi ako ima sta i u P_RNOP
-br_prnop(nBrNal, nRBr, nPBr, cIdRoba)
+if (lPrip == .f.)
+	nLOGR_br := n_log_rbr( nBr_nal )
+	f_rnlog( nBr_nal, nLOGR_br, cTipArt, cAkcija,;
+		 dDatum, cVrijeme, cOperater, cOpis)
 
-select p_rnst
+	f20_stavke(nBr_nal, nLOGR_br, nStP_br, cProizvod, cIdRoba,;
+        	   nKolicina, nSirina, nVisina)
+endif
+
+// sada izbrisi ako ima sta i u P_RNOP
+br_prnop(nBrNal, nRBr, nPBr, cIdRoba, lPrip)
+
+select (nF_RNST)
 
 return .t.
 
@@ -366,21 +458,38 @@ return .t.
 // ---------------------------------------
 // brisanje kompletne pripreme
 // ---------------------------------------
-static function br_sve_zapise()
-local nBr_nal
+static function br_sve_zapise(nBr_nal, lPrip)
+local nF_RNST := F_P_RNST
+local nF_RNOP := F_P_RNOP
 
 if Pitanje( ,"Zelite li izbrisati pripremu !!????","N") == "N"
 	return .f.
 endif
 
-select p_rnst
-nBr_nal := field->br_nal
-zap        
+if (lPrip == nil)
+	lPrip := .t.
+endif
 
-select p_rnop
-zap
+if (lPrip == .f.)
+	nF_RNST := F_RNST
+	nF_RNOP := F_RNOP
+endif
 
-select p_rnst
+select (nF_RNST)
+go top
+do while !EOF() .and. field->br_nal == nBr_nal
+	delete
+	skip
+enddo
+
+select (nF_RNOP)
+go top
+do while !EOF() .and. field->br_nal == nBr_nal
+	delete
+	skip
+enddo
+
+select (nF_RNST)
 
 return .t.
 
@@ -388,11 +497,20 @@ return .t.
 // ---------------------------------------
 // brisi stavke iz p_rnop
 // ---------------------------------------
-static function br_prnop(nBrNal, nR_br, nP_br, cIdRoba)
+static function br_prnop(nBrNal, nR_br, nP_br, cIdRoba, lPrip)
 local nArea
+local nF_RNOP := F_P_RNOP
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+if (lPrip == .f.)
+	nF_RNOP := F_RNOP
+endif
+
 nArea := SELECT()
 
-select p_rnop
+select (nF_RNOP)
 set order to tag "br_nal"
 go top
 seek STR(nBrNal, 10, 0) + STR(nR_br) + STR(nP_br) + cIdRoba
@@ -448,3 +566,5 @@ nX += 1
 @ nX, nY SAY cLine
 
 return
+
+

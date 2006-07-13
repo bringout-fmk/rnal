@@ -3,19 +3,14 @@
 
 // ---------------------------------------------
 // edit radni nalog
-// lDorada - dorada naloga
 // ---------------------------------------------
-function ed_rnal(lDorada)
-
-if (lDorada == nil)
-	lDorada := .f.
-endif
+function ed_rnal()
 
 // otvori tabele
 o_rnal(.t.)
 
 // prikazi tabelu pripreme
-rnal_priprema(lDorada)
+rnal_priprema()
 
 return
 
@@ -24,15 +19,12 @@ return
 // ---------------------------------------------
 // prikazi tabelu pripreme
 // ---------------------------------------------
-static function rnal_priprema(lDorada)
+static function rnal_priprema()
 local cHeader
 local cFooter
 
 cHeader := "NOVI NALOG ZA PROIZVODNJU"
-if (lDorada == .t.)
-	cHeader := "Dorada naloga"
-endif
-cFooter := "Unos/dorada naloga za proizvodnju..."
+cFooter := "Unos novog naloga za proizvodnju..."
 
 Box(,20,77)
 @ m_x+18,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
@@ -50,10 +42,6 @@ set_a_kol( @Kol, @ImeKol)
 
 ObjDbedit("prnal", 20, 77, {|| k_handler()}, cHeader, cFooter, , , , , 3)
 BoxC()
-
-if (lDorada == .t.)
-	return
-endif
 
 closeret
 
@@ -174,7 +162,7 @@ ESC_RETURN 0
 if cDefSast == "D"
 	nBr_nal := _br_nal
 	nR_br := _r_br
-	rnst_priprema(nBr_nal, nR_br)
+	rnst_obrada(nBr_nal, nR_br)
 endif
 
 if !lNovi
@@ -324,7 +312,7 @@ do case
 		if RECCOUNT2() == 0
 			return DE_CONT
 		endif
-		rnst_priprema(p_rnal->br_nal, p_rnal->r_br)
+		rnst_obrada(p_rnal->br_nal, p_rnal->r_br, .t.)
 		SELECT P_RNAL
 		return DE_CONT
 

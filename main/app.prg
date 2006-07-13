@@ -75,22 +75,22 @@ private opcexe:={}
 
 say_fmk_ver()
 
-AADD(opc, "1. unos/dorada naloga za proizvodnju ")
-if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","EDIT"))
+AADD(opc, "1. otvaranje naloga za proizvodnju     ")
+if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "EDIT"))
 	AADD(opcexe, {|| ed_rnal()})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
 AADD(opc, "2. lista otvorenih naloga ")
-if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","DOKLSTO"))
+if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "DOKLSTO"))
 	AADD(opcexe, {|| frm_lst_nalog(1)})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
 AADD(opc, "3. lista zatorenih naloga ")
-if (ImaPravoPristupa(goModul:oDataBase:cName,"DOK","DOKLSTZ"))
+if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "DOKLSTZ"))
 	AADD(opcexe, {|| frm_lst_nalog(2)})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
@@ -119,7 +119,7 @@ AADD(opcexe, {|| nil})
 
 AADD(opc, "X. parametri")
 
-if (ImaPravoPristupa(goModul:oDataBase:cName,"PARAM","ALL"))
+if (ImaPravoPristupa(goModul:oDataBase:cName, "PARAM", "ALL"))
 	AADD(opcexe, {|| m_par()})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})

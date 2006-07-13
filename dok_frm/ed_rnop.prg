@@ -4,13 +4,22 @@
 // ------------------------------------------
 // unos instrukcija za sirovinu / operaciju
 // ------------------------------------------
-function ed_st_instr(nBrNal, nRBr, nPBr, cIdRoba)
+function ed_st_instr(nBrNal, nRBr, nPBr, cIdRoba, lPrip)
 local nArea
 local nTArea
 local cRNaziv
 local cFooter
+local nF_RNOP := F_P_RNOP
 private ImeKol
 private Kol
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNOP := F_RNOP
+endif
 
 nTArea := SELECT()
 
@@ -22,7 +31,7 @@ cFooter := ALLTRIM(cIdRoba)
 cFooter += "-"
 cFooter += PADR(roba->naz, 40)
 
-nArea := F_P_RNOP
+nArea := (nF_RNOP)
 
 Box(, 15, 77)
 @ m_x + 15, m_y + 2 SAY "<c-N> Nova operacija    | <c-T> Brisi operaciju  | <c-F9> Brisi sve operacije "
@@ -50,10 +59,10 @@ private TBScatter:="N"
 set order to tag "br_nal"
 go top
 
-ObjDbedit("prop", 15, 77, {|| k_handler(nBrNal, nRBr, nPBr, cIdRoba)}, "", cFooter, , , , , 1)
+ObjDbedit("prop", 15, 77, {|| k_handler(nBrNal, nRBr, nPBr, cIdRoba, lPrip)}, "", cFooter, , , , , 1)
 BoxC()
 
-select p_rnop
+select (nF_RNOP)
 set filter to
 
 return
@@ -79,7 +88,16 @@ return
 // ------------------------------------------
 // key handler tabele P_RNOP
 // ------------------------------------------
-static function k_handler(nBrNal, nRBr, nPBr, cIdRoba)
+static function k_handler(nBrNal, nRBr, nPBr, cIdRoba, lPrip)
+local nF_RNOP := F_P_RNOP
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNOP := F_RNOP
+endif
 
 if (Ch==K_CTRL_T .or. Ch==K_CTRL_F9) .and. reccount2()==0
 	return DE_CONT
@@ -88,7 +106,7 @@ endif
 // setuj direktni edit mod
 if gTBDir=="N"
 	gTBDir:="D"
-        select P_RNOP
+        select (nF_RNOP)
         DaTBDirektni()
 endif
 
@@ -108,13 +126,13 @@ do case
 	case (Ch == K_CTRL_N)
 		gTbDir:="N"
 		NeTBDirektni()
-		fill_p_rnop(nBrNal, nRBr, nPBr, cIdRoba)
+		fill_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, nil, lPrip)
 		gTbDir:="D"
 		DaTBDirektni()
 		return DE_REFRESH
 		
 	case (Ch  == K_CTRL_F9)
-        	select P_RNOP
+        	select (nF_RNOP)
 		if Pitanje( ,"Zelite li izbrisati sve zapise ?????","N") == "D"
 	     		set order to tag "br_nal"
 			go top
@@ -137,10 +155,20 @@ return DE_CONT
 // -------------------------------------------------------
 // napuni podatke p_rnop sa karakteristikama
 // -------------------------------------------------------
-static function fill_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
+static function fill_p_rnop(nBrNal, nRBr, nPBr,;
+			    cIdRoba, cOper, lPrip)
 local nCount
 local aRealacije:={}
 local aPom := {}
+local nF_RNOP := F_P_RNOP
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNOP := F_RNOP
+endif
 
 if ( cOper == nil )
 	cOper := SPACE(6)
@@ -152,7 +180,7 @@ if EMPTY(cOper) .and. get_oper(@cOper) == 0
 endif
 
 // maticna operacija
-add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
+add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper, lPrip)
 // daj relacije prve stavke
 aRelacije := g_relacije(cOper)
 
@@ -160,7 +188,8 @@ aRelacije := g_relacije(cOper)
 if LEN(aRelacije) > 0
 	for i:=1 to LEN(aRelacije)
 		// dodaj i njih
-		add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, PADR(aRelacije[i], 6))
+		add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba,;
+			   PADR(aRelacije[i], 6), lPrip)
 	next
 endif
 
@@ -170,8 +199,19 @@ return
 // -----------------------------
 // dodaj operacije
 // -----------------------------
-static function add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba, cOper)
+static function add_p_rnop(nBrNal, nRBr, nPBr, cIdRoba,;
+			   cOper, lPrip)
 local nCount
+local nF_RNOP := F_P_RNOP
+
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNOP := F_RNOP
+endif
+
 nCount := 0
 
 select s_rnka
@@ -181,10 +221,10 @@ seek cOper
 
 do while !EOF() .and. s_rnka->id_rnop == cOper
 	cRnKa := s_rnka->id
-	select p_rnop
+	select (nF_RNOP)
 		
 	// ako ne postoji karakteristika u pripremi dodaj
-	if !post_rnka(nBrNal, nRBr, nPBr, cIdRoba, cRnKa)
+	if !post_rnka(nBrNal, nRBr, nPBr, cIdRoba, cRnKa, lPrip)
 		append blank
 		replace br_nal with nBrNal
 		replace r_br with nRBr
@@ -203,7 +243,7 @@ do while !EOF() .and. s_rnka->id_rnop == cOper
 	++ nCount
 enddo
 
-select p_rnop
+select (nF_RNOP)
 // pozicioniraj se na nove zapise
 go bottom
 skip -(nCount)
@@ -238,11 +278,21 @@ return aRet
 // -------------------------------------------------------
 // ispituje da li postoji vec unesena karakteristika 
 // -------------------------------------------------------
-static function post_rnka(nBrNal, nRBr, nPBr, cIdRoba, cIdKa)
+static function post_rnka(nBrNal, nRBr, nPBr, cIdRoba,;
+			  cIdKa, lPrip)
 local nTRec
 local xRet:=.f.
+local nF_RNOP := F_P_RNOP
 
-select p_rnop
+if (lPrip == nil)
+	lPrip := .t.
+endif
+
+if (lPrip == .f.)
+	nF_RNOP := F_RNOP
+endif
+
+select (nF_RNOP)
 nTRec := RecNo()
 set order to tag "rn_ka"
 go top
