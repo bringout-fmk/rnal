@@ -241,14 +241,25 @@ do case
 		
 	// otvaranje naloga za doradu
 	case (UPPER(CHR(Ch)) == "D")
+		// provjeri marker
+		if get_p_marker() == "P"
+			// vec neko radi povrat
+			MsgBeep("Nalog vec doradjuje drugi operater!#Dorada naloga onemogucena!")
+			SELECT RNAL
+			return DE_CONT
+		endif
+		
 		if Pitanje(, "Otvoriti nalog radi dorade (D/N) ?", "N") == "D"
+			
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
 			cTblFilt := DBFilter()
 			set filter to
+			
 			if pov_nalog(nBr_nal) == 1
 				MsgBeep("Nalog otvoren!")
 			endif
+			
 			SELECT RNAL
 			set_f_kol(cTblFilt)
 			GO (nTRec)
@@ -259,12 +270,21 @@ do case
 			GO (nTRec)
 			RETURN DE_REFRESH
 		endif
+		
 		SELECT RNAL
 		RETURN DE_CONT
 
 	// zatvaranje naloga
 	case (UPPER(CHR(Ch)) == "Z")
+		
+		if get_p_marker() == "P"
+			MsgBeep("Neko doradjuje ovaj nalog! #Zatvaranje onemoguceno!")
+			select RNAL
+			return DE_CONT
+		endif
+			
 		if Pitanje(, "Zatvoriti nalog (D/N) ?", "N") == "D"
+					
 			g_nal_status(@cNal_real)
 			nTRec := RecNo()
 			nBr_nal := rnal->br_nal
@@ -289,7 +309,11 @@ do case
 
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )
-		// trazi opis prije azuriranja
+		if get_p_marker() == "P"
+			MsgBeep("Neko vec doradjuje ovaj nalog!#Promjene onemogucene!")
+			return DE_CONT
+		endif
+		
 		nBr_nal := rnal->br_nal
 		m_prom(nBr_nal)
 		select rnal

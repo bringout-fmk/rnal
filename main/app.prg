@@ -75,7 +75,7 @@ private opcexe:={}
 
 say_fmk_ver()
 
-AADD(opc, "1. otvaranje naloga za proizvodnju     ")
+AADD(opc, "1. unos/dorada naloga za proizvodnju  ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "EDIT"))
 	AADD(opcexe, {|| ed_rnal()})
 else

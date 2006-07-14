@@ -5,17 +5,13 @@
 // edit radni nalog
 // lDorada - dorada naloga
 // ---------------------------------------------
-function ed_rnal(lDorada)
-
-if (lDorada == nil)
-	lDorada := .f.
-endif
+function ed_rnal()
 
 // otvori tabele
 o_rnal(.t.)
 
 // prikazi tabelu pripreme
-rnal_priprema(lDorada)
+rnal_priprema()
 
 return
 
@@ -24,9 +20,19 @@ return
 // ---------------------------------------------
 // prikazi tabelu pripreme
 // ---------------------------------------------
-static function rnal_priprema(lDorada)
+static function rnal_priprema()
 local cHeader
 local cFooter
+local lDorada
+private ImeKol
+private Kol
+
+SELECT (F_P_RNAL)
+SET ORDER TO TAG "br_nal"
+GO TOP
+if field->rec_zak == "P"
+	lDorada := .t.
+endif
 
 cHeader := "NOVI NALOG ZA PROIZVODNJU"
 if (lDorada == .t.)
@@ -38,13 +44,6 @@ Box(,20,77)
 @ m_x+18,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
 @ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  | <S> Pregled sirovina "
 @ m_x+20,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
-
-private ImeKol
-private Kol
-
-SELECT (F_P_RNAL)
-SET ORDER TO TAG "br_nal"
-GO TOP
 
 set_a_kol( @Kol, @ImeKol)
 
@@ -86,12 +85,17 @@ return
 // ---------------------------------------------
 static function nalog_item(lNova)
 local nCount 
+local cStat 
 
 UsTipke()
 
 Box(, 21, 77, .f., "Unos novih stavki")
 
 Scatter()
+
+cStat := _rec_zak
+
+if cStat <> "P"
 
 if RECCOUNT2() == 0
 	if g_nal_header(lNova) == 0
@@ -105,6 +109,8 @@ else
 		BoxC()
 		return 1
 	endif
+endif
+
 endif
 
 SELECT p_rnal
@@ -345,13 +351,18 @@ do case
 		return DE_CONT
 		
 	case Ch==K_ALT_A
-		if Pitanje( , "Azurirati nalog (D/N)?", "D") == "D" .and. nal_integritet()
-	  		// generisi sifru robe + match code
+		if !nal_integritet()
+			return DE_CONT
+		endif
+		if Pitanje(, "Azurirati nalog (D/N)?", "D") == "D"
+	  		
+			// generisi sifru robe + match code
 			gen_r_sif()
 			
 			// uzmi broj naloga
 			nBr_nal := _n_br_nal()
 			
+			// filuj sve tabele sa brojem naloga
 			f_p_br_nal( nBr_nal )
 			
 			// brisi viska operacije

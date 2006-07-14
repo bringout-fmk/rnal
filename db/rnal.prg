@@ -37,14 +37,25 @@ endif
 MsgO("Azuriranje naloga u toku...")
 Beep(1)
 
+if cStat == "P"
+	// logiraj deltu
+	rnal_delta( nBr_nal, cOpis )
+	
+	// brisi kumulativ
+	b_kumulativ( nBr_nal )
+endif
+
 // azuriraj maticnu tabelu RNAL
 a_rnal( nBr_nal , cStat )
 // azuriranje stavki RNST
 a_rnst( nBr_nal )
 // azuriraj operacije RNOP
 a_rnop( nBr_nal )
-// dodaj u RNLOG
-a_rnlog( nBr_nal, cOpis )
+
+if cStat <> "P"
+	// logiraj promjene
+	a_rnlog( nBr_nal, cOpis, cStat )
+endif
 
 // sve je ok brisi pripremu
 select p_rnal
@@ -208,8 +219,8 @@ p_rnst( nBr_nal )
 // povrat operacija RNOP
 p_rnop( nBr_nal ) 
 
-// brisi kumulativ
-b_kumulativ( nBr_nal )
+// markiraj povrat u RNAL
+set_p_marker( nBr_nal, "P" )
 
 select rnal
 use
@@ -219,6 +230,33 @@ o_rnal(.t.)
 MsgC()
 
 return 1
+
+
+// markiraj povrat....
+function set_p_marker(nBr_nal, cMark)
+local nTArea
+nTArea := SELECT()
+
+select rnal
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+if FOUND()
+	Scatter()
+	_rec_zak := cMark
+	Gather()
+endif
+
+select (nTArea)
+return
+
+
+// vrati marker naloga
+function get_p_marker()
+local cMark
+cMark := field->rec_zak
+return cMark
 
 
 
