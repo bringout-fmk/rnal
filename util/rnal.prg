@@ -344,11 +344,11 @@ return cRet
 // --------------------------------------------------------
 // automatski prebacuje sastavnice proizvoda u tabelu RNST
 // --------------------------------------------------------
-function sast_to_rnst(cProizvod, nBr_nal, nR_br, lPrip)
+function sast_to_rnst(cProizvod, nBr_nal, nR_br)
 
 // da li vec postoje sastavnice ???
-if !sast_exist(nBr_nal, nR_br, lPrip)
-	dodaj_sastavnice(nBr_nal, nR_br, lPrip)
+if !sast_exist(nBr_nal, nR_br)
+	dodaj_sastavnice(nBr_nal, nR_br)
 endif
 
 return
@@ -356,18 +356,9 @@ return
 // ----------------------------------------
 // dodaj sastavnice u P_RNST
 // ----------------------------------------
-function dodaj_sastavnice(cProizvod, nBr_nal, nR_br, lPrip)
+function dodaj_sastavnice(cProizvod, nBr_nal, nR_br)
 local nTArea
 local nCount
-local nF_RNST := F_P_RNST
-
-if lPrip == nil
-	lPrip := .t.
-endif
-
-if lPrip == .f.
-	nF_RNST := F_RNST
-endif
 
 if EMPTY(cProizvod)
 	return
@@ -385,14 +376,14 @@ nCount := 0
 // prodji kroz sastavnice
 do while !EOF() .and. sast->id == cProizvod
 	
-	select (nF_RNST)
+	select p_rnst
 	append blank
 	
 	Scatter()
 	
 	_br_nal := nBr_nal
 	_r_br := nR_br
-	_p_br := next_p_br(nBr_nal, nR_br, .f.)
+	_p_br := next_p_br(nBr_nal, nR_br)
 	_idroba := sast->id2
 	_kolicina := sast->kolicina
 	_debljina := g_roba_debljina(_idroba)
@@ -415,22 +406,13 @@ return
 // --------------------------------------
 // da li vec postoje sastavnice
 // --------------------------------------
-function sast_exist(nBr_nal, nR_br, lPrip)
+function sast_exist(nBr_nal, nR_br)
 local nTArea
 local nCount := 0
-local nF_RNST := F_P_RNST
-
-if lPrip == nil
-	lPrip := .t.
-endif
-
-if lPrip == .f.
-	nF_RNST := F_RNST
-endif
 
 nTArea := SELECT()
 
-select (nF_RNST)
+select p_rnst
 set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
@@ -449,7 +431,6 @@ if nCount > 0
 endif
 
 return .f.
-
 
 // -------------------------------------------
 // brisi sastavnice za broj naloga + r_br
