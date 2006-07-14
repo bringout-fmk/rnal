@@ -308,7 +308,7 @@ return 1
 // logiranje promjena pri operaciji azuriranja
 // naloga
 // -------------------------------------------
-function a_rnlog( nBr_nal, cOpis, cStat )
+function a_rnlog( nBr_nal, cOpis )
 local cOperater
 local cKontakt
 local cVrIsp
@@ -323,37 +323,28 @@ select p_rnal
 go top
 
 cOperater := field->operater
-
-if cStat <> "P"
-	cK_ime := field->k_ime
-	cK_tel := field->k_tel
-	cK_opis := field->k_opis
-	cVrIsp := field->vr_isp
-	cMjIsp := field->mj_isp
-	cDatIsp := DTOC(field->datisp)
-	cPartner := field->idpartner
-	cPrioritet := field->hitnost
-	cVrPlac := field->vr_plac
-endif
+cK_ime := field->k_ime
+cK_tel := field->k_tel
+cK_opis := field->k_opis
+cVrIsp := field->vr_isp
+cMjIsp := field->mj_isp
+cDatIsp := DTOC(field->datisp)
+cPartner := field->idpartner
+cPrioritet := field->hitnost
+cVrPlac := field->vr_plac
 
 if (cOpis == nil)
 	cOpis := "Otvoren novi nalog"
 endif
 
-if cStat <> "P"
-	// logiraj osnovne podatke
-	log_osn(nBr_nal, cOperater, cOpis, cPartner, cPrioritet, cVrPlac)
-
-	// logiraj podatke o isporuci
-	log_isporuka(nBr_nal, cOperater, cOpis, cMjIsp, cVrIsp, cDatIsp)
-
-	// logiranje podataka o kontaktu
-	log_kontakt(nBr_nal, cOperater, cOpis, cK_ime, cK_tel, cK_opis)
-endif
-
+// logiraj osnovne podatke
+log_osn(nBr_nal, cOperater, cOpis, cPartner, cPrioritet, cVrPlac)
+// logiraj podatke o isporuci
+log_isporuka(nBr_nal, cOperater, cOpis, cMjIsp, cVrIsp, cDatIsp)
+// logiranje podataka o kontaktu
+log_kontakt(nBr_nal, cOperater, cOpis, cK_ime, cK_tel, cK_opis)
 // logiranje artikala
 log_artikal(nBr_nal, cOperater, cOpis)
-
 // logiranje operacija
 log_operacije(nBr_nal, cOperater, cOpis)
 

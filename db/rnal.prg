@@ -54,7 +54,7 @@ a_rnop( nBr_nal )
 
 if cStat <> "P"
 	// logiraj promjene
-	a_rnlog( nBr_nal, cOpis, cStat )
+	a_rnlog( nBr_nal, cOpis )
 endif
 
 // sve je ok brisi pripremu
