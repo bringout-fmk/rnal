@@ -469,6 +469,12 @@ if RECCOUNT2() == 0
 	return .f.
 endif
 
+select p_rnst
+set filter to
+
+select p_rnop
+set filter to
+
 // provjeri rnst
 select p_rnal
 set order to tag "br_nal"

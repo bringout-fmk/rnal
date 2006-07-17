@@ -287,7 +287,7 @@ return 1
 // ---------------------------------------------
 static function k_handler()
 local nBr_nal
-local cLOG_opis
+local cLOGopis
 
 if (Ch==K_CTRL_T .or. Ch==K_ENTER;
 	.or. Ch==K_CTRL_P;
@@ -298,7 +298,7 @@ endif
 do case
 	case (Ch == K_CTRL_T)
 		SELECT P_RNAL
-		if br_sve_zapise()
+		if br_stavku()
 			return DE_REFRESH
 		endif
 		return DE_CONT
@@ -351,11 +351,25 @@ do case
 		return DE_CONT
 		
 	case Ch==K_ALT_A
+		
 		if !nal_integritet()
 			return DE_CONT
 		endif
+		
+		select p_rnal
+		go top
+		
 		if Pitanje(, "Azurirati nalog (D/N)?", "D") == "D"
-	  		
+			
+			// opis prije azuriranja
+			if get_p_marker() == "P"
+				if get_box_opis(@cLOGopis) == 0
+					return DE_CONT
+				endif
+			else
+				cLOGopis := ""
+			endif
+			
 			// generisi sifru robe + match code
 			gen_r_sif()
 			
@@ -369,11 +383,12 @@ do case
 			del_op_error()
 			
 			// azuriraj nalog
-			if azur_nalog() == 1
+			if azur_nalog(cLOGopis) == 1
 				SELECT P_RNAL
 				RETURN DE_REFRESH
 			endif
 		endif
+		
 		RETURN DE_CONT
 	
 	case ( Ch == K_ESC )
@@ -386,6 +401,25 @@ do case
 endcase
 
 return DE_CONT
+
+
+// vrati box sa poljem opis
+function get_box_opis(cOpis)
+private GetList:={}
+
+cOpis := SPACE(150)
+
+Box(,1,60)
+	@ m_x + 1, m_y + 2 SAY "Opis promjene:" GET cOpis VALID !EMPTY(cOpis) PICT "@S40"
+	read
+BoxC()
+
+if LastKey()==K_ESC
+	return 0
+endif
+
+return 1
+
 
 
 // ---------------------------------------
@@ -410,7 +444,57 @@ zap
 
 del_rnal_z( nBr_nal )
 
+// vrati marker naloga
+set_p_marker( nBr_nal, "" )
+
 select p_rnal
 
 return .t.
+
+
+// ------------------------------
+// brisanje stavke
+// ------------------------------
+static function br_stavku()
+local nTArea := SELECT()
+
+nBr_nal := field->br_nal
+nR_br := field->r_br
+
+delete
+
+select p_rnst
+set filter to
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+if FOUND()
+	do while !EOF() .and. field->br_nal == nBr_nal ;
+			.and. field->r_br == nR_br
+		
+		delete
+		skip
+	enddo
+endif
+
+select p_rnop
+set filter to
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+if FOUND()
+	do while !EOF() .and. field->br_nal == nBr_nal ;
+			.and. field->r_br == nR_br
+		
+		delete
+		skip
+	enddo
+endif
+
+
+select (nTArea)
+return
+
 

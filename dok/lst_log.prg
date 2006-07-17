@@ -189,7 +189,7 @@ cRow1 := SPACE(nLenText)
 cRow2 := SPACE(nLenText)
 cRow3 := SPACE(nLenText)
 
-cOpis := g_log_opis( rnlog->tip )
+cOpis := g_log_opis( rnlog->br_nal, rnlog->tip )
 
 aOpisArr := SjeciStr(cOpis, nLenText)
 if LEN(aOpisArr) > 0
@@ -216,8 +216,29 @@ return
 
 
 // vraca opisno polje
-static function g_log_opis(cTip)
+static function g_log_opis(nBr_nal, cTip)
 local cRet := ""
+local nTArea := SELECT()
+select rnlog
+
+do case
+	case cTip == "01"
+		cRet := get01_stavka(nBr_nal)
+	case cTip == "99"
+		cRet := get99_stavka(nBr_nal)
+	case cTip == "10"
+		cRet := get10_stavka(nBr_nal)
+	case cTip == "11"
+		cRet := get11_stavka(nBr_nal)
+	case cTip == "12"
+		cRet := get12_stavka(nBr_nal)
+	case cTip == "20"
+		cRet := get20_stavka(nBr_nal)
+	case cTip == "30"
+		cRet := get30_stavka(nBr_nal)
+endcase
+
+select (nTArea)
 return cRet
 
 
