@@ -242,7 +242,6 @@ AADD(aDBf,{ "datum"      , "D" ,   8 ,  0 })
 AADD(aDBf,{ "vrijeme"    , "C" ,   8 ,  0 })
 AADD(aDBf,{ "operater"   , "C" ,  40 ,  0 })
 AADD(aDBf,{ "tip"        , "C" ,   2 ,  0 })
-AADD(aDBf,{ "akcija"     , "C" ,   1 ,  0 })
 AADD(aDBf,{ "opis"       , "C" , 150 ,  0 })
 
 return aDbf
@@ -271,6 +270,7 @@ AADD(aDBf,{ "n_3"        , "N" ,  15 ,  5 })
 AADD(aDBf,{ "k_1"        , "N" ,  15 ,  5 })
 AADD(aDBf,{ "k_2"        , "N" ,  15 ,  5 })
 AADD(aDBf,{ "k_3"        , "N" ,  15 ,  5 })
+AADD(aDBf,{ "akcija"     , "C" ,   1 ,  0 })
 
 return aDbf
 

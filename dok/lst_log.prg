@@ -124,7 +124,7 @@ aImeKol := {}
 AADD(aImeKol, {"Datum", {|| datum }, "datum", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vrijeme" , {|| PADR(vrijeme, 5) }, "vrijeme", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Tip" , {|| PADR(s_prom_tip(tip), 15) }, "tip", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Akcija" , {|| PADR(s_prom_akcija(akcija), 10) }, "akcija", {|| .t.}, {|| .t.} })
+//AADD(aImeKol, {"Akcija" , {|| PADR(s_prom_akcija(akcija), 10) }, "akcija", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Operater" , {|| PADR(operater, 20) }, "operater", {|| .t.}, {|| .t.} })
 
 aKol:={}
