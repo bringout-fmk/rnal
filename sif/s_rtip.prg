@@ -67,7 +67,7 @@ add_mcode(@aImeKol)
 AADD(aImeKol, {"Grupacija", {|| grupa}, "grupa", {|| .t.}, {|| p_rgrupe(@wgrupa)} })
 AADD(aImeKol, {"Naziv", {|| naziv}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Oznaka", {|| vrsta}, "vrsta", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Zaokruzenje", {|| tip_zaok }, "tip_zaok", {|| .t.}, {|| v_zaokr( @wtip_zaok ) } ,, "99" })
+AADD(aImeKol, {"Zaokruzenje", {|| tip_zaok }, "tip_zaok", {|| .t. }, {|| v_zaokr( @wtip_zaok ) } ,, "99" })
 AADD(aImeKol, {"Neto koef.", {|| neto_koef }, "neto_koef", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Neto proc.", {|| neto_proc }, "neto_proc", {|| .t.}, {|| .t.} })
 
@@ -137,16 +137,22 @@ private opc:={}
 private opcexe:={}
 private izbor:=1
 
-AADD(opc, "0 - bez zaokruzenja           ")
-AADD(opcexe, {|| nZaok := 0, Izbor := 0 })
-AADD(opc, "1 - tabela GN  ")
-AADD(opcexe, {|| nZaok := 1, Izbor := 0 })
-AADD(opc, "2 - profilit zaokruzenje ")
-AADD(opcexe, {|| nZaok := 2, Izbor := 0 })
-AADD(opc, "3 - staklo debljine do 3mm  ")
-AADD(opcexe, {|| nZaok := 3, Izbor := 0 })
+if nZaok == 0
 
-Menu_SC("mzk")
+	AADD(opc, "1 - tabela GN                  ")
+ 	AADD(opcexe, {|| nZaok := 1, Izbor := 0 })
+ 
+ 	AADD(opc, "2 - profilit zaokruzenje ")
+ 	AADD(opcexe, {|| nZaok := 2, Izbor := 0 })
+ 
+ 	AADD(opc, "3 - staklo debljine do 3mm  ")
+ 	AADD(opcexe, {|| nZaok := 3, Izbor := 0 })
+ 
+ 	AADD(opc, "99 - bez zaokruzenja  ")
+ 	AADD(opcexe, {|| nZaok := 99, Izbor := 0 })
+ 
+ 	Menu_SC("mzk")
+endif
 
 return .t.
 

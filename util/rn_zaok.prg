@@ -6,7 +6,7 @@
  * ----------------------------------------------------------------
  */
 
-static BEZ_ZAOKR := 0
+static BEZ_ZAOKR := 99
 static GN_ZAOKR := 1
 static PROF_ZAOKR := 2
 static S3M_ZAOKR := 3
