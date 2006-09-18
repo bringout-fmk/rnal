@@ -231,7 +231,7 @@ nX += 2
 nPartX := m_x + nX
 nPartY := m_y + 20
 
-@ m_x + nX, m_y + 2 SAY "Partner:" GET _idpartner VALID val_partner(@_idpartner, nPartX, nPartY)
+@ m_x + nX, m_y + 2 SAY "Kupac:" GET _idpartner VALID val_partner(@_idpartner, nPartX, nPartY)
 
 nX += 3
 

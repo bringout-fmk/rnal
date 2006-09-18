@@ -10,7 +10,7 @@
 // ------------------------------------------------
 // prelged sifrarnika tipova
 // ------------------------------------------------
-function p_rtip(cId, dx, dy)
+function p_rtip(cId, cGrupa, dx, dy)
 *{
 local nTArea
 local nArea
@@ -18,6 +18,10 @@ local cHeader
 
 cHeader := "Lista: tipovi artikala "
 nTArea := SELECT()
+
+if cGrupa == nil
+	cGrupa := ""
+endif
 
 Private Kol
 Private ImeKol
@@ -27,11 +31,29 @@ nArea := F_S_TIPOVI
 
 select (nTArea)
 
+if !EMPTY(cGrupa)
+	set_f_tbl(cGrupa)
+endif
+
 set_a_kol( @Kol, @ImeKol)
 return PostojiSifra( nArea, 1, 10, 75, cHeader, ;
        @cId, dx, dy, ;
 	{|Ch| k_handler(Ch)} )
 	
+
+// -------------------------------------------
+// setovanje filtera po grupaciji
+// -------------------------------------------
+static function set_f_tbl(cGrupa)
+local cFilter
+local nTArea := SELECT()
+cFilter := "grupa == " + cm2str(cGrupa)
+select s_tipovi
+set filter to &cFilter
+
+select (nTArea)
+return
+
 
 // ---------------------------------------------------
 // kolone tabele
@@ -42,7 +64,7 @@ aImeKol := {}
 
 AADD(aImeKol, {"ID"   , {|| id}   , "id"   , {|| .t.}, {|| .t.} })
 add_mcode(@aImeKol)
-AADD(aImeKol, {"Grupacija", {|| grupa}, "grupa", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Grupacija", {|| grupa}, "grupa", {|| .t.}, {|| p_rgrupe(@wgrupa)} })
 AADD(aImeKol, {"Naziv", {|| naziv}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Oznaka", {|| vrsta}, "vrsta", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Zaokruzenje", {|| tip_zaok }, "tip_zaok", {|| .t.}, {|| v_zaokr( @wtip_zaok ) } ,, "99" })

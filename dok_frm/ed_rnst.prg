@@ -128,6 +128,8 @@ local cIdRoba
 local nDebStakla
 local nXRekap
 local nYRekap
+local nXGrupa
+local nXTip
 local cRobaVrsta:=""
 local nZaokruzenje := 0
 local nNetoKoef := 0
@@ -140,11 +142,9 @@ if lNovi
 	_p_br := next_p_br(nBr_nal, nR_br)
 	_idroba := SPACE(LEN(idroba))
 	_roba_vrsta := "S"
-	//_kolicina := 0
+	_roba_gr := SPACE(6)
 	_roba_tip := SPACE(6)
 	_debljina := 0
-	//_d_sirina := 0
-	//_d_visina := 0
 	_d_ukupno := 0
 	cUnosOp := "D"
 endif
@@ -154,7 +154,15 @@ endif
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Tip:" GET _roba_tip VALID p_rtip(@_roba_tip) 
+@ m_x + nX, m_y + 2 SAY "   Grupacija:" GET _roba_gr VALID p_rgrupe(@_roba_gr, 4, 25) 
+
+read
+
+ESC_RETURN 0
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "  Tip stakla:" GET _roba_tip VALID p_rtip(@_roba_tip, _roba_gr, 5, 25) 
 
 nX += 1
 

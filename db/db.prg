@@ -118,6 +118,7 @@ Skloni(KUMPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"S_RNOP.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"S_RNKA.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"S_TIPOVI.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"S_GRUPE.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
 ?
@@ -151,6 +152,7 @@ AADD(gaDBFs, { F_LOGIT, "RNLOG_IT", P_KUMPATH  } )
 AADD(gaDBFs, { F_S_RNOP, "S_RNOP", P_SIFPATH } )
 AADD(gaDBFs, { F_S_RNKA, "S_RNKA", P_SIFPATH } )
 AADD(gaDBFs, { F_S_RNKA, "S_TIPOVI", P_SIFPATH } )
+AADD(gaDBFs, { F_S_RNKA, "S_GRUPE", P_SIFPATH } )
 AADD(gaDBFs, { F_SAST, "SAST", P_SIFPATH } )
 AADD(gaDBFs, { F_ROBA, "ROBA", P_SIFPATH } )
 AADD(gaDBFs, { F_SIFK, "SIFK", P_SIFPATH } )
@@ -192,6 +194,7 @@ cre_tbls(nArea, "P_RNOP")
 cre_tbls(nArea, "S_RNOP")
 cre_tbls(nArea, "S_RNKA")
 cre_tbls(nArea, "S_TIPOVI")
+cre_tbls(nArea, "S_GRUPE")
 cre_sifk(nArea)
 
 return
@@ -310,6 +313,7 @@ AADD(aDBf,{ "p_br"       , "N" ,   4 ,  0 })
 AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
 AADD(aDBf,{ "roba_vrsta" , "C" ,   1 ,  0 })
 AADD(aDBf,{ "roba_tip"   , "C" ,   6 ,  0 })
+AADD(aDBf,{ "roba_gr"    , "C" ,   6 ,  0 })
 AADD(aDBf,{ "kolicina"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "debljina"   , "N" ,  15 ,  5 })
 AADD(aDBf,{ "d_visina"   , "N" ,  15 ,  5 })
@@ -373,13 +377,29 @@ aDbf:={}
 // set polja sifrarnika tipova
 AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
 add_f_mcode(@aDbf)
-AADD(aDBf,{ "grupa"       , "C" ,   3 ,  0 })
+AADD(aDBf,{ "grupa"       , "C" ,   6 ,  0 })
 AADD(aDBf,{ "vrsta"       , "C" ,   5 ,  0 })
 AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
 AADD(aDBf,{ "tip_zaok"    , "N" ,   2 ,  0 })
 AADD(aDBf,{ "neto_koef"   , "N" ,  10 ,  5 })
 AADD(aDBf,{ "neto_proc"   , "N" ,  10 ,  5 })
 return aDbf
+
+
+// ----------------------------------------------
+// s_grupe fields
+// ----------------------------------------------
+function g_sgr_fields()
+local aDbf
+aDbf:={}
+// set polja sifrarnika tipova
+AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
+add_f_mcode(@aDbf)
+AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
+AADD(aDBf,{ "k1"          , "C" ,   1 ,  0 })
+AADD(aDBf,{ "k2"          , "C" ,  10 ,  0 })
+return aDbf
+
 
 
 // ---------------------------------------------
@@ -433,6 +453,8 @@ do case
 		nArea2 := F_S_RNKA
 	case cTable == "S_TIPOVI"
 		nArea2 := F_S_TIPOVI
+	case cTable == "S_GRUPE"
+		nArea2 := F_S_GRUPE
 	case cTable == "P_RNAL"
 		nArea2 := F_P_RNAL
 	case cTable == "P_RNOP"
@@ -459,6 +481,8 @@ if (nArea==-1 .or. nArea == nArea2)
 			aDbf := g_srnka_fields()
 		case cTable == "S_TIPOVI"
 			aDbf := g_stip_fields()
+		case cTable == "S_GRUPE"
+			aDbf := g_sgr_fields()
 	endcase
 
 	do case 
@@ -503,6 +527,9 @@ if (nArea==-1 .or. nArea == nArea2)
 		  	CREATE_INDEX("idop","id_rnop+id", cPath + cTable)
 		case (nArea2 == F_S_TIPOVI)
 			CREATE_INDEX("id","id", cPath + cTable)
+		case (nArea2 == F_S_GRUPE)
+			CREATE_INDEX("id","id", cPath + cTable)
+			
 	endcase
 endif
 return 
@@ -552,7 +579,7 @@ if i==F_RNLOG .or. i==F_LOGIT
 	lIdiDalje:=.t.
 endif
 
-if i==F_S_RNOP .or. i==F_S_RNKA .or. i==F_S_TIPOVI
+if i==F_S_RNOP .or. i==F_S_RNKA .or. i==F_S_TIPOVI .or. i==F_S_GRUPE
 	lIdiDalje:=.t.
 endif
 
