@@ -433,10 +433,10 @@ cLine := REPLICATE(CHR(205), 76)
 nX += 1
 
 @ nX, nY SAY "      Zaokruzenja:"
-@ nX, col() + 4 SAY "Sirina (cm)"
+@ nX, col() + 4 SAY "Sirina (mm)"
 @ nX, col() + 2 SAY nGNSirina PICT PIC_DIM()
 
-@ nX, col() + 2 SAY "Visina (cm)"
+@ nX, col() + 2 SAY "Visina (mm)"
 @ nX, col() + 2 SAY nGNVisina PICT PIC_DIM()
 
 nX += 1
@@ -456,3 +456,4 @@ nX += 1
 @ nX, nY SAY cLine
 
 return
+

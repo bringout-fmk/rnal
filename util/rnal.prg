@@ -319,6 +319,40 @@ select (nTArea)
 return cRet
 
 
+// ----------------------------
+// get roba grupa
+// ----------------------------
+function g_roba_gr(cRoba)
+local nTArea := SELECT()
+local cRet := ""
+local cPom
+select roba
+set order to tag "ID"
+go top
+
+if roba->(fieldpos("ROBA_TIP")) == 0
+	select (nTArea)
+	return cRet
+endif
+
+hseek cRoba
+
+if FOUND()
+	cPom := field->roba_tip
+endif
+
+select s_tipovi
+set order to tag "ID"
+hseek cPom
+
+if FOUND()
+	cRet := field->grupa
+endif
+
+select (nTArea)
+return cRet
+
+
 
 // ----------------------------
 // get roba debljina
@@ -395,6 +429,7 @@ do while !EOF() .and. sast->id == cProizvod
 	_kolicina := sast->kolicina
 	_debljina := g_roba_debljina(_idroba)
 	_roba_tip := g_roba_tip(_idroba)
+	_roba_gr  := g_roba_gr(_idroba)
 	_roba_vrsta := "S"
 	
 	Gather()
