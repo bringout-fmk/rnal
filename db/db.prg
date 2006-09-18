@@ -396,6 +396,7 @@ aDbf:={}
 AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
 add_f_mcode(@aDbf)
 AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
+AADD(aDBf,{ "funkcija"    , "N" ,   2 ,  0 })
 AADD(aDBf,{ "k1"          , "C" ,   1 ,  0 })
 AADD(aDBf,{ "k2"          , "C" ,  10 ,  0 })
 return aDbf
