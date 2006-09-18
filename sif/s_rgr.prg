@@ -4,11 +4,14 @@
 // ------------------------------------------------
 // prelged sifrarnika grupa
 // ------------------------------------------------
-function p_rgrupe(cId, dx, dy)
-*{
+function p_rgrupe(cId, cFunc, dx, dy)
 local nTArea
 local nArea
 local cHeader
+
+if cFunc == nil
+	cFunc := ""
+endif
 
 cHeader := "Lista: grupe artikala "
 nTArea := SELECT()
@@ -20,6 +23,10 @@ O_S_GRUPE
 nArea := F_S_GRUPE
 
 select (nTArea)
+
+if !EMPTY(cFunc)
+	set_f_tbl(cFunc)
+endif
 
 set_a_kol( @Kol, @ImeKol)
 return PostojiSifra( nArea, 1, 10, 75, cHeader, ;
@@ -48,6 +55,18 @@ next
 
 return
 
+// ---------------------------------------
+// postavi filter po funkciji
+// ---------------------------------------
+static function set_f_tbl(cFunc)
+local cFilter
+
+cFilter := "funkcija == " + cFunc
+
+select s_grupe
+set filter to &cFilter
+
+return
 
 // ------------------------------------
 // keyboard handler
@@ -90,6 +109,22 @@ if nFunc == 0
 endif
 
 return .t.
+
+
+
+// -------------------------------------
+// vrati funkciju
+// -------------------------------------
+function get_funkcija(cFunc)
+local nFunc := 0
+
+v_funkcija(@nFunc)
+
+cFunc := STR(nFunc, 2, 0)
+
+return .t.
+
+
 
 // -------------------------------
 // vraca opis funkcije

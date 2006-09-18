@@ -135,6 +135,7 @@ local nZaokruzenje := 0
 local nNetoKoef := 0
 local nNetoProc := 0
 local cRFilt := ""
+local cFunkcija := SPACE(2)
 
 if lNovi
 	_br_nal := nBr_nal
@@ -154,7 +155,12 @@ endif
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "   Grupacija:" GET _roba_gr VALID p_rgrupe(@_roba_gr, 4, 25) 
+
+@ m_x + nX, m_y + 2 SAY "    Funkcija:" GET cFunkcija VALID get_funkcija(@cFunkcija)
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "   Grupacija:" GET _roba_gr VALID p_rgrupe(@_roba_gr, cFunkcija, 5, 25) 
 
 read
 
@@ -162,7 +168,7 @@ ESC_RETURN 0
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "  Tip stakla:" GET _roba_tip VALID p_rtip(@_roba_tip, _roba_gr, 5, 25) 
+@ m_x + nX, m_y + 2 SAY "  Tip stakla:" GET _roba_tip VALID p_rtip(@_roba_tip, _roba_gr, 6, 25) 
 
 nX += 1
 
