@@ -181,6 +181,8 @@ public gDg_margina := 0
 
 ::super:setTGVars()
 
+gPartnBlock := {|Ch| rn_partn_block(Ch) }
+
 O_PARAMS
 Rpar("ff",@gFirma)
 Rpar("fn",@gNFirma)

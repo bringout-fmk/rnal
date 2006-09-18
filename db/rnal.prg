@@ -898,31 +898,26 @@ function gen_r_id()
 local cRet := ""
 local nTArea 
 local nPom:=0
+local cPom
 
 nTArea := SELECT()
 
 select roba
-set filter to id = "X"
+set filter to id = "XR"
 set order to tag "ID"
-go top
+go bottom
 
-do while !EOF() .and. LEFT(field->id, 1) == "X"
-	if TYPE(SUBSTR(field->id, 2, 1)) == "C"
-		skip
-		loop
-	endif
-	nPom := VAL(RIGHT(field->id, 9))
-	skip
-enddo
+cPom := RIGHT(field->id, 8)
 
 select roba
 set filter to
 
 select (nTArea)
 
-nPom += 1
+cPom := NovaSifra(cPom)
+nPom := VAL(cPom)
 
-cRet := "X" + PADL(ALLTRIM(STR(nPom)), 9, "0")
+cRet := "XR" + PADL(ALLTRIM(STR(nPom)), 8, "0")
 
 return cRet
 

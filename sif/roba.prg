@@ -1,7 +1,9 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
-
+// -----------------------------------------
+// vraca artikal po filteru
+// -----------------------------------------
 function get_artikal(cId, cFilter, dx, dy)
 
 if EMPTY(cFilter) .or. cFilter == nil
@@ -90,6 +92,12 @@ endif
 AADD(aImeKol, {"Tarifa", {|| IdTarifa}, "IdTarifa", {|| .t. }, {|| P_Tarifa(@wIdTarifa) }})
 
 AADD(aImeKol, {"Tip", {|| " " + Tip + " "}, "Tip", {|| .t.}, {|| .t. }})
+AADD(aImeKol, {"NC", {|| nc}, "nc", {|| .t.}, {|| .t. }})
+AADD(aImeKol, {"VPC", {|| vpc}, "vpc", {|| .t.}, {|| .t. }})
+
+if roba->(fieldpos("BARKOD")) <> 0
+	AADD(aImeKol, {"BARKOD", {|| barkod}, "barkod", {|| .t.}, {|| .t. }})
+endif
 
 for i:=1 TO LEN(aImeKol)
 	AADD(aKol, i)

@@ -140,11 +140,11 @@ if lNovi
 	_p_br := next_p_br(nBr_nal, nR_br)
 	_idroba := SPACE(LEN(idroba))
 	_roba_vrsta := "S"
-	_kolicina := 0
+	//_kolicina := 0
 	_roba_tip := SPACE(6)
 	_debljina := 0
-	_d_sirina := 0
-	_d_visina := 0
+	//_d_sirina := 0
+	//_d_visina := 0
 	_d_ukupno := 0
 	cUnosOp := "D"
 endif
@@ -176,7 +176,7 @@ nRobaY := m_y + 35
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Vrsta [S] - sirovina [K] - kupac:" GET _roba_vrsta VALID val_kunos(@_roba_vrsta, "KS")
+@ m_x + nX, m_y + 2 SAY "Vrsta [S] - sirovina [K] - kupac:" GET _roba_vrsta VALID val_kunos(@_roba_vrsta, "KS") PICT "@!"
 
 read
 

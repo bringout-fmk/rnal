@@ -107,12 +107,11 @@ local nLOGR_br
 local cAkcija
 local cTip
 local cRobVrsta
+local lLogSt := .f.
 
 nLOGR_br := n_log_rbr( nBr_nal )
 cAkcija := "+"
 cTip := "20"
-
-f_rnlog(nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
 
 select p_rnst
 set order to tag "br_nal"
@@ -141,10 +140,17 @@ do while !EOF()
 		
 		f20_stavke(cAkcija, nBr_nal, nLOGR_br, nStP_br, cProizvod, cIdRoba, cRobVrsta, nKolicina, nSirina, nVisina)
 		
+		lLogSt := .t.
+		
 		select p_rnst
 		skip
 	enddo
 enddo
+
+// ako je bilo stavki dodaj i RNLOG zapis
+if lLogSt
+	f_rnlog(nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
+endif
 
 return
 
@@ -157,12 +163,11 @@ local cProizvod
 local nLOGR_br
 local cAkcija
 local cTip
+local lLogOper := .f.
 
 nLOGR_br := n_log_rbr( nBr_nal )
 cAkcija := "+"
 cTip := "30"
-
-f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
 
 select p_rnal
 set order to tag "br_nal"
@@ -206,6 +211,8 @@ do while !EOF()
 				   cProizvod, cRoba, cRnOper,;
 				   cRnKa, cInstr)
 			
+			lLogOper := .t.
+			
 			select p_rnop
 			skip
 		enddo
@@ -217,6 +224,11 @@ do while !EOF()
 	select p_rnal
 	skip
 enddo
+
+// ako je bilo operacija dodaj i RNLOG zapis
+if lLogOper
+	f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
+endif
 
 return
 

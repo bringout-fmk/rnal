@@ -301,16 +301,23 @@ function g_roba_tip(cRoba)
 local nTArea := SELECT()
 local cRet := ""
 select roba
-if roba->(fieldpos("R_TIP")) == 0
+set order to tag "ID"
+go top
+
+if roba->(fieldpos("ROBA_TIP")) == 0
 	select (nTArea)
 	return cRet
 endif
+
 hseek cRoba
+
 if FOUND()
-	cRet := field->r_tip
+	cRet := field->roba_tip
 endif
+
 select (nTArea)
 return cRet
+
 
 
 // ----------------------------
@@ -388,6 +395,7 @@ do while !EOF() .and. sast->id == cProizvod
 	_kolicina := sast->kolicina
 	_debljina := g_roba_debljina(_idroba)
 	_roba_tip := g_roba_tip(_idroba)
+	_roba_vrsta := "S"
 	
 	Gather()
 	
