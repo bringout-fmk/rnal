@@ -103,6 +103,7 @@ return nSelect
 static function new_partn_f_lica(cNaz, cIdPart)
 local nX := 1
 local nLeft := 15
+local cRegB := SPACE(13)
 private GetList:={}
 
 select partn
@@ -134,6 +135,10 @@ Box(, 8, 60)
 
 	@ m_x + nX, m_y+2 SAY PADL("Telefon:", nLeft) GET _telefon
 	
+	++ nX
+
+	@ m_x + nX, m_y+2 SAY PADL("ID broj:", nLeft) GET cRegB VALID !EMPTY(cRegB)
+	
 	read
 BoxC()
 
@@ -148,6 +153,13 @@ select partn
 set filter to
 set order to tag "ID"
 seek cIdPart
+
+O_SIFK
+O_SIFV
+// dodaj u sifk, sifv zapis
+USifK("PARTN", "REGB", cIdPart, cRegB)
+
+select partn
 
 return .t.
 
