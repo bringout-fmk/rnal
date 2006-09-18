@@ -347,8 +347,8 @@ return cRet
 function sast_to_rnst(cProizvod, nBr_nal, nR_br)
 
 // da li vec postoje sastavnice ???
-if !sast_exist(nBr_nal, nR_br)
-	dodaj_sastavnice(nBr_nal, nR_br)
+if !sast_exist(nBr_nal, nR_br, cProizvod)
+	dodaj_sastavnice(cProizvod, nBr_nal, nR_br)
 endif
 
 return
@@ -418,8 +418,7 @@ go top
 seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 
 do while !EOF() .and. field->br_nal == nBr_nal ;
-                .and. field->r_br == nR_br
-	
+                .and. field->r_br == nR_br 
 	++ nCount
 	skip
 enddo
@@ -493,6 +492,28 @@ do while !EOF()
 		MsgBeep("Stavka br. " + ALLTRIM(STR(nR_br)) + " nema sastavnica!##Azuriranje onemoguceno!")
 		return .f.
 	endif
+
+	do while !EOF() .and. p_rnst->br_nal == nBr_nal .and. ;
+	  		      p_rnst->r_br == nR_br
+
+		if p_rnst->kolicina == 0
+			MsgBeep("Sirovine - kolicina = 0 !!!")
+			return .f.
+		endif
+
+		if p_rnst->d_visina == 0
+			MsgBeep("Sirovine - visina = 0 !!!")
+			return .f.
+		endif
+
+		if p_rnst->d_sirina == 0
+			MsgBeep("Sirovine - sirina = 0 !!!")
+			return .f.
+		endif
+		
+		skip
+		loop
+	enddo
 
 	select p_rnal
 	skip

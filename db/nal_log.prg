@@ -106,6 +106,7 @@ local cProizvod
 local nLOGR_br
 local cAkcija
 local cTip
+local cRobVrsta
 
 nLOGR_br := n_log_rbr( nBr_nal )
 cAkcija := "+"
@@ -136,8 +137,9 @@ do while !EOF()
 		nVisina := field->d_visina
 		nSirina := field->d_sirina
 		nStP_br := field->p_br
+		cRobVrsta := field->roba_vrsta
 		
-		f20_stavke(cAkcija, nBr_nal, nLOGR_br, nStP_br, cProizvod, cIdRoba, nKolicina, nSirina, nVisina)
+		f20_stavke(cAkcija, nBr_nal, nLOGR_br, nStP_br, cProizvod, cIdRoba, cRobVrsta, nKolicina, nSirina, nVisina)
 		
 		select p_rnst
 		skip
@@ -316,7 +318,7 @@ return
 // stavke.... sastavnice
 // --------------------------------
 function f20_stavke(cAkcija, nBr_nal, nR_br, nSt_Rbr,;
-		    cRoba, cRoba2, nKol, nVis, nSir)
+		    cRoba, cRoba2, cRobVrsta, nKol, nVis, nSir)
 local nP_br
 
 nP_br := n_logit_pbr(nBr_nal, nR_br)
@@ -330,6 +332,7 @@ replace p_br with nP_br
 replace idroba with cRoba
 replace idroba2 with cRoba2
 replace st_rbr with nSt_Rbr
+replace c_1 with cRobVrsta
 replace k_1 with nKol
 replace n_1 with nVis
 replace n_2 with nSir
@@ -343,8 +346,8 @@ return
 // stavke.... instrukcije
 // --------------------------------
 function f30_stavke(cAkcija, nBr_nal, nR_br, nSt_rbr,;
-		     cRoba1, cRoba2, nRnOper,;
-		     cRnKa, nInstr)
+		     cRoba1, cRoba2, cRnOper,;
+		     cRnKa, cInstr)
 local nP_br
 
 nP_br := n_logit_pbr(nBr_nal, nR_br)
@@ -468,6 +471,7 @@ local nR_br
 local nP_br
 local cProizvod
 local cSirovina
+local cRobVrsta
 local cAkcija
 local nLOGR_br
 local cTip := "20"
@@ -491,6 +495,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	nKolicina := field->kolicina
 	nSirina := field->d_sirina
 	nVisina := field->d_visina
+	cRobVrsta := field->roba_vrsta
 	
 	// provjeri da li rnal(stavka) postoji u p_rnal 
 	// akcija "-"
@@ -503,7 +508,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		cAkcija := "-"
 		
 		f20_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, rnst->idroba,;
+			   rnal->proizvod, rnst->idroba, rnst->roba_vrsta,;
 			   rnst->kolicina, rnst->d_visina,;
 			   rnst->d_sirina)
 			
@@ -527,7 +532,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		cAkcija := "E"
 		
 		f20_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, rnst->idroba,;
+			   rnal->proizvod, rnst->idroba, rnst->roba_vrsta,;
 			   rnst->kolicina, rnst->d_visina,;
 			   rnst->d_sirina)
 	
@@ -552,6 +557,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	nKolicina := field->kolicina
 	nSirina := field->d_sirina
 	nVisina := field->d_visina
+	cRobVrsta := field->roba_vrsta
 	
 	// provjeri da li stavka postoji u kumulativu
 	// akcija "+"
@@ -564,7 +570,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		cAkcija := "+"
 		
 		f20_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   p_rnal->proizvod, cSirovina,;
+			   p_rnal->proizvod, cSirovina, cRobVrsta, ;
 			   nKolicina, nVisina, nSirina)
 
 		lSetRNLOG := .t.
@@ -597,6 +603,7 @@ local lSetRNLOG := .f.
 local cOperater := goModul:oDataBase:cUser
 local cIdOper
 local cIdKarakt
+local cInstr
 local cRoba
 
 // uzmi sljedeci broj RNLOG
@@ -620,7 +627,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	// provjeri da li rnop(stavka) postoji u p_rnop 
 	// akcija "-"
 	
-	if !op_exist(nBr_nal, nR_br, nP_br, cRoba, .f.)
+	if !op_exist(nBr_nal, nR_br, nP_br, cRoba, cIdOper, cIdKarakt, .f.)
 		
 		// pozicioniraj se na rnal
 		seek_rnal(nBr_nal, nR_br)
@@ -628,9 +635,9 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		cAkcija := "-"
 		
 		f30_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, rnop->idroba,;
-			   rnop->id_rnop, rnop->id_rnka,;
-			   rnop->rn_instr)
+			   rnal->proizvod, cRoba,;
+			   cIdOper, cIdKarakt,;
+			   cInstr)
 			
 		lSetRNLOG := .t.
 		
@@ -644,7 +651,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	// akcija "E"
 	
 	if !op_value(nBr_nal, nR_br, nP_br, cRoba, cIdOper, ;
-		      cIdKarak, cInstr, .f.)
+		      cIdKarakt, cInstr, .f.)
 		
 		// pozicioniraj se na RNAL zapis
 		seek_rnal(nBr_nal, nR_br)
@@ -652,9 +659,9 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		cAkcija := "E"
 		
 		f30_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, rnop->idroba,;
-			   rnop->id_rnop, rnop->id_rnka,;
-			   rnop->rn_instr)
+			   rnal->proizvod, cRoba,;
+			   cIdOper, cIdKarakt,;
+			   cInstr)
 	
 		lSetRNLOG := .t.
 	endif
@@ -681,7 +688,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	// provjeri da li stavka postoji u kumulativu
 	// akcija "+"
 	
-	if !op_exist(nBr_nal, nR_br, nP_br, cRoba, .t.)
+	if !op_exist(nBr_nal, nR_br, nP_br, cRoba, cIdOper, cIdKarakt, .t.)
 		
 		// pozicioniraj se na P_RNAL
 		seek_prnal(nBr_nal, nR_br)
@@ -689,9 +696,9 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		cAkcija := "+"
 		
 		f30_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, rnop->idroba,;
-			   rnop->id_rnop, rnop->id_rnka,;
-			   rnop->rn_instr)
+			   rnal->proizvod, cRoba,;
+			   cIdOper, cIdKarakt,;
+			   cInstr)
 	
 		lSetRNLOG := .t.
 	
@@ -705,7 +712,6 @@ enddo
 if lSetRNLOG 
 	f_rnlog(nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
 endif
-
 
 return
 
@@ -810,7 +816,7 @@ return lRet
 // da li postoji operacija u tabelama
 // P_RNOP, RNOP
 // --------------------------------------
-static function op_exist(nBr_nal, nR_br, nP_br, cRoba, lKumul)
+static function op_exist(nBr_nal, nR_br, nP_br, cRoba, cIdOper, cIdKarakt, lKumul)
 local nF_RNOP := F_P_RNOP
 local nTArea := SELECT()
 local nTRec := RecNo()
@@ -827,7 +833,7 @@ endif
 select (nF_RNOP)
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + STR(nP_br, 4, 0) + cRoba
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + STR(nP_br, 4, 0) + cRoba + cIdOper + cIdKarakt
 
 if FOUND()
 	lRet := .t.
@@ -860,11 +866,9 @@ endif
 select (nF_RNOP)
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + STR(nP_br, 4, 0) + cRoba
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + STR(nP_br, 4, 0) + cRoba + cIdOper + cIdKarak
  
-if (field->id_rnop == cIdOper) .and. ;
-   (field->id_rnka == cIdKarak) .and. ;
-   (field->rn_instr == cInstr)
+if (ALLTRIM(field->rn_instr) == ALLTRIM(cInstr))
 	lRet := .t.
 endif
 
@@ -911,6 +915,9 @@ do while !EOF() .and. field->br_nal == nBr_nal ;
 	select rnlog_it
 	skip
 enddo
+
+select rnlog
+set order to tag "br_nal"
 
 select (nTArea)
 return cRet

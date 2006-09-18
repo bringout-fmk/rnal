@@ -457,44 +457,53 @@ return .t.
 // ------------------------------
 static function br_stavku()
 local nTArea := SELECT()
+local lDelete := .f.
+
+if Pitanje(,"Izbrisati stavku (D/N)?", "D") == "N"
+	return lDelete
+endif
 
 nBr_nal := field->br_nal
 nR_br := field->r_br
 
-delete
-
-select p_rnst
-set filter to
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
-
-if FOUND()
-	do while !EOF() .and. field->br_nal == nBr_nal ;
-			.and. field->r_br == nR_br
-		
-		delete
-		skip
-	enddo
+if RECCOUNT2() <> 0
+	delete
+	lDelete := .t.
 endif
 
-select p_rnop
-set filter to
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+if lDelete
+	select p_rnst
+	set filter to
+	set order to tag "br_nal"
+	go top
+	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 
-if FOUND()
-	do while !EOF() .and. field->br_nal == nBr_nal ;
+	if FOUND()
+		do while !EOF() .and. field->br_nal == nBr_nal ;
 			.and. field->r_br == nR_br
 		
-		delete
-		skip
-	enddo
-endif
+			delete
+			skip
+		enddo
+	endif
 
+	select p_rnop
+	set filter to
+	set order to tag "br_nal"
+	go top
+	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+	if FOUND()
+		do while !EOF() .and. field->br_nal == nBr_nal ;
+			.and. field->r_br == nR_br
+		
+			delete
+			skip
+		enddo
+	endif
+endif
 
 select (nTArea)
-return
+return lDelete
 
 

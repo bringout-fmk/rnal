@@ -41,6 +41,12 @@ return NIL
 
 method mMenu()
 
+// security mora biti aktivan
+if gSecurity == "N"
+	MsgBeep("Security nije aktivan!#Prekidam rad...")
+	::quit()
+endif
+
 PID("START")
 close all
 

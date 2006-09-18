@@ -98,9 +98,14 @@ static function k_handler(nBr_nal)
 local nTblFilt
 
 // prikazi opis na formi
-s_log_opis_on_form()
+//s_log_opis_on_form()
 
 do case
+	// browse...
+	case (Ch == K_UP .or. Ch == K_DOWN) 
+		s_log_opis_on_form()
+		return DE_REFRESH
+		
 	// stampa liste log-a
 	case (Ch == K_CTRL_P)
 		if Pitanje(, "Stampati liste promjena (D/N) ?", "D") == "D"
@@ -124,8 +129,8 @@ aImeKol := {}
 AADD(aImeKol, {"Datum", {|| datum }, "datum", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vrijeme" , {|| PADR(vrijeme, 5) }, "vrijeme", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Tip" , {|| PADR(s_prom_tip(tip), 15) }, "tip", {|| .t.}, {|| .t.} })
-//AADD(aImeKol, {"Akcija" , {|| PADR(s_prom_akcija(akcija), 10) }, "akcija", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Operater" , {|| PADR(operater, 20) }, "operater", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Opis" , {|| PADR(opis, 20) }, "opis", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)
@@ -133,6 +138,7 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
 
 // --------------------------------------------
 // prikaz tipa loga
