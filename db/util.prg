@@ -34,6 +34,11 @@ if !used()
 	O_S_TIPOVI
 endif
 
+select F_S_GRUPE
+if !used()
+	O_S_GRUPE
+endif
+
 select F_RNAL
 if !used()
 	O_RNAL

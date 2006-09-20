@@ -24,7 +24,7 @@ nArea := F_S_GRUPE
 
 select (nTArea)
 
-if !EMPTY(cFunc)
+if !EMPTY(cFunc) .and. (cFunc <> "99")
 	set_f_tbl(cFunc)
 endif
 
@@ -64,6 +64,7 @@ local cFilter
 cFilter := "funkcija == " + cFunc
 
 select s_grupe
+set filter to
 set filter to &cFilter
 
 return
@@ -72,41 +73,61 @@ return
 // keyboard handler
 // ------------------------------------
 static function k_handler(Ch)
+
+do case
+	case Ch == K_CTRL_T
+		//
+		// do_something()
+	
+endcase
+
 return DE_CONT
 
 // ------------------------------------
 // odabir funkcije stakla
 // ------------------------------------
 static function v_funkcija(nFunc)
+local nSX
+local nSY
 private opc:={}
 private opcexe:={}
 private izbor:=1
 
+nSX := m_x
+nSY := m_y
+
 if nFunc == 0
 
-	AADD(opc, "1 - Toplotno zastitno               ")
+	AADD(opc, "1 - Toplotno zastitno             ")
  	AADD(opcexe, {|| nFunc := 1, Izbor := 0 })
- 
- 	AADD(opc, "2 - Suncano zastitno ")
+	
+	AADD(opc, "2 - Suncano zastitno")
  	AADD(opcexe, {|| nFunc := 2, Izbor := 0 })
- 
- 	AADD(opc, "3 - Multifunkcionalna  ")
+	
+	AADD(opc, "3 - Multifunkcionalno")
  	AADD(opcexe, {|| nFunc := 3, Izbor := 0 })
- 	
-	AADD(opc, "4 - Zvucno zastitno  ")
+	
+	AADD(opc, "4 - Zvucno zastitno")
  	AADD(opcexe, {|| nFunc := 4, Izbor := 0 })
- 	
-	AADD(opc, "5 - Sigurnosna  ")
+	
+	AADD(opc, "5 - Sigurnosno")
  	AADD(opcexe, {|| nFunc := 5, Izbor := 0 })
- 
- 	AADD(opc, "6 - Dekorativna  ")
+
+	AADD(opc, "6 - Dekorativno")
  	AADD(opcexe, {|| nFunc := 6, Izbor := 0 })
+
+	AADD(opc, "99 - nista od ponudjenog ")
+	AADD(opcexe, {|| nFunc := 99, izbor := 0 })
  
- 	AADD(opc, "99 - nista od ponudjenog  ")
- 	AADD(opcexe, {|| nFunc := 99, Izbor := 0 })
- 
- 	Menu_SC("func")
+  	Menu_SC("func")
 endif
+
+if LastKey() == K_ESC
+	nFunc := 99
+endif
+
+m_x := nSX
+m_y := nSY
 
 return .t.
 
@@ -118,9 +139,13 @@ return .t.
 function get_funkcija(cFunc)
 local nFunc := 0
 
-v_funkcija(@nFunc)
+if EMPTY(cFunc)
 
-cFunc := STR(nFunc, 2, 0)
+	v_funkcija(@nFunc)
+
+	cFunc := STR(nFunc, 2, 0)
+
+endif
 
 return .t.
 
@@ -129,29 +154,70 @@ return .t.
 // -------------------------------
 // vraca opis funkcije
 // -------------------------------
-static function g_func_opis(nFunc)
+function g_func_opis(nFunc)
 local xRet
+local aFunc 
 
-do case
-	case nFunc == 1
-		xRet := "Toplotno zastitno"
-	case nFunc == 2
-		xRet := "Suncano zastitno"
-	case nFunc == 3
-		xRet := "Multifunkcinalno"
-	case nFunc == 4
-		xRet := "Zvucno zastitno"
-	case nFunc == 5
-		xRet := "Sigurnosno"
-	case nFunc == 6
-		xRet := "Dekoratino"
-	otherwise
-		xRet := "----"
-endcase
+aFunc := g_aFunction()
 
-xRet := PADR(xRet, 18)
+if ( nFunc == 0 ) .or. ( LEN(aFunc) < nFunc )
+	xRet := PADR("---", 20)
+else
+	xRet := PADR(aFunc[nFunc, 2], 20)
+endif
 
 return xRet
 
 
+
+// ----------------------------------------
+// matrica sa dostupnim funkcijama
+// ----------------------------------------
+static function g_aFunction()
+local aFunc := {}
+
+AADD(aFunc, { 1, "Toplotno zastitno"})
+AADD(aFunc, { 2, "Suncano zastitno"})
+AADD(aFunc, { 3, "Multifunkcionalno"})
+AADD(aFunc, { 4, "Zvucno zastitno"})
+AADD(aFunc, { 5, "Sigurnosno"})
+AADD(aFunc, { 6, "Dekorativno"})
+
+return aFunc
+
+
+// ---------------------------------------------
+// prikazuje opis funkcije na kordinatama nX, nY
+// ---------------------------------------------
+function sh_function(cFunc, nX, nY)
+local nFunc
+local cOpis
+
+nFunc := VAL(cFunc)
+
+cOpis := g_func_opis(nFunc)
+
+@ m_x + nX, m_y + nY SAY cOpis
+
+return .t.
+
+
+// ------------------------------------
+// vraca funkciju odredjene grupe
+// ------------------------------------
+function g_func_from_grupa(cGrupa)
+local nFunc := 99
+local nTArea := SELECT()
+
+if !EMPTY(cGrupa)
+	select s_grupe
+	set order to tag "ID"
+	seek cGrupa
+	if FOUND()
+		nFunc := field->funkcija
+	endif
+endif
+
+select (nTArea)
+return nFunc
 

@@ -147,8 +147,10 @@ if lNovi
 	_roba_tip := SPACE(6)
 	_debljina := 0
 	_d_ukupno := 0
-	cUnosOp := "D"
+	cUnosOp := "N"
 endif
+
+cFunkcija := STR( g_func_from_group(_roba_gr) , 2, 0)
 
 @ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999" WHEN _r_br == 0
 @ m_x + nX, col() + 2 SAY "P.br:" GET _p_br PICT "9999"
@@ -156,11 +158,11 @@ endif
 nX += 2
 
 
-@ m_x + nX, m_y + 2 SAY "    Funkcija:" GET cFunkcija VALID get_funkcija(@cFunkcija)
+@ m_x + nX, m_y + 2 SAY PADL("Funkcija:", 15) GET cFunkcija VALID {|| get_funkcija(@cFunkcija), sh_function(cFunkcija, 4, 25)}
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "   Grupacija:" GET _roba_gr VALID p_rgrupe(@_roba_gr, cFunkcija, 5, 25) 
+@ m_x + nX, m_y + 2 SAY PADL("Grupacija:", 15) GET _roba_gr VALID p_rgrupe(@_roba_gr, cFunkcija, 5, 25) 
 
 read
 
@@ -168,11 +170,11 @@ ESC_RETURN 0
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "  Tip stakla:" GET _roba_tip VALID p_rtip(@_roba_tip, _roba_gr, 6, 25) 
+@ m_x + nX, m_y + 2 SAY PADL("Tip stakla:", 15) GET _roba_tip VALID p_rtip(@_roba_tip, _roba_gr, 6, 25) 
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Debljina:" GET _debljina PICT PIC_DIM()  
+@ m_x + nX, m_y + 2 SAY PADL("Debljina:", 15) GET _debljina PICT PIC_DIM()  
 @ m_x + nX, col() + 1 SAY "(mm)"
 
 read
@@ -240,7 +242,7 @@ nYRekap := m_y + 2
 s_rekap_stavka(nXRekap, nYRekap, _z_sirina, _z_visina, _d_ukupno, _z_ukupno, _neto)
 
 // unos operacija
-nUnOpX := 18
+nUnOpX := 19
 @ m_x + nUnOpX, m_y + 2 SAY "Unos instrukcija (D/N)?" GET cUnosOp VALID val_d_n( cUnosOp ) PICT "@!"
 
 read

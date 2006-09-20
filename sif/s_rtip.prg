@@ -64,7 +64,7 @@ aImeKol := {}
 
 AADD(aImeKol, {"ID"   , {|| id}   , "id"   , {|| .t.}, {|| .t.} })
 add_mcode(@aImeKol)
-AADD(aImeKol, {"Grupacija", {|| grupa}, "grupa", {|| .t.}, {|| p_rgrupe(@wgrupa)} })
+AADD(aImeKol, {"Grupa", {|| grupa}, "grupa", {|| .t.}, {|| p_rgrupe(@wgrupa)} })
 AADD(aImeKol, {"Naziv", {|| naziv}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Oznaka", {|| vrsta}, "vrsta", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Zaokruzenje", {|| tip_zaok }, "tip_zaok", {|| .t. }, {|| v_zaokr( @wtip_zaok ) } ,, "99" })
@@ -83,7 +83,40 @@ return
 // keyboard handler
 // ------------------------------------
 static function k_handler(Ch)
+
+do case
+	case Ch == K_CTRL_T
+		// provjeri da li smijes brisati sifru
+		if !chk_del_item( field->id )
+			MsgBeep("Ovu sifru vec koristi neki od artikala !!!")
+			return DE_CONT
+		endif
+endcase
+
 return DE_CONT
+
+
+// --------------------------------------
+// provjeri da li smijes brisati stavku
+// --------------------------------------
+static function chk_del_item(cTip)
+local nTArea := SELECT()
+local lRet := .t.
+
+O_ROBA
+select roba
+set order to tag "ID"
+go top
+do while !EOF()
+	if field->roba_tip == cTip
+		lRet := .f.
+		exit
+	endif
+	skip
+enddo
+
+select (nTArea)
+return lRet
 
 
 // -------------------------------
