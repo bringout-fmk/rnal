@@ -15,7 +15,7 @@ local nTArea
 local nArea
 local cHeader
 
-cHeader := "Lista: tipovi artikala "
+cHeader := "Lista: tipovi artikala,    <S> setuj funkcije"
 nTArea := SELECT()
 
 if cFilter == nil
@@ -88,9 +88,55 @@ do case
 			MsgBeep("Ovu sifru vec koristi neki od artikala !!!")
 			return DE_CONT
 		endif
+	case UPPER(CHR(Ch)) == "S"
+		fld_funkcija()
+		return 7
 endcase
 
 return DE_CONT
+
+
+// ---------------------------------------
+// setovanje polja FUNKCIJA, opcija "S"
+// ---------------------------------------
+static function fld_funkcija()
+local aStdVals 
+local aRet
+
+// standardne vrijednosti
+aStdVals := g_aFunction()
+
+aRet := get_hash_field( funkcija, aStdVals)
+
+scatter()
+set_hash_field( @_funkcija , aRet)
+gather()
+
+return 
+
+
+// ----------------------------------------------
+// setovanje polja funkcija iz browse-a
+// ----------------------------------------------
+static function fld_get_funkcija( cFunc )
+local aStdVals 
+local aRet
+local lSilent := .t.
+local nLenField
+
+nLenField := LEN(cFunc)
+
+// standardne vrijednosti
+aStdVals := g_aFunction()
+
+aRet := get_hash_field( cFunc, aStdVals)
+
+set_hash_field( @cFunc , aRet, nil, lSilent )
+
+cFunc := PADR(cFunc, nLenField )
+
+return .t.
+
 
 
 // --------------------------------------
@@ -185,14 +231,6 @@ if nZaok == 0
 endif
 
 return .t.
-
-// ----------------------------------------------
-// setovanje polja funkcija
-// ----------------------------------------------
-static function fld_get_funkcija(cFunction)
-
-return .t.
-
 
 // ------------------------------------
 // odabir funkcije stakla
