@@ -10,8 +10,7 @@
 // ------------------------------------------------
 // prelged sifrarnika tipova
 // ------------------------------------------------
-function p_rtip(cId, cGrupa, dx, dy)
-*{
+function p_rtip(cId, cFilter, dx, dy)
 local nTArea
 local nArea
 local cHeader
@@ -19,8 +18,8 @@ local cHeader
 cHeader := "Lista: tipovi artikala "
 nTArea := SELECT()
 
-if cGrupa == nil
-	cGrupa := ""
+if cFilter == nil
+	cFilter := ""
 endif
 
 Private Kol
@@ -31,8 +30,8 @@ nArea := F_S_TIPOVI
 
 select (nTArea)
 
-if !EMPTY(cGrupa)
-	set_f_tbl(cGrupa)
+if !EMPTY(cFilter)
+	set_f_tbl(cFilter)
 endif
 
 set_a_kol( @Kol, @ImeKol)
@@ -42,15 +41,12 @@ return PostojiSifra( nArea, 1, 10, 75, cHeader, ;
 	
 
 // -------------------------------------------
-// setovanje filtera po grupaciji
+// setovanje filtera na tabeli
 // -------------------------------------------
-static function set_f_tbl(cGrupa)
-local cFilter
+static function set_f_tbl(cFilter)
 local nTArea := SELECT()
-cFilter := "grupa == " + cm2str(cGrupa)
 select s_tipovi
 set filter to &cFilter
-
 select (nTArea)
 return
 
@@ -65,8 +61,9 @@ aImeKol := {}
 AADD(aImeKol, {"ID"   , {|| id}   , "id"   , {|| .t.}, {|| .t.} })
 add_mcode(@aImeKol)
 AADD(aImeKol, {"Grupa", {|| grupa}, "grupa", {|| .t.}, {|| p_rgrupe(@wgrupa)} })
-AADD(aImeKol, {"Naziv", {|| naziv}, "naziv", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Naziv", {|| PADR(naziv, 40)}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Oznaka", {|| vrsta}, "vrsta", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Funkcija", {|| funkcija }, "funkcija", {|| .t. }, {|| fld_get_func( @wfunkcija ) } })
 AADD(aImeKol, {"Zaokruzenje", {|| tip_zaok }, "tip_zaok", {|| .t. }, {|| v_zaokr( @wtip_zaok ) } ,, "99" })
 AADD(aImeKol, {"Neto koef.", {|| neto_koef }, "neto_koef", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Neto proc.", {|| neto_proc }, "neto_proc", {|| .t.}, {|| .t.} })
@@ -188,5 +185,149 @@ if nZaok == 0
 endif
 
 return .t.
+
+// ----------------------------------------------
+// setovanje polja funkcija
+// ----------------------------------------------
+static function fld_get_funkcija(cFunction)
+
+return .t.
+
+
+// ------------------------------------
+// odabir funkcije stakla
+// ------------------------------------
+function v_funkcija(nFunc)
+local nSX
+local nSY
+private opc:={}
+private opcexe:={}
+private izbor:=1
+
+nSX := m_x
+nSY := m_y
+
+if nFunc == 0
+
+	AADD(opc, "1 - Toplotno zastitno             ")
+ 	AADD(opcexe, {|| nFunc := 1, Izbor := 0 })
+	
+	AADD(opc, "2 - Suncano zastitno")
+ 	AADD(opcexe, {|| nFunc := 2, Izbor := 0 })
+	
+	AADD(opc, "3 - Zvucno zastitno")
+ 	AADD(opcexe, {|| nFunc := 3, Izbor := 0 })
+	
+	AADD(opc, "4 - Sigurnosno")
+ 	AADD(opcexe, {|| nFunc := 4, Izbor := 0 })
+
+	AADD(opc, "5 - Dekorativno")
+ 	AADD(opcexe, {|| nFunc := 5, Izbor := 0 })
+
+	AADD(opc, "99 - nista od ponudjenog ")
+	AADD(opcexe, {|| nFunc := 99, izbor := 0 })
+ 
+  	Menu_SC("func")
+endif
+
+if LastKey() == K_ESC
+	nFunc := 99
+endif
+
+m_x := nSX
+m_y := nSY
+
+return .t.
+
+
+
+// -------------------------------------
+// vrati funkciju
+// -------------------------------------
+function get_funkcija(cFunc)
+local nFunc := 0
+
+if EMPTY(cFunc)
+
+	v_funkcija(@nFunc)
+
+	cFunc := STR(nFunc, 2, 0)
+
+endif
+
+cFunc := PADL(ALLTRIM(cFunc), 2)
+
+return .t.
+
+
+
+// -------------------------------
+// vraca opis funkcije
+// -------------------------------
+function g_func_opis(nFunc)
+local xRet
+local aFunc 
+
+aFunc := g_aFunction()
+
+if ( nFunc == 0 ) .or. ( LEN(aFunc) < nFunc )
+	xRet := PADR("---", 20)
+else
+	xRet := PADR(aFunc[nFunc, 2], 20)
+endif
+
+return xRet
+
+
+
+// ----------------------------------------
+// matrica sa dostupnim funkcijama
+// ----------------------------------------
+static function g_aFunction()
+local aFunc := {}
+
+AADD(aFunc, { 1, "Toplotno zastitno"})
+AADD(aFunc, { 2, "Suncano zastitno"})
+AADD(aFunc, { 3, "Zvucno zastitno"})
+AADD(aFunc, { 4, "Sigurnosno"})
+AADD(aFunc, { 5, "Dekorativno"})
+
+return aFunc
+
+
+// ---------------------------------------------
+// prikazuje opis funkcije na kordinatama nX, nY
+// ---------------------------------------------
+function sh_function(cFunc, nX, nY)
+local nFunc
+local cOpis
+
+nFunc := VAL(cFunc)
+
+cOpis := g_func_opis(nFunc)
+
+@ m_x + nX, m_y + nY SAY cOpis
+
+return .t.
+
+
+
+// generisi filter za tabelu tipova
+function gen_tip_filter(cFunkcija, cRobaGrupa)
+local cFilt:=".t."
+
+if !EMPTY(cFunkcija) .or. (cFunkcija <> "99")
+	cFilt += " .and. " + cm2str(cFunkcija) + " $ funkcija"
+endif
+
+if !EMPTY(cRobaGrupa)
+	cFilt += " .and. grupa ==" + cm2str(cRobaGrupa)
+endif
+
+if cFilt == ".t."
+	cFilt := ""
+endif
+
+return cFilt
 
 

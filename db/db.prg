@@ -379,10 +379,14 @@ AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
 add_f_mcode(@aDbf)
 AADD(aDBf,{ "grupa"       , "C" ,   6 ,  0 })
 AADD(aDBf,{ "vrsta"       , "C" ,   5 ,  0 })
-AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
+AADD(aDBf,{ "naziv"       , "C" , 100 ,  0 })
+AADD(aDbf,{ "funkcija"    , "C" ,  30 ,  0 })
 AADD(aDBf,{ "tip_zaok"    , "N" ,   2 ,  0 })
 AADD(aDBf,{ "neto_koef"   , "N" ,  10 ,  5 })
 AADD(aDBf,{ "neto_proc"   , "N" ,  10 ,  5 })
+AADD(aDBf,{ "k_1"         , "C" ,  10 ,  0 })
+AADD(aDBf,{ "k_2"         , "C" ,  20 ,  0 })
+
 return aDbf
 
 
@@ -396,9 +400,9 @@ aDbf:={}
 AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
 add_f_mcode(@aDbf)
 AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
-AADD(aDBf,{ "funkcija"    , "N" ,   2 ,  0 })
-AADD(aDBf,{ "k1"          , "C" ,   1 ,  0 })
-AADD(aDBf,{ "k2"          , "C" ,  10 ,  0 })
+AADD(aDBf,{ "k_1"         , "C" ,  10 ,  0 })
+AADD(aDBf,{ "k_2"         , "C" ,  20 ,  0 })
+
 return aDbf
 
 

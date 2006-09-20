@@ -130,6 +130,7 @@ local nXRekap
 local nYRekap
 local nXGrupa
 local nXTip
+local cTipFilter
 local cRobaVrsta:=""
 local nZaokruzenje := 0
 local nNetoKoef := 0
@@ -150,7 +151,7 @@ if lNovi
 	cUnosOp := "N"
 endif
 
-cFunkcija := STR( g_func_from_group(_roba_gr) , 2, 0)
+//cFunkcija := STR( g_func_from_group(_roba_gr) , 2, 0)
 
 @ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999" WHEN _r_br == 0
 @ m_x + nX, col() + 2 SAY "P.br:" GET _p_br PICT "9999"
@@ -162,15 +163,18 @@ nX += 2
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("Grupacija:", 15) GET _roba_gr VALID p_rgrupe(@_roba_gr, cFunkcija, 5, 25) 
+@ m_x + nX, m_y + 2 SAY PADL("Grupacija:", 15) GET _roba_gr VALID p_rgrupe(@_roba_gr, 5, 25) 
 
 read
 
 ESC_RETURN 0
 
+// generisi filter za tip robe
+cTipFilter := gen_tip_filter(cFunkcija, _roba_gr)
+
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("Tip stakla:", 15) GET _roba_tip VALID p_rtip(@_roba_tip, _roba_gr, 6, 25) 
+@ m_x + nX, m_y + 2 SAY PADL("Tip stakla:", 15) GET _roba_tip VALID p_rtip(@_roba_tip, cTipFilter, 6, 25) 
 
 nX += 1
 
