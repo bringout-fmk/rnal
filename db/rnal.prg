@@ -402,10 +402,11 @@ return
 //----------------------------------------------
 // Zatvaranje naloga rnal->rn_status == "Z"
 //----------------------------------------------
-function z_rnal(nBr_nal, cOperater, cRealise)
+function z_rnal(nBr_nal, cRealise)
 local nTArea
 local dDatum:=DATE()
 local cVrijeme:=TIME()
+local cOperater := goModul:oDatabase:cUser
 
 nTArea := SELECT()
 
@@ -428,7 +429,7 @@ else
 endif
 
 // zatvaranje naloga....
-log_zatvori(nBr_nal, cOperater, cRealise)
+log_zatvori(nBr_nal, cOperater, "", cRealise)
 
 select (nTArea)
 

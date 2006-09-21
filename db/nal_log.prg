@@ -56,6 +56,7 @@ local cTip
 if ( cAkcija == nil)
 	cAkcija := "+"
 endif
+
 cTip := "10"
 nLOGR_br := n_log_rbr( nBr_nal )
 
@@ -273,12 +274,16 @@ return
 // partner, vrsta placanja, prioritet
 // -----------------------------------
 function f10_stavke(cAkcija, nBr_nal, nR_br, cPartn, cVrPlac, cPrioritet)
+local nP_br
+
+nP_br := n_logit_pbr(nBr_nal, nR_br)
 
 select rnlog_it
 append blank
 
 replace br_nal with nBr_nal
 replace r_br with nR_br
+replace p_br with nP_br
 replace c_1 with cPartn
 replace c_2 with cVrPlac
 replace c_3 with cPrioritet
@@ -292,12 +297,16 @@ return
 // mjesto, datum i vrijeme isporuke
 // --------------------------------
 function f11_stavke(cAkcija, nBr_nal, nR_br, cMjIsp, cDatIsp, cVrIsp)
+local nP_br
+
+nP_br := n_logit_pbr(nBr_nal, nR_br)
 
 select rnlog_it
 append blank
 
 replace br_nal with nBr_nal
 replace r_br with nR_br
+replace p_br with nP_br
 replace c_1 with cMjIsp
 replace c_2 with cDatIsp
 replace c_3 with cVrIsp
@@ -311,12 +320,16 @@ return
 // kontakti
 // --------------------------------
 function f12_stavke(cAkcija, nBr_nal, nR_br, cK_ime, cK_tel, cK_opis)
+local nP_br
+
+nP_br := n_logit_pbr(nBr_nal, nR_br)
 
 select rnlog_it
 append blank
 
 replace br_nal with nBr_nal
 replace r_br with nR_br
+replace p_br with nP_br
 replace c_1 with cK_ime
 replace c_2 with cK_tel
 replace c_3 with cK_opis
@@ -386,12 +399,16 @@ return
 // zatvori nalog....
 // --------------------------------
 function f99_stavke(cAkcija, nBr_nal, nR_br, cReal)
+local nP_br
+
+nP_br := n_logit_pbr(nBr_nal, nR_br)
 
 select rnlog_it
 append blank
 
 replace br_nal with nBr_nal
 replace r_br with nR_br
+replace p_br with nP_br
 replace c_1 with cReal
 replace akcija with cAkcija
 
@@ -538,15 +555,18 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	if !st_value(nBr_nal, nR_br, nP_br, cSirovina,;
 		      nKolicina, nSirina, nVisina, .f.)
 		
-		// pozicioniraj se na RNAL zapis
-		seek_rnal(nBr_nal, nR_br)
+		// pozicioniraj se na P_RNAL zapis
+		seek_prnal(nBr_nal, nR_br)
 	
 		cAkcija := "E"
 		
 		f20_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, rnst->idroba, rnst->roba_vrsta,;
-			   rnst->kolicina, rnst->d_visina,;
-			   rnst->d_sirina)
+			   p_rnal->proizvod, ;
+			   p_rnst->idroba, ;
+			   p_rnst->roba_vrsta, ;
+			   p_rnst->kolicina, ;
+			   p_rnst->d_visina, ;
+			   p_rnst->d_sirina )
 	
 		lSetRNLOG := .t.
 	endif
@@ -647,8 +667,10 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		cAkcija := "-"
 		
 		f30_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, cRoba,;
-			   cIdOper, cIdKarakt,;
+			   rnal->proizvod, ;
+			   cRoba, ;
+			   cIdOper, ;
+			   cIdKarakt, ;
 			   cInstr)
 			
 		lSetRNLOG := .t.
@@ -666,13 +688,15 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		      cIdKarakt, cInstr, .f.)
 		
 		// pozicioniraj se na RNAL zapis
-		seek_rnal(nBr_nal, nR_br)
+		seek_prnal(nBr_nal, nR_br)
 	
 		cAkcija := "E"
 		
 		f30_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, cRoba,;
-			   cIdOper, cIdKarakt,;
+			   p_rnal->proizvod, ;
+			   cRoba, ;
+			   cIdOper, ;
+			   cIdKarakt, ;
 			   cInstr)
 	
 		lSetRNLOG := .t.
@@ -708,8 +732,10 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		cAkcija := "+"
 		
 		f30_stavke(cAkcija, nBr_nal, nLOGR_br, nP_br,;
-			   rnal->proizvod, cRoba,;
-			   cIdOper, cIdKarakt,;
+			   p_rnal->proizvod, ;
+			   cRoba, ;
+			   cIdOper, ;
+			   cIdKarakt, ;
 			   cInstr)
 	
 		lSetRNLOG := .t.
@@ -891,20 +917,17 @@ return lRet
 
 
 
-// --------------------------------------------
-// vraca tekst sa opisom stavke 20
-// --------------------------------------------
-function get20_stavka(nBr_nal)
-local cRet:=""
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "20"
+// ----------------------------------------------
+function get20_stavka(nBr_nal, nR_br)
+local cRet := ""
 local nTArea := SELECT()
 
 select rnlog
 set order to tag "tip"
 go top
-seek STR(nBr_nal) + "20"
-
-cRet += ALLTRIM(field->opis) + " "
-nR_br := field->r_br
+seek STR(nBr_nal, 10, 0) + "20" + STR(nR_br, 4, 0)
 
 select rnlog_it
 set order to tag "br_nal"
@@ -914,15 +937,15 @@ seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
-	cRet += "Proizvod: " + ALLTRIM(field->idroba)
-	cRet += " "
-	cRet += "Sirovina: " + ALLTRIM(field->idroba2)
-	cRet += " "
-	cRet += "kol: " + ALLTRIM(STR(field->k_1))
-	cRet += " "
-	cRet += "vis: " + ALLTRIM(STR(field->n_1))
-	cRet += " "
-	cRet += "sir: " + ALLTRIM(STR(field->n_2))
+	cRet += "pro.: " + ALLTRIM(field->idroba)
+	cRet += ", "
+	cRet += "sir.: " + ALLTRIM(field->idroba2)
+	cRet += ", "
+	cRet += "kol= " + ALLTRIM(STR(field->k_1, 8, 2))
+	cRet += ", "
+	cRet += "vis= " + ALLTRIM(STR(field->n_1, 8, 2))
+	cRet += ", "
+	cRet += "sir= " + ALLTRIM(STR(field->n_2, 8, 2))
 	
 	select rnlog_it
 	skip
@@ -935,28 +958,199 @@ select (nTArea)
 return cRet
 
 
-function get01_stavka(nBr_nal)
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "01"
+// ----------------------------------------------
+function get01_stavka(nBr_nal, nR_br)
 local cRet := ""
+local nTArea := SELECT()
+
+select rnlog
+set order to tag "tip"
+go top
+seek STR(nBr_nal, 10, 0) + "01" + STR(nR_br, 4, 0)
+
+cRet += "Otvaranje naloga..."
+	
+set order to tag "br_nal"
+
+select (nTArea)
+
 return cRet
 
-function get99_stavka(nBr_nal)
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "99"
+// ----------------------------------------------
+function get99_stavka(nBr_nal, nR_br)
 local cRet := ""
+local nTArea := SELECT()
+
+select rnlog
+set order to tag "tip"
+go top
+seek STR(nBr_nal, 10, 0) + "99" + STR(nR_br, 4, 0)
+
+cRet += "Zatvaranje naloga..."
+	
+set order to tag "br_nal"
+
+select (nTArea)
+
 return cRet
 
-function get10_stavka(nBr_nal)
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "10"
+// ----------------------------------------------
+function get10_stavka(nBr_nal, nR_br)
 local cRet := ""
+local nTArea := SELECT()
+
+select rnlog
+set order to tag "tip"
+go top
+seek STR(nBr_nal, 10, 0) + "10" + STR(nR_br, 4, 0)
+
+select rnlog_it
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal ;
+		.and. field->r_br == nR_br
+
+	cRet += "partn: " + s_partner( ALLTRIM(field->c_1) )
+	cRet += ", "
+	cRet += "v.plac: " + s_placanje( ALLTRIM(field->c_2) )
+	cRet += ", "
+	cRet += "prioritet: " + s_hitnost( ALLTRIM(field->c_3) )
+	
+	select rnlog_it
+	skip
+enddo
+
+select rnlog
+set order to tag "br_nal"
+
+select (nTArea)
+
 return cRet
 
-function get11_stavka(nBr_nal)
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "11"
+// ----------------------------------------------
+function get11_stavka(nBr_nal, nR_br)
 local cRet := ""
+local nTArea := SELECT()
+
+select rnlog
+set order to tag "tip"
+go top
+seek STR(nBr_nal, 10, 0) + "11" + STR(nR_br, 4, 0)
+
+select rnlog_it
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal ;
+		.and. field->r_br == nR_br
+
+	cRet += "mj.isp: " + ALLTRIM(field->c_1)
+	cRet += ", "
+	cRet += "dat.isp: " + ALLTRIM(field->c_2)
+	cRet += ", "
+	cRet += "vr.isp: " + ALLTRIM(field->c_3)
+	
+	select rnlog_it
+	skip
+enddo
+
+select rnlog
+set order to tag "br_nal"
+
+select (nTArea)
+
 return cRet
 
-function get12_stavka(nBr_nal)
+
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "12"
+// ----------------------------------------------
+function get12_stavka(nBr_nal, nR_br)
 local cRet := ""
+local nTArea := SELECT()
+
+select rnlog
+set order to tag "tip"
+go top
+seek STR(nBr_nal, 10, 0) + "12" + STR(nR_br, 4, 0)
+
+select rnlog_it
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal ;
+		.and. field->r_br == nR_br
+
+	cRet += "k.ime: " + ALLTRIM(field->c_1)
+	cRet += ", "
+	cRet += "k.tel: " + ALLTRIM(field->c_2)
+	cRet += ", "
+	cRet += "k.opis: " + ALLTRIM(field->c_3)
+	
+	select rnlog_it
+	skip
+enddo
+
+select rnlog
+set order to tag "br_nal"
+
+select (nTArea)
+
 return cRet
 
-function get30_stavka(nBr_nal)
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "30"
+// ----------------------------------------------
+function get30_stavka(nBr_nal, nR_br)
 local cRet := ""
+local nTArea := SELECT()
+
+select rnlog
+set order to tag "tip"
+go top
+seek STR(nBr_nal, 10, 0) + "30" + STR(nR_br, 4, 0)
+
+select rnlog_it
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal ;
+		.and. field->r_br == nR_br
+
+	cRet += "sirov.= " + ALLTRIM(field->idroba2)
+	cRet += ", "
+	cRet += "oper.= " + s_karakt( ALLTRIM(field->c_2) )
+	cRet += ", "
+	cRet += "instr.= " + ALLTRIM(field->c_3)
+	
+	select rnlog_it
+	skip
+enddo
+
+select rnlog
+set order to tag "br_nal"
+
+select (nTArea)
+
 return cRet
 
 

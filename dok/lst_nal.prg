@@ -298,26 +298,33 @@ do case
 			GO (nTRec)
 			RETURN DE_REFRESH
 		endif
+		
 		SELECT RNAL
 		RETURN DE_CONT
 	
 	// lista promjena na nalogu
 	case (UPPER(CHR(Ch)) == "L")
+		
 		nBr_nal := rnal->br_nal
 		frm_lst_rnlog(nBr_nal)
+		
 		RETURN DE_CONT
 
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )
+		
 		if get_p_marker() == "P"
 			MsgBeep("Neko vec doradjuje ovaj nalog!#Promjene onemogucene!")
 			return DE_CONT
 		endif
 		
 		nBr_nal := rnal->br_nal
+		
 		m_prom(nBr_nal)
+		
 		select rnal
-		return DE_CONT
+		
+		return DE_REFRESH
 
 endcase
 
@@ -352,7 +359,9 @@ AADD(aImeKol, {"Partner", {|| PADR(s_partner(idpartner), 30) }, "idpartner", {||
 AADD(aImeKol, {"Datum", {|| datnal }, "datnal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp." , {|| datisp }, "datisp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| vr_isp }, "vr_isp", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Placanje" , {|| PADR(s_placanje(vr_plac),10) }, "vr_plac", {|| .t.}, {|| .t.} })
+//AADD(aImeKol, {"Placanje" , {|| PADR(s_placanje(vr_plac),10) }, "vr_plac", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Kontakt ime" , {|| PADR(k_ime, 20) }, "k_ime", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Kontakt tel" , {|| PADR(k_tel, 20) }, "k_tel", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Hitnost" , {|| PADR(s_hitnost(hitnost),10) }, "hitnost", {|| .t.}, {|| .t.} })
 
 aKol:={}

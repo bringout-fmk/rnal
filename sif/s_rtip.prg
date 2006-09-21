@@ -91,6 +91,7 @@ do case
 	case UPPER(CHR(Ch)) == "S"
 		fld_funkcija()
 		return 7
+
 endcase
 
 return DE_CONT
@@ -368,7 +369,7 @@ return .t.
 function gen_tip_filter(cFunkcija, cRobaGrupa)
 local cFilt:=".t."
 
-if !EMPTY(cFunkcija) .or. (cFunkcija <> "99")
+if !EMPTY(cFunkcija) .and. (cFunkcija <> "99")
 	cFilt += " .and. " + cm2str(ALLTRIM(cFunkcija)) + " $ funkcija"
 endif
 

@@ -17,7 +17,7 @@ return .f.
 // -----------------------------------------------------
 function c_ukvadrat(nKol, nDim1, nDim2)
 local xRet
-xRet := ( nDim1 / 100 ) * (nDim2 / 100)
+xRet := ( nDim1 / 1000 ) * ( nDim2 / 1000 )
 xRet := nKol * xRet
 return xRet
 

@@ -4,8 +4,8 @@
 // validacija
 // --------------------------
 
-static MAX_VISINA := 600.00 
-static MAX_SIRINA := 321.00 
+static MAX_VISINA := 60000.00 
+static MAX_SIRINA := 32100.00 
 static MAX_DEBLJINA := 100
 
 // ----------------------------------------

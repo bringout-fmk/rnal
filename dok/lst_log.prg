@@ -34,7 +34,7 @@ cFooter := " Pregled promjena na nalogu... "
 
 Box(, 20, 77)
 
-//set_box_dno()
+set_box_dno()
 
 select rnlog
 set_f_kol(nBr_nal)
@@ -90,9 +90,28 @@ return
 // ---------------------------------------------
 static function k_handler(nBr_nal)
 local nTblFilt
+local cLogText := ""
+
+// napravi string iz rnlog/rnlog_it
+cLogText := g_log_opis( rnlog->br_nal, ;
+			rnlog->r_br, ;
+			rnlog->tip )
+
+
+// prikaz stringa u browse - box-u
+s_log_opis_on_form( cLogText )
 
 do case
 	
+	// refresh na browse
+	// radi prikaza s_log_opis...()
+	case (Ch == K_UP) .or. ;
+		(Ch == K_PGUP) .or. ;
+		(Ch == K_DOWN) .or. ;
+		(Ch == K_PGDN)
+		
+		return DE_REFRESH
+		
 	// stampa liste log-a
 	case (Ch == K_CTRL_P)
 		if Pitanje(, "Stampati liste promjena (D/N) ?", "D") == "D"
@@ -122,11 +141,12 @@ aImeKol := {}
 
 AADD(aImeKol, {"Datum", {|| datum }, "datum", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vrijeme" , {|| PADR(vrijeme, 5) }, "vrijeme", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Tip" , {|| PADR(s_prom_tip(tip), 15) }, "tip", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Operater" , {|| PADR(operater, 20) }, "operater", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Opis" , {|| PADR(opis, 20) }, "opis", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Operater" , {|| PADR(operater, 15) }, "operater", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Tip" , {|| PADR(s_prom_tip(tip), 12) }, "tip", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Opis" , {|| PADR(opis, 20) + "..." }, "opis", {|| .t.}, {|| .t.} })
 
 aKol:={}
+
 for i:=1 to LEN(aImeKol)
 	AADD(aKol,i)
 next
@@ -135,15 +155,15 @@ return
 
 
 // --------------------------------------------
-// prikaz tipa loga
+// vraca opis tipa promjene
 // --------------------------------------------
 static function s_prom_tip(cTip)
 local xRet:=""
 do case
 	case cTip == "01"
-		xRet := "otvaranje"
+		xRet := "nal.otvoren"
 	case cTip == "99"
-		xRet := "zatvaranje"
+		xRet := "nal.zatvoren"
 	case cTip == "10"
 		xRet := "osn.podaci"
 	case cTip == "11"
@@ -160,9 +180,10 @@ return xRet
 
 // -------------------------------------------
 // prikaz opisa log-a na formi
+// cLogText se lomi na 3 reda...
 // -------------------------------------------
-static function s_log_opis_on_form()
-local aOpisArr:={}
+static function s_log_opis_on_form(cLogText)
+local aLogArr:={}
 local cRow1
 local cRow2
 local cRow3
@@ -173,16 +194,18 @@ cRow1 := SPACE(nLenText)
 cRow2 := SPACE(nLenText)
 cRow3 := SPACE(nLenText)
 
-cOpis := g_log_opis( rnlog->br_nal, rnlog->tip )
+aLogArr := SjeciStr(cLogText, nLenText)
 
-aOpisArr := SjeciStr(cOpis, nLenText)
-if LEN(aOpisArr) > 0
-	cRow1 := aOpisArr[1]
-	if LEN(aOpisArr) > 1
-		cRow2 := aOpisArr[2]
+if LEN(aLogArr) > 0
+	
+	cRow1 := aLogArr[1]
+	
+	if LEN(aLogArr) > 1
+		cRow2 := aLogArr[2]
 	endif
-	if LEN(aOpisArr) > 2
-		cRow3 := aOpisArr[3]
+	
+	if LEN(aLogArr) > 2
+		cRow3 := aLogArr[3]
 	endif
 endif
 
@@ -199,27 +222,29 @@ endif
 return
 
 
-// vraca opisno polje
-static function g_log_opis(nBr_nal, cTip)
+// -------------------------------------------------------
+// formira i vraca string na osnovu tabela RNLOG/RNLOG_IT
+// -------------------------------------------------------
+static function g_log_opis(nBr_nal, nR_br, cTip)
 local cRet := ""
 local nTArea := SELECT()
 select rnlog
 
 do case
 	case cTip == "01"
-		cRet := get01_stavka(nBr_nal)
+		cRet := get01_stavka(nBr_nal, nR_br)
 	case cTip == "99"
-		cRet := get99_stavka(nBr_nal)
+		cRet := get99_stavka(nBr_nal, nR_br)
 	case cTip == "10"
-		cRet := get10_stavka(nBr_nal)
+		cRet := get10_stavka(nBr_nal, nR_br)
 	case cTip == "11"
-		cRet := get11_stavka(nBr_nal)
+		cRet := get11_stavka(nBr_nal, nR_br)
 	case cTip == "12"
-		cRet := get12_stavka(nBr_nal)
+		cRet := get12_stavka(nBr_nal, nR_br)
 	case cTip == "20"
-		cRet := get20_stavka(nBr_nal)
+		cRet := get20_stavka(nBr_nal, nR_br)
 	case cTip == "30"
-		cRet := get30_stavka(nBr_nal)
+		cRet := get30_stavka(nBr_nal, nR_br)
 endcase
 
 select (nTArea)
