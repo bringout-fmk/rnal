@@ -102,15 +102,23 @@ return DE_CONT
 static function fld_funkcija()
 local aStdVals 
 local aRet
+local lArrChanged := .f.
 
 // standardne vrijednosti
 aStdVals := g_aFunction()
 
-aRet := get_hash_field( funkcija, aStdVals)
+aRet := get_hash_field( funkcija, aStdVals, @lArrChanged)
 
-scatter()
-set_hash_field( @_funkcija , aRet)
-gather()
+// samo ako je bilo promjena u matrici pozovi snimanje...
+if lArrChanged
+	
+	scatter()
+	
+	set_hash_field( @_funkcija , aRet)
+	
+	gather()
+
+endif
 
 return 
 
@@ -122,6 +130,7 @@ static function fld_get_funkcija( cFunc )
 local aStdVals 
 local aRet
 local lSilent := .t.
+local lArrChanged := .f.
 local nLenField
 
 nLenField := LEN(cFunc)
@@ -129,11 +138,16 @@ nLenField := LEN(cFunc)
 // standardne vrijednosti
 aStdVals := g_aFunction()
 
-aRet := get_hash_field( cFunc, aStdVals)
+aRet := get_hash_field( cFunc, aStdVals, @lArrChanged )
 
-set_hash_field( @cFunc , aRet, nil, lSilent )
+// ako je bilo promjena na matrici snimi polje...
+if lArrChanged
+	
+	set_hash_field( @cFunc , aRet, nil, lSilent )
 
-cFunc := PADR(cFunc, nLenField )
+	cFunc := PADR(cFunc, nLenField )
+
+endif
 
 return .t.
 
