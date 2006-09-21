@@ -355,7 +355,7 @@ function gen_tip_filter(cFunkcija, cRobaGrupa)
 local cFilt:=".t."
 
 if !EMPTY(cFunkcija) .or. (cFunkcija <> "99")
-	cFilt += " .and. " + cm2str(cFunkcija) + " $ funkcija"
+	cFilt += " .and. " + cm2str(ALLTRIM(cFunkcija)) + " $ funkcija"
 endif
 
 if !EMPTY(cRobaGrupa)
