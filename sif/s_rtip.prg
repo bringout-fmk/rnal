@@ -59,7 +59,6 @@ static function set_a_kol( aKol, aImeKol )
 aImeKol := {}
 
 AADD(aImeKol, {"ID"   , {|| id}   , "id"   , {|| .t.}, {|| .t.} })
-add_mcode(@aImeKol)
 AADD(aImeKol, {"Grupa", {|| grupa}, "grupa", {|| .t.}, {|| p_rgrupe(@wgrupa)} })
 AADD(aImeKol, {"Naziv", {|| PADR(naziv, 40)}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Oznaka", {|| vrsta}, "vrsta", {|| .t.}, {|| .t.} })

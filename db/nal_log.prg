@@ -30,19 +30,24 @@ cPartner := field->idpartner
 cPrioritet := field->hitnost
 cVrPlac := field->vr_plac
 
-if (cOpis == nil)
-	cOpis := "Otvoren novi nalog"
-endif
-
 // logiraj osnovne podatke
+cOpis := "Init.osnovni podaci"
 log_osn(nBr_nal, cOperater, cOpis, cPartner, cPrioritet, cVrPlac)
+
 // logiraj podatke o isporuci
+cOpis := "Init.podaci isporuke"
 log_isporuka(nBr_nal, cOperater, cOpis, cMjIsp, cVrIsp, cDatIsp)
+
 // logiranje podataka o kontaktu
+cOpis := "Init.podaci isporuke"
 log_kontakt(nBr_nal, cOperater, cOpis, cK_ime, cK_tel, cK_opis)
+
 // logiranje artikala
+cOpis := "Init.podaci stavki"
 log_artikal(nBr_nal, cOperater, cOpis)
+
 // logiranje operacija
+cOpis := "Init.podaci operacija"
 log_operacije(nBr_nal, cOperater, cOpis)
 
 return

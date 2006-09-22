@@ -42,7 +42,6 @@ static function set_a_kol( aKol, aImeKol)
 aImeKol := {}
 AADD(aImeKol, {"Operacija", {|| id_rnop}, "id_rnop", {|| .t.}, {|| p_rnop(@wid_rnop)} })
 AADD(aImeKol, {"ID", {|| id}, "id", {|| auto_inc(@wid, @wid_rnop), .f. }, {|| .t.} })
-add_mcode(@aImeKol)
 AADD(aImeKol, {"Naziv", {|| PADR(naziv, 40)}, "naziv", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Def.vrijednost", {|| PADR(ka_def, 40)}, "ka_def", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Validacija", {|| ka_val}, "ka_val", {|| .t.}, {|| .t.} })

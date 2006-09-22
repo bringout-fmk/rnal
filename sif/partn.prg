@@ -116,6 +116,7 @@ cIdPart := _id
 _naz := PADR(cNaz, LEN(_naz) - LEN(cNaz) )
 _adresa := SPACE(LEN(_adresa))
 _telefon := SPACE(LEN(_telefon))
+_match_code := SPACE(LEN(_match_code))
 
 Box(, 8, 60)
 	
@@ -124,6 +125,10 @@ Box(, 8, 60)
 	read
 	
 	++ nX 
+
+	@ m_x + nX, m_y+2 SAY PADL("match code:", nLeft) GET _match_code
+	
+	++ nX
 	
 	@ m_x + nX, m_y+2 SAY PADL("Mjesto:", nLeft) GET _mjesto
 	

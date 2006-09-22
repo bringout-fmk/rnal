@@ -368,9 +368,9 @@ next
 
 p_line(cDlhead, 10, .t.)
 p_line(cINaziv, 10, .t.)
-p_line(cSlHead, 10, .t.)
-p_line(" Adresa: " + cIAdresa, 10, .t.)
-p_line("Id broj: " + cIIdBroj, 10, .t.)
+//p_line(cSlHead, 10, .t.)
+//p_line(" Adresa: " + cIAdresa, 10, .t.)
+//p_line("Id broj: " + cIIdBroj, 10, .t.)
 p_line(cDlhead, 10, .t.)
 
 ?
