@@ -67,6 +67,7 @@ aImeKol := {}
 AADD(aImeKol, {"Br.nal", {|| PADR(TRANSFORM(br_nal, "99999"),7)}, "br_nal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"R.br", {|| PADR(TRANSFORM(r_br, "99999"),7)}, "r_br", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Proizvod", {|| proizvod}, "proizvod", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Kolicina", {|| TRANSFORM(kolicina, PIC_KOL())}, "kolicina", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.n.", {|| datnal}, "datnal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp", {|| datisp}, "datisp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Mj.isp", {|| PADR(mj_isp,20)}, "mj_isp", {|| .t.}, {|| .t.} })
@@ -155,11 +156,15 @@ endif
 
 @ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999"
 
-nX += 2
+nX += 1
 nRobaX := m_x + nX
 nRobaY := m_y + 25
 
 @ m_x + nX, m_y + 2 SAY "Proizvod:" GET _proizvod VALID val_roba(@_proizvod, nRobaX, nRobaY)
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina ) 
 
 read
 
