@@ -196,7 +196,7 @@ return cRet
 // -----------------------------------
 function get_oper(cOper)
 Box(,1,50)
-	@ m_x + 1, m_y + 2 SAY "Unesi operaciju:" GET cOper VALID !EMPTY(cOper) .and. p_rnop(@cOper)
+	@ m_x + 1, m_y + 2 SAY "Unesi dodatnu operaciju:" GET cOper VALID !EMPTY(cOper) .and. p_rnop(@cOper)
 	read
 BoxC()
 

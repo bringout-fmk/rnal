@@ -52,7 +52,7 @@ if !FILE(PRIVPATH + cT_PARS)
 endif
 
 // kreiraj indexe
-CREATE_INDEX("br_nal", "br_nal+r_br", PRIVPATH + "T_RNST")
+CREATE_INDEX("br_nal", "br_nal+r_br+idproizvod", PRIVPATH + "T_RNST")
 CREATE_INDEX("br_nal", "br_nal+r_br+idroba", PRIVPATH + "T_RNOP")
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
 

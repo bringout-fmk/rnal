@@ -25,7 +25,7 @@ cFooter += PADR(roba->naz, 40)
 nArea := F_P_RNOP
 
 Box(, 15, 77)
-@ m_x + 15, m_y + 2 SAY "<c-N> Nova operacija    | <c-T> Brisi operaciju  | <c-F9> Brisi sve operacije "
+@ m_x + 15, m_y + 2 SAY "<c-N> Nova instrukcija | <c-T> Brisi instrukciju | <c-F9> Brisi sve instr."
 
 select (nArea)
 

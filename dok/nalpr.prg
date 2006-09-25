@@ -77,9 +77,15 @@ local nBr_nal
 local nR_br
 local dDatnal
 local dDatisp
-local aRobaNaz
-local cRobaNaz
+local cProizId
+local cProizNaz
+local cSirovNaz
+local cSirovId
 local cLine
+local cProizRbr
+local cSirovRbr
+local cOperRbr
+local cProizLine
 local lShow_zagl
 local cCurrOper
 local cOperacija
@@ -107,6 +113,7 @@ nalpr_header()
 nalpr_kupac()
 
 cLine := g_line()
+cProizLine := g_proiz_line()
 
 // setuj len_ukupno
 LEN_UKUPNO := LEN(cLine)
@@ -130,73 +137,58 @@ aRobaNaz := {}
 do while !EOF()
 	
 	cNal_br := t_rnst->br_nal
-	cRbr := t_rnst->r_br
-	cIdRoba := t_rnst->idroba
 	
-	// uzmi naziv u matricu
-	cRobaNaz := NazivDobra(t_rnst->idroba, t_rnst->roba_naz, t_rnst->jmj)
-	aRobaNaz := SjeciStr(cRobaNaz, LEN_NAZIV)
+	cProizRbr := t_rnst->r_br
 	
-	// PRVI RED
-	// redni broj ili podbroj
+	cProizId := t_rnst->idproizvod
+	
+	// uzmi naziv proizvoda
+	cProizNaz := NazivDobra(t_rnst->idproizvod, t_rnst->pro_naz, t_rnst->jmj)
+	
 	? RAZMAK
 	
-	?? PADL(t_rnst->r_br + ")", LEN_RBR)
+	?? PADL(cProizRbr + ")", LEN_RBR)
 	
 	?? " "
 	
-	// idroba, naziv robe, jmj
-	?? PADR( aRobaNaz[1], LEN_NAZIV) 
-	?? " "
+	// proizvod, naziv robe, jmj
+	?? PADR(cProizNaz, LEN_NAZIV) 
 	
-	?? show_number(t_rnst->kolicina, PIC_KOLICINA) 
-	?? " "
+	? cProizLine
 	
-	// dimenzije
-	?? show_number( t_rnst->d_sirina,  PIC_DIMENZIJA)
-	
-	?? " "
-	
-	?? show_number( t_rnst->d_visina,  PIC_DIMENZIJA)
-	
-	?? " "
-	
-	?? show_number( t_rnst->d_ukupno,  PIC_VRIJEDNOST)
-	
-	select t_rnop
-	set order to tag "br_nal"
-	go top
-	seek cNal_br + cRbr + cIdRoba
-
-	cCurrOper := "XXX"
-	
-	do while !EOF() .and. t_rnop->(br_nal + r_br + idroba) == cNal_br + cRbr + cIdRoba
-
-		cOperacija := t_rnop->rn_op
-		// prvo ispisi operaciju
-		if cOperacija <> cCurrOper
-			
-			? RAZMAK
-			?? SPACE(LEN_RBR)
-			?? " "
-			?? PADR(t_rnop->rn_op_naz, LEN_RNOP)
+	do while !EOF() .and. t_rnst->(br_nal + r_br + idproizvod) == cNal_br + cProizRbr + cProizId
 		
-		endif
+		cSirovRbr := t_rnst->p_br
+		cSirovId := t_rnst->idroba
+		cSirovNaz := NazivDobra(t_rnst->idroba, t_rnst->roba_naz, t_rnst->jmj)
 
-		cCurrOper := cOperacija
-		
 		? RAZMAK
+	
+		?? PADL(ALLTRIM(cProizRbr) + "." + ALLTRIM(cSirovRbr) + ")", LEN_RBR)
+	
+		?? " "
+	
+		// sirovina, naziv robe, jmj
+		?? PADR(cSirovNaz, LEN_NAZIV) 
+	
+		?? " "
+
+		?? PADR(t_rnst->kolicina, LEN_KOLICINA)
+
+		?? " "
+
+		?? PADR(t_rnst->d_sirina, LEN_DIMENZIJA)
+
+		?? " "
+
+		?? PADR(t_rnst->d_visina, LEN_DIMENZIJA)
 		
-		?? SPACE(LEN_RBR)
+		// instrukcije.....
+		//do while !EOF()
 		
-		?? SPACE(3)
-
-		?? ALLTRIM(t_rnop->rn_ka_naz)
-
-		?? ": "
-
-		?? ALLTRIM(t_rnop->rn_instr)
-
+		//enddo
+	
+		select t_rnst
 		skip
 	enddo
 	
@@ -207,7 +199,6 @@ do while !EOF()
     	endif	
 
 	SELECT t_rnst
-	skip
 enddo
 
 // provjeri za novu stranicu
@@ -325,11 +316,10 @@ cLine := g_line()
 
 cRed1 := RAZMAK 
 cRed1 += PADC("R.br", LEN_RBR) 
-cRed1 += " " + PADR("Naziv artikla (sifra, naziv, jmj)", LEN_NAZIV)
+cRed1 += " " + PADR("Proizvod/sirovina/usluga", LEN_NAZIV)
 cRed1 += " " + PADC("kolicina", LEN_KOLICINA)
-cRed1 += " " + PADC("Sirina(cm)", LEN_DIMENZIJA)
-cRed1 += " " + PADC("Visina(cm)", LEN_DIMENZIJA)
-cRed1 += " " + PADC("Ukupno(m2)", LEN_DIMENZIJA)
+cRed1 += " " + PADC("Sirina(mm)", LEN_DIMENZIJA)
+cRed1 += " " + PADC("Visina(mm)", LEN_DIMENZIJA)
 
 ? cRed1
 
@@ -391,9 +381,21 @@ cLine += " " + REPLICATE("-", LEN_NAZIV)
 cLine += " " + REPLICATE("-", LEN_KOLICINA)
 cLine += " " + REPLICATE("-", LEN_DIMENZIJA)
 cLine += " " + REPLICATE("-", LEN_DIMENZIJA)
-cLine += " " + REPLICATE("-", LEN_VRIJEDNOST)
 
 return cLine
+
+
+// ----------------------------------------------
+// definicija linije za podvlacenje proizvoda
+// ----------------------------------------------
+static function g_proiz_line()
+local cLine
+
+cLine := RAZMAK
+cLine += REPLICATE("-", LEN_RBR + LEN_NAZIV + LEN_KOLICINA + LEN_DIMENZIJA)
+
+return cLine
+
 
 
 // ----------------------------------------------
