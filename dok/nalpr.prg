@@ -137,23 +137,27 @@ aRobaNaz := {}
 do while !EOF()
 	
 	cNal_br := t_rnst->br_nal
-	
 	cProizRbr := t_rnst->r_br
-	
 	cProizId := t_rnst->idproizvod
-	
-	// uzmi naziv proizvoda
 	cProizNaz := NazivDobra(t_rnst->idproizvod, t_rnst->pro_naz, t_rnst->jmj)
-	
 	? RAZMAK
-	
+	// r.br
 	?? PADL(cProizRbr + ")", LEN_RBR)
+	
+	?? " "
+	
+	?? SPACE(LEN_RBR)
 	
 	?? " "
 	
 	// proizvod, naziv robe, jmj
 	?? PADR(cProizNaz, LEN_NAZIV) 
 	
+	?? " "
+
+	?? show_number(t_rnst->pro_kol, PIC_KOLICINA)
+	
+	// ispisi liniju ispod proizvoda...
 	? cProizLine
 	
 	do while !EOF() .and. t_rnst->(br_nal + r_br + idproizvod) == cNal_br + cProizRbr + cProizId
@@ -164,6 +168,10 @@ do while !EOF()
 
 		? RAZMAK
 	
+		?? SPACE(LEN_RBR)
+		
+		?? " "
+		
 		?? PADL(ALLTRIM(cProizRbr) + "." + ALLTRIM(cSirovRbr) + ")", LEN_RBR)
 	
 		?? " "
@@ -173,21 +181,34 @@ do while !EOF()
 	
 		?? " "
 
-		?? PADR(t_rnst->kolicina, LEN_KOLICINA)
+		?? show_number(t_rnst->sir_kol, PIC_KOLICINA)
 
 		?? " "
 
-		?? PADR(t_rnst->d_sirina, LEN_DIMENZIJA)
+		?? show_number(t_rnst->d_sirina, PIC_DIMENZIJA)
 
 		?? " "
 
-		?? PADR(t_rnst->d_visina, LEN_DIMENZIJA)
+		?? show_number(t_rnst->d_visina, PIC_DIMENZIJA)
 		
 		// instrukcije.....
-		//do while !EOF()
+		select t_rnop
+		seek t_rnst->br_nal + t_rnst->r_br + t_rnst->p_br + t_rnst->idroba
 		
-		//enddo
-	
+		nOperRazmak := LEN(RAZMAK) + (LEN_RBR * 3)
+		do while !EOF() .and. t_rnop->(br_nal + r_br + p_br + idroba) == t_rnst->(br_nal + r_br + p_br + idroba)
+			
+			? SPACE(nOperRazmak)
+			?? " "
+			?? ALLTRIM(t_rnop->rn_op_naz)
+			?? ","
+			?? ALLTRIM(t_rnop->rn_ka_naz)
+			?? " = "
+			?? ALLTRIM(t_rnop->rn_instr)
+			
+			skip
+		enddo
+				
 		select t_rnst
 		skip
 	enddo
@@ -207,11 +228,6 @@ if prow() > LEN_STRANICA - DSTR_KOREKCIJA()
 	Nstr_a4(nStr, .t.)
 endif	
 
-cPom := "U K U P N O   (m2): " 
-cPom += show_number(nNUkupno, PIC_VRIJEDNOST)
-
-? cLine
-? PADL( cPom, LEN_UKUPNO )
 ? cLine
 
 ?
@@ -221,10 +237,10 @@ s_nal_izdao()
 
 ?
 
-nStCount := t_rnst->(RecCount())
-
 // printanje tabele za proizvodnju
-prn_pr_table(nStCount)
+prn_pr_table()
+
+?
 
 // stampa footer-a
 s_nal_footer()
@@ -249,10 +265,10 @@ endif
 // nalog izdao
 
 cPom := "Nalog izdao: "
-cPom += REPLICATE("_", 10)
+cPom += REPLICATE("_", 30)
 cPom += " "
 cPom += "Vrijeme: "
-cPom += REPLICATE("_", 10)
+cPom += REPLICATE("_", 20)
 
 ? PADL(cPom, LEN_UKUPNO)
 
@@ -315,7 +331,7 @@ cLine := g_line()
 ? cLine
 
 cRed1 := RAZMAK 
-cRed1 += PADC("R.br", LEN_RBR) 
+cRed1 += PADC("R.br", LEN_RBR + LEN_RBR + 1) 
 cRed1 += " " + PADR("Proizvod/sirovina/usluga", LEN_NAZIV)
 cRed1 += " " + PADC("kolicina", LEN_KOLICINA)
 cRed1 += " " + PADC("Sirina(mm)", LEN_DIMENZIJA)
@@ -335,15 +351,10 @@ function nalpr_header()
 local cDLHead 
 local cSLHead 
 local cINaziv
-local cIAdresa
-local cIIdBroj
+local cRazmak := SPACE(2)
 
 // naziv
 cINaziv  := ALLTRIM(gFNaziv)
-// adresa
-cIAdresa := ALLTRIM(gFAdresa)
-// idbroj
-cIIdBroj := ALLTRIM(gFIdBroj)
 
 // double line header
 cDLHead := REPLICATE("=", 60)
@@ -356,12 +367,9 @@ for i:=1 to gDg_margina
 	?
 next
 
-p_line(cDlhead, 10, .t.)
-p_line(cINaziv, 10, .t.)
-//p_line(cSlHead, 10, .t.)
-//p_line(" Adresa: " + cIAdresa, 10, .t.)
-//p_line("Id broj: " + cIIdBroj, 10, .t.)
-p_line(cDlhead, 10, .t.)
+p_line(cRazmak + cDlhead, 10, .t.)
+p_line(cRazmak + cINaziv, 10, .t.)
+p_line(cRazmak + cDlhead, 10, .t.)
 
 ?
 
@@ -376,7 +384,7 @@ static function g_line()
 local cLine
 
 cLine := RAZMAK
-cLine += REPLICATE("-", LEN_RBR)
+cLine += REPLICATE("-", LEN_RBR + LEN_RBR + 1) 
 cLine += " " + REPLICATE("-", LEN_NAZIV)
 cLine += " " + REPLICATE("-", LEN_KOLICINA)
 cLine += " " + REPLICATE("-", LEN_DIMENZIJA)
@@ -392,7 +400,7 @@ static function g_proiz_line()
 local cLine
 
 cLine := RAZMAK
-cLine += REPLICATE("-", LEN_RBR + LEN_NAZIV + LEN_KOLICINA + LEN_DIMENZIJA)
+cLine += REPLICATE("-", LEN_RBR + 1 + LEN_RBR + 1 + LEN_NAZIV + 1 + LEN_KOLICINA)
 
 return cLine
 
@@ -409,13 +417,13 @@ local cDatIsp
 local cVrIsp
 local cPrioritet
 local cNarNaz
-local aNarNaz
 local cNarAdr
 local cNarTel
 local cNarFax
 local cNarMjesto
 local cNarIdBroj
 local cBr_nal
+local cRazmak := SPACE(2)
 
 // sve se iscitava iz T_PARS
 
@@ -435,51 +443,33 @@ cNarPtt := g_t_pars_opis("P05")
 cNarTel := g_t_pars_opis("P06")
 cNarFax := g_t_pars_opis("P07")
 
-aNarNaz := Sjecistr(cNarNaz, LEN_KUPAC)
 
-I_ON
-cPom := "Narucioc:"
-p_line(cPom, 10, .t.)
-cPom := REPLICATE("-", LEN(cPom))
-p_line(cPom, 10, .f.)
-I_OFF
+// broj naloga
+cPom := cNalPrNaziv + cBr_nal
+p_line(cRazmak + cPom, 10, .t.)
 
-// prvi red kupca - naziv
-cPom := ALLTRIM(aNarNaz[1])
-if EMPTY(cPom)
-	cPom := "-"
-endif
-p_line( SPACE(2) + PADR(cPom, LEN_KUPAC), 10, .t. )
 B_OFF
 
-// u istom redu datum naloga
-?? PADL("Datum naloga: " + cDatIsp, LEN_DATUM )
+// ostali podaci naloga
+cPom := "Datum naloga: " + cDatNal
+cPom += " Datum isporuke: " + cDatIsp
+cPom += " Vrijeme isporuke: " + cVrIsp
+cPom += " Prioritet: " + cPrioritet
+p_line(cRazmak + SPACE(1) + cPom, 12, .f.)
 
-// adresa 
-cPom := ALLTRIM(cNarAdr)
-if Empty(cPom)
-	cPom := "-"
-endif
-p_line( SPACE(2) + PADR(cPom, LEN_KUPAC), 10, .t. )
-B_OFF
+?
 
-// u istom redu datum isporuke
-?? PADL("Isporuka: " + cDatIsp + ", " + cVrIsp, LEN_DATUM)
+// kupac - naziv
+cPom := "Narucioc: " + cNarNaz
+p_line( cRazmak + cPom, 12, .f.)
 
-// mjesto
-cPom := ALLTRIM(cNarMjesto)
-if EMPTY(cPom)
-	cPom := "-"
-endif
-p_line(SPACE(2) + PADR(cPom, LEN_KUPAC), 10, .t.)
-B_OFF
-
-// u istom redu hitnost
-?? PADL("HITNOST:" + cPrioritet, LEN_DATUM)
+// adresa i mjesto
+cPom := "adresa: " + ALLTRIM(cNarAdr) 
+cPom := " mjesto: " + ALLTRIM(cNarMjesto)
+p_line( cRazmak + SPACE(1) + cPom, 12, .f. )
 
 cKTelFax := "-"
-
-// tel
+// telefon
 cPom := ALLTRIM(cNarTel)
 if !EMPTY(cPom)
 	cKTelFax := "tel: " + cPom
@@ -489,19 +479,9 @@ cPom := ALLTRIM(cNarTel)
 if !EMPTY(cPom)
 	cKTelFax += " fax: " + cPom
 endif
-
 if !EMPTY(cKTelFax)
-	p_line(SPACE(2), 10, .f., .t.)
-	P_12CPI
-	?? PADR(cKTelFax, LEN_KUPAC)
+	p_line( cRazmak + SPACE(1) + cKTelFax, 12, .f.)
 endif
-
-P_10CPI
-
-// broj dokumenta
-cPom := cNalPrNaziv + cBr_nal
-p_line( PADL(cPom, LEN_KUPAC + LEN_DATUM), 10, .t. )
-B_OFF
 
 ?
 
@@ -555,70 +535,30 @@ return
 
 // --------------------------------------
 // print tabele za proizvodnju
-// nStRows - broj stavki naloga
 // --------------------------------------
-static function prn_pr_table(nStRows)
-local nTblDuz := 70
+static function prn_pr_table()
+local nTblDuz := 130
 local cZagl
 local cLine
 local aCols:={}
 
-if (nStRows == nil .or. nStRows == 0)
-	nStRows := 5
-endif
-
-// daj kolone tabele sa duzinama
 aCols := a_pr_cols()
+cCols := g_pr_cols(aCols)
 
-cLine := REPLICATE("-", LEN_UKUPNO - LEN(RAZMAK) - 2 )
-cLine := "+" + cLine + "+"
+cLine := REPLICATE("=", nTblDuz)
 
-cZagl := g_zg_cols(aCols)
-cStavka := g_st_cols(aCols)
-
-? RAZMAK + cLine
-? RAZMAK + PADR("Rezaona:", 55)
-?? PADR("Brusiona:", 20)
-? RAZMAK + cLine
-? RAZMAK + cZagl
-? RAZMAK + cLine
-
-s_pr_rbr(nStRows, cStavka)
-
-? RAZMAK + cLine
-? RAZMAK + PADR("Termicka obrada:", 55)
-?? PADR("IZO staklo:", 20)
-? RAZMAK + cLine
-? RAZMAK + cZagl
-? RAZMAK + cLine
-
-s_pr_rbr(nStRows, cStavka)
-
-? RAZMAK + cLine
+? "Naradni dio naloga popunjava proizvodnja nakon obrade:"
+? cLine
+? cCols
+? cLine
+?
+?
+?
+?
+? cLine
 
 return
 
-
-
-// ----------------------------------------------
-// printanje sadrzaja tabele 
-// ----------------------------------------------
-static function s_pr_rbr(nTblRows, cStavka)
-local cRbr
-local cPom
-
-for i:=1 to nTblRows
-
-	// redni broj
-	cRbr := PADL(TRANSFORM(i, "999."), 4)
-	// zamjeni ??? sa rbr	
-	cPom := STRTRAN(cStavka, "????", cRbr)
-	
-	? RAZMAK
-	
-	?? cPom
-next
-return
 
 
 
@@ -628,13 +568,14 @@ return
 static function a_pr_cols()
 local aArr:={}
 
+AADD(aArr, { "Pogon" , 10 })
 AADD(aArr, { "R.br" , 4 })
-AADD(aArr, { "Sir X Vis " , 10 })
+AADD(aArr, { "Sir X Vis" , 15 })
 AADD(aArr, { "Kom." , 4 })
-AADD(aArr, { "Uradjeno" , 8 })
-AADD(aArr, { "Skart" , 5 })
+AADD(aArr, { "Uradjeno" , 25 })
+AADD(aArr, { "Skart" , 25 })
 AADD(aArr, { "Vrijeme" , 7 })
-AADD(aArr, { "Napomene  " , 10 })
+AADD(aArr, { "Napomene" , 30 })
 
 return aArr
 
@@ -642,43 +583,13 @@ return aArr
 // -------------------------------------------
 // vraca string zaglavlja kolone
 // -------------------------------------------
-static function g_zg_cols(aArr)
+static function g_pr_cols(aArr)
 local cRet := ""
-local cSepar := "|"
 
 for i:=1 to LEN(aArr)
-	cRet += cSepar
-	cRet += aArr[i, 1]
+	cRet += PADC( aArr[i, 1], aArr[i, 2] )
+	cRet += "*"
 next
-
-cRet += cRet
-cRet += cSepar
-
-return cRet
-
-
-
-
-// -------------------------------------------
-// vraca string zaglavlja kolone
-// -------------------------------------------
-static function g_st_cols(aArr)
-local cRet := ""
-local cSepar := "|"
-
-for i:=1 to LEN(aArr)
-	cRet += cSepar
-	if i == 1
-		cRet += "????"
-	elseif i == 2
-		cRet += PADC("X",10)
-	else
-		cRet += SPACE(aArr[i, 2])
-	endif
-next
-
-cRet += cRet 
-cRet += cSepar
 
 return cRet
 

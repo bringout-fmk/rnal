@@ -53,7 +53,7 @@ endif
 
 // kreiraj indexe
 CREATE_INDEX("br_nal", "br_nal+r_br+idproizvod", PRIVPATH + "T_RNST")
-CREATE_INDEX("br_nal", "br_nal+r_br+idroba", PRIVPATH + "T_RNOP")
+CREATE_INDEX("br_nal", "br_nal+r_br+p_br+idroba", PRIVPATH + "T_RNOP")
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
 
 return
@@ -70,7 +70,8 @@ AADD(aArr,{ "pro_naz"    , "C" , 250 ,  0 })
 AADD(aArr,{ "idroba"     , "C" ,  10 ,  0 })
 AADD(aArr,{ "roba_naz"   , "C" , 250 ,  0 })
 AADD(aArr,{ "jmj"        , "C" ,   3 ,  0 })
-AADD(aArr,{ "kolicina"   , "N" ,  15 ,  5 })
+AADD(aArr,{ "pro_kol"    , "N" ,  15 ,  5 })
+AADD(aArr,{ "sir_kol"    , "N" ,  15 ,  5 })
 AADD(aArr,{ "d_sirina"   , "N" ,  15 ,  5 })
 AADD(aArr,{ "z_sirina"   , "N" ,  15 ,  5 })
 AADD(aArr,{ "d_visina"   , "N" ,  15 ,  5 })
@@ -183,8 +184,8 @@ return xRet
 
 // dodaj stavke u tabelu T_RNST
 function a_t_rnst( cBr_nal, cR_br, cP_br, cId_pro, cPro_naz, ;
-		   cId_roba, cRoba_naz, cJmj, ;
-                   nKolicina, nD_sirina, nD_visina, ;
+		   cId_roba, cRoba_naz, cJmj, nPro_kol, ;
+                   nSir_kol, nD_sirina, nD_visina, ;
 		   nZ_sirina, nZ_visina, nD_ukupno, ;
 		   nZ_ukupno, nZ_Netto )
 
@@ -199,7 +200,8 @@ replace pro_naz with cPro_naz
 replace idroba with cId_roba
 replace roba_naz with cRoba_naz
 replace jmj with cJmj
-replace kolicina with nKolicina
+replace pro_kol with nPro_kol
+replace sir_kol with nSir_kol
 replace d_sirina with nD_sirina
 replace d_visina with nD_visina
 replace z_sirina with nZ_sirina

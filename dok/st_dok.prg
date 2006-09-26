@@ -97,7 +97,8 @@ do while !EOF() .and. field->br_nal == nBr_nal
 	
 	cProizvod := field->proizvod
 	nR_br := field->r_br
-
+	nPro_kol := field->kolicina
+	
 	// nadji proizvod
 	select roba
 	hseek cProizvod
@@ -140,7 +141,7 @@ do while !EOF() .and. field->br_nal == nBr_nal
 		nNUNeto  += nZ_Netto
 	
 		a_t_rnst( cBr_nal, cR_br, cP_br, cProizvod, cProNaz, ;
-		          cIdroba, cRobanaz, cRobaJmj, ;
+		          cIdroba, cRobanaz, cRobaJmj, nPro_kol, ;
                           nKolicina, nD_sirina, nD_visina, ;
 		          nZ_sirina, nZ_visina, nD_ukupno, ;
 		          nZ_ukupno, nZ_Netto )
