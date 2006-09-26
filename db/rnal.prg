@@ -210,6 +210,9 @@ endif
 
 MsgO("Vrsim povrat dokumenta u pripremu....")
 
+// setuj realizovano na ""
+set_real_marker( nBr_nal, "" )
+
 // povrat maticne tabele RNAL
 p_rnal( nBr_nal )
 
@@ -221,6 +224,7 @@ p_rnop( nBr_nal )
 
 // markiraj povrat u RNAL
 set_p_marker( nBr_nal, "P" )
+
 
 select rnal
 use
@@ -250,6 +254,27 @@ endif
 
 select (nTArea)
 return
+
+// markiraj povrat....
+function set_real_marker(nBr_nal, cMark)
+local nTArea
+nTArea := SELECT()
+
+select rnal
+set order to tag "br_nal"
+go top
+seek STR(nBr_nal, 10, 0)
+
+if FOUND()
+	Scatter()
+	_rn_real := cMark
+	Gather()
+endif
+
+select (nTArea)
+return
+
+
 
 
 // vrati marker naloga

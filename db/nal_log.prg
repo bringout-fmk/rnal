@@ -238,8 +238,9 @@ endif
 
 return
 
-
-// logiranje kontakta
+// ---------------------------------------
+// logiranje zatvaranje naloga...
+// ---------------------------------------
 function log_zatvori(nBr_nal, cOperater, cOpis, cReal, cAkcija)
 local nLOGR_br
 local cTip
@@ -255,6 +256,32 @@ f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
 f99_stavke(cAkcija, nBr_nal, nLOGR_br, cReal)
 
 return
+
+
+
+// ---------------------------------------
+// logiranje otvaranje naloga...
+// ---------------------------------------
+function log_otvori(nBr_nal, cOperater, cOpis)
+local nLOGR_br
+local cTip
+
+if (cOpis == nil)
+	cOpis := "Nalog otvoren radi dorade"
+endif
+
+if (cOperater == nil)
+	cOperater := goModul:oDataBase:cUser
+endif
+
+cTip := "01"
+nLOGR_br := n_log_rbr( nBr_nal )
+
+f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
+
+return
+
+
 
 // -------------------------------------------------------
 // dodaje stavku u tabelu RNLOG

@@ -153,6 +153,7 @@ local cZatvStatus := "Z"
 
 cFilter := "r_br = 1"
 cFilter += " .and. "
+// pogledaj da nije lock-ovan zapis
 cFilter += "rec_zak <> " + Cm2Str("Z")
 cFilter += " .and. "
 
@@ -257,7 +258,12 @@ do case
 			set filter to
 			
 			if pov_nalog(nBr_nal) == 1
+				
+				// logiraj otvaranje
+				log_otvori( nBr_nal )
+				
 				MsgBeep("Nalog otvoren!")
+				
 			endif
 			
 			SELECT RNAL
@@ -267,7 +273,7 @@ do case
 			ed_rnal(.t.)
 			SELECT RNAL
 			set_f_kol(cTblFilt)
-			GO (nTRec)
+			//GO (nTRec)
 			RETURN DE_REFRESH
 		endif
 		
@@ -290,12 +296,13 @@ do case
 			nBr_nal := rnal->br_nal
 			cTblFilt := DBFilter()
 			set filter to
-			if z_rnal(nBr_nal, "", cNal_real) == 1
+			if z_rnal(nBr_nal, cNal_real) == 1
 				MsgBeep("Nalog zatvoren !")
 			endif
 			SELECT RNAL
+			altd()
 			set_f_kol(cTblFilt)
-			GO (nTRec)
+			//GO (nTRec)
 			RETURN DE_REFRESH
 		endif
 		
