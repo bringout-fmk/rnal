@@ -91,15 +91,17 @@ return
 static function k_handler(nBr_nal)
 local nTblFilt
 local cLogText := ""
+local cPom
 
 // napravi string iz rnlog/rnlog_it
 cLogText := g_log_opis( rnlog->br_nal, ;
 			rnlog->r_br, ;
 			rnlog->tip )
 
+cPom := STRTRAN(cLogText, "#", ",")
 
 // prikaz stringa u browse - box-u
-s_log_opis_on_form( cLogText )
+s_log_opis_on_form( cPom )
 
 do case
 	
@@ -112,6 +114,12 @@ do case
 		
 		return DE_REFRESH
 		
+	// detaljni prikaz box-a sa promjenama
+	case (Ch == K_ENTER)
+	
+		sh_log_box(cLogText)
+		return DE_CONT
+	
 	// stampa liste log-a
 	case (Ch == K_CTRL_P)
 		if Pitanje(, "Stampati liste promjena (D/N) ?", "D") == "D"
@@ -338,4 +346,41 @@ endcase
 
 return xRet
 
+
+// ------------------------------------------
+// prikaz box-a sa informacijama loga
+// ------------------------------------------
+static function sh_log_box(cLogTxt)
+local aBoxTxt := {}
+local cPom 
+local cResp := "OK"
+private GetList:={}
+
+aBoxTxt := toktoniz(cLogTxt, "#") 
+
+altd()
+
+if LEN(aBoxTxt) == 0
+	return
+endif
+
+Box(, LEN(aBoxTxt) + 2, 70)
+	
+	@ m_x + 1, m_y + 2 SAY "Detaljni prikaz promjene: " COLOR "I" 
+	
+	for i:=1 to LEN(aBoxTxt)
+
+		@ m_x + (i+1), m_y + 2 SAY PADR(aBoxTxt[i], 65)
+	next
+
+	@ m_x + LEN(aBoxTxt) + 2, m_y + 2 GET cResp 
+	
+	read
+BoxC()
+
+if LastKey() == K_ESC .or. cResp == "OK"
+	return
+endif
+
+return 
 

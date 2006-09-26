@@ -942,15 +942,16 @@ seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
-	cRet += "pro.: " + ALLTRIM(field->idroba)
-	cRet += ", "
-	cRet += "sir.: " + ALLTRIM(field->idroba2)
-	cRet += ", "
-	cRet += "kol= " + ALLTRIM(STR(field->k_1, 8, 2))
-	cRet += ", "
-	cRet += "vis= " + ALLTRIM(STR(field->n_1, 8, 2))
-	cRet += ", "
-	cRet += "sir= " + ALLTRIM(STR(field->n_2, 8, 2))
+	cRet += "proizod: " + ALLTRIM(field->idroba)
+	cRet += "#"
+	cRet += "sirovina: " + ALLTRIM(field->idroba2)
+	cRet += "#"
+	cRet += "kol.=" + ALLTRIM(STR(field->k_1, 8, 2))
+	cRet += ","
+	cRet += "vis.=" + ALLTRIM(STR(field->n_1, 8, 2))
+	cRet += ","
+	cRet += "sir.=" + ALLTRIM(STR(field->n_2, 8, 2))
+	cRet += "#"
 	
 	select rnlog_it
 	skip
@@ -976,7 +977,7 @@ set order to tag "tip"
 go top
 seek STR(nBr_nal, 10, 0) + "01" + STR(nR_br, 4, 0)
 
-cRet += "Otvaranje naloga..."
+cRet += "Otvaranje naloga...#"
 	
 set order to tag "br_nal"
 
@@ -997,7 +998,7 @@ set order to tag "tip"
 go top
 seek STR(nBr_nal, 10, 0) + "99" + STR(nR_br, 4, 0)
 
-cRet += "Zatvaranje naloga..."
+cRet += "Zatvaranje naloga...#"
 	
 set order to tag "br_nal"
 
@@ -1027,10 +1028,11 @@ do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
 	cRet += "partn: " + s_partner( ALLTRIM(field->c_1) )
-	cRet += ", "
+	cRet += "#"
 	cRet += "v.plac: " + s_placanje( ALLTRIM(field->c_2) )
-	cRet += ", "
+	cRet += "#"
 	cRet += "prioritet: " + s_hitnost( ALLTRIM(field->c_3) )
+	cRet += "#"
 	
 	select rnlog_it
 	skip
@@ -1065,10 +1067,11 @@ do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
 	cRet += "mj.isp: " + ALLTRIM(field->c_1)
-	cRet += ", "
+	cRet += "#"
 	cRet += "dat.isp: " + ALLTRIM(field->c_2)
-	cRet += ", "
+	cRet += "#"
 	cRet += "vr.isp: " + ALLTRIM(field->c_3)
+	cRet += "#"
 	
 	select rnlog_it
 	skip
@@ -1104,10 +1107,11 @@ do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
 	cRet += "k.ime: " + ALLTRIM(field->c_1)
-	cRet += ", "
+	cRet += "#"
 	cRet += "k.tel: " + ALLTRIM(field->c_2)
-	cRet += ", "
+	cRet += "#"
 	cRet += "k.opis: " + ALLTRIM(field->c_3)
+	cRet += "#"
 	
 	select rnlog_it
 	skip
@@ -1138,17 +1142,29 @@ set order to tag "br_nal"
 go top
 seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 
+cTmpSirov := "XXX"
+
 do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
-	cRet += "sirov.= " + ALLTRIM(field->idroba2)
-	cRet += ", "
-	cRet += "oper.= " + s_karakt( ALLTRIM(field->c_2) )
-	cRet += ", "
-	cRet += "instr.= " + ALLTRIM(field->c_3)
+	cSirov := field->idroba2
 	
+	if cSirov <> cTmpSirov
+		cRet += "sirov.= " + ALLTRIM(field->idroba2)
+		cRet += "#"
+	endif
+	
+	cRet += s_karakt( ALLTRIM(field->c_2) )
+	cRet += "="
+	cRet += ALLTRIM(field->c_3)
+	
+	cRet += "#"
+		
 	select rnlog_it
 	skip
+
+	cTmpSirov := cSirov
+	
 enddo
 
 select rnlog
