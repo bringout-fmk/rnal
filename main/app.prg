@@ -102,6 +102,13 @@ else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
+AADD(opc, "4. izvjestaji ")
+if (ImaPravoPristupa(goModul:oDataBase:cName, "RPT", "M_RPT"))
+	AADD(opcexe, {|| m_rpt() })
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
 
 AADD(opc, "------------------------------------")
 AADD(opcexe, {|| nil})
