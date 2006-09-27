@@ -731,6 +731,7 @@ return
 // roba, novi ID
 // ------------------------------
 function r_new_id(cR_id)
+// ako postoji sifra, ne treba
 if !EMPTY(cR_id)
 	return .f.
 endif
@@ -814,6 +815,7 @@ do while !EOF()
 		// dodaj u roba
 		select roba
 		append blank
+		
 		Scatter()
 
 		_id := cNewId
@@ -858,6 +860,62 @@ enddo
 select (nTArea)
 
 return
+
+// --------------------------------------------------------
+// da li u robi postoji ovakva sifra prema sastavnicama
+// --------------------------------------------------------
+static function no_match_roba_sast(nBr_nal, nR_br, cNewId)
+local aSast := {}
+local nTArea := SELECT()
+local nTRec := RECNO()
+local lRet := .f.
+local cProID
+
+cProId := field->proizvod
+cNewId := ""
+
+// napuni matricu aSast sa sastavnicama iz p_rnst
+select p_rnst
+set order to tag "br_nal"
+seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+
+do while !EOF() .and. field->br_nal == nBr_nal ;
+		.and. field->r_br == nR_br
+
+	AADD(aSast, {|| p_rnst->idroba, p_rnst->kolicina })
+	
+	skip
+enddo
+
+if LEN(aSast) == 0
+	lRet := .t.
+else
+	select SAST
+	set order to tag "ID"
+	seek cProId
+	go top
+
+	do while !EOF() .and. field->id == cProId
+	
+		cSastId := field->id2
+		nSastKol := field->kolicina
+		
+		nScanId := ASCAN(aSast, {|xUsl| xUsl[1] == cSastId .and. xUsl[2] == nSastKol })
+		
+		if nScanId == 0
+			lRet := .t.
+			exit
+		endif
+		
+		skip
+	enddo
+endif
+
+select (nTArea)
+go (nTRec)
+
+return lRet
+
 
 // ---------------------------------
 // generisi roba match code
