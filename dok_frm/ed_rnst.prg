@@ -342,6 +342,15 @@ do case
 		select p_rnst
 		return DE_REFRESH
 	
+	case UPPER(CHR(Ch)) == "D"
+		
+		select p_rnst
+		if set_new_dims(p_rnst->br_nal, p_rnst->r_br) == 1
+			select p_rnst
+			return DE_REFRESH
+		endif
+		return DE_CONT
+	
 	case ( Ch == K_ESC )
 		select p_rnst
 		return DE_CONT 
@@ -468,4 +477,72 @@ nX += 1
 @ nX, nY SAY cLine
 
 return
+
+// ------------------------------------------
+// setovanje novih dimenzija stavki
+// ------------------------------------------
+static function set_new_dims(nBr_nal, nR_br)
+local cIzvrsiDN := "N"
+local nSirina := 0
+local nVisina := 0
+local cRobaVrsta
+local nZaokruzenje
+local nNetoKoef
+local nNetoProc
+
+if Pitanje(, "Setovati nove dimenzije (D/N) ?", "D") == "N"
+	return 0
+endif
+
+
+Box(, 6, 50)
+	@ m_x+1, m_y+2 SAY "Nove dimenzije su:"
+	@ m_x+3, m_y+2 SAY "   -> sirina (mm):" GET nSirina VALID nSirina <> 0 PICT PIC_DIM()
+	@ m_x+4, m_y+2 SAY "   -> visina (mm):" GET nVisina VALID nVisina <> 0 PICT PIC_DIM()
+	@ m_x+6, m_y+2 SAY "izvrsiti zamjenu" GET cIzvrsiDN VALID cIzvrsiDN $ "DN" PICT "@!"
+	read
+BoxC()
+
+if LastKey() == K_ESC
+	return 0
+endif
+
+if cIzvrsiDN == "N"
+	return 0
+endif
+
+go top
+do while !EOF() .and. field->br_nal == nBr_nal ;
+		.and. field->r_br == nR_br
+
+	Scatter()
+
+	// uzmi parametre 
+	g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, ;
+			@nNetoKoef, @nNetoProc)
+	
+	
+	_d_sirina := nSirina
+	_d_visina := nVisina
+	
+	// zaokruzenja dimenzija
+	_z_sirina := dim_zaokruzi(_d_sirina, nZaokruzenje)
+	_z_visina := dim_zaokruzi(_d_visina, nZaokruzenje)
+
+	// ukupno bez zaokruzenja
+	_d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
+	// ukupno sa zaokruzenjima
+	_z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _z_visina )
+
+	// racunaj neto (kilaza)
+	_neto := c_netto( _debljina, _z_ukupno, cRobaVrsta, nNetoKoef, nNetoProc )
+
+	Gather()
+	
+	skip
+enddo
+go top
+
+return 1
+
 

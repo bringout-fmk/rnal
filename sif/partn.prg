@@ -196,6 +196,7 @@ return cRet
 // -------------------------------------
 function ck_part_naz(cNaz)
 select partn
+set filter to
 set order to tag "NAZ"
 seek cNaz
 set order to tag "ID"

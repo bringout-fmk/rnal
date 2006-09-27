@@ -31,7 +31,8 @@ r_list_zagl()
 
 do while !EOF() .and. DTOS(field->datnal) == DTOS(dTekDate)
 	
-	if !EMPTY(field->rn_real)
+	// ako je nalog zatvoren, preskoci
+	if field->rn_status == "Z"
 		skip
 		loop
 	endif
@@ -125,7 +126,8 @@ r_list_zagl()
 
 do while !EOF() .and. DTOS(field->datisp) == DTOS(dTekDate)
 	
-	if !EMPTY(field->rn_real)
+	// ako je zatvoren, preskoci..
+	if field->rn_status == "Z"
 		skip
 		loop
 	endif
@@ -169,7 +171,7 @@ select rnal
 set order to tag "dat_isp"
 go top
 
-seek DTOS(dTekDate)
+//seek DTOS(dTekDate)
 
 r_l_get_line(@cLine)
 
@@ -180,15 +182,16 @@ START PRINT CRET
 
 r_list_zagl()
 
-do while !EOF() .and. DTOS(field->datisp) >= DTOS(dTekDate)
+do while !EOF()
 	
-	// ako je u datum isti preskoci...
-	if field->datisp == dTekDate
+	// ako je realizovan, preskoci
+	if field->rn_status == "Z"
 		skip
 		loop
 	endif
-	
-	if !EMPTY(field->rn_real)
+
+	// ako je u datum isti ili manji, preskoci...
+	if dTekDate <= field->datisp
 		skip
 		loop
 	endif
