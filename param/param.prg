@@ -13,6 +13,13 @@ static gPIC_DIM
 // picture kolicina
 static gPIC_KOL
 
+// dimenzije
+static gDEB_MIN
+static gDEB_MAX
+static gVIS_MIN
+static gVIS_MAX
+static gSIR_MIN
+static gSIR_MAX
 
 // -----------------------------------------
 // set parametara pri pokretanju modula
@@ -30,6 +37,7 @@ return
 // parametri zaokruzenja, formata prikaza
 // --------------------------------------
 function ed_zf_params()
+local cDimPict := "99999.99"
 
 gPIC_IZN:= PADR(gPIC_IZN, 20)
 gPIC_DIM:= PADR(gPIC_DIM, 20)
@@ -50,6 +58,24 @@ nX ++
 nX ++
 
 @ m_x + nX, m_y+2 SAY PADL(" iznos ", 30)   GET gPIC_IZN
+
+nX := nX + 2
+
+@ m_x + nX, m_y+2 SAY "2. min/max vrijednosti ***"
+nX ++
+
+@ m_x + nX, m_y+2 SAY PADL(" debljina (mm)   MIN:", 30) GET gDEB_MIN PICT cDimPict
+@ m_x + nX, m_y+43 SAY "MAX:" GET gDEB_MAX PICT cDimPict
+
+nX ++
+
+@ m_x + nX, m_y+2 SAY PADL(" sirina (mm)   MIN:", 30) GET gSIR_MIN PICT cDimPict
+@ m_x + nX, m_y+43 SAY "MAX:" GET gSIR_MAX PICT cDimPict
+
+nX ++
+
+@ m_x + nX, m_y+2 SAY PADL(" visina (mm)   MIN:", 30) GET gVIS_MIN PICT cDimPict
+@ m_x + nX, m_y+43 SAY "MAX:" GET gVIS_MAX PICT cDimPict
 
 read
 
@@ -284,6 +310,13 @@ gPIC_IZN := "9999999.99"
 gPIC_DIM := "9999999.99"
 gPIC_KOL := "9999999999"
 
+gDEB_MIN := 2
+gDEB_MAX := 100
+gVIS_MIN := 200
+gVIS_MAX := 1000
+gSIR_MIN := 200
+gSIR_MAX := 1000
+
 SELECT F_KPARAMS
 
 if !used()
@@ -297,6 +330,12 @@ private aHistory:={}
 RPar("P1", @gPIC_IZN)
 RPar("P2", @gPIC_DIM)
 RPar("P3", @gPIC_KOL)
+RPar("P4", @gDEB_MIN)
+RPar("P5", @gDEB_MAX)
+RPar("P6", @gSIR_MIN)
+RPar("P7", @gSIR_MAX)
+RPar("P8", @gVIS_MIN)
+RPar("P9", @gVIS_MAX)
 
 close
 return
@@ -318,6 +357,12 @@ private aHistory:={}
 WPar("P1", gPIC_IZN)
 WPar("P2", gPIC_DIM)
 WPar("P3", gPIC_KOL)
+RPar("P4", gDEB_MIN)
+RPar("P5", gDEB_MAX)
+RPar("P6", gSIR_MIN)
+RPar("P7", gSIR_MAX)
+RPar("P8", gVIS_MIN)
+RPar("P9", gVIS_MAX)
 
 close
 
@@ -349,6 +394,27 @@ if xVal <> nil
 	gPIC_KOL := xVal
 endif
 return gPIC_KOL
+
+
+function MAX_DEBLJINA()
+return gDEB_MAX
+
+function MIN_DEBLJINA()
+return gDEB_MIN
+
+function MIN_VISINA()
+return gVIS_MIN
+
+function MAX_VISINA()
+return gVIS_MAX
+
+function MAX_SIRINA()
+return gSIR_MIN
+
+function MIN_SIRINA()
+return gSIR_MIN
+
+
 
 
 

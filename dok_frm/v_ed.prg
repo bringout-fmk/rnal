@@ -1,12 +1,5 @@
 #include "sc.ch"
 
-// --------------------------
-// validacija
-// --------------------------
-
-static MAX_VISINA := 60000.00 
-static MAX_SIRINA := 32100.00 
-static MAX_DEBLJINA := 100
 
 // ----------------------------------------
 // validacija partnera
@@ -97,10 +90,15 @@ return .f.
 // -----------------------------
 function val_dim_visina(xVal)
 if ( xVal <> 0 )
-	if xVal > MAX_VISINA
-		MsgBeep("Max. visina = " + ALLTRIM(STR(MAX_VISINA)))
+	if xVal > MAX_VISINA()
+		MsgBeep("Max. visina = " + ALLTRIM(STR(MAX_VISINA())))
 		return .f.
 	endif
+	if xVal < MIN_VISINA()
+		MsgBeep("Min. visina = " + ALLTRIM(STR(MIN_VISINA())))
+		return .f.
+	endif
+	
 	return .t.
 endif
 MsgBeep("Visina mora biti <> 0 !!!")
@@ -112,10 +110,15 @@ return .f.
 // -----------------------------
 function val_dim_sirina(xVal)
 if ( xVal <> 0 )
-	if xVal > MAX_SIRINA
-		MsgBeep("Max. sirina = " + ALLTRIM(STR(MAX_SIRINA)))
+	if xVal > MAX_SIRINA()
+		MsgBeep("Max. sirina = " + ALLTRIM(STR(MAX_SIRINA())))
 		return .f.
 	endif
+	if xVal < MIN_SIRINA()
+		MsgBeep("Min. sirina = " + ALLTRIM(STR(MIN_SIRINA())))
+		return .f.
+	endif
+
 	return .t.
 endif
 MsgBeep("Sirina mora biti <> 0 !!!")
@@ -128,10 +131,15 @@ return .f.
 // -----------------------------
 function val_debljina(xVal)
 if ( xVal <> 0 )
-	if xVal > MAX_DEBLJINA
-		MsgBeep("Max. debljina = " + ALLTRIM(STR(MAX_DEBLJINA)))
+	if xVal > MAX_DEBLJINA()
+		MsgBeep("Max. debljina = " + ALLTRIM(STR(MAX_DEBLJINA())))
 		return .f.
 	endif
+	if xVal < MIN_DEBLJINA()
+		MsgBeep("Min. debljina = " + ALLTRIM(STR(MIN_DEBLJINA())))
+		return .f.
+	endif
+
 	return .t.
 endif
 MsgBeep("Debljina mora biti <> 0 !!!")

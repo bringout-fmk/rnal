@@ -221,9 +221,10 @@ read
 
 ESC_RETURN 0
 
+altd()
 // zaokruzenja dimenzija
-_z_sirina := dim_zaokruzi(_d_sirina, nZaokruzenje)
-_z_visina := dim_zaokruzi(_d_visina, nZaokruzenje)
+_z_sirina := dim_zaokruzi(_d_sirina, _debljina, nZaokruzenje)
+_z_visina := dim_zaokruzi(_d_visina, _debljina, nZaokruzenje)
 
 // ukupno bez zaokruzenja
 _d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
@@ -520,8 +521,8 @@ do while !EOF() .and. field->br_nal == nBr_nal ;
 	_d_visina := nVisina
 	
 	// zaokruzenja dimenzija
-	_z_sirina := dim_zaokruzi(_d_sirina, nZaokruzenje)
-	_z_visina := dim_zaokruzi(_d_visina, nZaokruzenje)
+	_z_sirina := dim_zaokruzi(_d_sirina, _debljina, nZaokruzenje)
+	_z_visina := dim_zaokruzi(_d_visina, _debljina, nZaokruzenje)
 
 	// ukupno bez zaokruzenja
 	_d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )

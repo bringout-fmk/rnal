@@ -16,11 +16,16 @@ static S3M_ZAOKR := 3
 // -------------------------------------
 // zaokruzi xVal po GNU tabeli
 // -------------------------------------
-function dim_zaokruzi(xVal, nTipZaok)
+function dim_zaokruzi(xVal, nDebljina, nTipZaok)
 
 // ako je bez zaokruzenja
 if nTipZaok == BEZ_ZAOKR
 	return xVal
+endif
+
+// ako je debljina do 3mm uvijek zaokruzi na 3mm zaokr.
+if nDebljina <= 3
+	return z_3mm_staklo(xVal)
 endif
 
 // zaokruzenje profilit staklo
@@ -48,7 +53,7 @@ local nPom
 local xRet
 nPom := nDimenzija
 do while .t.
-	if nPom%26 == 0
+	if nPom%260 == 0
 		xRet := nPom
 		exit
 	endif
@@ -66,7 +71,7 @@ local xRet
 nPom := nDimenzija
 do while .t.
 	++ nPom
-	if nPom%2 == 0
+	if nPom%20 == 0
 		xRet := nPom
 		exit
 	endif
@@ -82,6 +87,8 @@ return xRet
 static function z_po_gn(nDimenzija)
 local aGN := {}
 local nRet := 0
+
+altd()
 
 // definisi matricu GN-a
 aGN := arr_gn()
@@ -99,7 +106,7 @@ return nRet
 function arr_gn()
 local aGN:={}
 
-for i:=21 to 240 step 3
+for i:=210 to 2400 step 30
 	AADD(aGN, {i})
 next
 
