@@ -131,7 +131,8 @@ local nYRekap
 local nXGrupa
 local nXTip
 local cTipFilter
-local cRobaVrsta:=""
+local cRobaVrsta := ""
+local cGrupaVrsta := "" 
 local nZaokruzenje := 0
 local nNetoKoef := 0
 local nNetoProc := 0
@@ -203,6 +204,7 @@ ESC_RETURN 0
 _debljina := g_roba_debljina(_idroba)
 _roba_tip := g_roba_tip(_idroba)
 _roba_gr := g_roba_gr(_idroba)
+cGrupaVrsta := g_gr_vrsta(_roba_gr)
 
 // pronadji zaokruzenje
 g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
@@ -213,9 +215,9 @@ nX += 2
 
 @ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina )
 
-@ m_x + nX, col() + 2 SAY "Sirina (mm):" GET _d_sirina PICT PIC_DIM() VALID val_dim_sirina( _d_sirina )
+@ m_x + nX, col() + 2 SAY "Sirina (mm):" GET _d_sirina PICT PIC_DIM() VALID IF(EMPTY(cGrupaVrsta), val_dim_sirina( _d_sirina ), .t.)
  
-@ m_x + nX, col() + 2 SAY "Visina (mm):" GET _d_visina PICT PIC_DIM() VALID val_dim_visina( _d_visina )
+@ m_x + nX, col() + 2 SAY "Visina (mm):" GET _d_visina PICT PIC_DIM() VALID IF(EMPTY(cGrupaVrsta), val_dim_visina( _d_visina ), .t.)
 
 read
 

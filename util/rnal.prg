@@ -358,6 +358,26 @@ select (nTArea)
 return cRet
 
 
+// ----------------------------
+// get grupa vrsta K1 polje
+// ----------------------------
+function g_gr_vrsta(cGrupa)
+local nTArea := SELECT()
+local cRet := ""
+select s_grupe
+set filter to
+set order to tag "ID"
+go top
+
+seek cGrupa
+
+if FOUND()
+	cRet := ALLTRIM(field->k_1)
+endif
+
+select (nTArea)
+return cRet
+
 
 // ----------------------------
 // get roba debljina

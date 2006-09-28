@@ -89,7 +89,7 @@ return .f.
 // validacija dimenzije visina
 // -----------------------------
 function val_dim_visina(xVal)
-if ( xVal <> 0 )
+//if ( xVal <> 0 )
 	if xVal > MAX_VISINA()
 		MsgBeep("Max. visina = " + ALLTRIM(STR(MAX_VISINA())))
 		return .f.
@@ -99,17 +99,17 @@ if ( xVal <> 0 )
 		return .f.
 	endif
 	
-	return .t.
-endif
-MsgBeep("Visina mora biti <> 0 !!!")
-return .f.
+	//return .t.
+//endif
+//MsgBeep("Visina mora biti <> 0 !!!")
+return .t.
 
 
 // -----------------------------
 // validacija dimenzije sirina
 // -----------------------------
 function val_dim_sirina(xVal)
-if ( xVal <> 0 )
+//if ( xVal <> 0 )
 	if xVal > MAX_SIRINA()
 		MsgBeep("Max. sirina = " + ALLTRIM(STR(MAX_SIRINA())))
 		return .f.
@@ -119,10 +119,10 @@ if ( xVal <> 0 )
 		return .f.
 	endif
 
-	return .t.
-endif
-MsgBeep("Sirina mora biti <> 0 !!!")
-return .f.
+	//return .t.
+//endif
+//MsgBeep("Sirina mora biti <> 0 !!!")
+return .t.
 
 
 
