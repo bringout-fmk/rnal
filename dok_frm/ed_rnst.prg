@@ -123,7 +123,7 @@ local nRobaX
 local nRobaY
 local nUkX
 local nUnOpX
-local cUnosOp := "D"
+local cUnosOp := "N"
 local cIdRoba
 local nDebStakla
 local nXRekap
