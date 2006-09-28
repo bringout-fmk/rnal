@@ -525,6 +525,10 @@ if nCnt == 0
 	nCnt := 1
 endif
 
+if nCnt > 2
+	nCnt := INT( nCnt / 2 ) + 1
+endif
+
 select (nTArea)
 return
 
