@@ -325,7 +325,7 @@ return cRet
 function g_roba_gr(cRoba)
 local nTArea := SELECT()
 local cRet := ""
-local cPom
+local cPom := ""
 select roba
 set order to tag "ID"
 go top
@@ -338,15 +338,17 @@ endif
 hseek cRoba
 
 if FOUND()
+	
 	cPom := field->roba_tip
-endif
+	
+	select s_tipovi
+	set order to tag "ID"
+	hseek cPom
 
-select s_tipovi
-set order to tag "ID"
-hseek cPom
-
-if FOUND()
-	cRet := field->grupa
+	if FOUND()
+		cRet := field->grupa
+	endif
+	
 endif
 
 select (nTArea)
@@ -384,12 +386,14 @@ return cRet
 
 // --------------------------------------------------------
 // automatski prebacuje sastavnice proizvoda u tabelu RNST
+// cProizvod - proizvod
+// nRobaCnt - broj stakala
 // --------------------------------------------------------
-function sast_to_rnst(cProizvod, nBr_nal, nR_br)
+function sast_to_rnst(cProizvod, nRobaCnt, nBr_nal, nR_br)
 
 // da li vec postoje sastavnice ???
 if !sast_exist(nBr_nal, nR_br, cProizvod)
-	dodaj_sastavnice(cProizvod, nBr_nal, nR_br)
+	dodaj_sastavnice(cProizvod, nRobaCnt, nBr_nal, nR_br)
 endif
 
 return
@@ -397,15 +401,18 @@ return
 // ----------------------------------------
 // dodaj sastavnice u P_RNST
 // ----------------------------------------
-function dodaj_sastavnice(cProizvod, nBr_nal, nR_br)
+function dodaj_sastavnice(cProizvod, nRobaCnt, nBr_nal, nR_br)
 local nTArea
 local nCount
 
+nTArea := SELECT()
+
 if EMPTY(cProizvod)
+	// nafiluj na osnovu broja stakala
+	fill_broj_stakala(nRobaCnt, nBr_nal, nR_br)
+	select (nTArea)
 	return
 endif
-
-nTArea := SELECT()
 
 select sast
 set order to tag "IDRBR"
@@ -493,6 +500,75 @@ enddo
 select (nTArea)
 return
 
+
+// ------------------------------------------
+// vraca broj sastavnica
+// ------------------------------------------
+function get_roba_cnt(cProizvod, nCnt)
+local nTArea := SELECT()
+
+select sast 
+set order to tag "id"
+go top
+seek cProizvod
+
+nCnt := 0
+
+do while !EOF() .and. sast->id == cProizvod
+	// povecaj broj sastavnica
+	++ nCnt
+	skip
+enddo
+
+// ne moze biti 0, mora biti 1 sastavnica
+if nCnt == 0
+	nCnt := 1
+endif
+
+select (nTArea)
+return
+
+
+// ---------------------------------------------
+// filuje pripremu p_rnst po broju stakala
+// ---------------------------------------------
+static function fill_broj_stakala(nRobaCnt, nBr_nal, nR_br)
+local nBrSirovina := 1
+local i
+
+if nRobaCnt > 1
+	nBrSirovina := nRobaCnt + (nRobaCnt - 1)
+endif
+
+select p_rnst
+
+for i:=1 to nBrSirovina
+	
+	select p_rnst
+	append blank
+	
+	Scatter()
+	
+	_br_nal := nBr_nal
+	_r_br := nR_br
+	_p_br := next_p_br(nBr_nal, nR_br)
+	
+	if i%2 == 0
+		_idroba := "-distanc.-"
+	else
+		_idroba := "-staklo-"
+	endif
+	
+	_roba_vrsta := "S"
+	_kolicina := 1
+	_debljina := 0
+	
+	Gather()
+next
+
+return
+
+
 // -------------------------------------
 // provjera integriteta podataka 
 // pri azuriranju ili stampanju naloga
@@ -544,6 +620,7 @@ do while !EOF()
 			return .f.
 		endif
 
+		/*
 		if p_rnst->d_visina == 0
 			MsgBeep("Sirovine - visina = 0 !!!")
 			return .f.
@@ -553,6 +630,7 @@ do while !EOF()
 			MsgBeep("Sirovine - sirina = 0 !!!")
 			return .f.
 		endif
+		*/
 		
 		skip
 		loop

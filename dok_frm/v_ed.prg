@@ -47,6 +47,10 @@ return .t.
 // -------------------------------------------
 function val_sast(cId, cFilt, nX, nY)
 
+if ALLTRIM(cId) == "-staklo-" .or. ALLTRIM(cId) == "-distanc.-"
+	cId := SPACE(10)
+endif
+
 if EMPTY(cId)
 	get_artikal(@cId, cFilt)
 else

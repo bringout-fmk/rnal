@@ -789,6 +789,8 @@ local cNaziv
 local cMCode
 local nBr_nal
 local nR_br
+local nSirovCnt
+local cSirovina
 
 nTArea := SELECT()
 
@@ -798,9 +800,38 @@ go top
 
 do while !EOF()
 	
+	nBr_nal := p_rnal->br_nal
+	nR_br := p_rnal->r_br
+	
+	select p_rnst
+	set order to tag "br_nal"
+	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+		
+	cSirovina := ""
+	nSirovCnt := 0
+		
+	// pregledaj sirovine...
+	do while !EOF() .and. p_rnst->br_nal == nBr_nal ;
+			.and. p_rnst->r_br == nR_br
+	
+		cSirovina := p_rnst->idroba
+		++ nSirovCnt
+		
+		skip
+	enddo
+		
+	if nSirovCnt == 1
+		select p_rnal
+		Scatter()
+		_proizvod := cSirovina
+		Gather()
+		skip
+		loop
+	endif
+
 	// ako treba generisati novi ID
 	if r_new_id(p_rnal->proizvod)
-		
+	
 		nBr_nal := p_rnal->br_nal
 		nR_br := p_rnal->r_br
 		

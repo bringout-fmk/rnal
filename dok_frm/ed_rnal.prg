@@ -152,6 +152,8 @@ local cDefSast:="D"
 if lNovi
 	_r_br := next_r_br()
 	_proizvod := SPACE(LEN(proizvod))
+	_kolicina := 1
+	_roba_cnt := 0
 endif
 
 @ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999"
@@ -170,8 +172,17 @@ read
 
 ESC_RETURN 0
 
-// prebaci sastavnice u rnst ako postoje
-sast_to_rnst(_proizvod, _br_nal, _r_br)
+// vrati broj sastavnica ako je unjet proizvod
+get_roba_cnt(_proizvod, @_roba_cnt)
+
+@ m_x + nX, m_y + 25 SAY "Broj stakala:" GET _roba_cnt PICT PIC_KOL() 
+
+read
+
+ESC_RETURN 0
+
+// prebaci sastavnice u rnst
+sast_to_rnst(_proizvod, _roba_cnt, _br_nal, _r_br)
 
 nX += 2
 

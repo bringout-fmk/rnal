@@ -14,7 +14,7 @@ cFooter := "Unos/dorada stavki naloga za proizvodnju..."
 Box(,18,77)
 
 @ m_x+16,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <O> Pregled operacija"
-@ m_x+17,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
+@ m_x+17,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         | <D> Promjena dim."
 @ m_x+18,m_y+2 SAY ""
 
 private ImeKol
@@ -148,16 +148,14 @@ if lNovi
 	_roba_tip := SPACE(6)
 	_debljina := 0
 	_d_ukupno := 0
+	_kolicina := 1
 	cUnosOp := "N"
 endif
-
-//cFunkcija := STR( g_func_from_group(_roba_gr) , 2, 0)
 
 @ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999" WHEN _r_br == 0
 @ m_x + nX, col() + 2 SAY "P.br:" GET _p_br PICT "9999"
 
 nX += 2
-
 
 @ m_x + nX, m_y + 2 SAY PADL("Funkcija:", 15) GET cFunkcija VALID {|| get_funkcija(@cFunkcija), sh_function(cFunkcija, 4, 25)}
 
@@ -202,13 +200,9 @@ read
 
 ESC_RETURN 0
 
-if _debljina == 0
-	_debljina := g_roba_debljina(_idroba)
-endif
-
-if EMPTY(_roba_tip)
-	_roba_tip := g_roba_tip(_idroba)
-endif
+_debljina := g_roba_debljina(_idroba)
+_roba_tip := g_roba_tip(_idroba)
+_roba_grupa := g_roba_gr(_idroba)
 
 // pronadji zaokruzenje
 g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)

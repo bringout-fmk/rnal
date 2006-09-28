@@ -13,7 +13,7 @@ return .f.
 
 // -----------------------------------------------------
 // kalkulise kvadratne metre
-// nDim1, nDim2 u cm
+// nDim1, nDim2 u mm
 // -----------------------------------------------------
 function c_ukvadrat(nKol, nDim1, nDim2)
 local xRet
@@ -31,10 +31,13 @@ return xRet
 // -------------------------------------
 function c_netto(nDebljina, nU_m2, cRobaVrsta, nNetoKoef, nNetoProc)
 local xRet
+
 xRet := nNetoKoef * nDebljina * nU_m2
+
 if ALLTRIM(cRobaVrsta) == "IZO"
 	xRet := xRet * (1 + (nNetoProc / 100))
 endif
+
 return xRet
 
 
