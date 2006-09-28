@@ -202,7 +202,7 @@ ESC_RETURN 0
 
 _debljina := g_roba_debljina(_idroba)
 _roba_tip := g_roba_tip(_idroba)
-_roba_grupa := g_roba_gr(_idroba)
+_roba_gr := g_roba_gr(_idroba)
 
 // pronadji zaokruzenje
 g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
@@ -276,7 +276,7 @@ endif
 cRet += " .and. "
 
 // ako je uneseno 999 idi sve debljine...
-if nDebljina == 999
+if (nDebljina == 999) .or. (nDebljina == 0)
 	cRet += ".t."
 else
 	cRet += "debljina == " + STR(nDebljina, 15, 5)

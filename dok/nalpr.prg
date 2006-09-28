@@ -196,6 +196,7 @@ do while !EOF()
 		seek t_rnst->br_nal + t_rnst->r_br + t_rnst->p_br + t_rnst->idroba
 		
 		nOperRazmak := LEN(RAZMAK) + (LEN_RBR * 3)
+		
 		do while !EOF() .and. t_rnop->(br_nal + r_br + p_br + idroba) == t_rnst->(br_nal + r_br + p_br + idroba)
 			
 			? SPACE(nOperRazmak)
@@ -238,7 +239,7 @@ s_nal_izdao()
 ?
 
 // printanje tabele za proizvodnju
-prn_pr_table()
+prn_pr_table(5)
 
 ?
 
@@ -535,8 +536,9 @@ return
 
 // --------------------------------------
 // print tabele za proizvodnju
+// nRows - broj slobodnih mjesta u tabeli
 // --------------------------------------
-static function prn_pr_table()
+static function prn_pr_table(nRows)
 local nTblDuz := 130
 local cZagl
 local cLine
@@ -547,14 +549,13 @@ cCols := g_pr_cols(aCols)
 
 cLine := REPLICATE("=", nTblDuz)
 
-? "Naradni dio naloga popunjava proizvodnja nakon obrade:"
+? "Naredni dio naloga popunjava proizvodnja nakon obrade:"
 ? cLine
 ? cCols
 ? cLine
-?
-?
-?
-?
+for i:=1 to nRows
+	?
+next
 ? cLine
 
 return

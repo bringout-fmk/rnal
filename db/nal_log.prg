@@ -1054,9 +1054,9 @@ seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
-	cRet += "partn: " + s_partner( ALLTRIM(field->c_1) )
+	cRet += "Partner: " + s_partner( ALLTRIM(field->c_1) )
 	cRet += "#"
-	cRet += "v.plac: " + s_placanje( ALLTRIM(field->c_2) )
+	cRet += "vrsta placanja: " + s_placanje( ALLTRIM(field->c_2) )
 	cRet += "#"
 	cRet += "prioritet: " + s_hitnost( ALLTRIM(field->c_3) )
 	cRet += "#"
@@ -1093,11 +1093,11 @@ seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
-	cRet += "mj.isp: " + ALLTRIM(field->c_1)
+	cRet += "mjesto isporuke: " + ALLTRIM(field->c_1)
 	cRet += "#"
-	cRet += "dat.isp: " + ALLTRIM(field->c_2)
+	cRet += "datum isporuke: " + ALLTRIM(field->c_2)
 	cRet += "#"
-	cRet += "vr.isp: " + ALLTRIM(field->c_3)
+	cRet += "vrijeme isporuke: " + ALLTRIM(field->c_3)
 	cRet += "#"
 	
 	select rnlog_it
@@ -1133,11 +1133,11 @@ seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
 do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
-	cRet += "k.ime: " + ALLTRIM(field->c_1)
+	cRet += "kontakt ime: " + ALLTRIM(field->c_1)
 	cRet += "#"
-	cRet += "k.tel: " + ALLTRIM(field->c_2)
+	cRet += "kontakt telefon: " + ALLTRIM(field->c_2)
 	cRet += "#"
-	cRet += "k.opis: " + ALLTRIM(field->c_3)
+	cRet += "kontakt opis: " + ALLTRIM(field->c_3)
 	cRet += "#"
 	
 	select rnlog_it

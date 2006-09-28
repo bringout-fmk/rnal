@@ -327,6 +327,7 @@ local nTArea := SELECT()
 local cRet := ""
 local cPom := ""
 select roba
+set filter to
 set order to tag "ID"
 go top
 
@@ -335,15 +336,17 @@ if roba->(fieldpos("ROBA_TIP")) == 0
 	return cRet
 endif
 
-hseek cRoba
+seek cRoba
 
 if FOUND()
 	
 	cPom := field->roba_tip
 	
 	select s_tipovi
+	set filter to
 	set order to tag "ID"
-	hseek cPom
+	go top
+	seek cPom
 
 	if FOUND()
 		cRet := field->grupa
