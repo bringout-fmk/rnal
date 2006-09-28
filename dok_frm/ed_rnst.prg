@@ -157,7 +157,7 @@ endif
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("Funkcija:", 15) GET cFunkcija VALID {|| get_funkcija(@cFunkcija), sh_function(cFunkcija, 4, 25)}
+@ m_x + nX, m_y + 2 SAY PADL("Funkcija:", 15) GET cFunkcija VALID {|| get_funkcija(@cFunkcija), sh_function(cFunkcija, 4, 25)} PICT "99"
 
 nX += 1
 
@@ -172,7 +172,7 @@ cTipFilter := gen_tip_filter(cFunkcija, _roba_gr)
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("Tip stakla:", 15) GET _roba_tip VALID p_rtip(@_roba_tip, cTipFilter, 6, 25) 
+@ m_x + nX, m_y + 2 SAY PADL("Tip sirovine:", 15) GET _roba_tip VALID p_rtip(@_roba_tip, cTipFilter, 6, 25) 
 
 nX += 1
 
