@@ -3,7 +3,7 @@ MODUL=rnal_sif
 
 SRCDOSROOT=c:\\dev\\fmk\\rnal\\sif\\
 
-PRGS=m_sif.prg s_rnop.prg s_rnka.prg s_rtip.prg s_rgr.prg roba.prg partn.prg
+PRGS=m_sif.prg s_rnop.prg s_rnka.prg s_rtip.prg s_rgr.prg roba.prg partn.prg ut.prg
 CS=
 ASMS=
 

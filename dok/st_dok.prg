@@ -63,7 +63,6 @@ return DE_REFRESH
 // filuj tabele za stampu
 // ----------------------------------
 static function fill_stavke( lPriprema, nBr_Nal )
-local nTb_nal := F_RNAL
 local nTb_st := F_RNST
 local cIdRoba
 local cRobaNaz
@@ -83,78 +82,40 @@ local nNUDTotal := 0
 local nNUNeto := 0
 
 if ( lPriprema == .t. )
-	nTb_nal := F_P_RNAL
 	nTb_st := F_P_RNST
 endif
 
-select (nTb_nal)
+select (nTb_st)
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 // filuj stavke
 do while !EOF() .and. field->br_nal == nBr_nal
 	
-	cProizvod := field->proizvod
+	cItemID := field->item_id
 	nR_br := field->r_br
-	nPro_kol := field->kolicina
 	
 	// nadji proizvod
 	select roba
-	hseek cProizvod
+	hseek cItemID
 
-	cProNaz := ALLTRIM(roba->naz)
+	cItemNaz := ALLTRIM(roba->naz)
+	cItemJmj := ALLTRIM(roba->jmj)
 	
-	select (nTb_st)
-	set order to tag "br_nal"
-	go top
-	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+	nKolicina := field->item_kol
+	nSirina := field->item_sir
+	nVisina := field->item_vis
 
-	do while !EOF() .and. field->br_nal == nBr_nal;
-			.and. field->r_br == nR_br
-			
-		// pronadji robu
-		cIdRoba := field->idroba
-		select roba
-		seek cIdRoba
+	a_t_rnst( cBr_nal, cR_br, cItemID, cItemNaz, cItemJmj, ;
+                  nKolicina, nSirina, nVisina, ;
+	          nZ_sirina, nZ_visina, nD_ukupno, ;
+	          nZ_ukupno, nZ_Netto )
 	
-		select (nTb_st)
-	
-		cRobaNaz := ALLTRIM(roba->naz)
-		cRobaJmj := ALLTRIM(roba->jmj)
-	
-		cBr_nal := str_nal( field->br_nal )
-		cR_br := str_rbr( field->r_br )
-		cP_br := str_rbr( field->p_br )
-	
-		nKolicina := field->kolicina
-		nD_sirina := field->d_sirina
-		nD_visina := field->d_visina
-		nZ_sirina := field->z_sirina
-		nZ_visina := field->z_visina
-		nD_ukupno := field->d_ukupno
-		nZ_ukupno := field->z_ukupno
-		nZ_Netto  := field->z_netto
-
-		nNUZTotal += nZ_ukupno
-		nNUDTotal += nD_ukupno
-		nNUNeto  += nZ_Netto
-	
-		a_t_rnst( cBr_nal, cR_br, cP_br, cProizvod, cProNaz, ;
-		          cIdroba, cRobanaz, cRobaJmj, nPro_kol, ;
-                          nKolicina, nD_sirina, nD_visina, ;
-		          nZ_sirina, nZ_visina, nD_ukupno, ;
-		          nZ_ukupno, nZ_Netto )
-	
-		select (nTb_ST)
-		skip
-	enddo
-	
-	select (nTb_nal)
+	select (nTb_ST)
 	skip
-
 enddo
-
+	
 // dodaj i nalog ukupno itd...
 add_tpars("N10", TRANSFORM(nNUDTotal, PIC_IZN()))
 add_tpars("N11", TRANSFORM(nNUZTotal, PIC_IZN()))
@@ -185,7 +146,7 @@ endif
 select (nTb_OP)
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 do while !EOF() .and. field->br_nal == nBr_nal
 
@@ -219,22 +180,20 @@ return
 // napuni podatke narucioca i ostalo
 // --------------------------------------
 static function fill_nalog_osn(lPriprema, nBr_Nal)
-local nTb_ST := F_RNAL
-local nTb_OP := F_RNOP
+local nTb_RN := F_RNAL
 
 if ( lPriprema == .t. )
-	nTb_ST := F_P_RNAL
-	nTb_OP := F_P_RNOP
+	nTb_RN := F_P_RNAL
 endif
 
-select (nTb_ST)
+select (nTb_RN)
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 f_narucioc(field->idpartner)
 
-select (nTb_ST)
+select (nTb_RN)
 
 // iz prvog sloga odmah uzmi osnovne podatke naloga
 // partner, datumi itd...
@@ -242,15 +201,15 @@ select (nTb_ST)
 // broj naloga
 add_tpars("N01", str_nal(nBr_nal) )
 // datum naloga
-add_tpars("N02", DToC(field->datnal) )
+add_tpars("N02", DToC(field->dat_nal) )
 // datum isporuke
-add_tpars("N03", DToC(field->datisp) )
+add_tpars("N03", DToC(field->dat_isp) )
 // vrijeme isporuke
 add_tpars("N04", PADR(field->vr_isp, 5))
 // hitnost - prioritet
-add_tpars("N05", s_hitnost(field->hitnost))
+add_tpars("N05", say_hitnost(field->hitnost))
 // nalog vrsta placanja
-add_tpars("N06", s_placanje(field->vr_plac))
+add_tpars("N06", say_vr_plac(field->vr_plac))
 
 return
 

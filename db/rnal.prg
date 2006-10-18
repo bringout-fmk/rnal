@@ -4,6 +4,7 @@
 // -------------------------------------------
 // procedura azuriranja naloga
 // -------------------------------------------
+
 function azur_nalog(cOpis)
 local nBr_nal
 local cStat
@@ -87,7 +88,7 @@ local nKTrec
 select p_rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 // ako je bio povrat
 if cStat <> "P"
@@ -100,7 +101,7 @@ if cStat <> "P"
 	select rnal
 	set order to tag "br_nal_z"
 	go top
-	seek STR(nBr_nal, 10, 0) + "Z"
+	seek s_br_nal(nBr_nal) + "Z"
 	select rnal
 	Scatter()
 	_rec_zak := ""
@@ -134,7 +135,7 @@ endif
 
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 do while !EOF() .and. ( p_rnst->br_nal == nBr_nal )
 	Scatter()
@@ -165,9 +166,10 @@ endif
 
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 do while !EOF() .and. ( p_rnop->br_nal == nBr_nal )
+	
 	if !EMPTY(ALLTRIM(p_rnop->rn_instr))
 		
 		Scatter()
@@ -177,6 +179,7 @@ do while !EOF() .and. ( p_rnop->br_nal == nBr_nal )
 		
 		Gather()
 	endif
+	
 	select p_rnop
 	skip
 enddo
@@ -193,7 +196,7 @@ o_rnal(.t.)
 select rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 if !Found()
 	MsgBeep("Nalog " + ALLTRIM(STR(nBr_nal)) + " ne postoji !!!")
@@ -235,8 +238,9 @@ MsgC()
 
 return 1
 
-
+// ----------------------------------------
 // markiraj povrat....
+// ----------------------------------------
 function set_p_marker(nBr_nal, cMark)
 local nTArea
 nTArea := SELECT()
@@ -244,7 +248,7 @@ nTArea := SELECT()
 select rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 if FOUND()
 	Scatter()
@@ -255,7 +259,9 @@ endif
 select (nTArea)
 return
 
-// markiraj povrat....
+// ----------------------------------------
+// markiraj realizacija marker....
+// ----------------------------------------
 function set_real_marker(nBr_nal, cMark)
 local nTArea
 nTArea := SELECT()
@@ -263,7 +269,7 @@ nTArea := SELECT()
 select rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 if FOUND()
 	Scatter()
@@ -275,9 +281,9 @@ select (nTArea)
 return
 
 
-
-
+// ------------------------------------
 // vrati marker naloga
+// ------------------------------------
 function get_p_marker()
 local cMark
 cMark := field->rec_zak
@@ -289,11 +295,10 @@ return cMark
 // povrat RNAL
 //----------------------------------------------
 static function p_rnal(nBr_nal)
-
 select rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 if Found()
 	// dodaj u pripremu dokument
@@ -310,6 +315,7 @@ if Found()
 		_rec_zak := "P"
 		
 		select p_rnal
+		
 		APPEND BLANK
 		Gather()
 	
@@ -320,15 +326,15 @@ endif
 
 return
 
+
 //----------------------------------------------
 // povrat RNST
 //----------------------------------------------
 static function p_rnst(nBr_nal)
-
 select rnst
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 if Found()
 	// dodaj u pripremu dokument
@@ -338,6 +344,7 @@ if Found()
 		Scatter()
 	
 		select p_rnst
+		
 		APPEND BLANK
 		Gather()
 	
@@ -358,7 +365,7 @@ static function p_rnop(nBr_nal)
 select rnop
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 if Found()
 	// dodaj u pripremu dokument
@@ -379,6 +386,7 @@ endif
 return
 
 
+
 //----------------------------------------
 // brisi nalog iz kumulativa
 //----------------------------------------
@@ -388,7 +396,8 @@ static function b_kumulativ(nBr_nal)
 select rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
+
 if Found()
 	do while !eof() .and. (br_nal == nBr_nal)
 		DELETE
@@ -400,7 +409,7 @@ endif
 select rnst
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 if Found()
 	do while !eof() .and. (br_nal == nBr_nal)
@@ -413,7 +422,8 @@ endif
 select rnop
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
+
 if Found()
 	do while !eof() .and. (br_nal == nBr_nal)
 		DELETE
@@ -424,13 +434,14 @@ endif
 return
 
 
+
 //----------------------------------------------
 // Zatvaranje naloga rnal->rn_status == "Z"
 //----------------------------------------------
 function z_rnal(nBr_nal, cRealise)
 local nTArea
-local dDatum:=DATE()
-local cVrijeme:=TIME()
+local dDatum := DATE()
+local cVrijeme := TIME()
 local cOperater := goModul:oDatabase:cUser
 
 nTArea := SELECT()
@@ -438,15 +449,19 @@ nTArea := SELECT()
 select rnal
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 if Found()
 	// setuj status na zatvoreno
 	do while !EOF() .and. (field->br_nal == nBr_nal)
+		
 		Scatter()
+		
 		_rn_status := "Z"
 		_rn_real := cRealise
+		
 		Gather()
+		
 		skip
 	enddo
 else
@@ -462,17 +477,20 @@ return 1
 
 
 //---------------------------------------------
-// vraca sljedeci redni broj naloga, generalni
+// vraca sljedeci redni broj stavke naloga
 //---------------------------------------------
 function next_r_br()
 local nLastRbr
+local nRecNo := RECNO()
 PushWa()
-select p_rnal
+select p_rnst
 set order to tag "br_nal"
 go bottom
 nLastRbr := field->r_br
 PopWa()
+go (nRecNo)
 return nLastRbr + 1
+
 
 
 // -------------------------------------------
@@ -480,17 +498,22 @@ return nLastRbr + 1
 // -------------------------------------------
 function next_p_br(nBr_nal, nR_br)
 local nLastPbr := 0
+
 PushWa()
 select p_rnst
 set order to tag "br_nal"
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+seek s_br_nal(nBr_nal) + s_r_br(nR_br)
+
 do while !EOF() .and. field->br_nal == nBr_nal;
                 .and. field->r_br == nR_br
 
 	nLastPbr := field->p_br
+	
 	skip
 enddo
+
 PopWa()
+
 return nLastPBr + 1
 
 
@@ -503,7 +526,9 @@ PushWa()
 select rnal
 set order to tag "br_nal"
 go bottom
+
 nLastRbr := br_nal
+
 PopWa()
 
 return nLastRbr + 1
@@ -521,7 +546,8 @@ nArea := SELECT()
 
 select RNAL
 set order to tag "br_nal_z"
-hseek STR(nBrNal, 10, 0) + "Z"
+go top
+seek s_br_nal(nBrNal) + "Z"
 
 if Found()
 	lRet := .t.
@@ -532,11 +558,13 @@ select (nArea)
 return lRet
 
 
+// -----------------------------------------
 // novi broj naloga
 // mrezni rad....
+// -----------------------------------------
 function _n_br_nal(lNovi)
 local nTArea
-local nNoviBroj
+local nNewBrNal
 
 nTArea := SELECT()
 select p_rnal
@@ -568,23 +596,26 @@ if !rnal->(FLOCK())
       	endif
 endif
 
-nNoviBroj := next_br_nal()
+nNewBrNal := next_br_nal()
 
 // pravi se fizicki append u bazi dokumenata da bi se sacuvalo mjesto
 // za ovaj dokument
 select rnal
 appblank2(.f., .f.)   
 _rec_zak := "Z"
-_br_nal := nNoviBroj
+_br_nal := nNewBrNal
 Gather2()
 DBUnlock()
 
 select (nTArea)
 
-return nNoviBroj
+return nNewBrNal
 
 
+
+// ----------------------------------------------
 // napuni pripremne tabele sa brojem naloga
+// ----------------------------------------------
 function f_p_br_nal( nBr_nal )
 local nTRec
 local nTArea
@@ -658,19 +689,25 @@ go (nTRec)
 return
 
 
+// --------------------------------------
 // pronadji i brisi RNAL "Z" zapis
+// --------------------------------------
 function del_rnal_z( nBr_nal )
+
 select rnal
 set order to tag "br_nal_z"
 go top
 
-seek STR(nBr_nal, 10, 0) + "Z"
+seek s_br_nal(nBr_nal) + "Z"
 
 // ako sam pronasao, brisi
 if Found()
-	do while !EOF() .and. field->br_nal == nBr_nal .and. field->rec_zak == "Z"
+	do while !EOF() .and. field->br_nal == nBr_nal ;
+			.and. field->rec_zak == "Z"
+			
 		delete
 		skip
+		
 	enddo
 endif
 
@@ -687,14 +724,15 @@ local nTArea
 local nBr_nal
 local nR_br
 local nP_br
-local cIdRoba
-local cPom
+local cItemId
+local cSeek
 
 nTArea := SELECT()
 
 // selektuj p_rnal
 select p_rnst
 set order to tag "br_nal"
+
 // selektuj p_rnop
 select p_rnop
 set order to tag "br_nal"
@@ -705,13 +743,13 @@ do while !EOF()
 	nBr_Nal := p_rnop->br_nal
 	nR_br := p_rnop->r_br
 	nP_br := p_rnop->p_br
-	cIdRoba := p_rnop->idroba
+	cItemId := p_rnop->item_id
 	
-	cPom := STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0) + STR(nP_br, 4, 0) + cIdRoba
+	cSeek := s_br_nal(nBr_nal) + s_r_br(nR_br) + s_p_br(nP_br) + cItemId
 	
 	select p_rnst
 	go top
-	seek cPom
+	seek cSeek
 	
 	if !Found()
 		select p_rnop
@@ -726,226 +764,6 @@ select (nTArea)
 
 return
 
-
-// ------------------------------
-// roba, novi ID
-// ------------------------------
-function r_new_id(cR_id)
-// ako postoji sifra, ne treba
-if !EMPTY(cR_id)
-	return .f.
-endif
-return .t.
-
-// --------------------------------------------
-// provjerava da li postoji identican proizvod
-// --------------------------------------------
-function ck_id_exist(nBr_nal, nR_br)
-local nTArea
-local lExist:=.f.
-local cRoba
-
-nTArea := SELECT()
-
-select p_rnst
-set order to tag "br_nal"
-go top
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
-
-do while !EOF() .and. field->br_nal == nBr_nal;
-		.and. field->r_br == nR_br
-
-	cRoba := field->idroba
-
-	select sast
-	set order to tag "ID2"
-	go top
-	seek cProizvod + cRoba
-	
-	if FOUND()
-		lExist := .t.
-	else
-		lExist := .f.
-		exit
-	endif
-	
-	select p_rnst
-	skip
-enddo
-
-
-select (nTArea)
-
-return lExist
-
-
-// --------------------------------
-// generisi novu sifru robe
-// --------------------------------
-function gen_r_sif()
-local nTArea
-local cNewId
-local cNaziv
-local cMCode
-local nBr_nal
-local nR_br
-local nSirovCnt
-local cSirovina
-
-nTArea := SELECT()
-
-select p_rnal
-set order to tag "br_nal"
-go top
-
-do while !EOF()
-	
-	nBr_nal := p_rnal->br_nal
-	nR_br := p_rnal->r_br
-	
-	select p_rnst
-	set order to tag "br_nal"
-	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
-		
-	cSirovina := ""
-	nSirovCnt := 0
-		
-	// pregledaj sirovine...
-	do while !EOF() .and. p_rnst->br_nal == nBr_nal ;
-			.and. p_rnst->r_br == nR_br
-	
-		cSirovina := p_rnst->idroba
-		++ nSirovCnt
-		
-		skip
-	enddo
-		
-	if nSirovCnt == 1
-		select p_rnal
-		Scatter()
-		_proizvod := cSirovina
-		Gather()
-		skip
-		loop
-	endif
-
-	// ako treba generisati novi ID
-	if r_new_id(p_rnal->proizvod)
-	
-		nBr_nal := p_rnal->br_nal
-		nR_br := p_rnal->r_br
-		
-		cMCode := gen_r_mc(nR_br)
-		cNewId := gen_r_id()
-		cNaziv := gen_r_naz(nBr_nal, nR_br)
-		
-		// dodaj u samu pripremu novi id
-		select p_rnal
-		replace proizvod with cNewId
-		
-		// dodaj u roba
-		select roba
-		append blank
-		
-		Scatter()
-
-		_id := cNewId
-		_naz := cNaziv
-		_match_code := cMCode
-		_jmj := "KOM"
-		_idtarifa := "PDV17 "
-		_tip := "P"
-
-		Gather()
-
-		// dodaj i u sastavnice
-		select p_rnst
-		set order to tag "br_nal"
-		go top
-		seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
-		
-		do while !EOF() .and. p_rnst->br_nal == nBr_nal ;
-		                .and. p_rnst->r_br == nR_br
-			
-			select sast
-			append blank
-			
-			Scatter()
-			_id := cNewId
-			_r_br := p_rnst->p_br
-			_id2 := p_rnst->idroba
-			_kolicina := p_rnst->kolicina
-
-			Gather()
-			
-			select p_rnst
-			skip
-		enddo
-		
-	endif
-	
-	select p_rnal
-	skip
-enddo
-
-select (nTArea)
-
-return
-
-// --------------------------------------------------------
-// da li u robi postoji ovakva sifra prema sastavnicama
-// --------------------------------------------------------
-static function no_match_roba_sast(nBr_nal, nR_br, cNewId)
-local aSast := {}
-local nTArea := SELECT()
-local nTRec := RECNO()
-local lRet := .f.
-local cProID
-
-cProId := field->proizvod
-cNewId := ""
-
-// napuni matricu aSast sa sastavnicama iz p_rnst
-select p_rnst
-set order to tag "br_nal"
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
-
-do while !EOF() .and. field->br_nal == nBr_nal ;
-		.and. field->r_br == nR_br
-
-	AADD(aSast, {|| p_rnst->idroba, p_rnst->kolicina })
-	
-	skip
-enddo
-
-if LEN(aSast) == 0
-	lRet := .t.
-else
-	select SAST
-	set order to tag "ID"
-	seek cProId
-	go top
-
-	do while !EOF() .and. field->id == cProId
-	
-		cSastId := field->id2
-		nSastKol := field->kolicina
-		
-		nScanId := ASCAN(aSast, {|xUsl| xUsl[1] == cSastId .and. xUsl[2] == nSastKol })
-		
-		if nScanId == 0
-			lRet := .t.
-			exit
-		endif
-		
-		skip
-	enddo
-endif
-
-select (nTArea)
-go (nTRec)
-
-return lRet
 
 
 // ---------------------------------
@@ -968,32 +786,33 @@ endif
 
 return cRet
 
+
 // ----------------------------
 // generisi naziv artikla
 // ----------------------------
 function gen_r_naz(nBr_nal, nR_br)
 local cRet := ""
 local nTArea
-local cRoba
+local cItemId
 
 select p_rnst
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+seek s_br_nal(nBr_nal) + s_r_br(nR_br)
 
 do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 	
-	cRoba := field->idroba
+	cItemID := field->idroba
 	select roba
-	hseek cRoba
+	hseek cItemID
 	
 	if LEN(cRet) == 250
 		exit
 	endif
 	
 	if !EMPTY(cRet)
-		cRet += " + "
+		cRet += ","
 	endif
 	
 	cRet += ALLTRIM(LEFT(roba->naz, 40))

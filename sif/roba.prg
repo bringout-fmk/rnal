@@ -103,4 +103,30 @@ next
 return
 
 
+// ----------------------------------
+// prikazi info o robi
+// ----------------------------------
+function s_roba_naz(cId, nX, nY)
+local nArr
+local nRazmak := 2
+local nRobaLen := 40
+local cPom
+
+nArr := SELECT()
+select roba
+hseek cId
+
+if Found()
+	cPom := ALLTRIM( LEFT(roba->naz,40) )
+	cPom += "(" + ALLTRIM(roba->jmj) + ")"
+	cPom := PADR(cPom, nRobaLEN)
+	@ nX, nY SAY cPom
+else
+	@ nX, nY SAY SPACE(nRobaLen)
+endif
+
+select (nArr)
+
+return .t.
+
 

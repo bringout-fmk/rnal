@@ -1,11 +1,5 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
-/*
-* ----------------------------------------------------------------
-*                                     Copyright Sigma-com software 
-* ----------------------------------------------------------------
-*/
-
 
 // ------------------------------------------
 // lista naloga
@@ -151,10 +145,8 @@ return nRet
 static function gen_filter(nStatus, dDatOd, dDatDo, cPartNaz)
 local cZatvStatus := "Z"
 
-cFilter := "r_br = 1"
-cFilter += " .and. "
 // pogledaj da nije lock-ovan zapis
-cFilter += "rec_zak <> " + Cm2Str("Z")
+cFilter := "rec_zak <> " + Cm2Str("Z")
 cFilter += " .and. "
 
 if nStatus == 1
@@ -166,10 +158,10 @@ else
 endif
 
 if !EMPTY(dDatOd)
-	cFilter += " .and. datnal >= " + Cm2Str(dDatOd)
+	cFilter += " .and. dat_nal >= " + Cm2Str(dDatOd)
 endif
 if !Empty(dDatDo)
-	cFilter += " .and. datnal <= " + Cm2Str(dDatDo)
+	cFilter += " .and. dat_nal <= " + Cm2Str(dDatDo)
 endif
 if !Empty(cPartNaz)
 	cFilter += " .and. PARTN->naz = " + Cm2Str(cPartNaz)
@@ -300,7 +292,6 @@ do case
 				MsgBeep("Nalog zatvoren !")
 			endif
 			SELECT RNAL
-			altd()
 			set_f_kol(cTblFilt)
 			//GO (nTRec)
 			RETURN DE_REFRESH
@@ -363,13 +354,12 @@ aImeKol := {}
 
 AADD(aImeKol, {"Nalog br.", {|| br_nal }, "br_nal", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Partner", {|| PADR(s_partner(idpartner), 30) }, "idpartner", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Datum", {|| datnal }, "datnal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Dat.isp." , {|| datisp }, "datisp", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Datum", {|| dat_nal }, "dat_nal", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Dat.isp." , {|| dat_isp }, "dat_isp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| vr_isp }, "vr_isp", {|| .t.}, {|| .t.} })
-//AADD(aImeKol, {"Placanje" , {|| PADR(s_placanje(vr_plac),10) }, "vr_plac", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Kontakt ime" , {|| PADR(k_ime, 20) }, "k_ime", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Kontakt tel" , {|| PADR(k_tel, 20) }, "k_tel", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Hitnost" , {|| PADR(s_hitnost(hitnost),10) }, "hitnost", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Hitnost" , {|| PADR(say_hitnost(hitnost),10) }, "hitnost", {|| .t.}, {|| .t.} })
 
 aKol:={}
 for i:=1 to LEN(aImeKol)

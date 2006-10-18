@@ -29,7 +29,7 @@ START PRINT CRET
 
 r_list_zagl()
 
-do while !EOF() .and. DTOS(field->datnal) == DTOS(dTekDate)
+do while !EOF() .and. DTOS(field->dat_nal) == DTOS(dTekDate)
 	
 	// ako je nalog zatvoren, preskoci
 	if field->rn_status == "Z"
@@ -40,7 +40,7 @@ do while !EOF() .and. DTOS(field->datnal) == DTOS(dTekDate)
 	cPom := ""
 	cPom += PADR( STR(field->br_nal, 10, 0) , 10)
 	cPom += " "
-	cPom += PADR( DTOC(field->datisp) , 8)
+	cPom += PADR( DTOC(field->dat_isp) , 8)
 	cPom += " "
 	cPom += PADR( field->vr_isp , 8 )
 	cPom += " "
@@ -124,7 +124,7 @@ START PRINT CRET
 
 r_list_zagl()
 
-do while !EOF() .and. DTOS(field->datisp) == DTOS(dTekDate)
+do while !EOF() .and. DTOS(field->dat_isp) == DTOS(dTekDate)
 	
 	// ako je zatvoren, preskoci..
 	if field->rn_status == "Z"
@@ -135,7 +135,7 @@ do while !EOF() .and. DTOS(field->datisp) == DTOS(dTekDate)
 	cPom := ""
 	cPom += PADR( STR(field->br_nal, 10, 0) , 10)
 	cPom += " "
-	cPom += PADR( DTOC(field->datisp) , 8)
+	cPom += PADR( DTOC(field->dat_isp) , 8)
 	cPom += " "
 	cPom += PADR( field->vr_isp , 8 )
 	cPom += " "
@@ -191,7 +191,7 @@ do while !EOF()
 	endif
 
 	// ako je u datum isti ili manji, preskoci...
-	if dTekDate <= field->datisp
+	if dTekDate <= field->dat_isp
 		skip
 		loop
 	endif
@@ -199,7 +199,7 @@ do while !EOF()
 	cPom := ""
 	cPom += PADR( STR(field->br_nal, 10, 0) , 10)
 	cPom += " "
-	cPom += PADR( DTOC(field->datisp) , 8)
+	cPom += PADR( DTOC(field->dat_isp) , 8)
 	cPom += " "
 	cPom += PADR( field->vr_isp , 8 )
 	cPom += " "

@@ -42,7 +42,7 @@ select rnal
 set filter to
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal)
+seek s_br_nal(nBr_nal)
 
 cPartn := field->idpartner
 cHitnost := field->hitnost
@@ -130,7 +130,7 @@ select rnal
 set filter to
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal)
+seek s_br_nal(nBr_nal)
 
 cMjIsp := field->mj_isp
 cVrIsp := field->vr_isp
@@ -241,7 +241,7 @@ select rnal
 set filter to
 set order to tag "br_nal"
 go top
-seek STR(nBr_nal, 10, 0)
+seek s_br_nal(nBr_nal)
 
 cK_ime := field->k_ime
 cK_tel := field->k_tel

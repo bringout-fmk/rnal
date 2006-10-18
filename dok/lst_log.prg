@@ -29,7 +29,7 @@ local cHeader
 private ImeKol
 private Kol
 
-cHeader := " Nalog broj: " + STR(nBr_nal, 10, 0) + " "
+cHeader := " Nalog broj: " + s_br_nal(nBr_nal) + " "
 cFooter := " Pregled promjena na nalogu... "
 
 Box(, 20, 77)
@@ -276,7 +276,7 @@ cTip := s_prom_tip(rnlog->tip)
 
 select rnlog_it
 set order to tag "br_nal"
-seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
+seek s_br_nal(nBr_nal) + s_r_br(nR_br)
 
 START PRINT CRET
 

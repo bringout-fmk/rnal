@@ -41,9 +41,9 @@ endif
 cFooter := "Unos/dorada naloga za proizvodnju..."
 
 Box(,20,77)
-@ m_x+18,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
-@ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  | <S> Pregled sirovina "
-@ m_x+20,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         |"
+@ m_x+18,m_y+2 SAY "<c-N> Novi nalog      | <ENT> Ispravi stavku     | <a-A> Azuriranje naloga"
+@ m_x+19,m_y+2 SAY "<c-P> Stampa naloga   | <c-O> Stampa otpremnice  |"
+@ m_x+20,m_y+2 SAY "<c-T> Brisi nalog     | "
 
 set_a_kol( @Kol, @ImeKol)
 
@@ -65,15 +65,14 @@ static function set_a_kol( aKol, aImeKol )
 aImeKol := {}
 
 AADD(aImeKol, {"Br.nal", {|| PADR(TRANSFORM(br_nal, "99999"),7)}, "br_nal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"R.br", {|| PADR(TRANSFORM(r_br, "99999"),7)}, "r_br", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Proizvod", {|| proizvod}, "proizvod", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Kolicina", {|| TRANSFORM(kolicina, PIC_KOL())}, "kolicina", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Dat.n.", {|| datnal}, "datnal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Dat.isp", {|| datisp}, "datisp", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Mj.isp", {|| PADR(mj_isp,20)}, "mj_isp", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Dat.n.", {|| dat_nal}, "dat_nal", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Dat.isp", {|| dat_isp}, "dat_isp", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Mj.isp", {|| PADR(mj_isp, 20)}, "mj_isp", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp", {|| vr_isp}, "vr_isp", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Kupac", {|| say_item_mc(F_PARTN, "PARTN", idpartner)}, "idpartner", {|| .t.}, {|| .t.} })
 
 aKol:={}
+
 for i:=1 to LEN(aImeKol)
 	AADD(aKol,i)
 next
@@ -85,57 +84,50 @@ return
 // obrada sve stavke 
 // ---------------------------------------------
 static function nalog_item(lNova)
-local nCount 
-local cStat 
+local cStatus
 
-UsTipke()
+cStatus := rec_zak
 
-Box(, 21, 77, .f., "Unos novih stavki")
+// ako status nije "POVRAT"
+// otvori masku za unos osnovnih podataka naloga...
+if cStatus <> "P"
+ 
+   UsTipke()
 
-Scatter()
+   Box(, 21, 77, .f., "Unos novih stavki")
+  
+   Scatter()
 
-cStat := _rec_zak
-
-if cStat <> "P"
-
-if RECCOUNT2() == 0
+   if RECCOUNT2() == 0
+   	// radi se o potpuno novoj stavci
 	if g_nal_header(lNova) == 0
 		select p_rnal
 		BoxC()
 		return 1
 	endif
-else
+   else
+   	// radi se o postojecoj stavci u tabeli
 	if g_nal_header(.f.) == 0
 		select p_rnal
 		BoxC()
 		return 1
 	endif
-endif
+   endif
+   
+   Gather()
+	
+   select p_rnal
+   
+   BoxC()
 
 endif
 
-SELECT p_rnal
+if lNova == .t.
+	// otvori unos stavki naloga....
+	g_nal_item(lNova)
+endif
 
-nCount := 0
-
-do while .t.
-	if nCount > 0
-		Scatter()
-	endif
-	++ nCount
-	if g_nal_item(lNova) == 0
-		exit
-	endif
-	select p_rnal
-	if lNova
-		append blank
-	endif
-	Gather()
-enddo
-
-SELECT p_rnal
-
-BoxC()
+select p_rnal
 
 return 1
 
@@ -144,66 +136,7 @@ return 1
 // obradi stavku naloga
 // ---------------------------------------
 function g_nal_item(lNovi)
-local nX := 17
-local nRobaX
-local nRobaY
-local cDefSast:="D"
-
-if lNovi
-	_r_br := next_r_br()
-	_proizvod := SPACE(LEN(proizvod))
-	_kolicina := 1
-	_roba_cnt := 0
-endif
-
-@ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999"
-
-nX += 1
-nRobaX := m_x + nX
-nRobaY := m_y + 25
-
-@ m_x + nX, m_y + 2 SAY "Proizvod:" GET _proizvod VALID val_roba(@_proizvod, nRobaX, nRobaY)
-
-nX += 1
-
-@ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina ) 
-
-read
-
-ESC_RETURN 0
-
-// vrati broj sastavnica ako je unjet proizvod
-get_roba_cnt(_proizvod, @_roba_cnt)
-
-@ m_x + nX, m_y + 25 SAY "Broj stakala:" GET _roba_cnt PICT PIC_KOL() 
-
-read
-
-ESC_RETURN 0
-
-// prebaci sastavnice u rnst
-sast_to_rnst(_proizvod, _roba_cnt, _br_nal, _r_br)
-
-nX += 2
-
-@ m_x + nX, m_y + 2 SAY "Definisi-pregledaj sastavnice proizvoda (D/N)" GET cDefSast VALID val_d_n(@cDefSast) PICT "@!"
-
-read
-
-ESC_RETURN 0
-
-// definisanje sastavnica
-if cDefSast == "D"
-	nBr_nal := _br_nal
-	nR_br := _r_br
-	rnst_priprema(nBr_nal, nR_br)
-endif
-
-if !lNovi
-	return 0
-endif
-
-return 1
+return g_item_unos(lNovi)
 
 
 // ---------------------------------------
@@ -215,20 +148,23 @@ local nPartX
 local nPartY
 local cLine
 
+_operater := goModul:oDatabase:cUser
+
 if lNovi
 	//_br_nal := next_br_nal()
 	_br_nal := 0
-	_datnal := DATE()
-	_datisp := DATE()
-	_hitnost := "2"
+	_dat_nal := DATE()
+	_dat_isp := DATE()
+	_hitnost := " "
 	_idpartner := SPACE(LEN(idpartner))
 	_vr_isp := PADR( LEFT( TIME(), 5 ), 8 )
 	_mj_isp := SPACE(100)
-	_operater := goModul:oDatabase:cUser
 	_k_ime := SPACE(40)
 	_k_tel := SPACE(60)
 	_k_opis := SPACE(100)
-	_vr_plac := "1"
+	_dod_opis := SPACE(150)
+	_montaza := " "
+	_vr_plac := " "
 	if _rn_status == " "
 		_rn_status := "O"
 	endif
@@ -240,7 +176,7 @@ set cursor on
 
 @ m_x + nX, m_y + 2 SAY "Broj naloga:" GET _br_nal PICT "999999999" WHEN _br_nal <> 0
 
-@ m_x + nX, col() + 4 SAY "Datum naloga:" GET _datnal VALID !EMPTY(_datnal)
+@ m_x + nX, col() + 4 SAY "Datum naloga:" GET _dat_nal VALID !EMPTY(_dat_nal)
 
 nX += 2
 
@@ -261,7 +197,7 @@ ESC_RETURN 0
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "  Datum isporuke:" GET _datisp VALID !EMPTY(_datisp)
+@ m_x + nX, m_y + 2 SAY "  Datum isporuke:" GET _dat_isp VALID !EMPTY(_dat_isp)
 
 @ m_x + nX, col() + 4 SAY "Vrijeme isporuke:" GET _vr_isp VALID !EMPTY(_vr_isp)
 
@@ -283,9 +219,11 @@ nX += 1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Prioritet hitnosti (1/2/3):" GET _hitnost VALID val_kunos( _hitnost, "123" ) PICT "9"
+@ m_x + nX, m_y + 2 SAY "Prioritet:" GET _hitnost VALID val_priority(@_hitnost) PICT "9"
 
-@ m_x + nX, col() + 2 SAY "Vr.placanja 1-kes 2-ziro racun:" GET _vr_plac VALID val_kunos( _vr_plac, "12") PICT "9"
+@ m_x + nX, col() + 2 SAY "Placanje:" GET _vr_plac VALID val_plac(@_vr_plac) PICT "9"
+
+@ m_x + nX, col() + 2 SAY "Montaza (D/N):" GET _montaza VALID val_d_n(@_montaza) PICT "@!"
 
 nX += 1
 
@@ -294,6 +232,18 @@ nX += 1
 read
 
 ESC_RETURN 0
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "  Dodatni podaci naloga:" GET _dod_opis VALID !EMPTY(_dod_opis) PICT "@S40"
+
+read
+
+ESC_RETURN 0
+
+if lNovi
+	append blank
+endif
 
 return 1
 
@@ -305,34 +255,39 @@ static function k_handler()
 local nBr_nal
 local cLOGopis
 
-if (Ch==K_CTRL_T .or. Ch==K_ENTER;
-	.or. Ch==K_CTRL_P;
-	.or. Ch==K_CTRL_F9) .and. reccount2()==0
+if (Ch==K_ENTER .or. Ch==K_CTRL_P .or. Ch==K_CTRL_F9) ;
+	.and. reccount2()==0
+	
 	return DE_CONT
 endif
 
 do case
-	case (Ch == K_CTRL_T)
-		SELECT P_RNAL
-		if br_stavku()
-			return DE_REFRESH
-		endif
-		return DE_CONT
 	
+	// ispravka naloga....
 	case (Ch == K_ENTER)
 		SELECT P_RNAL
-  		Scatter()
+  		if reccount2() == 0
+			return DE_CONT
+		endif
+		
+		Scatter()
   		if nalog_item(.f.) == 1
 			Gather()
 			RETURN DE_REFRESH
 		endif
 		return DE_CONT
 		
+	// unos novog naloga
 	case (Ch == K_CTRL_N)
 		SELECT P_RNAL
+		if reccount2() == 1
+			MsgBeep("U pripremi vec postoji nalog!#Azurirajte ga!")
+			return DE_CONT
+		endif
 		nalog_item(.t.)
 		return DE_REFRESH
 		
+	// brisanje naloga
 	case (Ch  == K_CTRL_F9)
         	SELECT P_RNAL
 		if br_sve_zapise()
@@ -340,22 +295,22 @@ do case
 		endif
 		return DE_CONT
 	
+	// pregled stavki naloga...
 	case ( UPPER(CHR(Ch)) == "S" )
-		// pregled sirovina / operacija
+		// pregled stavki naloga
 		SELECT P_RNAL
 		if RECCOUNT2() == 0
 			return DE_CONT
 		endif
-		rnst_priprema(p_rnal->br_nal, p_rnal->r_br)
+		g_nal_item(.f.)
 		SELECT P_RNAL
 		return DE_CONT
 
+	// stampa naloga
 	case Ch==K_CTRL_P
 		if nal_integritet()
 			select p_rnal
 			go top
-			// generisi sifru proizvoda 
-			gen_r_sif()
 			
 			nBr_nal := _n_br_nal()
 			f_p_br_nal( nBr_nal )
@@ -366,6 +321,7 @@ do case
 		endif
 		return DE_CONT
 		
+	// azuriranje naloga
 	case Ch==K_ALT_A
 		
 		if !nal_integritet()
@@ -379,15 +335,12 @@ do case
 			
 			// opis prije azuriranja
 			if get_p_marker() == "P"
-				if get_box_opis(@cLOGopis) == 0
+				if get_box_promjena(@cLOGopis) == 0
 					return DE_CONT
 				endif
 			else
 				cLOGopis := ""
 			endif
-			
-			// generisi sifru robe + match code
-			gen_r_sif()
 			
 			// uzmi broj naloga
 			nBr_nal := _n_br_nal()
@@ -406,7 +359,8 @@ do case
 		endif
 		
 		RETURN DE_CONT
-	
+
+	// izlazak iz pripreme....
 	case ( Ch == K_ESC )
 		select p_rnal
 		if RECCOUNT2() <> 0
@@ -419,8 +373,10 @@ endcase
 return DE_CONT
 
 
+// --------------------------------------
 // vrati box sa poljem opis
-function get_box_opis(cOpis)
+// --------------------------------------
+function get_box_promjena(cOpis)
 private GetList:={}
 
 cOpis := SPACE(150)
@@ -435,7 +391,6 @@ if LastKey()==K_ESC
 endif
 
 return 1
-
 
 
 // ---------------------------------------
@@ -458,6 +413,7 @@ zap
 select p_rnop
 zap
 
+// brisi marker naloga
 del_rnal_z( nBr_nal )
 
 // vrati marker naloga
@@ -467,59 +423,5 @@ select p_rnal
 
 return .t.
 
-
-// ------------------------------
-// brisanje stavke
-// ------------------------------
-static function br_stavku()
-local nTArea := SELECT()
-local lDelete := .f.
-
-if Pitanje(,"Izbrisati stavku (D/N)?", "D") == "N"
-	return lDelete
-endif
-
-nBr_nal := field->br_nal
-nR_br := field->r_br
-
-if RECCOUNT2() <> 0
-	delete
-	lDelete := .t.
-endif
-
-if lDelete
-	select p_rnst
-	set filter to
-	set order to tag "br_nal"
-	go top
-	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
-
-	if FOUND()
-		do while !EOF() .and. field->br_nal == nBr_nal ;
-			.and. field->r_br == nR_br
-		
-			delete
-			skip
-		enddo
-	endif
-
-	select p_rnop
-	set filter to
-	set order to tag "br_nal"
-	go top
-	seek STR(nBr_nal, 10, 0) + STR(nR_br, 4, 0)
-
-	if FOUND()
-		do while !EOF() .and. field->br_nal == nBr_nal ;
-			.and. field->r_br == nR_br
-		
-			delete
-			skip
-		enddo
-	endif
-endif
-
-select (nTArea)
-return lDelete
 
 

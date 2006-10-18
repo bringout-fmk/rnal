@@ -204,3 +204,74 @@ select (nArea)
 return val_kunos(ALLTRIM(xVal), cValid)
 
 
+// ------------------------------------
+// validacija polja placanje
+// ------------------------------------
+function val_plac(cPlac)
+local nSaveX
+local nSaveY
+private opc:={}
+private opcexe:={}
+private izbor:=1
+
+nSaveX := m_x
+nSaveY := m_y
+
+if cPlac == " "
+
+	AADD(opc, "ziro racun")
+ 	AADD(opcexe, {|| cPlac := "1", Izbor := 0 })
+ 
+ 	AADD(opc, "kes")
+ 	AADD(opcexe, {|| cPlac := "2", Izbor := 0 })
+ 
+ 	Menu_SC("placanje")
+
+	if lastkey() == K_ESC
+		cPlac := "1"
+	endif
+endif
+
+m_x := nSaveX
+m_y := nSaveY
+
+return .t.
+
+
+
+// ------------------------------------
+// validacija polja prioritet
+// ------------------------------------
+function val_priority(cPrior)
+local nSaveX
+local nSaveY
+private opc:={}
+private opcexe:={}
+private izbor:=1
+
+nSaveX := m_x
+nSaveY := m_y
+
+if cPrior == " "
+
+	AADD(opc, "Low priority    ")
+ 	AADD(opcexe, {|| cPrior := "1", Izbor := 0 })
+ 
+ 	AADD(opc, "Normal priority ")
+ 	AADD(opcexe, {|| cPrior := "2", Izbor := 0 })
+ 
+ 	AADD(opc, "High priority ")
+ 	AADD(opcexe, {|| cPrior := "3", Izbor := 0 })
+ 
+ 	Menu_SC("priority")
+
+	if lastkey() == K_ESC
+		cPrior := "2"
+	endif
+endif
+
+m_x := nSaveX
+m_y := nSaveY
+
+return .t.
+

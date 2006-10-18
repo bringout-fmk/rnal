@@ -209,3 +209,103 @@ endif
 return .t.
 
 
+// --------------------------------------
+// prikazi partner naziv + adresa
+// --------------------------------------
+function s_partner( cId )
+local xRet
+local nArea
+
+nArea := SELECT()
+
+select partn
+seek cId
+
+if Found()
+	xRet := ALLTRIM(partn->naz)
+	xRet += SPACE(1)
+	xRet += ALLTRIM(partn->adresa)
+else
+	xRet := cId
+endif
+
+select (nArea)
+
+return xRet
+
+
+// -------------------------------------
+// prikazi box sa podacima partnera
+// -------------------------------------
+function s_part_box(cId, nX, nY)
+local cPAdresa
+local cPNaziv
+local cPMjesto
+
+if g_part_info(cId, @cPNaziv, @cPAdresa, @cPMjesto)
+
+	@ nX, nY SAY cPNaziv
+	nX += 1
+	@ nX, nY SAY cPAdresa
+	nX += 1
+	@ nX, nY SAY cPMjesto
+endif
+
+return .t.
+
+
+
+// -------------------------------------
+// setuj podatke partnera
+// -------------------------------------
+static function g_part_info(cId, cNaziv, cAdresa, cMjesto)
+local nArr
+local xRet
+
+nArr := SELECT()
+
+select partn
+hseek cId
+
+if !Found()
+	select (nArr)
+	return .f.
+endif
+ 
+cNaziv := ALLTRIM(LEFT(partn->naz, 25))
+cAdresa := ALLTRIM(partn->adresa)
+cMjesto := ALLTRIM(partn->mjesto)
+
+select (nArr)
+return .t.
+
+// ---------------------------------------
+// prikazi karakteristiku
+// lBrowse - iz brows-a
+// ---------------------------------------
+function s_karakt(cIdKar, lBrowse)
+local cRet
+local nTArea
+
+if (lBrowse == nil)
+	lBrowse := .f.
+endif
+
+nTArea := SELECT()
+
+select s_rnka
+set order to tag "id"
+go top
+seek cIdKar
+
+if Found()
+	cRet := ALLTRIM(field->naziv)
+else
+	cRet := cIdKar
+endif
+
+select (nTArea)
+
+return cRet
+
+

@@ -58,5 +58,50 @@ return
 static function k_handler(Ch)
 return DE_CONT
 
+// ------------------------------------------
+// prikazi operaciju
+// lBrowse - iz browsa
+// ------------------------------------------
+function s_operacija(cIdOper, lBrowse)
+local cRet
+local nTArea
 
+if (lBrowse == nil)
+	lBrowse := .f.
+endif
+
+nTArea := SELECT()
+
+select s_rnop
+set order to tag "id"
+go top
+seek cIdOper
+
+if Found()
+	cRet := ALLTRIM(field->naziv)
+	if (lBrowse .and. LEN(cRet) > 8)
+		cRet := PADR(cRet, 8) + ".."
+	endif
+else
+	cRet := cIdOper
+endif
+
+select (nTArea)
+
+return cRet
+
+
+
+// -----------------------------------
+// vraca id operacije, kroz box unos
+// -----------------------------------
+function get_oper(cOper)
+Box(,1,50)
+	@ m_x + 1, m_y + 2 SAY "Unesi dodatnu operaciju:" GET cOper VALID !EMPTY(cOper) .and. p_rnop(@cOper)
+	read
+BoxC()
+
+ESC_RETURN 0
+
+return 1
 

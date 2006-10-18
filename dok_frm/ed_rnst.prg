@@ -1,545 +1,337 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
-// ---------------------------------------------
-// prikazi tabelu pripreme
-// ---------------------------------------------
-function rnst_priprema(nBr_nal, nR_br)
-local cHeader
-local cFooter
-
-cHeader := "SIROVINE / OPERACIJE STAVKE NALOGA"
-cFooter := "Unos/dorada stavki naloga za proizvodnju..."
-
-Box(,18,77)
-
-@ m_x+16,m_y+2 SAY "<c-N> Nova stavka     | <ENT> Ispravi stavku     | <O> Pregled operacija"
-@ m_x+17,m_y+2 SAY "<c-T> Brisi stavku    | <c-F9> Brisi sve         | <D> Promjena dim."
-@ m_x+18,m_y+2 SAY ""
-
+// --------------------------------------------
+// unos stavki radnog naloga
+// --------------------------------------------
+function g_item_unos(lNova)
+local nItemFLeft := 2
+local nItemQLeft := 36
+local nPosLeft
+local nPosRight
+local nPosTop
+local nPosBottom
+local cItemType
+local cItemGroup
 private ImeKol
 private Kol
+private oBrowse
+private bPrevOpc
+private bPrevKroz
+private aOptions
+private bPrevUp
+private bPrevDn
 
-SELECT (F_P_RNST)
-SET ORDER TO TAG "br_nal"
-GO TOP
 
-set_f_kol(nBr_nal, nR_br)
-set_a_kol(@Kol, @ImeKol)
+// setuj kolone
+set_a_kol(@ImeKol, @Kol)
 
-ObjDbedit("prnst", 18, 77, {|| k_handler(nBr_nal, nR_br)}, cHeader, cFooter, , , , , 3)
-BoxC()
+// setuj prikaz opcija unosa
+set_a_options(@aOptions)
 
-return
+// setovanje opcija unosa
+set_options()
 
-// ------------------------------------------
-// postavlja filter na brnal i rbr
-// ------------------------------------------
-static function set_f_kol(nBr_nal, nR_br)
-local cFilter
+Box(, 20, 77, , aOptions)
 
-cFilter := "br_nal == " + STR(nBr_nal, 10, 0)
-cFilter += " .and. "
-cFilter += "r_br == " + STR(nR_br, 4, 0)
-
-set filter to &cFilter
+select p_rnst
 go top
 
-return
+nPosLeft := m_y + 77
+nPosRight := m_y + 1
+nPosTop := m_x + 7
+nPosBottom := m_x + 19
+
+oBrowse := FormBrowse( nPosTop, nPosRight, nPosBottom, nPosLeft, ;
+		ImeKol, Kol, { "Í", "Ä", "³"}, 0)
+		
+oBrowse:autolite:=.f.
+bPrevDN := SETKEY(K_PGDN, { || dummy_func() })
+bPrevUp := SETKEY(K_PGUP, { || dummy_func() })
+
+select p_rnst
+go top
+
+Scatter()
+
+nR_br := 0
+cItemType := SPACE(10)
+cItemGroup := SPACE(10)
+
+do while .t.
+	
+	// novi redni broj automatski dodaj
+	_r_br := next_r_br()
+	// resetuj sirinu i visinu
+	_item_sirina := 0
+	_item_visina := 0
+	
+	do while !oBrowse:Stabilize() .and. ( (Ch:=INKEY()) == 0 )
+	enddo
+
+	set cursor on
+
+	// prva kolona - filter stavke
+	
+	if IsRamaGlas()
+		@ m_x + 2, m_y + nItemFLeft SAY say_left("Debljina (mm):", 15) GET _item_debljina PICT pic_dim()
+	endif
+	
+	@ m_x + 3, m_y + nItemFLeft SAY say_left("Tip:", 15) GET cItemType
+	@ m_x + 4, m_y + nItemFLeft SAY say_left("Grupa:", 15) GET cItemGroup
+	@ m_x + 5, m_y + nItemFLeft SAY say_left("Stavka:", 15) GET _item_id
+	
+	// druga kolona - unos kolicine itd....
+	if IsRamaGlas()
+		@ m_x + 3, m_y + nItemQLeft SAY say_left("Sirina (mm):", 15) GET _item_sirina PICT pic_dim()
+		@ m_x + 4, m_y + nItemQLeft SAY say_left("Visina (mm):", 15) GET _item_visina PICT pic_dim()
+	endif
+	
+	@ m_x + 5, m_y + nItemQLeft SAY say_left("Kolicina:", 15) GET _item_kol PICT pic_kol() SEND READER:={|g| send_reader(g) }
+
+	read
+
+	if LASTKEY() == K_ESC
+		EXIT
+	endif
+
+	select p_rnst
+	
+	// dodaj zapis
+	append blank
+	Gather()
+
+	// sumiraj neke varijable....
+	// nUkupno += ....
+
+	// refresh oBrowse
+	oBrowse:goBottom()
+	oBrowse:refreshAll()
+	oBrowse:dehilite()
+enddo
+
+// ukloni opcije pripreme
+canc_options()
+
+SETKEY(K_PGDN, bPrevDN)
+SETKEY(K_PGUP, bPrevUP)
+
+BoxC()
+
+return 1
+
+
+// -----------------------------------------
+// prikazi tekst sa opcijom PADL
+// -----------------------------------------
+static function say_left(cTxt, nLeft)
+if cTxt == nil
+	cTxt := "-"
+endif
+if nLeft == nil
+	nLeft := 5
+endif
+return PADL(cTxt, nLeft)
+
 
 // ---------------------------------------------
-// postavi matrice ImeKol, Kol
+// setovanje kolona unosa
 // ---------------------------------------------
-static function set_a_kol( aKol, aImeKol )
-
+static function set_a_kol(aImeKol, aKol)
+local i
 aImeKol := {}
+aKol := {}
 
-AADD(aImeKol, {"Br.nal", {|| TRANSFORM(br_nal, "99999")}, "br_nal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"R.br", {|| TRANSFORM(r_br, "99999")}, "r_br", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"P.br", {|| TRANSFORM(p_br, "99999")}, "p_br", {|| .t.}, {|| .t.} })
-AADD(aImeKol, { PADR("Sirovina", 10), {|| idroba }, "idroba", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Kolicina", {|| TRANSFORM(kolicina, PIC_KOL()) }, "kolicina", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Sirina", {|| TRANSFORM(d_sirina, PIC_DIM()) }, "d_sirina", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Visina", {|| TRANSFORM(d_visina, PIC_DIM()) }, "d_visina", {|| .t.}, {|| .t.} })
+AADD(aImeKol, { "R.br", { || TRANSFORM(r_br, "9999") }, "r_br"  })
+AADD(aImeKol, { "Stavka", { || say_item_mc(F_ROBA, "ROBA", item_id) }, "item_id"  })
+AADD(aImeKol, { "Kolicina", { || TRANSFORM(item_kol, "9999") }, "item_kol"  })
 
-aKol:={}
+if IsRamaGlas()
+	AADD(aImeKol, { "Sirina", { || TRANSFORM(item_sirina, PIC_DIM())}, "item_sirina"   })
+	AADD(aImeKol, { "Visina", { || TRANSFORM(item_visina, PIC_DIM())}, "item_visina"   })
+	AADD(aImeKol, { "Debljina", { || TRANSFORM(item_debljina, PIC_DIM())}, "item_debljina"   })
+endif
+
 for i:=1 to LEN(aImeKol)
-	AADD(aKol,i)
+	AADD(aKol, i)
 next
 
 return
 
+// ----------------------------------------
+// setovanje opisa opcija unosa
+// ----------------------------------------
+static function set_a_options(aOpt)
+aOpt := {}
+AADD(aOpt, "<*> - Ispravka stavke")
+return
+
+
+// ------------------------------------------
+// setovanje opcjija unosa
+// ------------------------------------------
+static function set_options()
+bPrevOpc := SETKEY(ASC("*"), { || edit_item() })
+return .t.
+
+
+// ------------------------------------------
+// cancel opcija unosa
+// ------------------------------------------
+static function canc_options()
+SETKEY(ASC("*"), bPrevOpc)
+return .f.
+
+
+// -------------------------------------------
+// ispravka stavke unosa
+// -------------------------------------------
+static function edit_item()
+local cItemId 
+local nItemKol
+local nItemSir
+local nItemVis
+local nItemDeb
+local aConds := {}
+local aProcs := {}
+
+canc_options()
+
+OpcTipke( {"<Enter> - ispravi stavku", "<DEL> brisi stavku", "<ESC> - zavrsi"} )
+
+oBrowse:autolite := .t.
+oBrowse:configure()
+
+cItemId := _item_id
+nItemKol := _item_kol
+nItemSir := _item_sirina
+nItemVis := _item_visina
+nItemDeb := _item_debljina
+
+// opcije ispravke....
+AADD(aConds, { |Ch| Ch == K_DEL} )
+AADD(aProcs, { || delete_item(oBrowse) })
+
+AADD(aConds, { |Ch| Ch == K_ENTER} )
+AADD(aProcs, { || ed_item(oBrowse) })
+
+ShowBrowse( oBrowse, aConds, aProcs )
+
+oBrowse:autolite := .f.
+oBrowse:dehilite()
+oBrowse:stabilize()
+
+Prozor0()
+
+_item_id := cItemId
+_item_kol := nItemKol
+_item_sir := nItemSir
+_item_vis := nItemVis
+_item_deb := nItemDeb
+
+set_options()
+
+return
+
 
 // ---------------------------------------------
-// obrada sve stavke 
+// brisanje stavke iz pripremne tabele
 // ---------------------------------------------
-static function stavke_item(nBr_nal, nR_br, lNova)
-local nCount
-
-UsTipke()
-
-Box(, 20, 77, .f., "Unos novih stavki")
-
+static function delete_item(oBrowse)
 select p_rnst
 
-Scatter()
-
-nCount := 0
-
-do while .t.
-	
-	if nCount > 0
-		Scatter()
-	endif
-	
-	++ nCount
-	
-	if g_st_item(nBr_nal, nR_br, lNova) == 0
-		exit
-	endif
-	
-	select p_rnst
-	
-	if lNova
-		append blank
-	endif
-	
-	Gather()
-enddo
-
-SELECT p_rnst
-
-BoxC()
-
-return 1
-
-
-// ---------------------------------------
-// obradi stavka naloga
-// ---------------------------------------
-static function g_st_item(nBr_nal, nR_br, lNovi)
-local nX := 2
-local nRobaX
-local nRobaY
-local nUkX
-local nUnOpX
-local cUnosOp := "N"
-local cIdRoba
-local nDebStakla
-local nXRekap
-local nYRekap
-local nXGrupa
-local nXTip
-local cTipFilter
-local cRobaVrsta := ""
-local cGrupaVrsta := "" 
-local nZaokruzenje := 0
-local nNetoKoef := 0
-local nNetoProc := 0
-local cRFilt := ""
-local cFunkcija := SPACE(2)
-
-if lNovi
-	_br_nal := nBr_nal
-	_r_br := nR_br
-	_p_br := next_p_br(nBr_nal, nR_br)
-	_idroba := SPACE(LEN(idroba))
-	_roba_vrsta := "S"
-	_roba_gr := SPACE(6)
-	_roba_tip := SPACE(6)
-	_debljina := 0
-	_d_ukupno := 0
-	_kolicina := 1
-	cUnosOp := "N"
+if reccount2() == 0
+	MsgBeep("Priprema prazna !!!")
+	return DE_REFRESH
 endif
 
-@ m_x + nX, m_y + 2 SAY "R.br:" GET _r_br PICT "9999" WHEN _r_br == 0
-@ m_x + nX, col() + 2 SAY "P.br:" GET _p_br PICT "9999"
+beep(2)
 
-nX += 2
-
-@ m_x + nX, m_y + 2 SAY PADL("Funkcija:", 15) GET cFunkcija VALID {|| get_funkcija(@cFunkcija), sh_function(cFunkcija, 4, 25)} PICT "99"
-
-nX += 1
-
-@ m_x + nX, m_y + 2 SAY PADL("Grupacija:", 15) GET _roba_gr VALID p_rgrupe(@_roba_gr, 5, 25) 
-
-read
-
-ESC_RETURN 0
-
-// generisi filter za tip robe
-cTipFilter := gen_tip_filter(cFunkcija, _roba_gr)
-
-nX += 1
-
-@ m_x + nX, m_y + 2 SAY PADL("Tip sirovine:", 15) GET _roba_tip VALID p_rtip(@_roba_tip, cTipFilter, 6, 25) 
-
-nX += 1
-
-@ m_x + nX, m_y + 2 SAY PADL("Debljina:", 15) GET _debljina PICT PIC_DIM()  
-@ m_x + nX, col() + 1 SAY "(mm)"
-
-read
-
-ESC_RETURN 0
-
-// sastavi filter za tabelu robe
-cRFilt := g_sast_filter(_roba_tip, _debljina)
-
-nX += 2
-nRobaX := m_x + nX
-nRobaY := m_y + 35
-
-@ m_x + nX, m_y + 2 SAY "Sirovina / operacija:" GET _idroba VALID val_sast(@_idroba, cRFilt, nRobaX, nRobaY)
-
-nX += 2
-
-@ m_x + nX, m_y + 2 SAY "Vrsta [S] - sirovina [K] - kupac:" GET _roba_vrsta VALID val_kunos(@_roba_vrsta, "KS") PICT "@!"
-
-read
-
-ESC_RETURN 0
-
-_debljina := g_roba_debljina(_idroba)
-_roba_tip := g_roba_tip(_idroba)
-_roba_gr := g_roba_gr(_idroba)
-cGrupaVrsta := g_gr_vrsta(_roba_gr)
-
-// pronadji zaokruzenje
-g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, @nNetoKoef, @nNetoProc)
-
-select p_rnst
-
-nX += 2
-
-@ m_x + nX, m_y + 2 SAY "Kolicina:" GET _kolicina PICT PIC_KOL() VALID val_kolicina( _kolicina )
-
-@ m_x + nX, col() + 2 SAY "Sirina (mm):" GET _d_sirina PICT PIC_DIM() VALID IF(EMPTY(cGrupaVrsta), val_dim_sirina( _d_sirina ), .t.)
- 
-@ m_x + nX, col() + 2 SAY "Visina (mm):" GET _d_visina PICT PIC_DIM() VALID IF(EMPTY(cGrupaVrsta), val_dim_visina( _d_visina ), .t.)
-
-read
-
-ESC_RETURN 0
-
-altd()
-// zaokruzenja dimenzija
-_z_sirina := dim_zaokruzi(_d_sirina, _debljina, nZaokruzenje)
-_z_visina := dim_zaokruzi(_d_visina, _debljina, nZaokruzenje)
-
-// ukupno bez zaokruzenja
-_d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
-// ukupno sa zaokruzenjima
-_z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _z_visina )
-
-// racunaj neto (kilaza)
-_neto := c_netto( _debljina, _z_ukupno, cRobaVrsta, nNetoKoef, nNetoProc )
-
-nXRekap := m_x + nX + 1
-nYRekap := m_y + 2
-
-// prikazi rekapitulaciju
-s_rekap_stavka(nXRekap, nYRekap, _z_sirina, _z_visina, _d_ukupno, _z_ukupno, _neto)
-
-// unos operacija
-nUnOpX := 19
-@ m_x + nUnOpX, m_y + 2 SAY "Unos instrukcija (D/N)?" GET cUnosOp VALID val_d_n( cUnosOp ) PICT "@!"
-
-read
-
-ESC_RETURN 0
-
-if cUnosOp == "D"
-	// unos operacija nad artiklom
-	nP_br := _p_br
-	cIdRoba := _idroba
-	ed_st_instr(nBr_Nal, nR_Br, nP_Br, cIdRoba)
-endif
-
-if !lNovi
-	return 0
-endif
-
-return 1
-
-
-// -----------------------------------
-// sastavlja filter za tabelu robe
-// -----------------------------------
-static function g_sast_filter(cTip, nDebljina)
-local cRet := ""
-
-if EMPTY(cTip)
-	cRet += ".t."
-else
-	cRet += "roba_tip == " + Cm2Str(PADR(cTip,6))
-endif
-
-cRet += " .and. "
-
-// ako je uneseno 999 idi sve debljine...
-if (nDebljina == 999) .or. (nDebljina == 0)
-	cRet += ".t."
-else
-	cRet += "debljina == " + STR(nDebljina, 15, 5)
-endif
-
-return cRet
-
-
-
-// ---------------------------------------------
-// tabela RNAL keyboard handler 
-// ---------------------------------------------
-static function k_handler(nBr_nal, nR_br)
-
-if (Ch==K_CTRL_T .or. Ch==K_ENTER;
-	.or. Ch==K_CTRL_P;
-	.or. Ch==K_CTRL_F9) .and. reccount2()==0
-	return DE_CONT
-endif
-
-do case
-	case (Ch == K_CTRL_T)
-		SELECT P_RNST
-		if br_stavku()
-			return DE_REFRESH
-		endif
-		SELECT P_RNST
-		return DE_CONT
-		
-	case (Ch == K_ENTER)
-		SELECT P_RNST
-  		Scatter()
-  		if stavke_item(nBr_nal, nR_br, .f.) == 1
-			Gather()
-			RETURN DE_REFRESH
-		endif
-		SELECT P_RNST
-		return DE_CONT
-		
-	case (Ch == K_CTRL_N)
-		SELECT P_RNST
-		stavke_item(nBr_nal, nR_br, .t.)
-		SELECT P_RNST
-		return DE_REFRESH
-		
-	case (Ch  == K_CTRL_F9)
-        	SELECT P_RNST
-		if br_sve_zapise()
-			return DE_REFRESH
-		endif
-		SELECT P_RNST
-		return DE_CONT
-		
-	case UPPER(CHR(Ch)) == "O"
-		select p_rnop
-		ed_st_instr(p_rnst->br_nal, p_rnst->r_br, p_rnst->p_br, p_rnst->idroba)
-		select p_rnst
-		return DE_REFRESH
-	
-	case UPPER(CHR(Ch)) == "D"
-		
-		select p_rnst
-		if set_new_dims(p_rnst->br_nal, p_rnst->r_br) == 1
-			select p_rnst
-			return DE_REFRESH
-		endif
-		return DE_CONT
-	
-	case ( Ch == K_ESC )
-		select p_rnst
-		return DE_CONT 
-
-endcase
-
-return DE_CONT
-
-
-// ---------------------------------------
-// brisi stavku iz pripreme
-// ---------------------------------------
-static function br_stavku()
-local nBrNal
-local nRbr
-local nPbr
-local cIdRoba
-
-// kod brisanja stavke je bitno da se izbrise stavka iz P_RNAL
-// kao i sve stavke iz P_RNOP
-
-if Pitanje(, "Zelite izbrisati ovu stavku ?", "D") == "N"
-	return .f.
-endif
-
-nBrNal := field->br_nal
-nRBr := field->r_br
-nPBr := field->p_br
-cIdRoba := field->idroba
+// setuj neke varijable
+// nukupno -= ....
 
 delete
 
-// sada izbrisi ako ima sta i u P_RNOP
-br_prnop(nBrNal, nRBr, nPBr, cIdRoba)
+oBrowse:refreshAll()
 
-select p_rnst
-
-return .t.
-
-
-
-// ---------------------------------------
-// brisanje kompletne pripreme
-// ---------------------------------------
-static function br_sve_zapise()
-local nBr_nal
-
-if Pitanje( ,"Zelite li izbrisati pripremu !!????","N") == "N"
-	return .f.
-endif
-
-select p_rnst
-nBr_nal := field->br_nal
-zap        
-
-select p_rnop
-zap
-
-select p_rnst
-
-return .t.
-
-
-// ---------------------------------------
-// brisi stavke iz p_rnop
-// ---------------------------------------
-static function br_prnop(nBrNal, nR_br, nP_br, cIdRoba)
-local nArea
-nArea := SELECT()
-
-select p_rnop
-set order to tag "br_nal"
-go top
-seek STR(nBrNal, 10, 0) + STR(nR_br) + STR(nP_br) + cIdRoba
-
-if !Found()
-	return
-endif
-
-// brisi sve stavke iz P_RNOP za dati uslov
-do while !EOF() .and. field->br_nal == nBrNal .and. field->r_br == nR_br .and. field->p_br == nP_br .and. field->idroba == cIdRoba
-	delete
-	skip
+do while !oBrowse:stable
+	oBrowse:stabilize()
 enddo
 
-select (nArea)
-
-return
+return (DE_REFRESH)
 
 
-// ----------------------------------------
-// ispisuje rekapitulaciju stavke GN
-// ----------------------------------------
-static function s_rekap_stavka(nX, nY, nGNSirina, nGNVisina, nUkupno, nGNUkupno, nNeto)
-local cLine 
+// ---------------------------------------------
+// ispravka stavke u pripremi
+// ---------------------------------------------
+static function ed_item(oBrowse)
+private GetList := {}
 
-cLine := REPLICATE(CHR(205), 76)
+select p_rnst
 
-@ nX, nY SAY cLine
-
-nX += 1
-
-@ nX, nY SAY "      Zaokruzenja:"
-@ nX, col() + 4 SAY "Sirina (mm)"
-@ nX, col() + 2 SAY nGNSirina PICT PIC_DIM()
-
-@ nX, col() + 2 SAY "Visina (mm)"
-@ nX, col() + 2 SAY nGNVisina PICT PIC_DIM()
-
-nX += 1
-
-@ nX, nY SAY PADL("UKUPNO PO GN-u:", 15)
-@ nX, col() + 2 SAY nGNUkupno PICT PIC_IZN()
-@ nX, col() + 1 SAY "m2"
-
-nX += 1
-
-@ nX, nY SAY PADL("NETO:", 15)
-@ nX, col() + 2 SAY nNeto PICT PIC_IZN()
-@ nX, col() + 1 SAY "kg"
-
-nX += 1
-
-@ nX, nY SAY cLine
-
-return
-
-// ------------------------------------------
-// setovanje novih dimenzija stavki
-// ------------------------------------------
-static function set_new_dims(nBr_nal, nR_br)
-local cIzvrsiDN := "N"
-local nSirina := 0
-local nVisina := 0
-local cRobaVrsta
-local nZaokruzenje
-local nNetoKoef
-local nNetoProc
-
-if Pitanje(, "Setovati nove dimenzije (D/N) ?", "D") == "N"
-	return 0
+if reccount2() == 0
+	MsgBeep("Priprema prazna !!!!")
+	return (DE_CONT)
 endif
 
+Scatter()
+set cursor on
 
-Box(, 6, 50)
-	@ m_x+1, m_y+2 SAY "Nove dimenzije su:"
-	@ m_x+3, m_y+2 SAY "   -> sirina (mm):" GET nSirina VALID nSirina <> 0 PICT PIC_DIM()
-	@ m_x+4, m_y+2 SAY "   -> visina (mm):" GET nVisina VALID nVisina <> 0 PICT PIC_DIM()
-	@ m_x+6, m_y+2 SAY "izvrsiti zamjenu" GET cIzvrsiDN VALID cIzvrsiDN $ "DN" PICT "@!"
-	read
+Box(, 6, 75)
+
+@ m_x + 1, m_y + 2 SAY "    stavka: " GET _item_id
+@ m_x + 2, m_y + 2 SAY "  kolicina: " GET _item_kol
+
+read
+
+if LASTKEY() <> K_ESC
+	Gather()
+endif
+
 BoxC()
 
-if LastKey() == K_ESC
-	return 0
-endif
-
-if cIzvrsiDN == "N"
-	return 0
-endif
-
-go top
-do while !EOF() .and. field->br_nal == nBr_nal ;
-		.and. field->r_br == nR_br
-
-	Scatter()
-
-	// uzmi parametre 
-	g_rtip_params(_roba_tip, @cRobaVrsta, @nZaokruzenje, ;
-			@nNetoKoef, @nNetoProc)
-	
-	
-	_d_sirina := nSirina
-	_d_visina := nVisina
-	
-	// zaokruzenja dimenzija
-	_z_sirina := dim_zaokruzi(_d_sirina, _debljina, nZaokruzenje)
-	_z_visina := dim_zaokruzi(_d_visina, _debljina, nZaokruzenje)
-
-	// ukupno bez zaokruzenja
-	_d_ukupno := c_ukvadrat( _kolicina, _d_sirina, _d_visina )
-	// ukupno sa zaokruzenjima
-	_z_ukupno := c_ukvadrat( _kolicina, _z_sirina, _z_visina )
-
-	// racunaj neto (kilaza)
-	_neto := c_netto( _debljina, _z_ukupno, cRobaVrsta, nNetoKoef, nNetoProc )
-
-	Gather()
-	
-	skip
+oBrowse:refreshCurrent()
+do while !oBrowse:stable
+	oBrowse:stabilize()
 enddo
-go top
 
-return 1
+return (DE_CONT)
+
+
+
+
+static function send_reader(oGet, GetList, oMenu, aMsg)
+local nKey
+local nRow
+local nCol
+
+if ( GetPreValSc(oGet, aMsg) )
+	
+	oGet:setFocus()
+	
+	do while ( oGet:exitState == GE_NOEXIT )
+		
+		if (oGet:typeOut)
+			oGet:exitState := GE_ENTER
+		endif
+		
+		do while ( oGet:exitState == GE_NOEXIT )
+			nKey := INKEY(0)
+			GetApplyKey( oGet, nKey, GetList, oMenu, aMsg )
+			nRow := ROW()
+			nCol := COL()
+			DevPos(nRow, nCol)
+		enddo
+
+		if ( !GetPstValSC( oGet, aMsg ) )
+			oGet:exitState := GE_NOEXIT
+		endif
+		
+	enddo
+	
+	// deaktiviraj get
+	oGet:killFocus()
+endif
+return
 
 
