@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.43"
+   sodipodi:docbase="/home/hernad/sc/Fmk/RNAL/db/model"
+   sodipodi:docname="rnal.svg">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;">
+      <path
+         id="path3300"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none;"
+         transform="scale(0.8) rotate(180)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.046895"
+     inkscape:cx="183.29713"
+     inkscape:cy="957.16474"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:window-width="1400"
+     inkscape:window-height="976"
+     inkscape:window-x="0"
+     inkscape:window-y="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="opacity:0.82967033;color:#000000;fill:none;fill-opacity:0.34426228;fill-rule:evenodd;stroke:#000000;stroke-width:3.54330707;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.53551911;visibility:visible;display:inline;overflow:visible"
+       id="rect1307"
+       width="220"
+       height="174.28572"
+       x="47.351997"
+       y="74.733246" />
+    <text
+       xml:space="preserve"
+       style="font-size:25.99357033px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="68.013039"
+       y="148.95363"
+       id="text1313"
+       transform="scale(0.99236,1.007699)"><tspan
+         sodipodi:role="line"
+         id="tspan1315"
+         x="68.013039"
+         y="148.95363">id</tspan></text>
+    <rect
+       style="opacity:0.10439561;color:#000000;fill:#00d100;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:3.54330707;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.53551911;visibility:visible;display:inline;overflow:visible"
+       id="rect1317"
+       width="218.50328"
+       height="38.685825"
+       x="46.805073"
+       y="77.336075" />
+    <text
+       xml:space="preserve"
+       style="font-size:42.97175217px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="97.662827"
+       y="112.07916"
+       id="text1309"
+       transform="scale(1.00552,0.99451)"><tspan
+         sodipodi:role="line"
+         id="tspan1311"
+         x="97.662827"
+         y="112.07916">artikli</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.99357605px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="67.271645"
+       y="178.1458"
+       id="text2192"
+       transform="scale(0.99236,1.007699)"><tspan
+         sodipodi:role="line"
+         id="tspan2194"
+         x="67.271645"
+         y="178.1458">id_el</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.99358368px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="65.567841"
+       y="228.58449"
+       id="text2196"
+       transform="scale(0.99236,1.007699)"><tspan
+         sodipodi:role="line"
+         id="tspan2198"
+         x="65.567841"
+         y="228.58449">.....</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.99358177px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="65.567833"
+       y="209.62633"
+       id="text2204"
+       transform="scale(0.99236,1.007699)"><tspan
+         sodipodi:role="line"
+         id="tspan2206"
+         x="65.567833"
+         y="209.62633">opis</tspan></text>
+    <rect
+       style="opacity:0.82967033;color:#000000;fill:none;fill-opacity:0.34426228;fill-rule:evenodd;stroke:#000000;stroke-width:3.54330707;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.53551911;visibility:visible;display:inline;overflow:visible"
+       id="rect2208"
+       width="220"
+       height="174.28572"
+       x="349.72736"
+       y="77.833328" />
+    <text
+       xml:space="preserve"
+       style="font-size:25.99357414px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="372.7164"
+       y="152.03006"
+       id="text2210"
+       transform="scale(0.99236,1.007699)"><tspan
+         sodipodi:role="line"
+         id="tspan2212"
+         x="372.7164"
+         y="152.03006">id</tspan></text>
+    <rect
+       style="opacity:0.10439561;color:#000000;fill:#00d100;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:3.54330707;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.53551911;visibility:visible;display:inline;overflow:visible"
+       id="rect2214"
+       width="218.50328"
+       height="38.685825"
+       x="349.18042"
+       y="80.436157" />
+    <text
+       xml:space="preserve"
+       style="font-size:42.97172928px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="362.27951"
+       y="118.07771"
+       id="text2216"
+       transform="scale(1.00552,0.99451)"><tspan
+         sodipodi:role="line"
+         id="tspan2218"
+         x="362.27951"
+         y="118.07771">elementi</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.9935894px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="374.12149"
+       y="211.7549"
+       id="text2224"
+       transform="scale(0.99236,1.007699)"><tspan
+         sodipodi:role="line"
+         id="tspan2226"
+         x="374.12149"
+         y="211.7549">.....</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.99358749px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="370.27121"
+       y="184.26556"
+       id="text2228"
+       transform="scale(0.99236,1.007699)"><tspan
+         sodipodi:role="line"
+         id="tspan2230"
+         x="370.27121"
+         y="184.26556">opis</tspan></text>
+    <path
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow1Lend);stroke-opacity:1;display:inline"
+       d="M 139.46002,174.52823 L 286.62653,143.47507 L 353.42607,144.91686"
+       id="path2255"
+       inkscape:connector-type="polyline"
+       sodipodi:nodetypes="ccc" />
+  </g>
+</svg>
