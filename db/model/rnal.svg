@@ -15,7 +15,7 @@
    inkscape:version="0.44.1"
    sodipodi:docbase="C:\dev\fmk\rnal\db\model"
    sodipodi:docname="rnal.svg"
-   inkscape:export-filename="C:\dev\fmk\rnal\db\model\er_model_data_samples_relations.png"
+   inkscape:export-filename="C:\dev\fmk\rnal\db\model\er_model_data_samples.png"
    inkscape:export-xdpi="90.000000"
    inkscape:export-ydpi="90.000000">
   <defs
@@ -200,7 +200,7 @@
        id="box_articles"
        inkscape:label="box_articles"
        transform="matrix(0.705706,0,0,1.070277,11.63777,-21.69302)"
-       style="opacity:0.1;fill:red;display:inline;stroke:none">
+       style="opacity:0.1;fill:red;stroke:none;display:inline">
       <rect
          y="310.36111"
          x="37.526524"
@@ -225,7 +225,7 @@
        id="a6116"
        inkscape:label="box_articles"
        transform="matrix(1.182425,0,0,1.070115,398.572,-23.05105)"
-       style="opacity:0.1;fill:lime;display:inline;stroke:none">
+       style="opacity:0.1;fill:lime;stroke:none;display:inline">
       <rect
          y="310.36111"
          x="37.526524"
@@ -251,7 +251,7 @@
      inkscape:label="ER model"
      inkscape:groupmode="layer"
      id="layer1"
-     style="opacity:1;display:none"
+     style="opacity:1;display:inline"
      sodipodi:insensitive="true">
     <g
        id="g5769"
@@ -1180,7 +1180,7 @@
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="ER model relations"
-     style="opacity:1;display:none"
+     style="opacity:1;display:inline"
      sodipodi:insensitive="true">
     <path
        style="opacity:1;fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:black;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow1Mend);stroke-opacity:1;display:inline"
