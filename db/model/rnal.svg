@@ -15,7 +15,7 @@
    inkscape:version="0.44.1"
    sodipodi:docbase="C:\dev\fmk\rnal\db\model"
    sodipodi:docname="rnal.svg"
-   inkscape:export-filename="C:\dev\fmk\rnal\db\model\rnal_model.png"
+   inkscape:export-filename="C:\dev\fmk\rnal\db\model\er_model_data_samples_relations.png"
    inkscape:export-xdpi="90.000000"
    inkscape:export-ydpi="90.000000">
   <defs
@@ -95,10 +95,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.0388466"
-     inkscape:cx="526.18109"
-     inkscape:cy="385.3889"
+     inkscape:cx="526.18111"
+     inkscape:cy="385.38891"
      inkscape:document-units="px"
-     inkscape:current-layer="layer4"
+     inkscape:current-layer="layer3"
      inkscape:window-width="1400"
      inkscape:window-height="994"
      inkscape:window-x="-4"
@@ -118,7 +118,8 @@
      inkscape:groupmode="layer"
      id="layer6"
      inkscape:label="Main data"
-     style="opacity:0.91397855;display:inline">
+     style="opacity:0.91397861;display:inline"
+     sodipodi:insensitive="true">
     <text
        xml:space="preserve"
        style="font-size:14.72105789px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;opacity:1;fill:black;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Arial"
@@ -139,7 +140,7 @@
      inkscape:label="Background"
      style="opacity:1;display:inline">
     <rect
-       style="opacity:0.1;fill:yellow;fill-opacity:1;stroke:black;stroke-width:1.09776354;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
+       style="opacity:0.1;fill:yellow;fill-opacity:1;stroke:none;stroke-width:1.09776354;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
        id="rect4593"
        width="346.27875"
        height="248.02013"
@@ -158,7 +159,7 @@
          x="44.898235"
          y="253.58694">Customers</tspan></text>
     <rect
-       style="opacity:0.1;fill:blue;fill-opacity:1;stroke:black;stroke-width:0.65275013;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
+       style="opacity:0.1;fill:blue;fill-opacity:1;stroke:none;stroke-width:0.65275013;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
        id="rect2312"
        width="347.97324"
        height="250.97408"
@@ -177,7 +178,7 @@
          x="487.68912"
          y="256.25867">Documents</tspan></text>
     <rect
-       style="opacity:0.1;fill:#666;fill-opacity:1;stroke:black;stroke-width:0.98162568;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
+       style="opacity:0.1;fill:#666;fill-opacity:1;stroke:none;stroke-width:0.98162568;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
        id="rect6228"
        width="210.93155"
        height="251.96075"
@@ -199,14 +200,14 @@
        id="box_articles"
        inkscape:label="box_articles"
        transform="matrix(0.705706,0,0,1.070277,11.63777,-21.69302)"
-       style="opacity:0.1;fill:red;display:inline">
+       style="opacity:0.1;fill:red;display:inline;stroke:none">
       <rect
          y="310.36111"
          x="37.526524"
          height="392.39093"
          width="490.64954"
          id="rect5542"
-         style="opacity:1;fill:red;fill-opacity:1;stroke:black;stroke-width:1.64360523;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline" />
+         style="opacity:1;fill:red;fill-opacity:1;stroke:none;stroke-width:1.64360523;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline" />
     </a>
     <text
        xml:space="preserve"
@@ -224,14 +225,14 @@
        id="a6116"
        inkscape:label="box_articles"
        transform="matrix(1.182425,0,0,1.070115,398.572,-23.05105)"
-       style="opacity:0.1;fill:lime;display:inline">
+       style="opacity:0.1;fill:lime;display:inline;stroke:none">
       <rect
          y="310.36111"
          x="37.526524"
          height="392.39093"
          width="490.64954"
          id="rect6118"
-         style="opacity:1;fill:lime;fill-opacity:1;stroke:black;stroke-width:1.64360523;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline" />
+         style="opacity:1;fill:lime;fill-opacity:1;stroke:none;stroke-width:1.64360523;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline" />
     </a>
     <text
        xml:space="preserve"
@@ -250,7 +251,8 @@
      inkscape:label="ER model"
      inkscape:groupmode="layer"
      id="layer1"
-     style="opacity:1;display:inline">
+     style="opacity:1;display:none"
+     sodipodi:insensitive="true">
     <g
        id="g5769"
        transform="matrix(1,0,0,0.990005,0,1.60689)">
@@ -1178,7 +1180,8 @@
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="ER model relations"
-     style="opacity:1;display:inline">
+     style="opacity:1;display:none"
+     sodipodi:insensitive="true">
     <path
        style="opacity:1;fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:black;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow1Mend);stroke-opacity:1;display:inline"
        d="M 305.26953,132.60145 L 473.16777,131.64749"
@@ -1348,7 +1351,8 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Data samples"
-     style="display:none">
+     style="display:none"
+     sodipodi:insensitive="true">
     <g
        id="g10877"
        transform="translate(170.7601,-2.8125e-7)">
@@ -2148,7 +2152,8 @@
      inkscape:groupmode="layer"
      id="layer5"
      inkscape:label="Data samples relations"
-     style="display:none">
+     style="display:none"
+     sodipodi:insensitive="true">
     <path
        sodipodi:type="arc"
        style="opacity:0.3;fill:none;fill-opacity:1;stroke:#fe0505;stroke-width:1.82941854;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;display:inline"
