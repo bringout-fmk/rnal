@@ -13,7 +13,7 @@ if !USED(nArea)
 endif
 select &cTable
 
-set order to tag "ID"
+set order to tag "1"
 go top
 
 seek cId
@@ -28,6 +28,56 @@ xRet := PADR(xRet, 20)
 
 select (nTArea)
 return xRet
+
+
+
+// --------------------------------------
+// increment id u sifrarniku
+// wId - polje id proslijedjeno po ref.
+// cFieldName - ime id polja
+// --------------------------------------
+function _inc_id( wid, cFieldName )
+local nTRec
+
+if ((Ch == K_CTRL_N) .or. (Ch == K_F4))
+	
+	if (LastKey() == K_ESC)
+		return .f.
+	endif
+	
+	nTRec := RecNo()
+	
+	wid := _last_id( nTRec, cFieldName ) + 1
+	
+	AEVAL(GetList,{|o| o:display()})
+
+endif
+
+return .t.
+
+
+// ----------------------------------------
+// vraca posljednji id zapis iz tabele
+// nTRec - tekuci zapis tabele
+// cFieldName - ime id polja
+// ----------------------------------------
+static function _last_id( nTRec, cFieldName )
+local nLastId := 0
+
+go bottom
+
+nLastID := field->&cFieldName
+
+go nTRec
+
+return nLastID
+
+
+
+
+
+
+
 
 
 // ----------------------------
