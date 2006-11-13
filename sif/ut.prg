@@ -1,10 +1,11 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+
 // -------------------------------------------------
-// vrati opis match_code/naz za stavku sifrarnika
+// vrati match_code za stavku sifrarnika
 // -------------------------------------------------
-function say_item_mc(nArea, cTable, cId)
+function say_item_mc(nArea, cTable, nId)
 local nTArea := SELECT()
 local xRet := "-----"
 
@@ -16,19 +17,38 @@ select &cTable
 set order to tag "1"
 go top
 
-seek cId
+seek STR(nId)
 
 if FOUND()
 	xRet := ALLTRIM(field->match_code)
-	xRet += "/"
-	xRet += ALLTRIM(field->naz)
 endif
-
-xRet := PADR(xRet, 20)
 
 select (nTArea)
 return xRet
 
+
+
+// ---------------------------------------------
+// prikaz id/mc za stavku u browse-u sifrarnika
+// nFieldId - vrijednost id polja
+// ---------------------------------------------
+function sif_idmc(nFieldId)
+local cId := STR(nFieldId)
+local cMCode := ALLTRIM(field->match_code)
+local xRet
+
+xRet := ALLTRIM(cId)
+
+if !EMPTY(cMCode)
+	xRet += "/"
+	if LEN(cMCode) > 4
+		xRet += LEFT(cMCode, 4) + ".."
+	else
+		xRet += cMCode
+	endif
+endif
+
+return xRet
 
 
 // --------------------------------------
@@ -38,6 +58,7 @@ return xRet
 // --------------------------------------
 function _inc_id( wid, cFieldName )
 local nTRec
+local cDbFilter
 
 if ((Ch == K_CTRL_N) .or. (Ch == K_F4))
 	
@@ -46,8 +67,14 @@ if ((Ch == K_CTRL_N) .or. (Ch == K_F4))
 	endif
 	
 	nTRec := RecNo()
+	cDbFilter := DBFilter()
+
+	set filter to
 	
-	wid := _last_id( nTRec, cFieldName ) + 1
+	wid := _last_id( cFieldName ) + 1
+	
+	set filter to &cDbFilter
+	go (nTRec)
 	
 	AEVAL(GetList,{|o| o:display()})
 
@@ -58,19 +85,16 @@ return .t.
 
 // ----------------------------------------
 // vraca posljednji id zapis iz tabele
-// nTRec - tekuci zapis tabele
 // cFieldName - ime id polja
 // ----------------------------------------
-static function _last_id( nTRec, cFieldName )
-local nLastId := 0
+static function _last_id( cFieldName )
+local nLast_rec := 0
 
 go bottom
 
-nLastID := field->&cFieldName
+nLast_rec := field->&cFieldName
 
-go nTRec
-
-return nLastID
+return nLast_rec
 
 
 

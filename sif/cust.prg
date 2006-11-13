@@ -5,17 +5,22 @@
 // -----------------------------------------
 function s_customers(cId, dx, dy)
 local nTArea
+local cHeader
 private ImeKol
 private Kol
 
 nTArea := SELECT()
+
+cHeader := "Narucioci"
+cHeader += SPACE(5)
+cHeader += "/ c+K - pregled kontakata"
 
 select customs
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
 	
-cRet := PostojiSifra(F_CUSTOMS, 1, 10, 70, "Customers", @cId, dx, dy)
+cRet := PostojiSifra(F_CUSTOMS, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
 select (nTArea)
 
@@ -29,7 +34,7 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("ID", 10), {|| cust_id}, "cust_id", {|| _inc_id(@wcust_id, "CUST_ID"), .f.}, {|| .t.}})
+AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(cust_id)}, "cust_id", {|| _inc_id(@wcust_id, "CUST_ID"), .f.}, {|| .t.}})
 AADD(aImeKol, {PADC("Naziv", 20), {|| PADR(cust_desc, 20)}, "cust_desc"})
 AADD(aImeKol, {PADC("Adresa", 20), {|| PADR(cust_addr, 20)}, "cust_addr"})
 AADD(aImeKol, {PADC("Telefon", 20), {|| PADR(cust_tel, 20)}, "cust_tel"})
@@ -41,6 +46,18 @@ next
 
 return
 
+
+// -----------------------------------------
+// key handler funkcija
+// -----------------------------------------
+static function key_handler(Ch)
+do case
+	case Ch == K_CTRL_K
+		// pregled kontakata
+		s_contacts(nil, field->cust_id)
+		return DE_CONT
+endcase
+return DE_CONT
 
 
 // -------------------------------
