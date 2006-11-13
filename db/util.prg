@@ -1,125 +1,130 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 // u RNAL modulu ne trebamo kreirati tabele rabata
-//
 function crerabdb()
 return
 
 function crefmkpi()
 return
 
+
 // ------------------------------------------------
-// otvori tabele potrebne za ispravku radnog naloga
+// otvori tabele potrebne za rad sa RNAL
+// lTemporary - .t. i pripremne tabele
 // ------------------------------------------------
-function o_rnal(lPriprema)
+function o_tables(lTemporary)
 
-if lPriprema == nil
-	lPriprema := .f.
+if lTemporary == nil
+	lTemporary := .f.
 endif
 
-o_rn_sif()
+// otvori sifrarnike
+o_sif_tables()
 
-select F_S_RNKA
+select F_DOCS
 if !used()
-	O_S_RNKA
+	O_DOCS
 endif
 
-select F_S_RNOP
+select F_DOC_IT
 if !used()
-	O_S_RNOP
+	O_DOC_IT
 endif
 
-select F_S_TIPOVI
+select F_DOC_OPS
 if !used()
-	O_S_TIPOVI
+	O_DOC_OPS
 endif
 
-select F_S_GRUPE
+select F_DOC_LOG
 if !used()
-	O_S_GRUPE
+	O_DOC_LOG
 endif
 
-select F_RNAL
+select F_DOC_LIT
 if !used()
-	O_RNAL
+	O_DOC_LIT
 endif
 
-select F_RNST
-if !used()
-	O_RNST
-endif
+if lTemporary == .t.
 
-select F_RNOP
-if !used()
-	O_RNOP
-endif
-
-select F_RNLOG
-if !used()
-	O_RNLOG
-endif
-
-select F_LOGIT
-if !used()
-	O_LOGIT
-endif
-
-if lPriprema == .t.
-	SELECT (F_P_RNAL)
+	SELECT (F__DOCS)
 	if !used()
-		O_P_RNAL
+		O__DOCS
 	endif
 
-	SELECT (F_P_RNST)
+	SELECT (F__DOC_IT)
 	if !used()
-		O_P_RNST
+		O__DOC_IT
 	endif
 
-	SELECT (F_P_RNOP)
+	SELECT (F__DOC_OPS)
 	if !used()
-		O_P_RNOP
+		O__DOC_OPS
 	endif
+	
 endif
 
 return
 
+// -----------------------------------------
+// otvara tabele sifrarnika 
+// -----------------------------------------
+function o_sif_tables()
 
-// otvori sifrarnike
-function o_rn_sif()
-
-select F_TARIFA
+select F_E_GROUPS
 if !used()
-	O_TARIFA
+	O_E_GROUPS
 endif
 
-select F_PARTN
+select F_E_GR_ATT
 if !used()
-	O_PARTN
+	O_E_GR_ATT
 endif
 
-select F_OPS
+select F_E_GR_VAL
 if !used()
-	O_OPS
+	O_E_GR_VAL
 endif
 
-select F_ROBA
+select F_ARTICLES
 if !used()
-	O_ROBA
+	O_ARTICLES
 endif
 
-select F_SAST
+select F_ELEMENTS
 if !used()
-	O_SAST
+	O_ELEMENTS
 endif
 
-select F_SIFK
+select F_E_AOPS
 if !used()
-	O_SIFK
+	O_E_AOPS
 endif
 
-select F_SIFV
+select F_E_ATT
 if !used()
-	O_SIFV
+	O_E_ATT
+endif
+
+select F_CUSTOMS
+if !used()
+	O_CUSTOMS
+endif
+
+select F_CONTACTS
+if !used()
+	O_CONTACTS
+endif
+
+select F_AOPS
+if !used()
+	O_AOPS
+endif
+
+select F_AOPS_ATT
+if !used()
+	O_AOPS_ATT
 endif
 
 return

@@ -6,7 +6,7 @@ local oObj
 
 oObj:=TDBRNal():new()
 oObj:self:=oObj
-oObj:cName:="RNAL"
+oObj:cName:="DOCS"
 oObj:lAdmin:=.f.
 return oObj
 
@@ -81,10 +81,10 @@ endif
 ?
 
 // privatni
-fnul:=.f.
-Skloni(PRIVPATH,"P_RNAL.DBF",cSezona,finverse,fda,fnul)
-Skloni(PRIVPATH,"P_RNOP.DBF",cSezona,finverse,fda,fnul)
-Skloni(PRIVPATH,"P_RNST.DBF",cSezona,finverse,fda,fnul)
+fNul:=.f.
+Skloni(PRIVPATH,"_DOCS.DBF",cSezona,finverse,fda,fnul)
+Skloni(PRIVPATH,"_DOC_IT.DBF",cSezona,finverse,fda,fnul)
+Skloni(PRIVPATH,"_DOC_OPS.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
 if fRS
@@ -107,18 +107,25 @@ endif
 
 // kumulativ
 fNul := .f.
-Skloni(KUMPATH,"RNAL.DBF",cSezona,finverse,fda,fnul)
-Skloni(KUMPATH,"RNOP.DBF",cSezona,finverse,fda,fnul)
-Skloni(KUMPATH,"RNST.DBF",cSezona,finverse,fda,fnul)
-Skloni(KUMPATH,"RNLOG.DBF",cSezona,finverse,fda,fnul)
-Skloni(KUMPATH,"RNLOG_IT.DBF",cSezona,finverse,fda,fnul)
+Skloni(KUMPATH,"DOCS.DBF",cSezona,finverse,fda,fnul)
+Skloni(KUMPATH,"DOC_IT.DBF",cSezona,finverse,fda,fnul)
+Skloni(KUMPATH,"DOC_OPS.DBF",cSezona,finverse,fda,fnul)
+Skloni(KUMPATH,"DOC_LOG.DBF",cSezona,finverse,fda,fnul)
+Skloni(KUMPATH,"DOC_LIT.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
 // sifrarnik
-Skloni(SIFPATH,"S_RNOP.DBF",cSezona,finverse,fda,fnul)
-Skloni(SIFPATH,"S_RNKA.DBF",cSezona,finverse,fda,fnul)
-Skloni(SIFPATH,"S_TIPOVI.DBF",cSezona,finverse,fda,fnul)
-Skloni(SIFPATH,"S_GRUPE.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"AOPS.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"AOPS_ATT.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"ARTICLES.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"ELEMENTS.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"E_AOPS.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"E_ATT.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"E_GROUPS.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"E_GR_ATT.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"E_GR_VAL.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"CUSTOMS.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"CONTACTS.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
 ?
@@ -137,27 +144,29 @@ method setgaDBFs()
 PUBLIC gaDBFs:={}
 
 // privpath
-AADD(gaDBFs, { F_P_RNAL, "P_RNAL", P_PRIVPATH  } )
-AADD(gaDBFs, { F_P_RNST, "P_RNAL", P_PRIVPATH  } )
-AADD(gaDBFs, { F_P_RNOP, "P_RNOP", P_PRIVPATH  } )
+AADD(gaDBFs, { F__DOCS, "_DOCS", P_PRIVPATH  } )
+AADD(gaDBFs, { F__DOC_IT, "_DOC_IT", P_PRIVPATH  } )
+AADD(gaDBFs, { F__DOC_OPS, "_DOC_OPS", P_PRIVPATH  } )
 
 // kumpath
-AADD(gaDBFs, { F_RNAL, "RNAL", P_KUMPATH  } )
-AADD(gaDBFs, { F_RNST, "RNAL", P_KUMPATH  } )
-AADD(gaDBFs, { F_RNOP, "RNOP", P_KUMPATH  } )
-AADD(gaDBFs, { F_RNLOG, "RNLOG", P_KUMPATH  } )
-AADD(gaDBFs, { F_LOGIT, "RNLOG_IT", P_KUMPATH  } )
+AADD(gaDBFs, { F_DOCS, "DOCS", P_KUMPATH  } )
+AADD(gaDBFs, { F_DOC_IT, "DOC_IT", P_KUMPATH  } )
+AADD(gaDBFs, { F_DOC_OPS, "DOC_OPS", P_KUMPATH  } )
+AADD(gaDBFs, { F_DOC_LOG, "DOC_LOG", P_KUMPATH  } )
+AADD(gaDBFs, { F_DOC_LIT, "DOC_LIT", P_KUMPATH  } )
 
 // sifpath
-AADD(gaDBFs, { F_S_RNOP, "S_RNOP", P_SIFPATH } )
-AADD(gaDBFs, { F_S_RNKA, "S_RNKA", P_SIFPATH } )
-AADD(gaDBFs, { F_S_RNKA, "S_TIPOVI", P_SIFPATH } )
-AADD(gaDBFs, { F_S_RNKA, "S_GRUPE", P_SIFPATH } )
-AADD(gaDBFs, { F_SAST, "SAST", P_SIFPATH } )
-AADD(gaDBFs, { F_ROBA, "ROBA", P_SIFPATH } )
-AADD(gaDBFs, { F_SIFK, "SIFK", P_SIFPATH } )
-AADD(gaDBFs, { F_SIFV, "SIFV", P_SIFPATH } )
-AADD(gaDBFs, { F_PARTN, "PARTN", P_SIFPATH } )
+AADD(gaDBFs, { F_E_GROUPS, "E_GROUPS", P_SIFPATH } )
+AADD(gaDBFs, { F_E_GR_ATT, "E_GR_ATT", P_SIFPATH } )
+AADD(gaDBFs, { F_E_GR_VAL, "E_GR_VAL", P_SIFPATH } )
+AADD(gaDBFs, { F_AOPS, "AOPS", P_SIFPATH } )
+AADD(gaDBFs, { F_AOPS_ATT, "AOPS_ATT", P_SIFPATH } )
+AADD(gaDBFs, { F_ARTICLES, "ARTICLES", P_SIFPATH } )
+AADD(gaDBFs, { F_ELEMENTS, "ELEMENTS", P_SIFPATH } )
+AADD(gaDBFs, { F_E_AOP, "E_AOPS", P_SIFPATH } )
+AADD(gaDBFs, { F_E_ATT, "E_ATT", P_SIFPATH } )
+AADD(gaDBFs, { F_CUSTOMS, "CUSTOMS", P_SIFPATH } )
+AADD(gaDBFs, { F_CONTACTS, "CONTACTS", P_SIFPATH } )
 
 return
 
@@ -166,241 +175,341 @@ ISC_START(goModul,.f.)
 return
 
 
+// ----------------------------------------
+// metoda kreiranja tabela
+//  nArea - podrucje
+// ----------------------------------------
 method kreiraj(nArea)
-local cImeDbf
 
-if (nArea==nil)
+if (nArea == nil)
 	nArea:=-1
 endif
 
 Beep(1)
 
-if (nArea<>-1)
-	CreSystemDb(nArea)
+if (nArea <> -1)
+	CreSystemDb( nArea )
 endif
 
-CreFmkSvi()
-CreRoba()
-CreFmkPi()
-
-cre_tbls(nArea, "RNAL")
-cre_tbls(nArea, "RNST")
-cre_tbls(nArea, "RNOP")
-cre_tbls(nArea, "RNLOG")
-cre_tbls(nArea, "RNLOG_IT")
-cre_tbls(nArea, "P_RNAL")
-cre_tbls(nArea, "P_RNST")
-cre_tbls(nArea, "P_RNOP")
-cre_tbls(nArea, "S_RNOP")
-cre_tbls(nArea, "S_RNKA")
-cre_tbls(nArea, "S_TIPOVI")
-cre_tbls(nArea, "S_GRUPE")
+cre_tbls(nArea, "DOCS")
+cre_tbls(nArea, "_DOCS")
+cre_tbls(nArea, "DOC_IT")
+cre_tbls(nArea, "_DOC_IT")
+cre_tbls(nArea, "DOC_OPS")
+cre_tbls(nArea, "_DOC_OPS")
+cre_tbls(nArea, "DOC_LOG")
+cre_tbls(nArea, "DOC_LIT")
+cre_tbls(nArea, "ARTICLES")
+cre_tbls(nArea, "ELEMENTS")
+cre_tbls(nArea, "E_AOPS")
+cre_tbls(nArea, "E_ATT")
+cre_tbls(nArea, "E_GROUPS")
+cre_tbls(nArea, "E_GR_ATT")
+cre_tbls(nArea, "E_GR_VAL")
+cre_tbls(nArea, "AOPS")
+cre_tbls(nArea, "AOPS_ATT")
+cre_tbls(nArea, "CUSTOMS")
+cre_tbls(nArea, "CONTACTS")
 cre_sifk(nArea)
 
 return
 
 
 // ----------------------------------------------
-// rnal fields
+// vraca matricu sa strukturom tabele DOCS
+//   aDBF := {...}
 // ----------------------------------------------
-function g_rnal_fields()
+function a_docs()
 local aDbf
 
 aDbf:={}
-
-// set polja tabele rnal
-AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
-AADD(aDBf,{ "dat_nal"    , "D" ,   8 ,  0 })
-AADD(aDBf,{ "dat_isp"    , "D" ,   8 ,  0 })
-AADD(aDBf,{ "vr_isp"     , "C" ,   8 ,  0 })
-AADD(aDBf,{ "mj_isp"     , "C" ,  40 ,  0 })
-AADD(aDBf,{ "montaza"    , "C" ,   1 ,  0 })
-AADD(aDBf,{ "dod_opis"   , "C" , 150 ,  0 })
-AADD(aDBf,{ "operater"   , "C" ,  20 ,  0 })
-AADD(aDBf,{ "k_ime"      , "C" ,  40 ,  0 })
-AADD(aDBf,{ "k_tel"      , "C" ,  60 ,  0 })
-AADD(aDBf,{ "k_opis"     , "C" , 100 ,  0 })
-AADD(aDBf,{ "vr_plac"    , "C" ,   1 ,  0 })
-AADD(aDBf,{ "hitnost"    , "C" ,   1 ,  0 })
-AADD(aDBf,{ "idpartner"  , "C" ,   6 ,  0 })
-AADD(aDBf,{ "rn_status"  , "C" ,   1 ,  0 })
-AADD(aDBf,{ "rn_real_info" , "C" ,   1 ,  0 })
-AADD(aDBf,{ "rec_zak"    , "C" ,   1 ,  0 })
-
-return aDbf
-
-
-// ----------------------------------------------
-// rnlog fields
-// ----------------------------------------------
-function g_rlog_fields()
-local aDbf
-
-aDbf:={}
-
-// set polja tabele rnlog
-AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
-AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
-AADD(aDBf,{ "datum"      , "D" ,   8 ,  0 })
-AADD(aDBf,{ "vrijeme"    , "C" ,   8 ,  0 })
-AADD(aDBf,{ "operater"   , "C" ,  40 ,  0 })
-AADD(aDBf,{ "tip"        , "C" ,   2 ,  0 })
-AADD(aDBf,{ "opis"       , "C" , 150 ,  0 })
-
-return aDbf
-
-// ----------------------------------------------
-// rnlog fields
-// ----------------------------------------------
-function g_logit_fields()
-local aDbf
-
-aDbf:={}
-
-// set polja tabele log_it
-AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
-AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
-AADD(aDBf,{ "p_br"       , "N" ,   4 ,  0 })
-AADD(aDBf,{ "idroba"     , "C" ,  10 ,  0 })
-AADD(aDBf,{ "idroba2"    , "C" ,  10 ,  0 })
-AADD(aDBf,{ "st_rbr"     , "N" ,   4 ,  0 })
-AADD(aDBf,{ "c_1"        , "C" , 150 ,  0 })
-AADD(aDBf,{ "c_2"        , "C" , 150 ,  0 })
-AADD(aDBf,{ "c_3"        , "C" , 150 ,  0 })
-AADD(aDBf,{ "n_1"        , "N" ,  15 ,  5 })
-AADD(aDBf,{ "n_2"        , "N" ,  15 ,  5 })
-AADD(aDBf,{ "n_3"        , "N" ,  15 ,  5 })
-AADD(aDBf,{ "k_1"        , "N" ,  15 ,  5 })
-AADD(aDBf,{ "k_2"        , "N" ,  15 ,  5 })
-AADD(aDBf,{ "k_3"        , "N" ,  15 ,  5 })
-AADD(aDBf,{ "akcija"     , "C" ,   1 ,  0 })
+AADD(aDBf,{ "doc_no", "N", 10, 0 })
+AADD(aDBf,{ "doc_date", "D", 8, 0 })
+AADD(aDBf,{ "doc_dvr_date", "D", 8, 0 })
+AADD(aDBf,{ "doc_dvr_time", "C", 8,  0 })
+AADD(aDBf,{ "doc_ship_place", "C", 100, 0 })
+AADD(aDBf,{ "cust_id", "N", 10, 0 })
+AADD(aDBf,{ "cont_id", "N", 10, 0 })
+AADD(aDBf,{ "cont_add_desc", "C", 20, 0 })
+AADD(aDBf,{ "doc_pay_id", "N", 4, 0 })
+AADD(aDBf,{ "doc_priority", "N", 4, 0 })
+AADD(aDBf,{ "doc_desc", "C", 100, 0 })
+AADD(aDBf,{ "doc_status", "N", 2, 0 })
+AADD(aDBf,{ "operater_id", "N", 3, 0 })
 
 return aDbf
 
 
 
 // ----------------------------------------------
-// rnop fields
+// vraca matricu sa strukturom tabele DOC_IT
+//   aDBF := {...}
 // ----------------------------------------------
-function g_rnop_fields()
+function a_doc_it()
 local aDbf
 
 aDbf:={}
-
-// set polja tabele rnal
-AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
-AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
-AADD(aDBf,{ "p_br"       , "N" ,   4 ,  0 })
-AADD(aDBf,{ "item_id"    , "C" ,  10 ,  0 })
-AADD(aDBf,{ "id_rnop"    , "C" ,   6 ,  0 })
-AADD(aDBf,{ "id_rnka"    , "C" ,   6 ,  0 })
-AADD(aDBf,{ "rn_instr"   , "C" , 100 ,  0 })
-
-return aDbf
-
-// ----------------------------------------------
-// rnst fields
-// ----------------------------------------------
-function g_rnst_fields()
-local aDbf
-
-aDbf:={}
-
-// set polja tabele rnst
-AADD(aDBf,{ "br_nal"     , "N" ,  10 ,  0 })
-AADD(aDBf,{ "r_br"       , "N" ,   4 ,  0 })
-AADD(aDBf,{ "item_id"    , "C" ,  10 ,  0 })
-AADD(aDBf,{ "item_kol"   , "N" ,  15 ,  5 })
-AADD(aDBf,{ "item_debljina" , "N" ,  15 ,  5 })
-AADD(aDBf,{ "item_visina" , "N" ,  15 ,  5 })
-AADD(aDBf,{ "item_sirina" , "N" ,  15 ,  5 })
+AADD(aDBf,{ "doc_no", "N", 10, 0 })
+AADD(aDBf,{ "doc_it_no", "N", 4, 0 })
+AADD(aDBf,{ "art_id", "N", 10, 0 })
+AADD(aDBf,{ "doc_it_width", "N", 15,  5 })
+AADD(aDBf,{ "doc_it_heihg", "N", 15,  5 })
+AADD(aDBf,{ "doc_it_qtty",  "N", 15,  5 })
 
 return aDbf
 
 
-
-// ----------------------------------------------
-// s_rnop fields
-// ----------------------------------------------
-function g_srnop_fields()
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele DOC_OPS
+//   aDBF := {...}
+// --------------------------------------------------
+function a_doc_ops()
 local aDbf
 
 aDbf:={}
-
-// set polja sifrarnika operacija
-AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
-add_f_mcode(@aDbf)
-AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
-AADD(aDBf,{ "opis"        , "C" , 100 ,  0 })
-AADD(aDBf,{ "relacija"    , "C" , 100 ,  0 })
-AADD(aDBf,{ "tip_stakla"  , "C" ,  60 ,  0 })
-return aDbf
-
-
-
-// ----------------------------------------------
-// s_rnka fields
-// ----------------------------------------------
-function g_srnka_fields()
-local aDbf
-
-aDbf:={}
-
-// set polja sifrarnika karakteristika
-AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
-add_f_mcode(@aDbf)
-AADD(aDBf,{ "id_rnop"     , "C" ,   6 ,  0 })
-AADD(aDBf,{ "naziv"       , "C" , 100 ,  0 })
-AADD(aDBf,{ "ka_def"      , "C" , 100 ,  0 })
-AADD(aDBf,{ "ka_val"      , "C" ,  20 ,  0 })
-AADD(aDBf,{ "opis"        , "C" , 200 ,  0 })
-return aDbf
-
-
-
-// ----------------------------------------------
-// s_tipovi fields
-// ----------------------------------------------
-function g_stip_fields()
-local aDbf
-aDbf:={}
-// set polja sifrarnika tipova
-AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
-add_f_mcode(@aDbf)
-AADD(aDBf,{ "grupa"       , "C" ,   6 ,  0 })
-AADD(aDBf,{ "vrsta"       , "C" ,   5 ,  0 })
-AADD(aDBf,{ "naziv"       , "C" , 100 ,  0 })
-AADD(aDbf,{ "funkcija"    , "C" ,  30 ,  0 })
-AADD(aDBf,{ "tip_zaok"    , "N" ,   2 ,  0 })
-AADD(aDBf,{ "neto_koef"   , "N" ,  10 ,  5 })
-AADD(aDBf,{ "neto_proc"   , "N" ,  10 ,  5 })
-AADD(aDBf,{ "k_1"         , "C" ,  10 ,  0 })
-AADD(aDBf,{ "k_2"         , "C" ,  20 ,  0 })
+AADD(aDBf,{ "doc_no", "N", 10, 0 })
+AADD(aDBf,{ "doc_it_no", "N", 4, 0 })
+AADD(aDBf,{ "doc_op_no", "N", 4, 0 })
+AADD(aDBf,{ "aop_id", "N", 10,  0 })
+AADD(aDBf,{ "aop_att_id", "N", 10,  0 })
+AADD(aDBf,{ "doc_it_op_desc", "C", 150,  0 })
 
 return aDbf
 
 
-// ----------------------------------------------
-// s_grupe fields
-// ----------------------------------------------
-function g_sgr_fields()
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele DOC_LOG
+//   aDBF := {...}
+// --------------------------------------------------
+function a_doc_log()
 local aDbf
+
 aDbf:={}
-// set polja sifrarnika tipova
-AADD(aDBf,{ "id"          , "C" ,   6 ,  0 })
-add_f_mcode(@aDbf)
-AADD(aDBf,{ "naziv"       , "C" ,  40 ,  0 })
-AADD(aDBf,{ "k_1"         , "C" ,  10 ,  0 })
-AADD(aDBf,{ "k_2"         , "C" ,  20 ,  0 })
+AADD(aDBf,{ "doc_no", "N", 10, 0 })
+AADD(aDBf,{ "doc_log_no", "N", 10, 0 })
+AADD(aDBf,{ "doc_log_date", "D", 8, 0 })
+AADD(aDBf,{ "doc_log_time", "C", 8, 0 })
+AADD(aDBf,{ "operater_id", "N", 3,  0 })
+AADD(aDBf,{ "doc_log_type", "C", 3,  0 })
+AADD(aDBf,{ "doc_log_desc", "C", 100,  0 })
 
 return aDbf
 
+
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele DOCS_LOG_ITEMS
+//   aDBF := {...}
+// --------------------------------------------------
+function a_doc_lit()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "doc_no", "N", 10, 0 })
+AADD(aDBf,{ "doc_log_no", "N", 10, 0 })
+AADD(aDBf,{ "doc_lit_no", "N", 4, 0 })
+AADD(aDBf,{ "doc_lit_action", "C", 1, 0 })
+AADD(aDBf,{ "art_id", "N", 10, 0 })
+AADD(aDBf,{ "char_1", "C", 100,  0 })
+AADD(aDBf,{ "char_2", "C", 100,  0 })
+AADD(aDBf,{ "char_3", "C", 100,  0 })
+AADD(aDBf,{ "num_1", "N", 15,  5 })
+AADD(aDBf,{ "num_2", "N", 15,  5 })
+AADD(aDBf,{ "num_3", "N", 15,  5 })
+AADD(aDBf,{ "int_1", "N", 10,  0 })
+AADD(aDBf,{ "int_2", "N", 10,  0 })
+AADD(aDBf,{ "int_3", "N", 10,  0 })
+AADD(aDBf,{ "int_4", "N", 10,  0 })
+AADD(aDBf,{ "int_5", "N", 10,  0 })
+AADD(aDBf,{ "date_1", "D", 8,  0 })
+AADD(aDBf,{ "date_2", "D", 8,  0 })
+AADD(aDBf,{ "date_3", "D", 8,  0 })
+
+return aDbf
+
+
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele ARTICLES
+//   aDBF := {...}
+// --------------------------------------------------
+function a_articles()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "art_id", "N", 10, 0 })
+AADD(aDBf,{ "art_desc", "C", 250, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
+
+
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele ELEMENTS
+//   aDBF := {...}
+// --------------------------------------------------
+function a_elements()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "el_id", "N", 10, 0 })
+AADD(aDBf,{ "art_id", "N", 10, 0 })
+AADD(aDBf,{ "e_gr_id", "N", 10, 0 })
+
+return aDbf
+
+
+
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele E_ATT
+//   aDBF := {...}
+// --------------------------------------------------
+function a_e_att()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "el_att_id", "N", 10, 0 })
+AADD(aDBf,{ "el_id", "N", 10, 0 })
+AADD(aDBf,{ "e_gr_val_id", "N", 10, 0 })
+
+return aDbf
+
+
+
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele E_AOPS
+//   aDBF := {...}
+// --------------------------------------------------
+function a_e_aops()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "el_op_id", "N", 10, 0 })
+AADD(aDBf,{ "el_id", "N", 10, 0 })
+AADD(aDBf,{ "aop_id", "N", 10, 0 })
+AADD(aDBf,{ "aop_att_id", "N", 10, 0 })
+
+return aDbf
+
+
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele E_GROUPS
+//   aDBF := {...}
+// --------------------------------------------------
+function a_e_groups()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "e_gr_id", "N", 10, 0 })
+AADD(aDBf,{ "e_gr_desc", "C", 100, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
+
+
+
+// --------------------------------------------------
+// vraca matricu sa strukturom tabele E_GR_ATT
+//   aDBF := {...}
+// --------------------------------------------------
+function a_e_gr_att()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "e_gr_att_id", "N", 10, 0 })
+AADD(aDBf,{ "e_gr_id", "N", 10, 0 })
+AADD(aDBf,{ "e_gr_att_desc", "C", 100, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
+
+
+
+// ------------------------------------------------------
+// vraca matricu sa strukturom tabele E_GR_VAL
+//   aDBF := {...}
+// ------------------------------------------------------
+function a_e_gr_val()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "e_gr_val_id", "N", 10, 0 })
+AADD(aDBf,{ "e_gr_att_id", "N", 10, 0 })
+AADD(aDBf,{ "e_gr_val_desc", "C", 100, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
+
+
+// ------------------------------------------------------
+// vraca matricu sa strukturom tabele AOPS
+//   aDBF := {...}
+// ------------------------------------------------------
+function a_aops()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "aop_id", "N", 10, 0 })
+AADD(aDBf,{ "aop_desc", "C", 100, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
+
+
+// ------------------------------------------------------
+// vraca matricu sa strukturom tabele AOPS_ATT
+//   aDBF := {...}
+// ------------------------------------------------------
+function a_aops_att()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "aop_att_id", "N", 10, 0 })
+AADD(aDBf,{ "aop_id", "N", 10, 0 })
+AADD(aDBf,{ "aop_att_desc", "C", 100, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
+
+
+// ------------------------------------------------------
+// vraca matricu sa strukturom tabele CUSTOMS
+//   aDBF := {...}
+// ------------------------------------------------------
+function a_customs()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "cust_id", "N", 10, 0 })
+AADD(aDBf,{ "cust_desc", "C", 250, 0 })
+AADD(aDBf,{ "cust_addr", "C", 50, 0 })
+AADD(aDBf,{ "cust_tel", "C", 100, 0 })
+AADD(aDBf,{ "cust_ident_no", "C", 13, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
+
+
+// ------------------------------------------------------
+// vraca matricu sa strukturom tabele CONTACTS
+//   aDBF := {...}
+// ------------------------------------------------------
+function a_contacts()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "cont_id", "N", 10, 0 })
+AADD(aDBf,{ "cust_id", "N", 10, 0 })
+AADD(aDBf,{ "cont_desc", "C", 150, 0 })
+AADD(aDBf,{ "cont_tel", "C", 100, 0 })
+AADD(aDBf,{ "cont_add_desc", "C", 250, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
 
 
 // ---------------------------------------------
-// sifk fields
+// vraca strukturu tabele SIFK
 // ---------------------------------------------
-function g_sifk_fields(aDbf)
+function a_sifk(aDbf)
 aDbf := {}
 AADD(aDBf,{ 'ID'                  , 'C' ,   8 ,  0 })
 AADD(aDBf,{ 'SORT'                , 'C' ,   2 ,  0 })
@@ -421,125 +530,200 @@ AADD(aDBf,{ 'K1'                  , 'C' ,   1 ,  0 })
 AADD(aDBf,{ 'K2'                  , 'C' ,   2 ,  0 })
 AADD(aDBf,{ 'K3'                  , 'C' ,   3 ,  0 })
 AADD(aDBf,{ 'K4'                  , 'C' ,   4 ,  0 })
+
 return aDbf
 
 
-
-// cre tables
+// ------------------------------------------------
+// kreiranje tabela
+//  nArea - podrucje
+//  cTable - naziv tabele
+// ------------------------------------------------
 function cre_tbls(nArea, cTable)
 local nArea2 := 0
 local aDbf
-local cPath
+local cPath := KUMPATH
 
 do case 
-	case cTable == "RNAL"
-		nArea2 := F_RNAL
-	case cTable == "RNOP"
-		nArea2 := F_RNOP
-	case cTable == "RNST"
-		nArea2 := F_RNST
-	case cTable == "RNLOG"
-		nArea2 := F_RNLOG
-	case cTable == "RNLOG_IT"
-		nArea2 := F_LOGIT
-	case cTable == "S_RNOP"
-		nArea2 := F_S_RNOP
-	case cTable == "S_RNKA"
-		nArea2 := F_S_RNKA
-	case cTable == "S_TIPOVI"
-		nArea2 := F_S_TIPOVI
-	case cTable == "S_GRUPE"
-		nArea2 := F_S_GRUPE
-	case cTable == "P_RNAL"
-		nArea2 := F_P_RNAL
-	case cTable == "P_RNOP"
-		nArea2 := F_P_RNOP
-	case cTable == "P_RNST"
-		nArea2 := F_P_RNST
+	case cTable == "DOCS"
+		nArea2 := F_DOCS
+	case cTable == "_DOCS"
+		nArea2 := F__DOCS
+	case cTable == "DOC_IT"
+		nArea2 := F_DOC_IT
+	case cTable == "_DOC_IT"
+		nArea2 := F__DOC_IT
+	case cTable == "DOC_OPS"
+		nArea2 := F_DOC_OPS
+	case cTable == "_DOC_OPS"
+		nArea2 := F__DOC_OPS
+	case cTable == "DOC_LOG"
+		nArea2 := F_DOC_LOG
+	case cTable == "DOC_LIT"
+		nArea2 := F_DOC_LIT
+	case cTable == "E_GROUPS"
+		nArea2 := F_E_GROUPS
+	case cTable == "E_GR_ATT"
+		nArea2 := F_E_GR_ATT
+	case cTable == "E_GR_VAL"
+		nArea2 := F_E_GR_VAL
+	case cTable == "AOPS"
+		nArea2 := F_AOPS
+	case cTable == "AOPS_ATT"
+		nArea2 := F_AOPS_ATT
+	case cTable == "ARTICLES"
+		nArea2 := F_ARTICLES
+	case cTable == "ELEMENTS"
+		nArea2 := F_ELEMENTS
+	case cTable == "E_AOPS"
+		nArea2 := F_E_AOPS
+	case cTable == "E_ATT"
+		nArea2 := F_E_ATT
 endcase
+
+altd()
 
 if (nArea==-1 .or. nArea == nArea2)
 	do case 
-		case cTable == "RNAL" .or. cTable == "P_RNAL"
-			aDbf := g_rnal_fields()
-		case cTable == "RNOP" .or. cTable == "P_RNOP"
-			aDbf := g_rnop_fields()
-		case cTable == "RNST" .or. cTable == "P_RNST"
-			aDbf := g_rnst_fields()
-		case cTable == "RNLOG"
-			aDbf := g_rlog_fields()
-		case cTable == "RNLOG_IT"
-			aDbf := g_logit_fields()
-		case cTable == "S_RNOP"
-			aDbf := g_srnop_fields()
-		case cTable == "S_RNKA"
-			aDbf := g_srnka_fields()
-		case cTable == "S_TIPOVI"
-			aDbf := g_stip_fields()
-		case cTable == "S_GRUPE"
-			aDbf := g_sgr_fields()
-	endcase
-
-	do case 
-		case (LEFT(cTable, 2) == "P_") .or. (LEFT(cTable, 2) == "T_")
-			cPath := PRIVPATH
-		case LEFT(cTable, 2) == "S_"
-			cPath := SIFPATH
-		otherwise
+		case cTable == "DOCS" 
+			aDbf := a_docs()
 			cPath := KUMPATH
+			
+		case cTable == "_DOCS"
+			aDbf := a_docs()
+			cPath := PRIVPATH
+			
+		case cTable == "DOC_IT" 
+			aDbf := a_doc_it()
+			cPath := KUMPATH
+			
+		case cTable == "_DOC_IT"
+			aDbf := a_doc_it()
+			cPath := PRIVPATH
+			
+		case cTable == "DOC_OPS" 
+			aDbf := a_doc_ops()
+			cPath := KUMPATH
+			
+		case cTable == "_DOC_OPS"
+			aDbf := a_doc_ops()
+			cPath := PRIVPATH
+			
+		case cTable == "DOC_LOG"
+			aDbf := a_doc_log()
+			cPath := KUMPATH
+			
+		case cTable == "DOC_LIT"
+			aDbf := a_doc_lit()
+			cPath := KUMPATH
+			
+		case cTable == "ARTICLES"
+			aDbf := a_articles()
+			cPath := SIFPATH
+			
+		case cTable == "ELEMENTS"
+			aDbf := a_elements()
+			cPath := SIFPATH
+			
+		case cTable == "E_AOPS"
+			aDbf := a_e_aops()
+			cPath := SIFPATH
+			
+		case cTable == "E_ATT"
+			aDbf := a_e_att()
+			cPath := SIFPATH
+			
+		case cTable == "E_GROUPS"
+			aDbf := a_e_groups()
+			cPath := SIFPATH
+			
+		case cTable == "E_GR_ATT"
+			aDbf := a_e_gr_att()
+			cPath := SIFPATH
+			
+		case cTable == "E_GR_VAL"
+			aDbf := a_e_gr_val()
+			cPath := SIFPATH
+			
+		case cTable == "CUSTOMS"
+			aDbf := a_customs()
+			cPath := SIFPATH
+			
+		case cTable == "CONTACTS"
+			aDbf := a_contacts()
+			cPath := SIFPATH
+			
+		case cTable == "AOPS"
+			aDbf := a_aops()
+			cPath := SIFPATH
+			
+		case cTable == "AOPS_ATT"
+			aDbf := a_aops_att()
+			cPath := SIFPATH
+			
 	endcase
+	
+	// dodaj backslash
+	AddBS(@cPath)
 	
 	if !FILE(cPath + cTable + ".DBF")
 		DBcreate2(cPath + cTable + ".DBF", aDbf)
 	endif
 
 	do case 
-		case (nArea2 == F_P_RNAL)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)", cPath + cTable)
-		case (nArea2 == F_RNAL) 
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)", cPath + cTable)
-			CREATE_INDEX("br_nal_z", "STR(br_nal,10,0)+rec_zak", cPath + cTable)
-			CREATE_INDEX("dat_nal", "DTOS(dat_nal)+STR(br_nal,10,0)", cPath + cTable)
-			CREATE_INDEX("dat_isp", "DTOS(dat_isp)+STR(br_nal,10,0)", cPath + cTable)
-		case (nArea2 == F_P_RNOP)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)+item_id+id_rnop+id_rnka", cPath + cTable)
-			CREATE_INDEX("rn_ka", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)+item_id+id_rnka", cPath + cTable)
-		case (nArea2 == F_RNOP)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)+item_id+id_rnop+id_rnka", cPath + cTable)
-			CREATE_INDEX("rn_ka", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)+item_id+id_rnka", cPath + cTable)
-		case (nArea2 == F_RNST)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+item_id", cPath + cTable)
-		case (nArea2 == F_P_RNST)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+item_id", cPath + cTable)
-		case (nArea2 == F_RNLOG)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)", cPath + cTable)
-			CREATE_INDEX("tip", "STR(br_nal,10,0)+tip+STR(r_br,4,0)", cPath + cTable)
-		case (nArea2 == F_LOGIT)
-			CREATE_INDEX("br_nal", "STR(br_nal,10,0)+STR(r_br,4,0)+STR(p_br,4,0)", cPath + cTable)
-			CREATE_INDEX("logst", "STR(br_nal,10,0)+STR(r_br,4,0)+idroba+STR(st_rbr,4,0)+idroba2", cPath + cTable)
-		case (nArea2 == F_S_RNOP)
-		  	CREATE_INDEX("id","id", cPath + cTable)
-		case (nArea2 == F_S_RNKA)
-		  	CREATE_INDEX("id","id", cPath + cTable)
-		  	CREATE_INDEX("idop","id_rnop+id", cPath + cTable)
-		case (nArea2 == F_S_TIPOVI)
-			CREATE_INDEX("id","id", cPath + cTable)
-		case (nArea2 == F_S_GRUPE)
-			CREATE_INDEX("id","id", cPath + cTable)
-			
+		case (nArea2 == F_DOCS) .or. (nArea2 == F__DOCS)
+			CREATE_INDEX("1", "STR(doc_no,10,0)", cPath + cTable)
+		case (nArea2 == F_DOC_IT) .or. (nArea2 == F__DOC_IT)
+			CREATE_INDEX("1", "STR(doc_no,10,0)+STR(doc_it_no,4,0)", cPath + cTable)
+		case (nArea2 == F_DOC_OPS) .or. (nArea2 == F__DOC_OPS)
+			CREATE_INDEX("1", "STR(doc_no,10,0)+STR(doc_it_no,4,0)+STR(doc_op_no,4,0)", cPath + cTable)
+		case (nArea2 == F_DOC_LOG)
+			CREATE_INDEX("1", "STR(doc_no,10,0)+STR(doc_log_no,10,0)", cPath + cTable)
+		case (nArea2 == F_DOC_LIT)
+			CREATE_INDEX("1", "STR(doc_no,10,0)+STR(doc_log_no,10,0)+STR(doc_lit_no,10,0)", cPath + cTable)
+		case (nArea2 == F_ARTICLES)
+			CREATE_INDEX("1", "STR(art_id,10,0)", cPath + cTable)
+		case (nArea2 == F_ELEMENTS)
+			CREATE_INDEX("1", "STR(art_id,10,0)+STR(el_id,10,0)", cPath + cTable)
+		case (nArea2 == F_E_AOPS)
+			CREATE_INDEX("1", "STR(el_id,10,0)+STR(el_op_id,10,0)", cPath + cTable)
+		case (nArea2 == F_E_ATT)
+		  	CREATE_INDEX("1","STR(el_id,10,0)+STR(el_att_id,10,0)", cPath + cTable)
+		case (nArea2 == F_E_GROUPS)
+		  	CREATE_INDEX("1","STR(e_gr_id,10,0)", cPath + cTable)
+		case (nArea2 == F_CUSTOMS)
+			CREATE_INDEX("1","STR(cust_id,10,0)", cPath + cTable)
+		case (nArea2 == F_CONTACTS)
+			CREATE_INDEX("1","STR(cont_id,10,0)", cPath + cTable)
+			CREATE_INDEX("2","STR(cust_id,10,0)+STR(cont_id,10,0)", cPath + cTable)
+		case (nArea2 == F_AOPS)
+			CREATE_INDEX("1","STR(aop_id,10,0)", cPath + cTable)
+		case (nArea2 == F_AOPS_ATT)
+			CREATE_INDEX("1","STR(aop_att_id,10,0)", cPath + cTable)
+			CREATE_INDEX("2","STR(aop_id,10,0)+STR(aop_att_id,10,0)", cPath + cTable)
+		
+		case (nArea2 == F_E_GR_ATT)
+			CREATE_INDEX("1","STR(e_gr_att_id,10,0)", cPath + cTable)
+		
+		case (nArea2 == F_E_GR_VAL)
+			CREATE_INDEX("1","STR(e_gr_val_id,10,0)", cPath + cTable)
+			CREATE_INDEX("2","STR(e_gr_att_id,10,0)+STR(e_gr_val_id,10,0)", cPath + cTable)
+		
 	endcase
 endif
 return 
 
 
+
 // --------------------------------
+// kreiranje tabele SIFK
 // --------------------------------
 function cre_sifk(nArea)
 local cTbl
 
 if (nArea==-1 .or. nArea == F_SIFK)
 
-	aDbf := g_sifk_fields()
+	aDbf := a_sifk()
 	cTbl := "SIFK"
 
 	if !FILE( SIFPATH+ cTbl + '.DBF' )
@@ -560,33 +744,38 @@ local cDbfName
 
 lIdiDalje:=.f.
 
-if i==F_RNAL .or. i==F_P_RNAL
+if i==F_DOCS .or. i==F__DOCS
 	lIdiDalje:=.t.
 endif
 
-if i==F_RNST .or. i==F_P_RNST
+if i==F_DOC_IT .or. i==F__DOC_IT
 	lIdiDalje:=.t.
 endif
 
-if i==F_RNOP .or. i==F_P_RNOP
+if i==F_DOC_OPS .or. i==F__DOC_OPS
 	lIdiDalje:=.t.
 endif
 
-if i==F_RNLOG .or. i==F_LOGIT
+if i==F_DOC_LOG .or. i==F_DOC_LIT
 	lIdiDalje:=.t.
 endif
 
-if i==F_S_RNOP .or. i==F_S_RNKA .or. i==F_S_TIPOVI .or. i==F_S_GRUPE
+if i==F_ARTICLES .or. i==F_ELEMENTS .or. i==F_E_AOPS .or. i==F_E_ATT
 	lIdiDalje:=.t.
 endif
 
-if i==F_ROBA .or. i==F_SIFK .or. i==F_SIFV
+if i==F_E_GROUPS .or. i==F_E_GR_ATT .or. i==F_E_GR_VAL
 	lIdiDalje:=.t.
 endif
 
-if i==F_PARTN .or. i==F_SAST
+if i==F_CUSTOMS .or. i==F_CONTACTS
 	lIdiDalje:=.t.
 endif
+
+if i==F_AOPS .or. i==F_AOPS_ATT
+	lIdiDalje:=.t.
+endif
+
 
 if lIdiDalje
 	cDbfName:=DBFName(i,.t.)
@@ -670,9 +859,9 @@ else
 	cPriv:="D"
 endif
  
-aKum  := { F_RNAL, F_RNST, F_RNOP, F_RNLOG, F_LOGIT }
-aPriv := { F_P_RNAL, F_P_RNST, F_P_RNOP }
-aSif  := { F_ROBA, F_PARTN, F_S_RNKA, F_S_RNOP, F_S_TIPOVI }
+aKum  := { F_DOCS, F_DOC_IT, F_DOC_OPS, F_DOC_LOG, F_DOC_LIT }
+aPriv := { F__DOCS, F__DOC_IT, F__DOC_OPS }
+aSif  := { F_AOPS, F_AOPS_ATT, F_E_GROUPS, F_E_GR_ATT, F_E_GR_VAL, F_ARTICLES, F_ELEMENTS, F_E_AOPS, F_E_ATT }
 
 if cSif == "N"
 	aSif := {}
