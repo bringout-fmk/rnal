@@ -163,7 +163,7 @@ AADD(gaDBFs, { F_AOPS, "AOPS", P_SIFPATH } )
 AADD(gaDBFs, { F_AOPS_ATT, "AOPS_ATT", P_SIFPATH } )
 AADD(gaDBFs, { F_ARTICLES, "ARTICLES", P_SIFPATH } )
 AADD(gaDBFs, { F_ELEMENTS, "ELEMENTS", P_SIFPATH } )
-AADD(gaDBFs, { F_E_AOP, "E_AOPS", P_SIFPATH } )
+AADD(gaDBFs, { F_E_AOPS, "E_AOPS", P_SIFPATH } )
 AADD(gaDBFs, { F_E_ATT, "E_ATT", P_SIFPATH } )
 AADD(gaDBFs, { F_CUSTOMS, "CUSTOMS", P_SIFPATH } )
 AADD(gaDBFs, { F_CONTACTS, "CONTACTS", P_SIFPATH } )
@@ -579,9 +579,11 @@ do case
 		nArea2 := F_E_AOPS
 	case cTable == "E_ATT"
 		nArea2 := F_E_ATT
+	case cTable == "CUSTOMS"
+		nArea2 := F_CUSTOMS
+	case cTable == "CONTACTS"
+		nArea2 := F_CONTACTS
 endcase
-
-altd()
 
 if (nArea==-1 .or. nArea == nArea2)
 	do case 
@@ -672,42 +674,43 @@ if (nArea==-1 .or. nArea == nArea2)
 
 	do case 
 		case (nArea2 == F_DOCS) .or. (nArea2 == F__DOCS)
-			CREATE_INDEX("1", "STR(doc_no,10,0)", cPath + cTable)
+			CREATE_INDEX("1", "STR(doc_no,10)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_IT) .or. (nArea2 == F__DOC_IT)
-			CREATE_INDEX("1", "STR(doc_no,10,0)+STR(doc_it_no,4,0)", cPath + cTable)
+			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_OPS) .or. (nArea2 == F__DOC_OPS)
-			CREATE_INDEX("1", "STR(doc_no,10,0)+STR(doc_it_no,4,0)+STR(doc_op_no,4,0)", cPath + cTable)
+			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_op_no,4)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_LOG)
-			CREATE_INDEX("1", "STR(doc_no,10,0)+STR(doc_log_no,10,0)", cPath + cTable)
+			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_log_no,10)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_LIT)
-			CREATE_INDEX("1", "STR(doc_no,10,0)+STR(doc_log_no,10,0)+STR(doc_lit_no,10,0)", cPath + cTable)
+			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_log_no,10)+STR(doc_lit_no,10)", cPath + cTable, .t.)
 		case (nArea2 == F_ARTICLES)
-			CREATE_INDEX("1", "STR(art_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1", "STR(art_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_ELEMENTS)
-			CREATE_INDEX("1", "STR(art_id,10,0)+STR(el_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1", "STR(art_id,10)+STR(el_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_E_AOPS)
-			CREATE_INDEX("1", "STR(el_id,10,0)+STR(el_op_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1", "STR(el_id,10)+STR(el_op_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_E_ATT)
-		  	CREATE_INDEX("1","STR(el_id,10,0)+STR(el_att_id,10,0)", cPath + cTable)
+		  	CREATE_INDEX("1","STR(el_id,10)+STR(el_att_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_E_GROUPS)
-		  	CREATE_INDEX("1","STR(e_gr_id,10,0)", cPath + cTable)
+		  	CREATE_INDEX("1","STR(e_gr_id,10)", cPath + cTable, .t.)
+		
 		case (nArea2 == F_CUSTOMS)
-			CREATE_INDEX("1","STR(cust_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1","STR(cust_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_CONTACTS)
-			CREATE_INDEX("1","STR(cont_id,10,0)", cPath + cTable)
-			CREATE_INDEX("2","STR(cust_id,10,0)+STR(cont_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1","STR(cont_id,10)", cPath + cTable, .t.)
+			CREATE_INDEX("2","STR(cust_id,10)+STR(cont_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_AOPS)
-			CREATE_INDEX("1","STR(aop_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1","STR(aop_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_AOPS_ATT)
-			CREATE_INDEX("1","STR(aop_att_id,10,0)", cPath + cTable)
-			CREATE_INDEX("2","STR(aop_id,10,0)+STR(aop_att_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1","STR(aop_att_id,10)", cPath + cTable, .t.)
+			CREATE_INDEX("2","STR(aop_id,10)+STR(aop_att_id,10)", cPath + cTable, .t.)
 		
 		case (nArea2 == F_E_GR_ATT)
-			CREATE_INDEX("1","STR(e_gr_att_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1","STR(e_gr_att_id,10,0)", cPath + cTable, .t.)
 		
 		case (nArea2 == F_E_GR_VAL)
-			CREATE_INDEX("1","STR(e_gr_val_id,10,0)", cPath + cTable)
-			CREATE_INDEX("2","STR(e_gr_att_id,10,0)+STR(e_gr_val_id,10,0)", cPath + cTable)
+			CREATE_INDEX("1","STR(e_gr_val_id,10,0)", cPath + cTable, .t.)
+			CREATE_INDEX("2","STR(e_gr_att_id,10,0)+STR(e_gr_val_id,10,0)", cPath + cTable, .t.)
 		
 	endcase
 endif
