@@ -25,7 +25,7 @@ set order to tag "1"
 set_a_kol(@ImeKol, @Kol)
 aop_filter(nAop_id)
 	
-cRet := PostojiSifra(F_AOPS_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
+cRet := PostojiSifra(F_AOPS_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|Ch| key_handler(Ch) })
 
 select (nTArea)
 
@@ -58,8 +58,8 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(aop_att_id)}, "aop_att_id", {|| _inc_id(@waop_att_id, "AOP_ATT_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| .t. }, {|| s_aops( @waop_id )  }})
-AADD(aImeKol, {PADR("Naziv", 20), {|| PADR(aop_att_desc, 20)}, "aop_att_desc"})
+AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| .t. }, {|| s_aops( @waop_id ), show_it(g_aop_desc(waop_id))  }})
+AADD(aImeKol, {PADR("Opis", 40), {|| PADR(aop_att_desc, 40)}, "aop_att_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)

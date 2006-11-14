@@ -32,9 +32,7 @@ AADD(opcexe, {|| s_aops_att() })
 
 Izbor := 1
 
-gMeniSif:=.t.
 Menu_SC("m_sif")
-gMeniSif:=.f.
 
 return
 

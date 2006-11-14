@@ -15,6 +15,8 @@ private GetList:={}
 nTArea := SELECT()
 
 cHeader := "Elementi - grupe /"
+cHeader += SPACE(5)
+cHeader += "'A' - pregled atributa grupe"
 
 select e_groups
 set order to tag "1"
@@ -49,6 +51,17 @@ return
 // key handler funkcija
 // -----------------------------------------
 static function key_handler(Ch)
+local nTRec := RecNo()
+local nE_gr_id := field->e_gr_id
+
+do case
+	case UPPER(CHR(Ch)) == "A"
+		// pregled atributa
+		s_e_gr_att(nil, nE_gr_id)
+		go (nTRec)
+		return DE_CONT
+endcase
+
 return DE_CONT
 
 

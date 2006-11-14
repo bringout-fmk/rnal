@@ -36,7 +36,7 @@ function sif_idmc(nFieldId)
 local cId := STR(nFieldId)
 local cMCode := ALLTRIM(field->match_code)
 local xRet
-altd()
+
 xRet := ALLTRIM(cId)
 
 if !EMPTY(cMCode)
@@ -48,7 +48,16 @@ if !EMPTY(cMCode)
 	endif
 endif
 
-return xRet
+return PADR(xRet,10)
+
+
+
+function show_it(cItem)
+
+@ row(), col() + 3 SAY cItem
+
+return .t.
+
 
 
 // --------------------------------------

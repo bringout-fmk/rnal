@@ -20,7 +20,7 @@ set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
 	
-cRet := PostojiSifra(F_AOPS, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
+cRet := PostojiSifra(F_AOPS, 1, 12, 70, cHeader, @cId, dx, dy, {|Ch| key_handler(Ch) } )
 
 select (nTArea)
 
@@ -35,7 +35,7 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(aop_id)}, "aop_id", {|| _inc_id(@waop_id, "AOP_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("Naziv", 40), {|| PADR(aop_desc, 40)}, "aop_desc"})
+AADD(aImeKol, {PADC("Opis", 40), {|| PADR(aop_desc, 40)}, "aop_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)

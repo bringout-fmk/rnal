@@ -5,7 +5,7 @@
 // -----------------------------------------
 // otvara sifrarnik artikala
 // -----------------------------------------
-function s_e_gr_val(cId, dx, dy)
+function s_e_gr_val(cId, nE_gr_at_id, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
@@ -16,10 +16,15 @@ nTArea := SELECT()
 
 cHeader := "Elementi - atributi, vrijednosti atributa /"
 
+if nE_gr_at_id == nil
+	nE_gr_at_id := -1
+endif
+
 select e_gr_val
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
+gr_att_filter(nE_gr_at_id)
 	
 cRet := PostojiSifra(F_E_GR_VAL, 1, 16, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
@@ -37,13 +42,30 @@ aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| PADR(sif_idmc(e_gr_vl_id),10)}, "e_gr_vl_id", {|| _inc_id(@we_gr_vl_id, "E_GR_VL_ID"), .f.}, {|| .t.}})
 
-AADD(aImeKol, {PADC("Grupa/atribut", 15), {|| "(" + ALLTRIM(g_egr_by_att(e_gr_at_id)) + ") / " + PADR(g_gr_at_desc(e_gr_at_id), 15)}, "e_gr_at_id", {|| .t.}, {|| s_e_gr_att( @we_gr_at_id ) }})
+AADD(aImeKol, {PADC("Grupa/atribut", 15), {|| "(" + ALLTRIM(g_egr_by_att(e_gr_at_id)) + ") / " + PADR(g_gr_at_desc(e_gr_at_id), 15)}, "e_gr_at_id", {|| .t.}, {|| s_e_gr_att( @we_gr_at_id ), show_it( g_gr_at_desc( we_gr_at_id ) ) }})
 
 AADD(aImeKol, {PADC("Vrijednost", 20), {|| PADR(e_gr_vl_desc, 20) + ".." }, "e_gr_vl_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
 next
+
+return
+
+
+
+// --------------------------------------------------
+// filter po polju e_gr_at_id
+// --------------------------------------------------
+static function gr_att_filter(nE_gr_at_id)
+local cFilter
+
+if nE_gr_at_id > 0
+	cFilter := "e_gr_at_id == " + e_gr_at_str(nE_gr_at_id)
+	set filter to &cFilter
+else
+	set filter to
+endif
 
 return
 
