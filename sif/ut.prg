@@ -36,7 +36,7 @@ function sif_idmc(nFieldId)
 local cId := STR(nFieldId)
 local cMCode := ALLTRIM(field->match_code)
 local xRet
-
+altd()
 xRet := ALLTRIM(cId)
 
 if !EMPTY(cMCode)

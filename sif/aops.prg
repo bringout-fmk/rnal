@@ -13,14 +13,14 @@ private Kol
 
 nTArea := SELECT()
 
-cHeader := "Dodatne operacije /"
+cHeader := "Dodatne operacije /  'A' - pregled atributa"
 
 select aops
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
 	
-cRet := PostojiSifra(F_AOPS, 1, 10, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
+cRet := PostojiSifra(F_AOPS, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
 select (nTArea)
 
@@ -48,6 +48,17 @@ return
 // key handler funkcija
 // -----------------------------------------
 static function key_handler(Ch)
+local nAop_id := aops->aop_id
+local nTRec := RecNo()
+
+do case
+	case UPPER(CHR(Ch)) == "A"
+		// pregled atributa
+		s_aops_att(nil, nAop_id)
+		go (nTRec)
+		
+		return DE_CONT
+endcase
 return DE_CONT
 
 

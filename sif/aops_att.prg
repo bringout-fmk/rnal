@@ -5,11 +5,15 @@
 // ------------------------------------------------
 // otvara sifrarnik dodatnih operacija, atributa
 // ------------------------------------------------
-function s_aops_att(cId, dx, dy)
+function s_aops_att(cId, nAop_id, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
 private Kol
+
+if nAop_id == nil
+	nAop_id := -1
+endif
 
 nTArea := SELECT()
 
@@ -19,12 +23,31 @@ select aops_att
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
+aop_filter(nAop_id)
 	
 cRet := PostojiSifra(F_AOPS_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
 select (nTArea)
 
 return cRet
+
+
+
+// ------------------------------------------
+// setovanje filtera po nAop_id
+// ------------------------------------------
+static function aop_filter( nAop_id )
+local cFilter
+
+if nAop_id > 0
+	cFilter := "aop_id == " + aopid_str(nAop_id)
+	set filter to &cFilter
+else
+	set filter to
+endif
+
+return
+
 
 
 // -----------------------------------------

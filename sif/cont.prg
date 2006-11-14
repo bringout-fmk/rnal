@@ -39,7 +39,7 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(cont_id)}, "cont_id", {|| _inc_id(@wcont_id, "CONT_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("Narucioc", 10), {|| g_cust_desc( cust_id ) }, "cust_id", {|| .t. }, {|| if(nCust_id < 0, s_customers(@wcust_id), set_cust_id(@wcust_id, nCust_id) ) }})
+AADD(aImeKol, {PADC("Narucioc", 10), {|| g_cust_desc( cust_id ) }, "cust_id", {|| .t. }, {|| set_cust_id(@wcust_id, nCust_id), s_customers(@wcust_id) }})
 AADD(aImeKol, {PADC("Naziv", 20), {|| PADR(cont_desc, 20)}, "cont_desc"})
 AADD(aImeKol, {PADC("Telefon", 20), {|| PADR(cont_tel, 20)}, "cont_tel"})
 AADD(aImeKol, {PADC("Dodatni opis", 20), {|| PADR(cont_add_desc, 20)}, "cont_add_desc"})

@@ -1,14 +1,8 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
-/*
-* ----------------------------------------------------------------
-*                                     Copyright Sigma-com software 
-* ----------------------------------------------------------------
-*/
-
 
 // ------------------------------
-// meni sifranici
+// meni sifranika
 // ------------------------------
 function m_sif()
 private opc:={}
@@ -25,9 +19,11 @@ AADD(opc, "-------------------------")
 AADD(opcexe, {|| nil})
 AADD(opc, "5. artikli")
 AADD(opcexe, {|| s_articles() })
-AADD(opc, "6. grupe ")
+AADD(opc, "6. elementi, grupe ")
 AADD(opcexe, {|| s_e_groups() })
-AADD(opc, "7. grupe, atributi")
+AADD(opc, "7. elementi atributi grupe")
+AADD(opcexe, {|| s_e_gr_vals() })
+AADD(opc, "-------------------------")
 AADD(opcexe, {|| nil})
 AADD(opc, "8. dodatne operacije")
 AADD(opcexe, {|| s_aops() })
@@ -37,7 +33,7 @@ AADD(opcexe, {|| s_aops_att() })
 Izbor := 1
 
 gMeniSif:=.t.
-Menu_SC("rsif")
+Menu_SC("m_sif")
 gMeniSif:=.f.
 
 return
