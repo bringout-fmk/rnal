@@ -56,14 +56,15 @@ return
 // key handler funkcija
 // -----------------------------------------
 static function key_handler()
-
-altd()
+local nArt_id := 0
 
 do case
 	case Ch == K_CTRL_N
 		// novi artikal...
-		s_elements()
-		s_el_attribs()
+		_inc_id(@nArt_id, "ART_ID")
+		
+		s_elements( nArt_id )
+		
 		return DE_CONT
 	case Ch == K_F2
 		// ispravka...
