@@ -15,7 +15,7 @@ nTArea := SELECT()
 Private Kol
 Private ImeKol
 
-O_S_GRUPE
+//O_S_GRUPE
 nArea := F_S_GRUPE
 
 select (nTArea)

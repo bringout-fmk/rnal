@@ -20,7 +20,7 @@ private ImeKol
 cHeader := "Lista: karakteristike "
 nTArea := SELECT()
 
-O_S_RNKA
+//O_S_RNKA
 
 // postavi filter za operaciju
 set_f_kol()

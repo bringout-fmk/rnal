@@ -25,7 +25,7 @@ endif
 Private Kol
 Private ImeKol
 
-O_S_TIPOVI
+//O_S_TIPOVI
 nArea := F_S_TIPOVI
 
 select (nTArea)

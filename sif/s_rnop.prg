@@ -20,7 +20,7 @@ nTArea := SELECT()
 private Kol
 private ImeKol
 
-O_S_RNOP
+//O_S_RNOP
 
 set_a_kol( @Kol, @ImeKol)
 
