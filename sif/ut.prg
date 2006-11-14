@@ -34,7 +34,7 @@ return xRet
 // ---------------------------------------------
 function sif_idmc(nFieldId)
 local cId := STR(nFieldId)
-local cMCode := ALLTRIM(field->match_code)
+local cMCode := IF(FIELDPOS("MATCH_CODE") <> 0, ALLTRIM(field->match_code), "")
 local xRet
 
 xRet := ALLTRIM(cId)

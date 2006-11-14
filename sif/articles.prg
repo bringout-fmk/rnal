@@ -8,23 +8,31 @@
 function s_articles(cId, dx, dy)
 local nTArea
 local cHeader
+local cFooter
 private ImeKol
 private Kol
 
 nTArea := SELECT()
 
 cHeader := "Artikli /"
+cFooter := ""
 
-select customs
+select articles
 set order to tag "1"
+go top
 
 set_a_kol(@ImeKol, @Kol)
-	
-cRet := PostojiSifra(F_ARTICLES, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
+
+Box(,12,70)
+@ m_x + 12, m_y + 2 SAY "<c-N> Novi | <c-T> Brisi | <F2> Ispravi ..."
+
+ObjDbedit("art", 12, 70, {|| key_handler(Ch)}, cHeader, cFooter ,,,,,1)
+
+BoxC()
 
 select (nTArea)
 
-return cRet
+return 
 
 
 // -----------------------------------------
@@ -47,8 +55,23 @@ return
 // -----------------------------------------
 // key handler funkcija
 // -----------------------------------------
-static function key_handler(Ch)
+static function key_handler()
+
+altd()
+
+do case
+	case Ch == K_CTRL_N
+		// novi artikal...
+		s_elements()
+		s_el_attribs()
+		return DE_CONT
+	case Ch == K_F2
+		// ispravka...
+		return DE_CONT
+		
+endcase
 return DE_CONT
+
 
 
 // -------------------------------
