@@ -57,17 +57,54 @@ return
 // -----------------------------------------
 static function key_handler()
 local nArt_id := 0
+local cArt_desc := ""
+local nTRec := RecNO()
 
 do case
 	case Ch == K_CTRL_N
-		// novi artikal...
-		_inc_id(@nArt_id, "ART_ID")
 		
-		s_elements( nArt_id )
+		// novi artikal...
+		
+		// dodijeli i zauzmi novu sifru...
+		_set_sif_id(@nArt_id, "ART_ID")
+		
+		if s_elements( nArt_id, .t. ) == 1
+			
+			select articles
+			return DE_REFRESH
+			
+		endif
+		
+		select articles
+		go (nTRec)
 		
 		return DE_CONT
+		
 	case Ch == K_F2
-		// ispravka...
+		
+		// ispravka sifre
+		
+		if s_elements( field->art_id ) == 1
+			
+			select articles
+			return DE_REFRESH
+		
+		endif
+		
+		select articles
+		go (nTRec)
+
+		return DE_CONT
+		
+	case Ch == K_CTRL_T
+
+		// brisanje sifre...
+		if art_delete( field->art_id ) == 1
+			
+			return DE_REFRESH
+		
+		endif
+		
 		return DE_CONT
 		
 endcase
@@ -104,6 +141,217 @@ endif
 select (nTArea)
 
 return cArtDesc
+
+
+// ---------------------------------------------
+// brisanje sifre iz sifrarnika
+// nArt_id - artikal id
+// lSilent - tihi nacin rada, bez pitanja .t.
+// ---------------------------------------------
+static function art_delete( nArt_id, lSilent )
+local nEl_id 
+
+if lSilent == nil
+	lSilent := .f.
+endif
+
+select articles
+set order to tag "1"
+go top
+seek artid_str( nArt_id )
+
+if FOUND()
+	
+	if !lSilent .and. Pitanje(, "Izbrisati zapis (D/N) ???", "N") == "N"
+		return 0
+	endif
+	
+	delete
+
+	select elements
+	set order to tag "1"
+	go top
+	seek artid_str( nArt_id )
+
+	do while !EOF() .and. field->art_id == nArt_id
+		
+		nEl_id := field->el_id
+		
+		select e_att
+		set order to tag "1"
+		go top
+		seek elid_str( nEl_id )
+		
+		do while !EOF() .and. field->el_id == nEl_id
+			delete
+			skip
+		enddo
+
+		select e_aops
+		set order to tag "1"
+		go top
+		seek elid_str( nEl_id )
+	
+		do while !EOF() .and. field->el_id == nEl_id
+			delete
+			skip
+		enddo
+		
+		select elements
+		
+		delete
+		skip
+	
+	enddo
+	
+endif
+
+select articles
+
+return 1
+
+
+
+// ----------------------------------------------
+// setovanje opisa artikla na osnovu tabela
+//   ELEMENTS, E_AOPS, E_ATT
+//
+//  nArt_id - artikal id
+// ----------------------------------------------
+function _art_set_descr( nArt_id )
+local cArt_desc := ""
+local nEl_id
+local nEl_gr_id
+local nCount := 0
+local nE_gr_att 
+local nE_gr_val
+local cE_gr_val
+local cE_gr_att
+local lE_att := .f.
+
+// ukini filtere
+select elements
+set filter to
+select e_att
+set filter to
+select e_aops
+set filter to
+
+// elementi...
+select elements
+set order to tag "1"
+go top
+seek artid_str( nArt_id )
+
+do while !EOF() .and. field->art_id == nArt_id
+	
+	nEl_id := field->el_id
+	nEl_gr_id := field->e_gr_id
+	
+	if nCount > 0
+		cArt_desc += ";"
+	endif
+
+	// grupa_naziv, npr: staklo
+	cArt_desc += ALLTRIM( g_e_gr_desc( nEl_gr_id) )
+	cArt_desc += " "
+
+	// predji na atribute elemenata...
+	select e_att
+	set order to tag "1"
+	go top
+	seek elid_str( nEl_id )
+
+	do while !EOF() .and. field->el_id == nEl_id
+
+		// vrijednost atributa
+		nE_gr_val := field->e_gr_vl_id
+		cE_gr_val := ALLTRIM(g_e_gr_vl_desc( nE_gr_val ))
+		
+		// atributi...
+		nE_gr_att := g_gr_att_val( nE_gr_val )
+		cE_gr_att := ALLTRIM(g_gr_at_desc( nE_gr_att ))
+		
+		cArt_desc += cE_gr_val
+
+		if "deblj" $ cE_gr_att
+			
+			cArt_desc += "mm"
+			
+		endif
+		
+		cArt_desc += " "
+		
+		lE_Att := .t.
+		
+		skip
+		
+	enddo
+	
+
+	// predji na dodatne operacije elemenata....
+	select e_aops
+	set order to tag "1"
+	go top
+	seek elid_str( nEl_id )
+
+	do while !EOF() .and. field->el_id == nEl_id
+		
+		// dodatna operacija...
+		nAop_id := field->aop_id
+		cAop_desc := ALLTRIM(g_aop_desc( nAop_id ))
+		
+		// atribut...
+		nAop_att_id := field->aop_att_id
+		cAop_att_desc := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
+
+		if !EMPTY(cAop_desc) .or. cAop_desc <> "?????"
+			cArt_desc += cAop_desc 
+			cArt_desc += " "
+		endif
+
+		if !EMPTY(cAop_att_desc) .or. cAop_att_desc <> "?????"
+			cArt_desc += cAop_att_desc
+			cArt_desc += " "
+		endif
+
+		skip
+	enddo
+
+	// vrati se na elemente i idi dalje...
+	select elements
+	skip
+	
+	++ nCount
+enddo
+
+
+// update art_desc..
+select articles
+set order to tag "1"
+go top
+seek artid_str( nArt_id )
+
+if FOUND()
+	if !EMPTY(cArt_desc) .and. lE_att == .t.
+	
+		if EMPTY(field->art_desc) .or. (!EMPTY(field->art_desc) .and. Pitanje(, "Definisati naziv artikla (D/N) ?", "D") == "D")
+			Scatter()
+			_art_desc := cArt_desc
+			Gather()
+			return 1
+		endif
+		
+	else
+		
+		// izbrisi tu stavku....
+		art_delete(nArt_id, .t.)
+		return 0
+		
+	endif
+endif
+
+return 0
 
 
 

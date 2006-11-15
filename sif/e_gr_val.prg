@@ -130,3 +130,27 @@ go (nTRec)
 
 return cGr
 
+
+
+// -------------------------------------------------
+// vraca atribut grupe elementa iz tabele e_gr_val 
+// -------------------------------------------------
+function g_gr_att_val( nE_gr_val )
+local nE_gr_att := 0
+local nTArea := SELECT()
+
+select e_gr_val
+set order to tag "1"
+go top
+seek e_gr_vl_str(nE_gr_val)
+
+if FOUND()
+	nE_gr_att := field->e_gr_at_id
+endif
+
+select (nTArea)
+return nE_gr_att
+
+
+
+
