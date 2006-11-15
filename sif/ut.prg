@@ -83,6 +83,7 @@ if ((Ch == K_CTRL_N) .or. (Ch == K_F4))
 	wid := _last_id( cFieldName ) + 1
 	
 	set filter to &cDbFilter
+	go top
 	go (nTRec)
 	
 	AEVAL(GetList,{|o| o:display()})

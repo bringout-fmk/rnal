@@ -31,7 +31,7 @@ Box(,21,77)
 @ m_x + 17, m_y + 1 SAY "<c+N> nova"
 @ m_x + 18, m_y + 1 SAY "<F2> ispravka"
 @ m_x + 19, m_y + 1 SAY "<c+T> brisi"
-@ m_x + 21, m_y + 1 SAY "<TAB> - browse tabele |<c+N> nova |<F2> ispravka |<c+T> brisi"
+@ m_x + 21, m_y + 15 SAY "<TAB> - browse tabela"
 
 for i:=1 to 19
 	@ m_x + i, m_y + 21 SAY "º"
