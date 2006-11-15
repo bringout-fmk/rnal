@@ -130,3 +130,55 @@ endif
 return
 
 
+
+// -------------------------------------------
+// setuje novi zapis u tabeli sifrarnika
+// nId - id sifrarnika
+// cIdField - naziv id polja....
+// -------------------------------------------
+function _set_sif_id(nId, cIdField)
+local nTArea := SELECT()
+local nTime
+
+go top
+
+if !(FLOCK())
+	
+	nTime := 80     
+	
+	// daj mu 10 sekundi
+      	
+	do while nTime > 0
+        	
+		InkeySc(.125)
+         	
+		nTime --
+         	
+		if FLOCK()
+            		exit
+         	endif
+      	enddo
+	
+      	if nTime == 0 .AND. !(FLOCK())
+        	Beep (4)
+         	Msg ("Dodavanje nove stavke onemoguceno !!!# POKUSAJTE PONOVO")
+         	return 0
+      	endif
+endif
+
+_inc_id(@nId, cIdField)
+
+appblank2(.f., .f.)   
+
+cIdField := "_" + cIdField
+
+&cIdField := nId
+
+Gather2()
+DBUnlock()
+
+select (nTArea)
+
+return 1
+
+
