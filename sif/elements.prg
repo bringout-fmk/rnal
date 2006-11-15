@@ -438,10 +438,6 @@ endif
 
 Gather()
 
-if lNewRec
-	go top
-endif
-
 return DE_REFRESH
 
 
