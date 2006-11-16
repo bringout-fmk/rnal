@@ -195,10 +195,10 @@ aImeKol := {}
 aKol:={}
 
 AADD(aImeKol, {"R.br", {|| doc_it_no }, "doc_it_no" })
-AADD(aImeKol, {"Artikal", {|| PADR(g_art_desc( art_id ),10) + ".." }, "art_id" })
-AADD(aImeKol, {"Sirina", {|| doc_it_width }, "doc_it_width" })
-AADD(aImeKol, {"Visina", {|| doc_it_heigh }, "doc_it_heigh" })
-AADD(aImeKol, {"Kolicina", {|| doc_it_qtty }, "doc_it_qtty" })
+AADD(aImeKol, {"Artikal", {|| PADR(g_art_desc( art_id ), 18) + ".." }, "art_id" })
+AADD(aImeKol, {"sirina", {|| TRANSFORM(doc_it_width, PIC_DIM()) }, "doc_it_width" })
+AADD(aImeKol, {"visina", {|| TRANSFORM(doc_it_heigh, PIC_DIM()) }, "doc_it_heigh" })
+AADD(aImeKol, {"kol.", {|| TRANSFORM(doc_it_qtty, PIC_KOL()) }, "doc_it_qtty" })
 
 
 for i:=1 to LEN(aImeKol)
@@ -283,6 +283,15 @@ do case
 
 			endif
 			
+		elseif ALIAS() == "_DOC_IT"
+
+			if e_doc_item( _doc, .t. ) <> 0
+			
+				select _doc_it
+				nRet := DE_REFRESH
+
+			endif
+	
 		endif
 				
 	case Ch == K_F2
@@ -297,7 +306,16 @@ do case
 				nRet := DE_REFRESH
 
 			endif
+		
+		elseif ALIAS() == "_DOC_IT"
+
+			if e_doc_item( _doc, .f. ) <> 0
 			
+				select _doc_it
+				nRet := DE_REFRESH
+
+			endif
+	
 		endif
 	
 	case Ch == K_CTRL_T

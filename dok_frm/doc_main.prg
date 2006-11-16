@@ -36,7 +36,7 @@ Box(, nGetBoxX, nGetBoxY, .f., "Unos osnovnih podataka naloga")
 Scatter()
 _doc := _doc_no
 
-if _e_box_data( nGetBoxX, nGetBoxY ) == 0
+if _e_box_main( nGetBoxX, nGetBoxY ) == 0
 
 	select _docs
 	BoxC()
@@ -60,7 +60,7 @@ return 1
 // ---------------------------------------------
 // forma  unosa podataka
 // ---------------------------------------------
-static function _e_box_data( nBoxX, nBoxY )
+static function _e_box_main( nBoxX, nBoxY )
 local nX := 1
 local nLeft := 20
 

@@ -3,7 +3,7 @@ MODUL=rnal_df
 
 SRCDOSROOT=c:\\dev\\fmk\\rnal\\dok_frm\\
 
-PRGS=ed_doc.prg doc_main.prg 
+PRGS=ed_doc.prg doc_main.prg doc_item.prg 
 CS=
 ASMS=
 
