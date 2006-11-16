@@ -27,6 +27,10 @@ aop_filter(nAop_id)
 	
 cRet := PostojiSifra(F_AOPS_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|Ch| key_handler(Ch) })
 
+if nAop_id > 0
+	set filter to
+endif
+
 select (nTArea)
 
 return cRet

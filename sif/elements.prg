@@ -89,7 +89,8 @@ do while .t.
 		select articles
 		// generisi naziv artikla i update-uj
 		nRet := _art_set_descr( art_id )
-		
+		go top
+
 		exit
 		
 	endif
@@ -437,6 +438,7 @@ if lNewRec
 endif
 
 Gather()
+go top
 
 return DE_REFRESH
 

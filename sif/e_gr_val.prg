@@ -28,6 +28,10 @@ gr_att_filter(nE_gr_at_id)
 	
 cRet := PostojiSifra(F_E_GR_VAL, 1, 16, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
+if nE_gr_at_id > 0
+	set filter to
+endif
+
 select (nTArea)
 
 return cRet

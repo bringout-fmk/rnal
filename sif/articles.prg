@@ -15,14 +15,18 @@ function s_articles(cId, aAttribs)
 local nTArea
 local cHeader
 local cFooter
+local GetList:={}
 private ImeKol
 private Kol
 
-par_count := PCOUNT()
+if aAttribs == nil
+	aAttribs := {}
+endif
 
-if par_count == 0
-	l_open_dbedit := .t.
-else
+par_count := PCOUNT()
+l_open_dbedit := .t.
+
+if (par_count > 0 .and. LEN(aAttribs) == 0)
 	l_open_dbedit := .f.
 endif
 
@@ -49,6 +53,7 @@ endif
 if l_open_dbedit
 	
 	set_a_kol(@ImeKol, @Kol)
+	srch_art( aAttribs )
 
 	Box(,14,70)
 	
@@ -65,6 +70,7 @@ cId := field->art_id
 select (nTArea)
 
 return 
+
 
 
 // -----------------------------------------

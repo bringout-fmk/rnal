@@ -28,6 +28,10 @@ gr_filter(nGr_id)
 	
 cRet := PostojiSifra(F_E_GR_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
+if nGr_id > 0
+	set filter to
+endif
+
 select (nTArea)
 
 return cRet
@@ -117,5 +121,21 @@ select (nTArea)
 return cEGrAttDesc
 
 
+// ------------------------------------------------------
+// napuni matricu aAtt sa atributima grupa
+// ------------------------------------------------------
+function a_gr_attibs(aAtt, nE_Gr_id)
+local nTArea := SELECT()
+select e_gr_att
+set filter to "e_gr_id == " + gr_id_str(nE_gr_id)
+go top
 
+do while !EOF() .and. field->e_gr_id == nE_gr_id
+	AADD(aAtt, { field->e_gr_at_id, ALLTRIM(field->e_gr_at_desc), 0, 0, 0 })
+	skip
+enddo
 
+set filter to
+
+select (nTArea)
+return
