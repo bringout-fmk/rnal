@@ -1,16 +1,30 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+// variables
+static l_open_dbedit
+static par_count
+static _art_id
 
-// -----------------------------------------
+// ------------------------------------------------
 // otvara sifrarnik artikala
-// -----------------------------------------
-function s_articles(cId, dx, dy)
+// cId - artikal id
+// aAttribs - matrica sa atributima pretrage...
+// ------------------------------------------------
+function s_articles(cId, aAttribs)
 local nTArea
 local cHeader
 local cFooter
 private ImeKol
 private Kol
+
+par_count := PCOUNT()
+
+if par_count == 0
+	l_open_dbedit := .t.
+else
+	l_open_dbedit := .f.
+endif
 
 nTArea := SELECT()
 
@@ -21,14 +35,32 @@ select articles
 set order to tag "1"
 go top
 
-set_a_kol(@ImeKol, @Kol)
+if !l_open_dbedit
+	
+	seek artid_str(cId)
+	
+	if !FOUND()
+		l_open_dbedit := .t.
+		go top
+	endif
 
-Box(,12,70)
-@ m_x + 12, m_y + 2 SAY "<c-N> Novi | <c-T> Brisi | <F2> Ispravi ..."
+endif
 
-ObjDbedit("art", 12, 70, {|| key_handler(Ch)}, cHeader, cFooter ,,,,,1)
+if l_open_dbedit
+	
+	set_a_kol(@ImeKol, @Kol)
 
-BoxC()
+	Box(,14,70)
+	
+	@ m_x + 14, m_y + 2 SAY "<c-N> Novi | <c-T> Brisi | <F2> Ispravi ..."
+
+	ObjDbedit("art", 14, 70, {|| key_handler(Ch)}, cHeader, cFooter ,,,,,1)
+
+	BoxC()
+
+endif
+
+cId := field->art_id
 
 select (nTArea)
 
@@ -106,6 +138,13 @@ do case
 		endif
 		
 		return DE_CONT
+
+	case Ch == K_ENTER
+
+		// izaberi sifru....
+		if par_count > 0
+			return DE_ABORT
+		endif
 		
 endcase
 return DE_CONT
