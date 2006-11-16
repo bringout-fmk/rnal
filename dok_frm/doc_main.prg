@@ -73,6 +73,7 @@ if l_new_doc
 	_doc_ship_place := SPACE( LEN(_doc_ship_place) )
 	_doc_priority := 2
 	_doc_pay_id := 1
+	_doc_status := 0
 
 endif
 
