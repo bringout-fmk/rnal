@@ -8,7 +8,7 @@
 function ed_rnal()
 
 // otvori tabele
-o_rnal(.t.)
+o_tables(.t.)
 
 // prikazi tabelu pripreme
 rnal_priprema()
