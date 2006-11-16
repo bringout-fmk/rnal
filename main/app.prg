@@ -52,10 +52,10 @@ close all
 
 SETKEY(K_SH_F1,{|| Calc()})
 
-CheckROnly(KUMPATH + "\RNAL.DBF")
+CheckROnly(KUMPATH + SLASH + "DOCS.DBF")
 
-O_RNAL
-select rnal
+O_DOCS
+select docs 
 TrebaRegistrovati(3)
 use
 
@@ -83,28 +83,31 @@ say_fmk_ver()
 
 AADD(opc, "1. unos/dorada naloga za proizvodnju  ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "EDIT"))
-	AADD(opcexe, {|| ed_rnal()})
+	AADD(opcexe, {|| ed_document( .t. )})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
 AADD(opc, "2. lista otvorenih naloga ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "DOKLSTO"))
-	AADD(opcexe, {|| frm_lst_nalog(1)})
+	//AADD(opcexe, {|| frm_lst_nalog(1)})
+	AADD(opcexe, {|| nil})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
 AADD(opc, "3. lista zatorenih naloga ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "DOKLSTZ"))
-	AADD(opcexe, {|| frm_lst_nalog(2)})
+	//AADD(opcexe, {|| frm_lst_nalog(2)})
+	AADD(opcexe, {|| nil})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
 AADD(opc, "4. izvjestaji ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "RPT", "M_RPT"))
-	AADD(opcexe, {|| m_rpt() })
+	//AADD(opcexe, {|| m_rpt() })
+	AADD(opcexe, {|| nil})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
@@ -188,8 +191,6 @@ public gDg_margina := 0
 
 ::super:setTGVars()
 
-gPartnBlock := {|Ch| rn_partn_block(Ch) }
-
 O_PARAMS
 Rpar("ff",@gFirma)
 Rpar("fn",@gNFirma)
@@ -214,7 +215,7 @@ public gGlBaza
 
 gModul:="RNAL"
 gTema:="OSN_MENI"
-gGlBaza:="RNAL.DBF"
+gGlBaza:="DOCS.DBF"
 
 public cZabrana:="Opcija nedostupna za ovaj nivo !!!"
 
