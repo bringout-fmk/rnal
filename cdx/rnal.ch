@@ -7,7 +7,7 @@
 
 #xcommand O__DOCS => select (F__DOCS); usex (PRIVPATH + "_DOCS"); set order to tag "1"
 #xcommand O__DOC_IT => select (F__DOC_IT); usex (PRIVPATH + "_DOC_IT"); set order to tag "1"
-#xcommand O__DOC_OPS => select (F__DOC_OPS); usex (PRIVPATH + "_DOCS_OP"); set order to tag "1"
+#xcommand O__DOC_OPS => select (F__DOC_OPS); usex (PRIVPATH + "_DOC_OPS"); set order to tag "1"
 #xcommand O_T_DOCS => select (F_T_DOCS); usex (PRIVPATH + "T_DOCS"); set order to tag "1"
 #xcommand O_T_DOC_OPS => select (F_T_DOC_OPS); usex (PRIVPATH + "T_DOC_OPS"); set order to tag "1"
 #xcommand O_T_PARS => select (F_T_PARS); usex (PRIVPATH + "T_PARS"); set order to tag "id_par"
