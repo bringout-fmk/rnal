@@ -5,13 +5,13 @@
 static l_open_dbedit
 static par_count
 static _art_id
+static l_auto_find
 
 // ------------------------------------------------
 // otvara sifrarnik artikala
 // cId - artikal id
-// aAttribs - matrica sa atributima pretrage...
 // ------------------------------------------------
-function s_articles(cId, aAttribs)
+function s_articles(cId, lAutoFind)
 local nTArea
 local cHeader
 local cFooter
@@ -19,15 +19,26 @@ local GetList:={}
 private ImeKol
 private Kol
 
-if aAttribs == nil
-	aAttribs := {}
-endif
-
 par_count := PCOUNT()
 l_open_dbedit := .t.
 
-if (par_count > 0 .and. LEN(aAttribs) == 0)
-	l_open_dbedit := .f.
+if lAutoFind == nil
+	lAutoFind := .f.
+endif
+
+altd()
+
+
+l_auto_find := lAutoFind
+
+if ( par_count > 0 )
+	if lAutoFind == .f.
+		l_open_dbedit := .f.
+	endif
+	if cId <> VAL(artid_str(0)) .and. lAutoFind == .t.
+		l_open_dbedit := .f.
+		lAutoFind := .f.
+	endif
 endif
 
 nTArea := SELECT()
@@ -53,13 +64,13 @@ endif
 if l_open_dbedit
 	
 	set_a_kol(@ImeKol, @Kol)
-	srch_art( aAttribs )
 
-	Box(,14,70)
+	Box(, 16, 77, .t.)
 	
-	@ m_x + 14, m_y + 2 SAY "<c-N> Novi | <c-T> Brisi | <F2> Ispravi ..."
+	@ m_x + 16, m_y + 2 SAY "<c-N> Novi | <c-T> Brisi | <F2> Ispravi ..."
 
-	ObjDbedit("art", 14, 70, {|| key_handler(Ch)}, cHeader, cFooter ,,,,,1)
+	altd()
+	ObjDbedit(, 16, 77, {|| key_handler(Ch)}, cHeader, cFooter , .t.,,,,1)
 
 	BoxC()
 
@@ -80,6 +91,7 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
+altd()
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(art_id)}, "art_id", {|| _inc_id(@wart_id, "ART_ID"), .f.}, {|| .t.}})
 AADD(aImeKol, {PADC("Naziv", 40), {|| PADR(art_desc, 40)}, "art_desc"})
 
@@ -97,13 +109,33 @@ static function key_handler()
 local nArt_id := 0
 local cArt_desc := ""
 local nTRec := RecNO()
+local nRet
+
+altd()
 
 do case
+	
+	case l_auto_find == .t.
+
+		pick_articles()
+		l_auto_find := .f.
+		
+		Tb:RefreshAll()
+     		
+		while !TB:stabilize()
+		end
+		
+		return DE_CONT
+	
 	case Ch == K_CTRL_N
 		
 		// novi artikal...
 		
 		// dodijeli i zauzmi novu sifru...
+		select articles
+		set filter to
+		set relation to
+		
 		_set_sif_id(@nArt_id, "ART_ID")
 		
 		if s_elements( nArt_id, .t. ) == 1
@@ -151,6 +183,15 @@ do case
 		if par_count > 0
 			return DE_ABORT
 		endif
+
+	case Ch == K_ALT_F
+
+		// selekcija artikala....
+		if pick_articles() == 1
+			return DE_REFRESH
+		endif
+		return DE_CONT
+		
 		
 endcase
 return DE_CONT
