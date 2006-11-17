@@ -326,6 +326,8 @@ do case
 			
 			if docs_delete() == 1
 			
+				l_auto_tab := .t.
+				KEYBOARD CHR(K_TAB)
 				nRet := DE_REFRESH
 				
 			endif

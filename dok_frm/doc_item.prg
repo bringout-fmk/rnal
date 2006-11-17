@@ -86,7 +86,7 @@ nX += 1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL:", nLeft) GET _art_id VALID {|| s_articles( @_art_id ), show_it( g_art_desc( _art_id ) + ".." , 30 ) }
+@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL:", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .t. ), show_it( g_art_desc( _art_id ) + ".." , 30 ) }
 
 nX += 2
 
