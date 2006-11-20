@@ -115,9 +115,26 @@ nLast_rec := field->&cFieldName
 return nLast_rec
 
 
+// ---------------------------------------------
+// setuje TBrowse direktni edit D/N
+//
+// cMod - tekuci mod...
+// ---------------------------------------------
+function _mod_tb_direkt( cMod )
 
+if cMod == "N"
+	return
+endif
 
+if gTbDir == "N"
+	gTbDir := "D"
+	NeTBDirektni()
+else
+	gTbDir := "N"
+	DaTBDirektni()
+endif
 
+return
 
 
 

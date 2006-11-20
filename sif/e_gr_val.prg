@@ -1,16 +1,20 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+static _tb_direkt := "N"
 
-// -----------------------------------------
+// -------------------------------------------------------------
 // otvara sifrarnik artikala
-// -----------------------------------------
-function s_e_gr_val(cId, nE_gr_at_id, dx, dy)
+// -------------------------------------------------------------
+function s_e_gr_val(cId, nE_gr_at_id, cE_gr_vl_desc, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
 private Kol
 private GetList:={}
+
+_tb_direkt := gTbDir
+_mod_tb_direkt( _tb_direkt )
 
 nTArea := SELECT()
 
@@ -20,17 +24,23 @@ if nE_gr_at_id == nil
 	nE_gr_at_id := -1
 endif
 
+if cE_gr_vl_desc == nil
+	cE_gr_vl_desc := ""
+endif
+
 select e_gr_val
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
-gr_att_filter(nE_gr_at_id)
+gr_att_filter(nE_gr_at_id, cE_gr_vl_desc)
 	
 cRet := PostojiSifra(F_E_GR_VAL, 1, 16, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
-if nE_gr_at_id > 0
+if nE_gr_at_id > 0 .or. cE_gr_vl_desc <> ""
 	set filter to
 endif
+
+_mod_tb_direkt( _tb_direkt )
 
 select (nTArea)
 
@@ -58,17 +68,30 @@ return
 
 
 
-// --------------------------------------------------
+// ------------------------------------------------------
 // filter po polju e_gr_at_id
-// --------------------------------------------------
-static function gr_att_filter(nE_gr_at_id)
-local cFilter
+//
+// nE_gr_at_id - id atributa grupe
+// nE_gr_vl_desc - description vrijednosti...
+// ------------------------------------------------------
+static function gr_att_filter(nE_gr_at_id, cE_gr_vl_desc)
+local cFilter := ""
 
 if nE_gr_at_id > 0
-	cFilter := "e_gr_at_id == " + e_gr_at_str(nE_gr_at_id)
+	cFilter += "e_gr_at_id == " + e_gr_at_str(nE_gr_at_id)
+endif
+
+if !EMPTY( cE_gr_vl_desc )
+	
+	if !EMPTY(cFilter)
+		cFilter += " .and. "
+	endif
+
+	cFilter += "e_gr_vl_desc = " + cm2str( ALLTRIM(cE_gr_vl_desc) )
+endif
+
+if !EMPTY(cFilter)
 	set filter to &cFilter
-else
-	set filter to
 endif
 
 return
