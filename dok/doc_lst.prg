@@ -2,15 +2,15 @@
 
 
 // ------------------------------------------
-// lista naloga
+// lista dokumenata....
 //  nStatus - "1" otoreni ili "2" zatvoreni
 // ------------------------------------------
-function frm_lst_nalog( nStatus )
+function frm_lst_docs( nStatus )
 local nTblRet
 
 o_tables(.f.)
 
-nTblRet := tbl_lista(nStatus)
+nTblRet := tbl_lista( nStatus )
 
 if nTblRet == 1
 	return
@@ -46,9 +46,8 @@ Box(, 20, 77)
 
 set_box_dno(nStatus)
 
-select rnal
-set order to tag "br_nal"
-//set relation to idpartner into partn
+select docs
+set order to tag "1"
 go top
 
 set_a_kol(@ImeKol, @Kol, nStatus)
@@ -99,7 +98,6 @@ static function lst_uslovi(nStatus)
 local nX := 2
 local dDatOd := CToD("")
 local dDatDo := DATE()
-local cPartNaz := SPACE(40)
 local cTblLista := "D"
 local nRet := 1
 local cFilter
@@ -111,11 +109,7 @@ Box( ,10, 70)
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Naziv partnera pocinje sa (prazno svi) " GET cPartNaz PICT "@S20"
-
-nX += 2
-
-@ m_x + nX, m_y + 2 SAY "Tabelarni pregled (D/N) " GET cTblLista VALID val_d_n( cTblLista )
+@ m_x + nX, m_y + 2 SAY "Tabelarni pregled (D/N) " GET cTblLista VALID cTblLista $ "DN" PICT "@!"
 
 read
 
@@ -125,13 +119,9 @@ if cTblLista == "N"
 	nRet := 2
 endif
 
-if LastKey() == K_ESC
-	return 0
-endif
+ESC_RETURN 0
 
-cPartNaz := ALLTRIM(cPartNaz)
-
-cFilter := gen_filter(nStatus, dDatOd, dDatDo, cPartNaz)
+cFilter := gen_filter(nStatus, dDatOd, dDatDo)
 
 set_f_kol(cFilter)
 
@@ -142,29 +132,23 @@ return nRet
 // ---------------------------------
 // generise string filtera
 // ---------------------------------
-static function gen_filter(nStatus, dDatOd, dDatDo, cPartNaz)
-local cZatvStatus := "Z"
-
-// pogledaj da nije lock-ovan zapis
-cFilter := "rec_zak <> " + Cm2Str("Z")
-cFilter += " .and. "
+static function gen_filter(nStatus, dDatOd, dDatDo)
+local nClosed := 1
+local cFilter := ""
 
 if nStatus == 1
 	// samo otvoreni nalozi
-	cFilter += "rn_status <> " + Cm2Str(cZatvStatus)
+	cFilter += "doc_status == 2 .or. doc_status == 3 .or. doc_status == 0 "
 else
 	// samo zatvoreni nalozi
-	cFilter += "rn_status == " + Cm2Str(cZatvStatus)
+	cFilter += "doc_status == 1"
 endif
 
 if !EMPTY(dDatOd)
-	cFilter += " .and. dat_nal >= " + Cm2Str(dDatOd)
+	cFilter += " .and. doc_date >= " + Cm2Str(dDatOd)
 endif
 if !Empty(dDatDo)
-	cFilter += " .and. dat_nal <= " + Cm2Str(dDatDo)
-endif
-if !Empty(cPartNaz)
-	cFilter += " .and. PARTN->naz = " + Cm2Str(cPartNaz)
+	cFilter += " .and. doc_date <= " + Cm2Str(dDatDo)
 endif
 
 return cFilter
@@ -175,10 +159,10 @@ return cFilter
 // setovanje filtera prema uslovima
 // ------------------------------------------------
 static function set_f_kol(cFilter)
-select rnal
-set order to tag "br_nal"
+select docs
+set order to tag "1"
 set filter to &cFilter
-set relation to idpartner into partn
+set relation to cust_id into customs
 go top
 
 return
@@ -203,6 +187,7 @@ endif
 do case
 	// stampa naloga
 	case (Ch == K_CTRL_P)
+		/*
 		if Pitanje(, "Stampati nalog (D/N) ?", "D") == "D"
 			nBr_nal := rnal->br_nal
 			nTRec := RecNo()
@@ -215,9 +200,11 @@ do case
 			return DE_REFRESH
 		endif
 		SELECT RNAL
+		*/
 		return DE_CONT
 	// stampa otpremnice
 	case ( Ch == K_CTRL_O )
+		/*
 		if Pitanje(,"Stampati otpremicu (D/N ?)", "D") == "D"
 			nBr_nal := rnal->br_nal
 			nTRec := RecNo()
@@ -230,97 +217,109 @@ do case
 			return DE_REFRESH
 		endif
 		SELECT RNAL
+		*/
 		RETURN DE_CONT
 		
 	// otvaranje naloga za doradu
 	case (UPPER(CHR(Ch)) == "D")
 		// provjeri marker
-		if get_p_marker() == "P"
+		if is_doc_busy()
 			// vec neko radi povrat
 			MsgBeep("Nalog vec doradjuje drugi operater!#Dorada naloga onemogucena!")
-			SELECT RNAL
+			SELECT docs
 			return DE_CONT
 		endif
 		
 		if Pitanje(, "Otvoriti nalog radi dorade (D/N) ?", "N") == "D"
 			
 			nTRec := RecNo()
-			nBr_nal := rnal->br_nal
+			nDoc_no := docs->doc_no
 			cTblFilt := DBFilter()
 			set filter to
 			
-			if pov_nalog(nBr_nal) == 1
+			if doc_2__doc( nDoc_no ) == 1
 				
 				// logiraj otvaranje
-				log_otvori( nBr_nal )
+				//log_otvori( nBr_nal )
 				
 				MsgBeep("Nalog otvoren!")
 				
 			endif
 			
-			SELECT RNAL
+			SELECT DOCS
 			set_f_kol(cTblFilt)
 			GO (nTRec)
+			
 			// otvori i obradi pripremu
-			ed_rnal(.t.)
-			SELECT RNAL
+			ed_document( .f. )
+			
+			SELECT DOCS
 			set_f_kol(cTblFilt)
 			//GO (nTRec)
+			
 			RETURN DE_REFRESH
 		endif
 		
-		SELECT RNAL
+		SELECT DOCS
 		RETURN DE_CONT
 
 	// zatvaranje naloga
 	case (UPPER(CHR(Ch)) == "Z")
 		
-		if get_p_marker() == "P"
+		if is_doc_busy()
 			MsgBeep("Neko doradjuje ovaj nalog! #Zatvaranje onemoguceno!")
-			select RNAL
+			select DOCS
 			return DE_CONT
 		endif
 			
 		if Pitanje(, "Zatvoriti nalog (D/N) ?", "N") == "D"
 					
-			g_nal_status(@cNal_real)
+			//g_doc_status(@cNal_real)
+			
 			nTRec := RecNo()
-			nBr_nal := rnal->br_nal
+			nDoc_no := docs->doc_no
 			cTblFilt := DBFilter()
+			
 			set filter to
-			if z_rnal(nBr_nal, cNal_real) == 1
-				MsgBeep("Nalog zatvoren !")
-			endif
-			SELECT RNAL
+			
+			//if z_rnal(nBr_nal, cNal_real) == 1
+			//	MsgBeep("Nalog zatvoren !")
+			//endif
+			
+			SELECT DOCS
 			set_f_kol(cTblFilt)
+			
 			//GO (nTRec)
+			
 			RETURN DE_REFRESH
 		endif
 		
-		SELECT RNAL
+		SELECT DOCS
 		RETURN DE_CONT
 	
 	// lista promjena na nalogu
 	case (UPPER(CHR(Ch)) == "L")
 		
-		nBr_nal := rnal->br_nal
-		frm_lst_rnlog(nBr_nal)
+		nDoc_no := docs->doc_no
+		
+		//frm_lst_rnlog(nDoc_no)
 		
 		RETURN DE_CONT
 
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )
 		
-		if get_p_marker() == "P"
+		if is_doc_busy()
 			MsgBeep("Neko vec doradjuje ovaj nalog!#Promjene onemogucene!")
+			select docs
 			return DE_CONT
 		endif
 		
-		nBr_nal := rnal->br_nal
+		nDoc_no := docs->doc_no
 		
-		m_prom(nBr_nal)
+		m_changes(nDoc_no)
 		
-		select rnal
+		select docs
 		
 		return DE_REFRESH
 
@@ -339,7 +338,7 @@ Box(,4, 50)
 	@ m_x + 1, m_y + 2 SAY "Trenutni status naloga je:"
 	@ m_x + 2, m_y + 2 SAY "   - realizovan (R)"
 	@ m_x + 3, m_y + 2 SAY "   -   ponisten (X)"
-	@ m_x + 4, m_y + 2 SAY "postavi trenutni status na:" GET cNalStatus VALID val_kunos(cNalStatus, "RX") PICT "@!"
+	@ m_x + 4, m_y + 2 SAY "postavi trenutni status na:" GET cNalStatus VALID cNalStatus $ "RX" PICT "@!"
 	read
 BoxC()
 
@@ -352,16 +351,16 @@ return
 static function set_a_kol(aImeKol, aKol, nStatus)
 aImeKol := {}
 
-AADD(aImeKol, {"Nalog br.", {|| br_nal }, "br_nal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Partner", {|| PADR(s_partner(idpartner), 30) }, "idpartner", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Datum", {|| dat_nal }, "dat_nal", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Dat.isp." , {|| dat_isp }, "dat_isp", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Vr.isp." , {|| vr_isp }, "vr_isp", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Kontakt ime" , {|| PADR(k_ime, 20) }, "k_ime", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Kontakt tel" , {|| PADR(k_tel, 20) }, "k_tel", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Hitnost" , {|| PADR(say_hitnost(hitnost),10) }, "hitnost", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {PADC("Dok.br",10), {|| doc_no }, "doc_no", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Narucioc", {|| PADR(g_cust_desc(cust_id), 30) }, "cust_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Datum", {|| doc_date }, "doc_date", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Dat.isp." , {|| doc_dvr_date }, "doc_dvr_date", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Vr.isp." , {|| doc_dvr_time }, "doc_dvr_time", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Kontakt" , {|| PADR(g_cont_desc(cont_id), 20) }, "cont_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Prioritet" , {|| PADR(doc_priority,10) }, "doc_priority", {|| .t.}, {|| .t.} })
 
 aKol:={}
+
 for i:=1 to LEN(aImeKol)
 	AADD(aKol,i)
 next
