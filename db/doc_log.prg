@@ -65,7 +65,7 @@ return
 // puni matricu sa osnovnim podacima dokumenta
 // aArr = { customer_id, doc_pay_id, doc_priority }
 // -------------------------------------------------
-static function a_log_main(nCustId, nDocPay, nPriority)
+function a_log_main(nCustId, nDocPay, nPriority)
 local aArr := {}
 AADD(aArr, { nCustId, nDocPay, nPriority })
 return aArr
@@ -75,7 +75,7 @@ return aArr
 // puni matricu sa podacima isporuke
 // aArr = { doc_dvr_date, doc_dvr_time, doc_ship_place }
 // -------------------------------------------------
-static function a_log_ship(dDate, cTime, cPlace)
+function a_log_ship(dDate, cTime, cPlace)
 local aArr := {}
 AADD(aArr, { dDate, cTime, cPlace })
 return aArr
@@ -85,7 +85,7 @@ return aArr
 // puni matricu sa podacima kontakta
 // aArr = { cont_id, cont_add_desc }
 // -------------------------------------------------
-static function a_log_cont(nCont_id, cCont_desc)
+function a_log_cont(nCont_id, cCont_desc)
 local aArr := {}
 AADD(aArr, { nCont_id, cCont_desc })
 return aArr

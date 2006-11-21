@@ -15,9 +15,6 @@ function doc_insert()
 
 o_tables(.t.)
 
-altd()
-
-
 // skloni filtere
 select _docs
 set filter to
@@ -38,7 +35,7 @@ endif
 __doc_no := _docs->doc_no
 __doc_stat := _docs->doc_status
 
-if !doc_exist( __doc_no )
+if __doc_stat < 2 .and. !doc_exist( __doc_no )
 	MsgBeep("Nalog " + ALLTRIM(STR( __doc_no )) + " nije moguce azurirati !!!")
 	return 0
 endif
@@ -304,8 +301,8 @@ if FOUND()
 		
 	Scatter()
 		
-	// setuj na busy
-	_doc_status := 3
+	// setuj na rejected...
+	_doc_status := 2
 		
 	select _docs
 		

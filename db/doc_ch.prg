@@ -23,7 +23,7 @@ AADD(opcexe, {|| _ch_ship() })
 AADD(opc, "3. promjena kontakta na nalogu")
 AADD(opcexe, {|| _ch_cont() })
 AADD(opc, "4. dodaj novi kontakt ")
-AADD(opcexe, {|| _add_cont() })
+AADD(opcexe, {|| _ch_cont(.t.) })
 
 Menu_sc("changes")
 
