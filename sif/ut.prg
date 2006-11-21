@@ -128,10 +128,10 @@ endif
 
 if gTbDir == "N"
 	gTbDir := "D"
-	NeTBDirektni()
+	DaTBDirektni()
 else
 	gTbDir := "N"
-	DaTBDirektni()
+	NeTBDirektni()
 endif
 
 return

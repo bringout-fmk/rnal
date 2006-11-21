@@ -17,6 +17,7 @@ private GetList:={}
 nTArea := SELECT()
 
 _tb_direkt := gTBDir
+_mod_tb_direkt( _tb_direkt )
 
 cHeader := "Elementi - grupe atributi /  'V' - pr.vrijednosti"
 
@@ -29,9 +30,9 @@ if cE_gr_at_desc == nil
 endif
 
 select e_gr_att
+set filter to
 set order to tag "1"
-
-_mod_tb_direkt( _tb_direkt )
+go top
 
 set_a_kol(@ImeKol, @Kol)
 gr_filter(nGr_id, cE_gr_at_desc)
@@ -42,9 +43,8 @@ if nGr_id > 0 .or. cE_gr_at_desc <> ""
 	set filter to
 endif
 
-_mod_tb_direkt( _tb_direkt )
-
 select (nTArea)
+//_mod_tb_direkt( _tb_direkt )
 
 return cRet
 
@@ -67,12 +67,12 @@ if !EMPTY(cE_gr_at_desc)
 		cFilter += " .and. "
 	endif
 
-	cFilter += "e_gr_at_desc = " + cm2str( ALLTRIM( cE_gr_at_desc ) )  
-	
+	cFilter += "UPPER(e_gr_at_desc) = " + cm2str( UPPER(ALLTRIM( cE_gr_at_desc )) )  
 endif
 
 if !EMPTY(cFilter)
 	set filter to &cFilter
+	go top
 endif
 
 return

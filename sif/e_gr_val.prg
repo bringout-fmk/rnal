@@ -40,8 +40,6 @@ if nE_gr_at_id > 0 .or. cE_gr_vl_desc <> ""
 	set filter to
 endif
 
-_mod_tb_direkt( _tb_direkt )
-
 select (nTArea)
 
 return cRet
@@ -87,11 +85,12 @@ if !EMPTY( cE_gr_vl_desc )
 		cFilter += " .and. "
 	endif
 
-	cFilter += "e_gr_vl_desc = " + cm2str( ALLTRIM(cE_gr_vl_desc) )
+	cFilter += "UPPER(e_gr_vl_desc) = " + cm2str( UPPER(ALLTRIM(cE_gr_vl_desc)) )
 endif
 
 if !EMPTY(cFilter)
 	set filter to &cFilter
+	go top
 endif
 
 return

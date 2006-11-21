@@ -115,38 +115,32 @@ local cUsl := ""
 local nTArea := SELECT()
 local cFilt := ""
 
+altd()
+
 select _fnd_par
 set order to tag "1"
 go top
 
 do while !EOF()
 
-	if ALLTRIM( field->fnd_par_type ) <> "EL_ATT"
+	if ALLTRIM( field->fnd_par_type ) <> "ATT"
 		skip
 		loop
 	endif
 
-	if field->fnd_val_1 <> 0
-		cUsl += ALLTRIM(STR( fnd_val_1 )) + "#"
+	if !EMPTY(field->fnd_val)
+		cUsl += ALLTRIM( fnd_val ) + "#"
 	endif
 	
-	if field->fnd_val_2 <> 0
-		cUsl += ALLTRIM(STR( fnd_val_2 )) + "#"
-	endif
-
-	if field->fnd_val_3 <> 0
-		cUsl += ALLTRIM(STR( fnd_val_3 )) + "#"
-	endif
-
 	skip
 enddo
 
-if !EMPTY( cUsl )
-	
+if !EMPTY(cUsl)
+
 	cUsl := "#" + cUsl
-	
-	cFilt := " .and. '#' + ALLTRIM(STR(E_ATT->e_gr_vl_id)) + '#' $ " + cm2str( cUsl )
-	
+
+	cFilt := "'#' + ALLTRIM(STR(E_ATT->e_gr_vl_id)) + '#' $ " + cm2str( cUsl )
+
 endif
 
 select (nTArea)
@@ -164,9 +158,11 @@ local nEl_id := 0
 local nArt_id := 0
 local nCount := 0
 
+altD()
+
 // ako nema filtera nemoj nista raditi
 if cFilter == ""
-	return
+	return nCount
 endif
 
 select e_att
@@ -227,7 +223,7 @@ go top
 
 do while !EOF()
 
-	if ALLTRIM( field->fnd_par_type ) <> "ART_DESC"
+	if ALLTRIM( field->fnd_par_type ) <> "DESC"
 		skip
 		loop
 	endif
@@ -236,7 +232,7 @@ do while !EOF()
 		cFilt += " .or. "
 	endif
 	
-	cFilt += " art_desc = " + cm2str( ALLTRIM(field->fnd_str) )
+	cFilt += " art_desc = " + cm2str( ALLTRIM(field->fnd_val) )
 
 	skip
 enddo
@@ -256,7 +252,7 @@ local nCount := 0
 
 // ako nema filtera nemoj nista raditi
 if cFilter == ""
-	return
+	return nCount
 endif
 
 select articles
@@ -307,7 +303,7 @@ go top
 
 do while !EOF()
 
-	if ALLTRIM( field->fnd_par_type ) <> "MATCH_CODE"
+	if ALLTRIM( field->fnd_par_type ) <> "MC"
 		skip
 		loop
 	endif
@@ -316,7 +312,7 @@ do while !EOF()
 		cFilt += " .or. "
 	endif
 	
-	cFilt += " match_code = " + cm2str( ALLTRIM(field->fnd_str) )
+	cFilt += " match_code = " + cm2str( ALLTRIM(field->fnd_val) )
 
 	skip
 enddo
@@ -336,7 +332,7 @@ local nCount := 0
 
 // ako nema filtera nemoj nista raditi
 if cFilter == ""
-	return
+	return nCount
 endif
 
 select articles
@@ -391,40 +387,26 @@ go top
 
 do while !EOF()
 
-	if ALLTRIM( field->fnd_par_type ) <> "EL_ADD_OP"
+	if ALLTRIM( field->fnd_par_type ) <> "AOP"
 		skip
 		loop
 	endif
 
-	if field->fnd_val_1 <> 0
-		cUsl += ALLTRIM(STR( fnd_val_1 )) + "#"
+	if !EMPTY(field->fnd_val)
+		
+		cUsl += ALLTRIM( fnd_val ) + "#"
+	
 	endif
 	
-	if field->fnd_val_2 <> 0
-		cUsl2 += ALLTRIM(STR( fnd_val_2 )) + "#"
-	endif
-
-	if field->fnd_val_3 <> 0
-		cUsl2 += ALLTRIM(STR( fnd_val_3 )) + "#"
-	endif
-
 	skip
 enddo
 
-if !EMPTY( cUsl )
-	
+if !EMPTY(cUsl)
+
 	cUsl := "#" + cUsl
 	
-	cFilt += " .and. '#' + ALLTRIM(STR(E_AOPS->aop_id)) + '#' $ " + cm2str( cUsl )
-	
-endif
+	cFilt := "'#' + ALLTRIM(STR(E_AOPS->aop_id)) + '#' $ " + cm2str( cUsl )
 
-if !EMPTY( cUsl2 )
-
-	cUsl2 := "#" + cUsl2
-	
-	cFilt += " .and. '#' + ALLTRIM(STR(E_AOPS->aop_att_id)) + '#' $ " + cm2str( cUsl2 )
-	
 endif
 
 select (nTArea)
@@ -444,7 +426,7 @@ local nCount := 0
 
 // ako nema filtera nemoj nista raditi
 if cFilter == ""
-	return
+	return nCount
 endif
 
 select e_aops
