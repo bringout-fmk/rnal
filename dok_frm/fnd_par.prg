@@ -27,41 +27,14 @@ if !FILE(PRIVPATH + cFndDbf + ".DBF")
 	
 	AADD(aDbf, { "fnd_par_no", "N", 4, 0})
 	AADD(aDbf, { "fnd_par_type", "C", 10, 0})
-	AADD(aDbf, { "fnd_str", "C", 100, 0})
-	AADD(aDbf, { "fnd_att", "N", 10, 0})
-	AADD(aDbf, { "fnd_val_1", "N", 10, 0})
-	AADD(aDbf, { "fnd_val_2", "N", 10, 0})
-	AADD(aDbf, { "fnd_val_3", "N", 10, 0})
+	AADD(aDbf, { "fnd_att", "C", 10, 0})
+	AADD(aDbf, { "fnd_val", "C", 10, 0})
 
 	DBcreate2(PRIVPATH + cFndDbf + ".DBF", aDbf)
 
 endif
 
 CREATE_INDEX("1", "STR(fnd_par_no, 4)", PRIVPATH + cFndDbf, .t.)
-
-O__FND_PAR
-select _fnd_par
-
-// ako je prazna tabela dodaj init podatke....
-if RECCOUNT2() == 0
-
-	append blank
-	replace fnd_par_no with 1
-	replace fnd_par_type with "ART_DESC"
-	
-	append blank
-	replace fnd_par_no with 2
-	replace fnd_par_type with "MATCH_CODE"
-	
-	append blank
-	replace fnd_par_no with 3
-	replace fnd_par_type with "EL_ATT"
-
-	append blank
-	replace fnd_par_no with 4
-	replace fnd_par_type with "EL_ADD_OP"
-
-endif
 
 return
 
@@ -197,30 +170,51 @@ static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 aKol:={}
 
-AADD(aImeKol, { PADC( "Tip", 6), {|| PADR(g_fnd_par_type( fnd_par_type ), 6)} })
-
-// edit kolone...
-
-// string ....
-AADD(aImeKol, {PADC("tekst", 30), {|| PADR(fnd_str, 30) }, "fnd_str", {|| ALLTRIM(fnd_par_type) $ "MATCH_CODE#ART_NAZ"}, {|| .t.}, "V"  })
+// tip atributa...
+AADD(aImeKol, ;
+	{ PADC( "Tip", 6),;
+	{|| PADR(g_fnd_par_type( fnd_par_type ), 6)} })
 
 // atribut
-AADD(aImeKol, {PADC("Atribut", 10), {|| PADR(g_gr_at_desc(fnd_att), 10) }, "fnd_att", {|| ALLTRIM(fnd_par_type) $ "EL_ATT#EL_ADD_OP" }, {|| s_e_gr_att( @wfnd_att, nil, wfnd_att ) }, "V"  })
+AADD(aImeKol, ;
+	{PADC("Atribut", 10),;
+	{|| IF(ALLTRIM(fnd_par_type) $ "ATT#AOP" ,PADR(g_gr_at_desc(VAL(fnd_att)), 10), PADR("*****", 10) ) },;
+	"fnd_att",;
+	{|| ALLTRIM(fnd_par_type) $ "ATT#AOP" .or. not_att_msg() },;
+	{|| s_e_gr_att( @wfnd_att, nil, wfnd_att ), to_str(@wfnd_att) },;
+	"V" })
 
-// vrijednost 1
-AADD(aImeKol, {PADC("Atr.vr 1", 10), {|| PADR(g_e_gr_vl_desc(fnd_val_1), 10)}, "fnd_val_1", {|| ALLTRIM(fnd_par_type) $ "EL_ATT#EL_ADD_OP"}, {|| s_e_gr_val( @wfnd_val_1, fnd_att, wfnd_val_1 ) }, "V"  })
 
-// vrijednost 2
-AADD(aImeKol, {PADC("Atr.vr 2", 10), {|| PADR(g_e_gr_vl_desc(fnd_val_2), 10)}, "fnd_val_2", {|| ALLTRIM(fnd_par_type) $ "EL_ATT#EL_ADD_OP"}, {|| s_e_gr_val( @wfnd_val_2, fnd_att, wfnd_val_2 ) }, "V"  })
-
-// vrijednost 3
-AADD(aImeKol, {PADC("Atr.vr 3", 10), {|| PADR(g_e_gr_vl_desc(fnd_val_3), 10)}, "fnd_val_3", {|| ALLTRIM(fnd_par_type) $ "EL_ATT#EL_ADD_OP" }, {|| s_e_gr_val( @wfnd_val_3, fnd_att, wfnd_val_3 ) }, "V"  })
+// vrijednost atributa
+AADD(aImeKol, ;
+	{PADC("Vrijednost", 40), ;
+	{|| IF( ALLTRIM(fnd_par_type) $ "ATT#AOP" , PADR(g_e_gr_vl_desc(val(fnd_val)), 40), PADR(fnd_val, 40))  },;
+	"fnd_val",;
+	{|| .t. },;
+	{|| IF(ALLTRIM(fnd_par_type) $ "ATT#AOP" , s_e_gr_val(@wfnd_val, VAL(fnd_att), wfnd_val), .t.), to_str(@wfnd_val)},;
+	"V"  })
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
 next
 
 return
+
+// -----------------------------------------
+// konvertuje nPar -> nPar.string
+// -----------------------------------------
+static function to_str(nPar)
+if VALTYPE(nPar) == "N"
+	nPar := STR(nPar,10)
+endif
+return .t.
+
+// -----------------------------------------
+// poruka sekcija nema atributa
+// -----------------------------------------
+static function not_att_msg()
+MSGBEEP("Ova sekcija nema atributa !!!#Unosi se samo vrijednost.")
+return .f.
 
 
 // -----------------------------------------------
@@ -233,10 +227,6 @@ local nY := m_y
 private izbor := 1
 private opc := {}
 private opcexe := {}
-
-if Pitanje(,"Dodati novi parametar za pretragu ?", "D") == "N"
-	return -1
-endif
 
 AADD(opc, "naziv artikla              ")
 AADD(opcexe, {||  nSelection := izbor, izbor := 0})
@@ -269,13 +259,13 @@ endif
 
 do case 
 	case nSelection == 1
-		cFndParType := "ART_DESC"
+		cFndParType := "DESC"
 	case nSelection == 2
-		cFndParType := "MATCH_CODE"
+		cFndParType := "MC"
 	case nSelection == 3
-		cFndParType := "EL_ATT"
+		cFndParType := "ATT"
 	case nSelection == 4
-		cFndParType := "EL_ADD_OP"
+		cFndParType := "AOP"
 endcase 
 
 select _fnd_par
@@ -303,16 +293,16 @@ static function g_fnd_par_type( par_type )
 
 par_type := ALLTRIM( par_type )
 
-if par_type == "EL_ATT"
+if par_type == "ATT"
 	return "atrib."
 endif
-if par_type == "EL_ADD_OP"
+if par_type == "AOP"
 	return "d.oper"
 endif
-if par_type == "MATCH_CODE"
+if par_type == "MC"
 	return "m.code"
 endif
-if par_type == "ART_DESC"
+if par_type == "DESC"
 	return "naziv"
 endif
 if EMPTY( par_type )
@@ -320,4 +310,6 @@ if EMPTY( par_type )
 endif
 
 return
+
+
 
