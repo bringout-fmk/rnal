@@ -238,7 +238,8 @@ local nX := m_x
 local nY := m_y
 local GetList := {}
 local nRec := RecNo()
-altd()
+local nDocNoNew := 0
+
 do case 
 
 	// automatski tab
@@ -251,7 +252,7 @@ do case
 	// browse tabele
 	case Ch == K_TAB
 
-		if ALIAS() == "_DOCS"
+		if ALIAS() == "_DOCS" .and. RecCount2() <> 0
 			
 			select _doc_it
 			nRet := DE_ABORT
@@ -349,7 +350,34 @@ do case
 			endif
 			
 		endif
+	
+	case Ch == K_ALT_A
+		
+		nRet := DE_CONT
+		
+		if ALIAS() == "_DOCS" .and. Pitanje(,"Izvrsiti azuriranje dokumenta (D/N) ?", "D") == "D"
 
+			altd()
+
+			// uzmi novi broj dokumenta
+			nDocNoNew := _new_doc_no()
+
+			// filuj sve tabele sa novim brojem
+			fill__doc_no( nDocNoNew )
+			
+			if doc_insert( nDocNoNew ) == 1
+				
+				select _docs
+				l_auto_tab := .t.
+				KEYBOARD CHR(K_TAB)
+				nRet := DE_REFRESH
+						
+			endif
+		
+		endif
+		
+		return nRet
+	
 endcase
 
 m_x := nX

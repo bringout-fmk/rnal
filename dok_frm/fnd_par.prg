@@ -2,21 +2,19 @@
 
 
 
-
 // ----------------------------------------------------------------------
 // Kreiranje pomocne tabele za parametre 
 // pretrage kod unosa naloga
 // 
 // _FND_PAR.DBF
 //  
-// -------------------------------------------------------------------
-// fnd_..no | fnd_..type | fnd_str | fnd_att | fnd_val_1 | fnd_val_2 |...
-// -------------------------------------------------------------------
-//        1 |   NAZ      | stakl...|         |           |           |
-//        2 | MATCH_CODE | LWE4... |         |           |           |
-//        3 |   ATTRIB   |         |    1    |    1      |           |
-//        4 |   ATTRIB   |         |    5    |    11     |     12    |
-// -------------------------------------------------------------------
+// -------------------------------------------
+// fnd_..no | fnd_..type | fnd_att | fnd_val |
+// -------------------------------------------
+//        1 |   MC       |         | FC4K    |
+//        2 |   ATT      |    1    |    1    |
+//        3 |   ATT      |    5    |   11    | 
+// -------------------------------------------
 // ----------------------------------------------------------------------
 
 function _cre_fnd_par()
@@ -97,7 +95,7 @@ return 1
 static function key_handler()
 local nTRec := RECNO()
 
-if ( Ch == K_CTRL_T .or. Ch == K_CTRL_F9 ) .and. RecCount2() == 0
+if ( Ch == K_CTRL_T .or. Ch == K_CTRL_F9) .and. RecCount2() == 0
 	return DE_CONT
 endif
 
@@ -177,11 +175,11 @@ AADD(aImeKol, ;
 
 // atribut
 AADD(aImeKol, ;
-	{PADC("Atribut", 10),;
-	{|| IF(ALLTRIM(fnd_par_type) $ "ATT#AOP" ,PADR(g_gr_at_desc(VAL(fnd_att)), 10), PADR("*****", 10) ) },;
+	{PADC("Atribut", 15),;
+	{|| IF(ALLTRIM(fnd_par_type) $ "ATT#AOP", "(" + ALLTRIM(g_egr_by_att(VAL(fnd_att))) + ") /" + PADR(g_gr_at_desc(VAL(fnd_att)), 15), PADR("*****", 10) ) },;
 	"fnd_att",;
 	{|| ALLTRIM(fnd_par_type) $ "ATT#AOP" .or. not_att_msg() },;
-	{|| s_e_gr_att( @wfnd_att, nil, wfnd_att ), to_str(@wfnd_att) },;
+	{|| s_e_gr_att( @wfnd_att, nil, @wfnd_att ), to_str(@wfnd_att) },;
 	"V" })
 
 
@@ -191,7 +189,7 @@ AADD(aImeKol, ;
 	{|| IF( ALLTRIM(fnd_par_type) $ "ATT#AOP" , PADR(g_e_gr_vl_desc(val(fnd_val)), 40), PADR(fnd_val, 40))  },;
 	"fnd_val",;
 	{|| .t. },;
-	{|| IF(ALLTRIM(fnd_par_type) $ "ATT#AOP" , s_e_gr_val(@wfnd_val, VAL(fnd_att), wfnd_val), .t.), to_str(@wfnd_val)},;
+	{|| IF(ALLTRIM(fnd_par_type) $ "ATT#AOP" , s_e_gr_val(@wfnd_val, VAL(fnd_att), @wfnd_val), .t.), to_str(@wfnd_val)},;
 	"V"  })
 
 for i:=1 to LEN(aImeKol)
@@ -200,8 +198,9 @@ next
 
 return
 
+
 // -----------------------------------------
-// konvertuje nPar -> nPar.string
+// konvertuje nPar -> STR(nPar) i vraæa .t.
 // -----------------------------------------
 static function to_str(nPar)
 if VALTYPE(nPar) == "N"
@@ -228,13 +227,11 @@ private izbor := 1
 private opc := {}
 private opcexe := {}
 
-AADD(opc, "naziv artikla              ")
+AADD(opc, "1. atribut elementa             ")
 AADD(opcexe, {||  nSelection := izbor, izbor := 0})
-AADD(opc, "match code")
+AADD(opc, "2. dodatna operacija artikla")
 AADD(opcexe, {||  nSelection := izbor, izbor := 0})
-AADD(opc, "atribut")
-AADD(opcexe, {||  nSelection := izbor, izbor := 0})
-AADD(opc, "dodatna operacija")
+AADD(opc, "3. match code artikla")
 AADD(opcexe, {||  nSelection := izbor, izbor := 0})
 
 Menu_SC("fnd_par_add")
@@ -259,13 +256,11 @@ endif
 
 do case 
 	case nSelection == 1
-		cFndParType := "DESC"
-	case nSelection == 2
-		cFndParType := "MC"
-	case nSelection == 3
 		cFndParType := "ATT"
-	case nSelection == 4
+	case nSelection == 2
 		cFndParType := "AOP"
+	case nSelection == 3
+		cFndParType := "MC"
 endcase 
 
 select _fnd_par
@@ -301,9 +296,6 @@ if par_type == "AOP"
 endif
 if par_type == "MC"
 	return "m.code"
-endif
-if par_type == "DESC"
-	return "naziv"
 endif
 if EMPTY( par_type )
 	return "????"

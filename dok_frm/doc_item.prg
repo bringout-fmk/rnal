@@ -12,6 +12,8 @@ static _doc
 // lNew - nova stavka .t. or .f.
 // ------------------------------------------
 function e_doc_item( nDoc_no, lNew )
+local nX := m_x
+local nY := m_y
 local nGetBoxX := 10
 local nGetBoxY := 70
 local GetList:={}
@@ -64,6 +66,9 @@ do while .t.
 enddo
 
 select _docs
+
+m_x := nX
+m_y := nY
 
 return nRet
 
