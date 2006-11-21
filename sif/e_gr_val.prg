@@ -36,6 +36,10 @@ gr_att_filter(nE_gr_at_id, cE_gr_vl_desc)
 	
 cRet := PostojiSifra(F_E_GR_VAL, 1, 16, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
+if VALTYPE(cE_gr_vl_desc) == "N"
+	cE_gr_vl_desc := STR(cE_gr_vl_desc, 10)
+endif
+
 if nE_gr_at_id > 0 .or. cE_gr_vl_desc <> ""
 	set filter to
 endif
@@ -85,7 +89,7 @@ if !EMPTY( cE_gr_vl_desc )
 		cFilter += " .and. "
 	endif
 
-	cFilter += "UPPER(e_gr_vl_desc) = " + cm2str( UPPER(ALLTRIM(cE_gr_vl_desc)) )
+	cFilter += "UPPER(e_gr_vl_de) = " + cm2str( UPPER(ALLTRIM(cE_gr_vl_desc)) )
 endif
 
 if !EMPTY(cFilter)

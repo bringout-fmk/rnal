@@ -66,6 +66,8 @@ return nRet
 // ---------------------------------------------
 static function _srch_art()
 local nRet := 0
+ 
+cFiltMC := ""
 
 select articles
 set relation to
@@ -80,25 +82,29 @@ set filter to
 // kreiraj pomocnu tabelu _ART_TMP i otvori je
 _cre_art_tmp()
 
-// gen description filter
-nRet += _set_desc_filter( _gen_desc_filter() )
-
-// gen m_code filter...
-nRet += _set_mc_filter( _gen_mc_filter() )
-
-// gen atribut filter ...
+// gen atribut elementa filter ...
 nRet += _set_att_filter( _gen_att_filter() )
 
-// gen aops filter...
+// gen add ops.. filter...
 nRet += _set_aop_filter( _gen_aop_filter() )
+
+// gen match_code filter...
+cFiltMC := _gen_mc_filter()
+
+if EMPTY(cFiltMC)
+	cFiltMC := ".t."
+endif
 
 select articles
 go top
 
+// postavi relaciju ARTICLES -> _ART_TMP
+// setuj filter po _ART_TMP->ART_MARKER = '*' i ARTICLES->MATCH_CODE
+
 if nRet > 0
 
 	set relation to STR(articles->art_id, 10) into _art_tmp
-	set filter to _art_tmp->(art_marker) == '*'
+	set filter to _art_tmp->(art_marker) == '*' .and. &cFiltMC
 	go top
 
 endif
@@ -114,8 +120,6 @@ static function _gen_att_filter()
 local cUsl := ""
 local nTArea := SELECT()
 local cFilt := ""
-
-altd()
 
 select _fnd_par
 set order to tag "1"
@@ -158,8 +162,6 @@ local nEl_id := 0
 local nArt_id := 0
 local nCount := 0
 
-altD()
-
 // ako nema filtera nemoj nista raditi
 if cFilter == ""
 	return nCount
@@ -177,91 +179,7 @@ do while !EOF()
 	go top
 	seek elid_str(nEl_id)
 
-	if FOUND()
-		
-		nArt_id := elements->art_id
-		
-		select _art_tmp
-		set order to tag "1"
-		go top
-		seek artid_str( nArt_id )
-		
-		if !FOUND()
-			append blank
-			Scatter()
-			_art_id := nArt_id
-			_art_marker := "*"
-			Gather()
-		endif
-	endif
-	
-	select e_att
-	skip
-
-	++ nCount
-	
-enddo
-
-select e_att
-set filter to
-
-select (nTArea)
-
-return nCount
-
-
-// --------------------------------------------
-// FILTER.GEN. art_description
-// --------------------------------------------
-static function _gen_desc_filter()
-local nTArea := SELECT()
-local cFilt := ""
-
-select _fnd_par
-set order to tag "1"
-go top
-
-do while !EOF()
-
-	if ALLTRIM( field->fnd_par_type ) <> "DESC"
-		skip
-		loop
-	endif
-
-	if !EMPTY(cFilt)
-		cFilt += " .or. "
-	endif
-	
-	cFilt += " art_desc = " + cm2str( ALLTRIM(field->fnd_val) )
-
-	skip
-enddo
-
-select (nTArea)
-
-return cFilt
-
-
-
-// ---------------------------------------------------
-// setuje filter za opis artikla
-// ---------------------------------------------------
-static function _set_desc_filter( cFilter ) 
-local nTArea := SELECT()
-local nCount := 0
-
-// ako nema filtera nemoj nista raditi
-if cFilter == ""
-	return nCount
-endif
-
-select articles
-set filter to &cFilter
-go top
-
-do while !EOF()
-	
-	nArt_id := field->art_id
+	nArt_id := elements->art_id
 
 	select _art_tmp
 	set order to tag "1"
@@ -276,18 +194,20 @@ do while !EOF()
 		Gather()
 	endif
 	
-	select articles
+	select e_att
 	skip
 
 	++ nCount
+
 enddo
 
-select articles
+select e_att
 set filter to
 
 select (nTArea)
 
 return nCount
+
 
 
 // --------------------------------------------

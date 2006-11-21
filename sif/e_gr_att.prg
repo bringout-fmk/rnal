@@ -21,6 +21,9 @@ _mod_tb_direkt( _tb_direkt )
 
 cHeader := "Elementi - grupe atributi /  'V' - pr.vrijednosti"
 
+altd()
+
+
 if nGr_id == nil
 	nGr_id := -1
 endif
@@ -30,7 +33,6 @@ if cE_gr_at_desc == nil
 endif
 
 select e_gr_att
-set filter to
 set order to tag "1"
 go top
 
@@ -39,12 +41,19 @@ gr_filter(nGr_id, cE_gr_at_desc)
 	
 cRet := PostojiSifra(F_E_GR_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
+if VALTYPE(cE_gr_at_desc) == "N"
+	cE_gr_at_desc := STR(cE_gr_at_desc, 10)
+endif
+
 if nGr_id > 0 .or. cE_gr_at_desc <> ""
 	set filter to
 endif
 
 select (nTArea)
-//_mod_tb_direkt( _tb_direkt )
+
+if LastKey() == K_ESC
+	cRet := 0
+endif
 
 return cRet
 
@@ -58,16 +67,16 @@ static function gr_filter(nE_gr_id, cE_gr_at_desc)
 local cFilter := ""
 
 if nE_gr_id > 0
-	cFilter += "e_gr_id == " + e_gr_id_str(nE_gr_id)
+	cFilter += 'e_gr_id == ' + e_gr_id_str(nE_gr_id)
 endif
 
 if !EMPTY(cE_gr_at_desc)
 
 	if !EMPTY(cFilter)
-		cFilter += " .and. "
+		cFilter += ' .and. '
 	endif
 
-	cFilter += "UPPER(e_gr_at_desc) = " + cm2str( UPPER(ALLTRIM( cE_gr_at_desc )) )  
+	cFilter += 'UPPER(e_gr_at_de) = ' + cm2str(UPPER(ALLTRIM(cE_gr_at_desc))) 
 endif
 
 if !EMPTY(cFilter)
