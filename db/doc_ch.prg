@@ -1,108 +1,106 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+// variables
+static __doc_no
+static __oper_id
+
 // --------------------------
 // meni promjena
 // --------------------------
-function m_prom(nBr_nal)
+function m_changes( nDoc_no )
 private opc:={}
 private opcexe:={}
 private izbor:=1
 
-AADD(opc, "1. promjena osnovnih podataka naloga ")
-AADD(opcexe, {|| prom_osnovni(nBr_nal) })
-AADD(opc, "2. promjena podataka o isporuci ")
-AADD(opcexe, {|| prom_isporuka(nBr_nal) })
-AADD(opc, "3. dodaj novi kontakt ")
-AADD(opcexe, {|| add_kontakt(nBr_nal) })
-AADD(opc, "4. promjena kontakta na nalogu")
-AADD(opcexe, {|| prom_kontakt(nBr_nal) })
+__doc_no := nDoc_no
+__oper_id := GetUserID()
 
-Menu_sc("prom")
+AADD(opc, "1. promjena osnovnih podataka naloga ")
+AADD(opcexe, {|| _ch_main() })
+AADD(opc, "2. promjena podataka o isporuci ")
+AADD(opcexe, {|| _ch_ship() })
+AADD(opc, "3. promjena kontakta na nalogu")
+AADD(opcexe, {|| _ch_cont() })
+AADD(opc, "4. dodaj novi kontakt ")
+AADD(opcexe, {|| _add_cont() })
+
+Menu_sc("changes")
 
 return DE_CONT
+
+
 
 // ---------------------------------
 // promjena osnovnih podataka 
 // ---------------------------------
-function prom_osnovni(nBr_nal)
+function _ch_main()
 local nTRec := RecNo()
-local cPartn
-local cHitnost
-local cVrPlac
-local cOpis
-local cDbFilt
+local nCustId
+local nDoc_priority
+local nDoc_pay_type
+local cDesc
+local aArr
 
 if Pitanje(,"Zelite izmjeniti osnovne podatke naloga (D/N)?", "D") == "N"
 	return
 endif
 
-cDbFilt := DBFilter()
-select rnal
-set filter to
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
+select docs
 
-cPartn := field->idpartner
-cHitnost := field->hitnost
-cVrPlac := field->vr_plac
+nCustId := field->cust_id
+nDoc_priority := field->doc_priority
+nDoc_pay_type := field->doc_pay_id
 
 // box sa unosom podataka
-if box_osnovni(@cPartn, @cHitnost, @cVrPlac, @cOpis) == 0
+if _box_main(@nCustId, @nDoc_priority, @nDoc_pay_type, @cDesc) == 0
 	return
 endif
 
-cOperater := goModul:oDataBase:cUser
+aArr := a_log_main( nCustId, nDoc_priority, nDoc_pay_type ) 
+log_main(__doc_no, cDesc, "E", aArr)
 
-// logiraj ....
-log_osn(nBr_nal, cOperater, cOpis, cPartn, cHitnost, cVrPlac, "E")
+select docs
+Scatter()
 
-select rnal
-do while !EOF() .and. field->br_nal == nBr_nal
-	Scatter()
-	if _idpartner <> cPartn
-		_idpartner := cPartn
-	endif
-	if _hitnost <> cHitnost
-		_hitnost := cHitnost
-	endif
-	if _vr_plac <> cVrPlac
-		_vr_plac := cVrPlac
-	endif
-	_operater := cOperater
-	Gather()
-	skip
-enddo
+if field->_cust_id <> nCustId
+	_cust_id := nCustId
+endif
+if field->_doc_priority <> nDoc_priority
+	_doc_priority := nDoc_priority
+endif
+if field->_doc_pay_id <> nDoc_pay_type
+	_doc_pay_id := nDoc_pay_type
+endif
 
-select rnal
-set filter to &cDbFilt
+_operater_id := __oper_id
+
+Gather()
+
+skip
+
+select docs
 go (nTRec)
 
-MsgBeep("Napravljene promjene na osnovnim podacima!")
-
 return
-
 
 
 // --------------------------------------
 // box sa unosom podataka osnovnih
 // --------------------------------------
-static function box_osnovni(cPartn, cHitnost, cVrPlac, cOpis)
+static function _box_main(nCust, nPrior, nPay, cDesc)
 
 Box(, 7, 65)
-	cOpis := SPACE(150)
+	cDesc := SPACE(150)
 	@ m_x + 1, m_y + 2 SAY "Promjena na osnovnim podacima naloga:"
-	@ m_x + 3, m_y + 2 SAY "Partner:" GET cPartn VALID val_partner(@cPartn)
-	@ m_x + 4, m_y + 2 SAY "Hitnost (1/2/3):" GET cHitnost VALID val_kunos(@cHitnost, "123")
-	@ m_x + 5, m_y + 2 SAY "Vrsta placanja 1-kes, 2-ziro rn.:" GET cVrPlac VALID val_kunos(@cVrPlac, "12")
-	@ m_x + 7, m_y + 2 SAY "Opis:" GET cOpis PICT "@S40"
+	@ m_x + 3, m_y + 2 SAY "Narucioc:" GET nCust VALID {|| s_customers(@nCust), show_it( g_cust_desc( nCust ) ) }
+	@ m_x + 4, m_y + 2 SAY "Prioritet (1/2/3):" GET nPrior VALID nPrior > 0 .and. nPrior < 4
+	@ m_x + 5, m_y + 2 SAY "Vrsta placanja 1-kes, 2-ziro rn.:" GET nPay VALID nPay > 0 .and. nPay < 3
+	@ m_x + 7, m_y + 2 SAY "Opis promjene:" GET cDesc PICT "@S40"
 	read
 BoxC()
 
-if LastKey() == K_ESC
-	return 0
-endif
+ESC_RETURN 0
 
 return 1
 
@@ -111,63 +109,53 @@ return 1
 // ---------------------------------
 // promjena podataka o isporuci
 // ---------------------------------
-function prom_isporuka(nBr_nal)
+function _ch_ship()
 local nTRec := RecNo()
-local cMjIsp
-local cVrIsp
-local dDatIsp
-local cDatIsp
-local cOperater
-local cOpis
-local cDbFilt
+local cShipPlace
+local cDvrTime
+local dDvrDate
+local cDesc
+local aArr
 
 if Pitanje(,"Zelite izmjeniti podatke o isporuci naloga (D/N)?", "D") == "N"
 	return
 endif
 
-cDbFilt := DBFilter()
-select rnal
-set filter to
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
-
-cMjIsp := field->mj_isp
-cVrIsp := field->vr_isp
-dDatIsp := field->datisp
+cShipPlace := field->doc_ship_place
+dDvrDate := field->doc_dvr_date
+cDvrTime := field->doc_dvr_time
 
 // box sa unosom podataka
-if box_isporuka(@cMjIsp, @cVrIsp, @dDatIsp, @cOpis) == 0
+if _box_ship(@dDvrDate, @cDvrTime, @cShipPlace, @cDesc) == 0
 	return
 endif
 
-cDatIsp := DTOC(dDatIsp)
-cOperater := goModul:oDataBase:cUser
 // logiraj isporuku
-log_isporuka(nBr_nal, cOperater, cOpis, cMjIsp, cVrIsp, cDatIsp, "E")
+aArr := a_log_ship( dDvrDate, cDvrTime, cShipPlace )
+log_ship(__doc_no, cDesc, "E", aArr)
 
-select rnal
-do while !EOF() .and. field->br_nal == nBr_nal
-	Scatter()
-	if _mj_isp <> cMjIsp
-		_mj_isp := cMjIsp
-	endif
-	if _vr_isp <> cVrIsp
-		_vr_isp := cVrIsp
-	endif
-	if _datisp <> dDatIsp
-		_datisp := dDatIsp
-	endif
-	_operater := cOperater
-	Gather()
-	skip
-enddo
+select docs
 
-select rnal
-set filter to &cDbFilt
+Scatter()
+
+if field->_doc_ship_place <> cShipPlace
+	_doc_ship_place := cShipPlace
+endif
+
+if field->_doc_dvr_time <> cDvrTime
+	_doc_dvr_time := cDvrTime
+endif
+
+if field->_doc_dvr_date <> dDvrDate
+	_doc_dvr_date := dDvrDate
+endif
+
+_operater_id := __oper_id
+
+Gather()
+
+select docs
 go (nTRec)
-
-MsgBeep("Napravljene promjene na podacima o isporuci !")
 
 return
 
@@ -175,109 +163,72 @@ return
 // --------------------------------------
 // box sa unosom podataka o isporuci
 // --------------------------------------
-static function box_isporuka(cMjIsp, cVrIsp, dDatIsp, cOpis)
+static function _box_ship(cShip, cTime, dDate, cDesc)
 
 Box(, 7, 65)
-	cOpis := SPACE(150)
+	cDesc := SPACE(150)
 	@ m_x + 1, m_y + 2 SAY "Promjena podataka o isporuci:"
-	@ m_x + 3, m_y + 2 SAY PADL("Novo mjesto isporuke:",22) GET cMjIsp VALID !EMPTY(cMjIsp) PICT "@S30"
-	@ m_x + 4, m_y + 2 SAY PADL("Novo vrijeme isporuke:",22) GET cVrIsp VALID !EMPTY(cVrIsp)
-	@ m_x + 5, m_y + 2 SAY PADL("Novi datum isporuke:",22) GET dDatIsp VALID !EMPTY(dDatIsp)
-	@ m_x + 7, m_y + 2 SAY PADL("Opis promjene:",22) GET cOpis PICT "@S40"
+	@ m_x + 3, m_y + 2 SAY PADL("Novo mjesto isporuke:",22) GET cShip VALID !EMPTY(cShip) PICT "@S30"
+	@ m_x + 4, m_y + 2 SAY PADL("Novo vrijeme isporuke:",22) GET cTime VALID !EMPTY(cTime)
+	@ m_x + 5, m_y + 2 SAY PADL("Novi datum isporuke:",22) GET dDate VALID !EMPTY(dDate)
+	@ m_x + 7, m_y + 2 SAY PADL("Opis promjene:",22) GET cDesc PICT "@S40"
 	read
 BoxC()
 
-if LastKey() == K_ESC
-	return 0
-endif
+ESC_RETURN 0
 
 return 1
-
-
-
-// ---------------------------------
-// dodaj kontakt naloga
-// ---------------------------------
-function add_kontakt(nBr_nal)
-local nTArea
-local cK_ime := SPACE(40)
-local cK_tel := SPACE(60)
-local cK_opis := SPACE(100)
-local cOperater
-local cOpis
-
-nTArea := SELECT()
-
-if box_kontakt(@cK_ime, @cK_tel, @cK_opis, @cOpis) == 0
-	return 
-endif
-
-cOperater := goModul:oDataBase:cUser
-
-// logiraj kontakt
-log_kontakt(nBr_nal, cOperater, cOpis, cK_ime, cK_tel, cK_opis, "+")
-
-select (nTArea)
-
-MsgBeep("Novi kontakt naloga dodan !")
-
-return
 
 
 // ---------------------------------
 // promjeni kontakt naloga
 // ---------------------------------
-function prom_kontakt(nBr_nal)
+function _ch_cont( lNew )
 local nTRec := RecNo()
-local cDbFilt
-local cK_ime
-local cK_tel
-local cK_opis
-local cOperater
-local cOpis
+local cDesc
+local aArr
+local cType := "E"
+local nCont_id := VAL(STR(0, 10))
+local nCont_desc := SPACE(150)
 
-cDbFilt := DBFilter()
-select rnal
-set filter to
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
+if lNew == nil
+	lNew := .f.
+endif
 
-cK_ime := field->k_ime
-cK_tel := field->k_tel
-cK_opis := field->k_opis
+if !lNew
+	nCont_id := field->cont_id
+	cCont_desc := field->cont_add_desc
+endif
 
-if box_kontakt(@cK_ime, @cK_tel, @cK_opis, @cOpis) == 0
+if _box_cont(@nCont_id, @cCont_desc, @cDesc) == 0
 	return 
 endif
 
-cOperater := goModul:oDataBase:cUser
-
 // logiraj promjenu kontakta
-log_kontakt(nBr_nal, cOperater, cOpis, cK_ime, cK_tel, cK_opis, "E")
+aArr := a_log_cont( nCont_id, nCont_desc )
 
-select rnal
-do while !EOF() .and. field->br_nal == nBr_nal
-	Scatter()
-	if _k_ime <> cK_ime
-		_k_ime := cK_ime
-	endif
-	if _k_tel <> cK_tel
-		_k_tel := cK_tel
-	endif
-	if _k_opis <> cK_opis
-		_k_opis := cK_opis
-	endif
-	_operater := cOperater
-	Gather()
-	skip
-enddo
+if lNew 
+	cType := "+"
+endif
 
-select rnal
-set filter to &cDbFilt
+log_cont(__doc_no, cDesc, cType, aArr)
+
+select docs
+	
+Scatter()
+if field->_cont_id <> nCont_id
+	_cont_id := nCont_id
+endif
+if field->_cont_add_desc <> cCont_desc
+	_cont_add_desc := cCont_desc
+endif
+
+_operater_id := __oper_id
+
+Gather()
+
+select docs
 go (nTRec)
-
-MsgBeep("Izmjenjen kontakt naloga !")
 
 return
 
@@ -285,21 +236,32 @@ return
 // ------------------------------------
 // box sa podatkom o kontaktu
 // ------------------------------------
-static function box_kontakt(cK_ime, cK_tel, cK_opis, cOpis)
+static function _box_cont(nCont, cCont_desc, cDesc)
+local nNew := .f.
+
+if nCont == 0
+	lNew := .t.
+endif
 
 Box(, 7, 65)
-	cOpis := SPACE(150)
-	@ m_x + 1, m_y + 2 SAY "Novi kontakti naloga:"
-	@ m_x + 3, m_y + 2 SAY PADL("Kontakt, ime:",20) GET cK_ime VALID !EMPTY(cK_ime) PICT "@S30"
-	@ m_x + 4, m_y + 2 SAY PADL("Kontakt, telefoni:",20) GET cK_tel VALID !EMPTY(cK_tel) PICT "@S30"
-	@ m_x + 5, m_y + 2 SAY PADL("Kontakt, dod.opis:",20) GET cK_opis VALID !EMPTY(cK_opis) PICT "@S30"
-	@ m_x + 7, m_y + 2 SAY "Opis promjene:" GET cOpis PICT "@S40"
+
+	cDesc := SPACE(150)
+	
+	if lNew == .t.
+		@ m_x + 1, m_y + 2 SAY "Novi kontakti naloga:"
+	else
+		@ m_x + 1, m_y + 2 SAY "Ispravka kontakta naloga:"
+	endif
+	
+	@ m_x + 3, m_y + 2 SAY PADL("Kontakt:",20) GET nCont VALID {|| s_contacts(@nCont) , show_it( g_cont_desc( nCont ) )}
+	
+	@ m_x + 4, m_y + 2 SAY PADL("Kontakt, dodatni opis:",20) GET cContDesc PICT "@S30"
+	
+	@ m_x + 7, m_y + 2 SAY "Opis promjene:" GET cDesc PICT "@S40"
 	read
 BoxC()
 
-if LastKey() == K_ESC
-	return 0
-endif
+ESC_RETURN 0
 
 return 1
 

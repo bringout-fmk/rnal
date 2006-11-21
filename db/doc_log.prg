@@ -1,471 +1,389 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+// variables
+static __doc_no
+
+
+
 // -------------------------------------------
 // logiranje promjena pri operaciji azuriranja
 // dokumenta
 // -------------------------------------------
-function doc_logit( nDoc_no )
-local cOperater
-local cKontakt
-local cVrIsp
-local cMjIsp
-local cDatIsp
-local cPartner
-local cPrioritet
-local cVrPlac
+function doc_logit()
+local cDesc := ""
+local aArr
 
-// uzmi podatke iz _DOCS
 select _docs
 go top
 
-/*
-cOperater := field->operater
-cK_ime := field->k_ime
-cK_tel := field->k_tel
-cK_opis := field->k_opis
-cVrIsp := field->vr_isp
-cMjIsp := field->mj_isp
-cDatIsp := DTOC(field->dat_isp)
-cPartner := field->idpartner
-cPrioritet := field->hitnost
-cVrPlac := field->vr_plac
-
+__doc_no := field->doc_no
 
 // logiraj osnovne podatke
-cOpis := "Init.osnovni podaci"
-log_osn(nBr_nal, cOperater, cOpis, cPartner, cPrioritet, cVrPlac)
+cDesc := "Inicijalni osnovni podaci"
+
+aArr := a_log_main(field->cust_id, ;
+		field->doc_pay_id, ;
+		field->doc_priority )
+
+log_main(__doc_no, cDesc, nil, aArr)
+
+select _docs
+go top
 
 // logiraj podatke o isporuci
-cOpis := "Init.podaci isporuke"
-log_isporuka(nBr_nal, cOperater, cOpis, cMjIsp, cVrIsp, cDatIsp)
+cDesc := "Inicijalni podaci isporuke"
+aArr := a_log_ship( field->doc_dvr_date, ;
+		field->doc_dvr_time, ;
+		field->doc_ship_place)
+		
+log_ship(__doc_no, cDesc, nil, aArr)
+
+select _docs
+go top
 
 // logiranje podataka o kontaktu
-cOpis := "Init.podaci isporuke"
-log_kontakt(nBr_nal, cOperater, cOpis, cK_ime, cK_tel, cK_opis)
+cDesc := "Inicijalni podaci kontakta"
+aArr := a_log_cont( field->cont_id, field->cont_add_desc )
+
+log_cont(__doc_no, cDesc, nil, aArr)
+
+
+select _doc_it
+go top
 
 // logiranje artikala
-cOpis := "Init.podaci stavki"
-log_artikal(nBr_nal, cOperater, cOpis)
+cDesc := "Inicijalni podaci stavki"
 
-// logiranje operacija
-cOpis := "Init.podaci operacija"
-log_operacije(nBr_nal, cOperater, cOpis)
+log_items(__doc_no, cDesc)
 
-*/
+
 return
 
 
+// -------------------------------------------------
+// puni matricu sa osnovnim podacima dokumenta
+// aArr = { customer_id, doc_pay_id, doc_priority }
+// -------------------------------------------------
+static function a_log_main(nCustId, nDocPay, nPriority)
+local aArr := {}
+AADD(aArr, { nCustId, nDocPay, nPriority })
+return aArr
+
+
+// -------------------------------------------------
+// puni matricu sa podacima isporuke
+// aArr = { doc_dvr_date, doc_dvr_time, doc_ship_place }
+// -------------------------------------------------
+static function a_log_ship(dDate, cTime, cPlace)
+local aArr := {}
+AADD(aArr, { dDate, cTime, cPlace })
+return aArr
+
+
+// -------------------------------------------------
+// puni matricu sa podacima kontakta
+// aArr = { cont_id, cont_add_desc }
+// -------------------------------------------------
+static function a_log_cont(nCont_id, cCont_desc)
+local aArr := {}
+AADD(aArr, { nCont_id, cCont_desc })
+return aArr
+
+
+
+
+
+// ----------------------------------------------------
 // logiranje osnovnih podataka
-function log_osn(nBr_nal, cOperater, cOpis, cPartner, cPrioritet, cVrPlac, cAkcija)
-local nLOGR_br
-local cTip
+// nDoc_no - dokument no
+// cDesc - opis
+// cAction - akcija 
+// aMain - matrica sa osnovnim podacima
+// ----------------------------------------------------
+function log_main( nDoc_no, cDesc, cAction, aArr )
+local nDoc_log_no
+local cDoc_log_type
 
-if ( cAkcija == nil)
-	cAkcija := "+"
+if ( cAction == nil)
+	cAction := "+"
 endif
 
-cTip := "10"
-nLOGR_br := n_log_rbr( nBr_nal )
+cDoc_log_type := "10"
+nDoc_log_no := _inc_log_no( nDoc_no )
 
-f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
-f10_stavke(cAkcija, nBr_nal, nLOGR_br, cPartner, cVrPlac, cPrioritet)
-
-return
-
-
-// logiranje podatka isporuke
-function log_isporuka(nBr_nal, cOperater, cOpis, cMjIsp, cVrIsp, cDatIsp, cAkcija)
-local nLOGR_br
-local cTip
-
-if ( cAkcija == nil )
-	cAkcija := "+"
-endif
-
-cTip := "11"
-nLOGR_br := n_log_rbr( nBr_nal )
-
-f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
-f11_stavke(cAkcija, nBr_nal, nLOGR_br, cMjIsp, cDatIsp, cVrIsp)
-
-return
-
-
-// logiranje kontakta
-function log_kontakt(nBr_nal, cOperater, cOpis, cK_ime, cK_tel, cK_opis, cAkcija)
-local nLOGR_br
-local cTip
-
-if ( cAkcija == nil )
-	cAkcija := "+"
-endif
-cTip := "12"
-nLOGR_br := n_log_rbr( nBr_nal )
-
-f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
-f12_stavke(cAkcija, nBr_nal, nLOGR_br, cK_ime, cK_tel, cK_opis)
-
-return
-
-
-// logiranje artikala
-function log_artikal(nBr_nal, cOperater, cOpis)
-local cProizvod
-local nLOGR_br
-local cAkcija
-local cTip
-local cRobVrsta
-local lLogSt := .f.
-
-nLOGR_br := n_log_rbr( nBr_nal )
-cAkcija := "+"
-cTip := "20"
-
-select p_rnst
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
-
-do while !EOF() .and. field->br_nal == nBr_nal
-
-	nR_br := field->r_br
-	cItemId := field->item_id
-	nKolicina := field->item_kol
-	nVisina := field->item_visina
-	nSirina := field->item_sirina
-	nDebljina := field->item_debljina
-	cRobVrsta := ""
-		
-	f20_stavke(cAkcija, nBr_nal, nLOGR_br, ;
-		cItemID, "", cRobVrsta, nKolicina, ;
-		nSirina, nVisina)
-		
-	lLogSt := .t.
-	
-	select p_rnst
-	skip
-	
-enddo
-
-// ako je bilo stavki dodaj i RNLOG zapis
-if lLogSt
-	f_rnlog(nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
-endif
-
-return
-
-
-// ------------------------------
-// logiranje operacija
-// ------------------------------
-function log_operacije(nBr_nal, cOperater, cOpis)
-local cProizvod
-local nLOGR_br
-local cAkcija
-local cTip
-local lLogOper := .f.
-
-nLOGR_br := n_log_rbr( nBr_nal )
-cAkcija := "+"
-cTip := "30"
-
-select p_rnst
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
-
-do while !EOF() .and. field->br_nal == nBr_Nal
-
-	cItemID := field->item_id
-	nR_br := field->r_br
-		
-	select p_rnop
-	set order to tag "br_nal"
-	go top
-	
-	seek s_br_nal(nBr_nal) + s_r_br(nR_br) + cItemID
-		
-	do while !EOF() .and. field->br_nal == nBr_nal;
-			.and. field->r_br == nR_br;
-			.and. field->idroba == cItemID
-
-		nSTP_br := field->p_br
-		cRnKa := field->id_rnka
-		cRnOper := field->id_rnop
-		cInstr := field->rn_instr
-			
-		f30_stavke(cAkcija, nBr_nal, nLOGR_br, ;
-				   cItemID, "", cRnOper, ;
-				   cRnKa, cInstr)
-			
-		lLogOper := .t.
-			
-		select p_rnop
-		skip
-	enddo
-		
-	select p_rnst
-	skip
-enddo
-
-// ako je bilo operacija dodaj i RNLOG zapis
-if lLogOper
-	f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
-endif
-
-return
-
-
-// ---------------------------------------
-// logiranje zatvaranje naloga...
-// ---------------------------------------
-function log_zatvori(nBr_nal, cOperater, cOpis, cReal, cAkcija)
-local nLOGR_br
-local cTip
-
-if ( cAkcija == nil )
-	cAkcija := "+"
-endif
-
-cTip := "99"
-nLOGR_br := n_log_rbr( nBr_nal )
-
-f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
-f99_stavke(cAkcija, nBr_nal, nLOGR_br, cReal)
-
-return
-
-
-
-// ---------------------------------------
-// logiranje otvaranje naloga...
-// ---------------------------------------
-function log_otvori(nBr_nal, cOperater, cOpis)
-local nLOGR_br
-local cTip
-
-if (cOpis == nil)
-	cOpis := "Nalog otvoren radi dorade"
-endif
-
-if (cOperater == nil)
-	cOperater := goModul:oDataBase:cUser
-endif
-
-cTip := "01"
-nLOGR_br := n_log_rbr( nBr_nal )
-
-f_rnlog( nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
-
-return
-
-
-
-// -------------------------------------------------------
-// dodaje stavku u tabelu RNLOG
-// -------------------------------------------------------
-function f_rnlog(nBr_nal, nR_br, cTip, ;
- 		 cOperater, cOpis)
-select rnlog
-append blank
-
-replace br_nal with nBr_nal
-replace r_br with nR_br
-replace datum with DATE()
-replace vrijeme with TIME()
-replace tip with cTip
-replace operater with cOperater
-replace opis with cOpis
+_d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+_lit_10_insert( cAction, nDoc_no, nDoc_log_no, aArr )
 
 return
 
 
 // -----------------------------------
-// filovanje stavki tip 10
-// partner, vrsta placanja, prioritet
+// punjenje loga sa stavkama tipa 10
 // -----------------------------------
-function f10_stavke(cAkcija, nBr_nal, nR_br, cPartn, cVrPlac, cPrioritet)
-local nP_br
+function _lit_10_insert(cAction, nDoc_no, nDoc_log_no, aArr)
+local nDoc_lit_no
 
-nP_br := n_logit_pbr(nBr_nal, nR_br)
+nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
 
-select rnlog_it
+select doc_lit
 append blank
 
-replace br_nal with nBr_nal
-replace r_br with nR_br
-replace p_br with nP_br
-replace c_1 with cPartn
-replace c_2 with cVrPlac
-replace c_3 with cPrioritet
-replace akcija with cAkcija
-
-return
-
-
-// --------------------------------
-// filovanje stavki tip 11
-// mjesto, datum i vrijeme isporuke
-// --------------------------------
-function f11_stavke(cAkcija, nBr_nal, nR_br, cMjIsp, cDatIsp, cVrIsp)
-local nP_br
-
-nP_br := n_logit_pbr(nBr_nal, nR_br)
-
-select rnlog_it
-append blank
-
-replace br_nal with nBr_nal
-replace r_br with nR_br
-replace p_br with nP_br
-replace c_1 with cMjIsp
-replace c_2 with cDatIsp
-replace c_3 with cVrIsp
-replace akcija with cAkcija
-
-return
-
-
-// --------------------------------
-// filovanje stavki tip 12
-// kontakti
-// --------------------------------
-function f12_stavke(cAkcija, nBr_nal, nR_br, cK_ime, cK_tel, cK_opis)
-local nP_br
-
-nP_br := n_logit_pbr(nBr_nal, nR_br)
-
-select rnlog_it
-append blank
-
-replace br_nal with nBr_nal
-replace r_br with nR_br
-replace p_br with nP_br
-replace c_1 with cK_ime
-replace c_2 with cK_tel
-replace c_3 with cK_opis
-replace akcija with cAkcija
-
-return
-
-
-// --------------------------------
-// filovanje stavki tip 20
-// stavke.... sastavnice
-// --------------------------------
-function f20_stavke(cAkcija, nBr_nal, nR_br, ;
-		    cRoba, cRoba2, cRobVrsta, nKol, nVis, nSir)
-local nP_br
-
-nP_br := n_logit_pbr(nBr_nal, nR_br)
-
-select rnlog_it
-append blank
-
-replace br_nal with nBr_nal
-replace r_br with nR_br
-replace p_br with nP_br
-replace idroba with cRoba
-replace idroba2 with cRoba2
-replace c_1 with cRobVrsta
-replace k_1 with nKol
-replace n_1 with nVis
-replace n_2 with nSir
-replace akcija with cAkcija
-
-return
-
-
-// --------------------------------
-// filovanje stavki tip 30
-// stavke.... instrukcije
-// --------------------------------
-function f30_stavke(cAkcija, nBr_nal, nR_br,;
-		     cRoba1, cRoba2, cRnOper,;
-		     cRnKa, cInstr)
-local nP_br
-
-nP_br := n_logit_pbr(nBr_nal, nR_br)
-
-select rnlog_it
-append blank
-
-replace br_nal with nBr_nal
-replace r_br with nR_br
-replace p_br with nP_br
-replace idroba with cRoba1
-replace idroba2 with cRoba2
-replace c_1 with cRnOper
-replace c_2 with cRnKa
-replace c_3 with cInstr
-replace akcija with cAkcija
-
-return
-
-
-// --------------------------------
-// filovanje stavki tip 99
-// zatvori nalog....
-// --------------------------------
-function f99_stavke(cAkcija, nBr_nal, nR_br, cReal)
-local nP_br
-
-nP_br := n_logit_pbr(nBr_nal, nR_br)
-
-select rnlog_it
-append blank
-
-replace br_nal with nBr_nal
-replace r_br with nR_br
-replace p_br with nP_br
-replace c_1 with cReal
-replace akcija with cAkcija
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_lit_no with nDoc_lit_no
+replace int_1 with aArr[1, 1]
+replace int_2 with aArr[1, 2]
+replace int_3 with aArr[1, 3]
+replace doc_lit_action with cAction
 
 return
 
 
 
-//------------------------------------------------
-// vraca sljedeci redni broj naloga u LOG tabeli
-//------------------------------------------------
-function n_log_rbr(nBr_nal)
-local nLastRbr:=0
-PushWa()
-select rnlog
-set order to tag "br_nal"
+// ----------------------------------------------------
+// logiranje podataka isporuke
+// nDoc_no - dokument no
+// cDesc - opis
+// cAction - akcija 
+// aArr - matrica sa podacima
+// ----------------------------------------------------
+function log_ship( nDoc_no, cDesc, cAction, aArr )
+local nDoc_log_no
+local cDoc_log_type
+
+if ( cAction == nil)
+	cAction := "+"
+endif
+
+cDoc_log_type := "11"
+nDoc_log_no := _inc_log_no( nDoc_no )
+
+_d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+_lit_11_insert( cAction, nDoc_no, nDoc_log_no, aArr )
+
+return
+
+
+// -----------------------------------
+// punjenje loga sa stavkama tipa 11
+// -----------------------------------
+function _lit_11_insert(cAction, nDoc_no, nDoc_log_no, aArr)
+local nDoc_lit_no
+
+nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
+
+select doc_lit
+append blank
+
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_lit_no with nDoc_lit_no
+replace date_1 with aArr[1, 1]
+replace char_1 with aArr[1, 2]
+replace char_2 with aArr[1, 3]
+replace doc_lit_action with cAction
+
+return
+
+
+// ----------------------------------------------------
+// logiranje podataka kontakata
+// nDoc_no - dokument no
+// cDesc - opis
+// cAction - akcija 
+// aArr - matrica sa podacima
+// ----------------------------------------------------
+function log_cont( nDoc_no, cDesc, cAction, aArr )
+local nDoc_log_no
+local cDoc_log_type
+
+if ( cAction == nil)
+	cAction := "+"
+endif
+
+cDoc_log_type := "12"
+nDoc_log_no := _inc_log_no( nDoc_no )
+
+_d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+_lit_12_insert( cAction, nDoc_no, nDoc_log_no, aArr )
+
+return
+
+
+// -----------------------------------
+// punjenje loga sa stavkama tipa 12
+// -----------------------------------
+function _lit_12_insert(cAction, nDoc_no, nDoc_log_no, aArr)
+local nDoc_lit_no
+
+nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
+
+select doc_lit
+append blank
+
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_lit_no with nDoc_lit_no
+replace int_1 with aArr[1, 1]
+replace char_1 with aArr[1, 2]
+replace doc_lit_action with cAction
+
+return
+
+
+
+// ----------------------------------------------------
+// logiranje podataka stavki naloga
+// nDoc_no - dokument no
+// cDesc - opis
+// cAction - akcija 
+// aArr - matrica sa podacima
+// ----------------------------------------------------
+function log_items( nDoc_no, cDesc, cAction )
+local nDoc_log_no
+local cDoc_log_type
+
+select _doc_it
+if RECCOUNT2() == 0
+	return
+endif
+
+if ( cAction == nil)
+	cAction := "+"
+endif
+
+cDoc_log_type := "20"
+nDoc_log_no := _inc_log_no( nDoc_no )
+
+_d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+
+select _doc_it
 go top
-seek STR(nBr_nal, 10, 0)
-do while !EOF() .and. (field->br_nal == nBr_nal)
-	nLastRbr := field->r_br
+seek docno_str(nDoc_no)
+
+do while !EOF() .and. field->doc_no == nDoc_no
+
+	_lit_20_insert( cAction, nDoc_no, nDoc_log_no, ;
+			field->art_id,  ;
+			field->doc_it_qtty,  ;
+			field->doc_it_heigh, ;
+			field->doc_it_width )
+	
+	select _doc_it
 	skip
+	
+enddo
+
+return
+
+
+// -----------------------------------
+// punjenje loga sa stavkama tipa 12
+// -----------------------------------
+function _lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
+			nArt_id, nArt_qtty, nArt_heigh, nArt_width)
+local nDoc_lit_no
+
+nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
+
+select doc_lit
+append blank
+
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_lit_no with nDoc_lit_no
+replace art_id with nArt_id
+replace num_1 with nArt_qtty
+replace num_2 with nArt_heigh
+replace num_3 with nArt_width
+replace doc_lit_action with cAction
+
+return
+
+
+
+// --------------------------------------------
+// dodaje zapis u tabelu doc_log
+// --------------------------------------------
+function _d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+local nOperId
+local nTArea := SELECT()
+
+nOperId := GetUserID()
+
+select doc_log
+append blank
+
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_log_date with DATE()
+replace doc_log_time with PADR(TIME(), 5)
+replace doc_log_type with cDoc_log_type
+replace operater_id with nOperId
+replace doc_log_desc with cDesc
+
+select (nTArea)
+return
+
+
+
+//-------------------------------------------------------
+// vraca sljedeci redni broj dokumenta u DOC_LOG tabeli
+//-------------------------------------------------------
+function _inc_log_no( nDoc_no )
+local nLastNo:=0
+
+PushWa()
+
+select doc_log
+set order to tag "1"
+go top
+
+seek docno_str( nDoc_no )
+
+do while !EOF() .and. (field->doc_no == nDoc_no)
+	nLastNo := field->doc_log_no
+	skip
+enddo
+
+PopWa()
+
+return nLastNo + 1
+
+
+
+// ----------------------------------------------
+// konvert doc_log_no -> STR(doc_log_no,10)
+// ----------------------------------------------
+static function doclog_str(nId)
+return STR(nId,10)
+
+
+
+//------------------------------------------------
+// vraca sljedeci doc_lit_no u tabeli DOC_LIT
+//------------------------------------------------
+static function _inc_lit_no( nDoc_no, nDoc_log_no )
+local nLastNo:=0
+
+PushWa()
+select doc_lit
+set order to tag "1"
+go top
+seek docno_str( nDoc_no ) + doclog_str( nDoc_log_no )
+
+do while !EOF() .and. (field->doc_no == nDoc_no) ;
+		.and. (field->doc_log_no == nDoc_log_no)
+	
+	nLastNo := field->doc_lit_no
+	skip
+	
 enddo
 PopWa()
 
-return nLastRbr + 1
+return nLastNo + 1
 
-
-
-//------------------------------------------------
-// vraca sljedeci podbroj u tabeli RNLOG_IT
-//------------------------------------------------
-static function n_logit_pbr(nBr_nal, nR_br)
-local nLastPbr:=0
-
-PushWa()
-select rnlog_it
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
-
-do while !EOF() .and. (field->br_nal == nBr_nal) ;
-		.and. (field->r_br == nR_br)
-	nLastPbr := field->p_br
-	skip
-enddo
-PopWa()
-
-return nLastPbr + 1
 
 
 // -----------------------------------------------
@@ -487,11 +405,11 @@ set filter to
 select doc_it
 set filter to
 
-// delta stavki naloga - robe
-//rn_delta(nBr_nal, cOpis)
+// delta stavki dokumenta
+_doc_it_delta( nDoc_no )
 
-// delta stavki naloga - operacije
-//op_delta(nBr_nal, cOpis)
+// delta dodatnih operacija dokumenta
+//_doc_op_delta( nDoc_no )
 
 select (nTArea)
 
@@ -499,124 +417,126 @@ return
 
 
 // -------------------------------------------------
-// function rn_delta() - delta stavki naloga
-// nBr_nal - broj naloga
-// cOpis - opis promjene
-// funkcija gleda p_rnst na osnovu rnst i trazi
+// function _doc_it_delta() - delta stavki dokumenta
+// nDoc_no - broj naloga
+// funkcija gleda _doc_it na osnovu doc_it i trazi
 // 1. stavke koje nisu iste
 // 2. stavke koje su izbrisane
 // -------------------------------------------------
-static function rn_delta(nBr_nal, cOpis)
-local nR_br
-local cItemID
-local cAkcija
-local nLOGR_br
-local cTip := "20"
-local lSetRNLOG := .f.
-local cOperater := goModul:oDataBase:cUser
+static function _doc_it_delta( nDoc_no )
+local nDoc_log_no
+local cDoc_log_type := "20"
+local cAction
+local lLogAppend := .f.
 
-// uzmi sljedeci broj RNLOG
-nLOGR_br := n_log_rbr( nBr_nal )
+// uzmi sljedeci broj DOC_LOG
+nDoc_log_no := _inc_log_no( nDoc_no )
 
-// pozicioniraj se na trazeni radni nalog
-select rnst
-set order to tag "br_nal"
+// pozicioniraj se na trazeni dokument
+select doc_it
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
-do while !EOF() .and. field->br_nal == nBr_nal
+do while !EOF() .and. field->doc_no == nDoc_no
 
-	nR_br := field->r_br
-	cItemID := field->item_id
-	nKolicina := field->item_kol
-	nSirina := field->item_sirina
-	nVisina := field->item_visina
+	nDoc_it_no := field->doc_it_no
+	nArt_id := field->art_id
+	nDoc_it_qtty := field->doc_it_qtty
+	nDoc_it_heigh := field->doc_it_heigh
+	nDoc_it_width := field->doc_it_width
 	
-	// provjeri da li rnal(stavka) postoji u p_rnal 
+	// DOC_IT -> _DOC_IT - provjeri da li je sta brisano
 	// akcija "-"
 	
-	if !st_exist(nBr_nal, nR_br, cItemID, .f.)
+	if !item_exist( nDoc_no, nDoc_it_no, nArt_id, .f.)
 		
-		cAkcija := "-"
+		cAction := "-"
 		
-		f20_stavke(cAkcija, nBr_nal, nLOGR_br, ;
-			   rnst->item_id, "", "",;
-			   rnst->item_kol, rnst->item_visina,;
-			   rnst->item_sirina)
+		_lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
+			   nArt_id , ;
+			   nDoc_it_qtty , ;
+			   nDoc_it_heigh , ;
+			   nDoc_it_width )
 			
-		lSetRNLOG := .t.
+		lLogAppend := .t.
 		
-		select rnst
+		select doc_it
+		
 		skip
 		loop
 		
 	endif
 
-	// provjeri integritet stavki RNST <-> P_RNST (idroba)
+	// DOC_IT -> _DOC_IT - da li je sta mjenjano od podataka 
 	// akcija "E"
 	
-	if !st_value(nBr_nal, nR_br, cItemID, ;
-		      nKolicina, nSirina, nVisina, .f.)
+	if !item_value(nDoc_no, nDoc_it_no, nArt_id, ;
+		      nDoc_it_qtty, ;
+		      nDoc_it_heigh, ;
+		      nDoc_it_width, .f.)
 		
-		cAkcija := "E"
+		cAction := "E"
 		
-		f20_stavke(cAkcija, nBr_nal, nLOGR_br, ;
-			   p_rnst->item_id, ;
-			   "", ;
-			   "", ;
-			   p_rnst->item_kol, ;
-			   p_rnst->item_visina, ;
-			   p_rnst->item_sirina )
+		_lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
+			   _doc_it->art_id, ;
+			   _doc_it->doc_it_qtty, ;
+			   _doc_it->doc_it_heigh, ;
+			   _doc_it->doc_it_width )
 	
-		lSetRNLOG := .t.
+		lLogAppend := .t.
 	endif
 	
-	select rnst
+	select doc_it
+	
 	skip
 enddo
 
-// pozicioniraj se na P_RNST
-select p_rnst
-set order to tag "br_nal"
+// pozicioniraj se na _DOC_IT
+select _doc_it
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str(nDoc_no)
 
-do while !EOF() .and. field->br_nal == nBr_nal
+do while !EOF() .and. field->doc_no == nDoc_no
 
-	nR_br := field->r_br
-	cItemID := field->item_id
-	nKolicina := field->item_kol
-	nSirina := field->item_sirina
-	nVisina := field->item_visina
+	nDoc_it_no := field->doc_it_no
+	nArt_id := field->art_id
+	nDoc_it_qtty := field->doc_it_qtty
+	nDoc_it_heigh := field->doc_it_heigh
+	nDoc_it_width := field->doc_it_width
 	
-	// provjeri da li stavka postoji u kumulativu
+	// _DOC_IT -> DOC_IT, da li stavka postoji u kumulativu
 	// akcija "+"
 	
-	if !st_exist(nBr_nal, nR_br, cItemID, .t.)
+	if !item_exist(nDoc_no, nDoc_it_no, nArt_id, .t.)
 		
-		cAkcija := "+"
+		cAction := "+"
 		
-		f20_stavke(cAkcija, nBr_nal, nLOGR_br, ;
-			   cItemID, "", "", ;
-			   nKolicina, nVisina, nSirina)
+		_lit_20_insert(cAction, nDoc_no, nDoc_it_no, ;
+			   nArt_id, ;
+			   nDoc_it_qtty, ;
+			   nDoc_it_heigh, ;
+			   nDoc_it_width)
 
-		lSetRNLOG := .t.
+		lLogAppend := .t.
 	
 	endif
 	
-	select p_rnst
+	select _doc_it
+	
 	skip
 enddo
 
-// ako je bilo promjena upisi i u RNLOG...
-if lSetRNLOG 
-	f_rnlog(nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
+// bilo je promjena dodaj novi log zapis
+if lLogAppend 
+	_d_log_insert(nDoc_no, nDoc_log_no, cDoc_log_type, cDesc)
 endif
 
 return
 
 
-
+/*
 // -------------------------------------------------
 // function op_delta() - delta operacija naloga
 // -------------------------------------------------
@@ -738,15 +658,15 @@ if lSetRNLOG
 endif
 
 return
-
+*/
 
 
 // --------------------------------------
-// da li postoji sirovina u tabelama
-// P_RNST, RNST
+// da li postoji item u tabelama
+// _DOC_IT, DOC_IT
 // --------------------------------------
-static function st_exist(nBr_nal, nR_br, cItemID, lKumul)
-local nF_RNST := F_P_RNST
+static function item_exist( nDoc_no, nDoc_it_no, nArt_id, lKumul)
+local nF_DOC_IT := F__DOC_IT
 local nTArea := SELECT()
 local nTRec := RecNo()
 local lRet := .f.
@@ -756,13 +676,14 @@ if (lKumul == nil)
 endif
 
 if ( lKumul == .t. )
-	nF_RNST := F_RNST
+	nF_DOC_IT := F_DOC_IT
 endif
 
-select (nF_RNST)
-set order to tag "br_nal"
+select (nF_DOC_IT)
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br) + cItemID
+
+seek docno_str(nDoc_no) + docno_str(nDoc_log_no) + artid_str(nArt_id)
 
 if FOUND()
 	lRet := .t.
@@ -772,14 +693,15 @@ select (nTArea)
 go (nTRec)
 
 return lRet
+
 
 
 // --------------------------------------
 // da li je stavka sirovina ista....
 // --------------------------------------
-static function st_value(nBr_nal, nR_br, cItemID,;
-			   nKolicina, nSirina, nVisina, lKumul)
-local nF_RNST := F_P_RNST
+static function item_value(nDoc_no, nDoc_it_no, nArt_id,;
+			   nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, lKumul)
+local nF_DOC_IT := F__DOC_IT
 local nTArea := SELECT()
 local nTRec := RecNo()
 local lRet := .f.
@@ -789,17 +711,17 @@ if (lKumul == nil)
 endif
 
 if (lKumul == .t.)
-	nF_RNST := F_RNST
+	nF_DOC_IT := F_DOC_IT
 endif
 
-select (nF_RNST)
-set order to tag "br_nal"
+select (nF_DOC_IT)
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br) + cItemID
+seek docno_str(nDoc_no) + docno_str(nDoc_it_no) + artid_str(nArt_id)
  
-if (field->item_kol == nKolicina) .and. ;
-   (field->item_sirina == nSirina) .and. ;
-   (field->item_visina == nVisina)
+if (field->doc_it_qtty == nDoc_it_qtty) .and. ;
+   (field->doc_it_heigh == nDoc_it_heigh) .and. ;
+   (field->doc_it_width == nDoc_it_width)
 	lRet := .t.
 endif
 
@@ -808,111 +730,46 @@ go (nTRec)
 
 return lRet
 
-
-// --------------------------------------
-// da li postoji operacija u tabelama
-// P_RNOP, RNOP
-// --------------------------------------
-static function op_exist(nBr_nal, nR_br, nP_br, cItemID, ;
-			cIdOper, cIdKarakt, lKumul)
-			
-local nF_RNOP := F_P_RNOP
-local nTArea := SELECT()
-local nTRec := RecNo()
-local lRet := .f.
-
-if (lKumul == nil)
-	lKumul := .f.
-endif
-
-if ( lKumul == .t. )
-	nF_RNOP := F_RNOP
-endif
-
-select (nF_RNOP)
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br) + s_p_br(nP_br) + cItemID + cIdOper + cIdKarakt
-
-if FOUND()
-	lRet := .t.
-endif
-
-select (nTArea)
-go (nTRec)
-
-return lRet
-
-
-// --------------------------------------
-// da li je stavka operacije ista....
-// --------------------------------------
-static function op_value(nBr_nal, nR_br, nP_br, cItemID,;
-			   cIdOper, cIdKarak, cInstr, lKumul)
-local nF_RNOP := F_P_RNOP
-local nTArea := SELECT()
-local nTRec := RecNo()
-local lRet := .f.
-
-if (lKumul == nil)
-	lKumul := .f.
-endif
-
-if (lKumul == .t.)
-	nF_RNOP := F_RNOP
-endif
-
-select (nF_RNOP)
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br) + s_p_br(nP_br) + cItemID + cIdOper + cIdKarak
- 
-if (ALLTRIM(field->rn_instr) == ALLTRIM(cInstr))
-	lRet := .t.
-endif
-
-select (nTArea)
-go (nTRec)
-
-return lRet
 
 
 
 // ----------------------------------------------
 // vraca string napunjen promjenama tipa "20"
 // ----------------------------------------------
-function get20_stavka(nBr_nal, nR_br)
+function _lit_20_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
 
-select rnlog
-set order to tag "tip"
+select doc_log
+set order to tag "2"
 go top
-seek s_br_nal(nBr_nal) + "20" + s_r_br(nR_br)
+seek docno_str( nDoc_no ) + "20" + doclog_str( nDoc_log_no )
 
-select rnlog_it
-set order to tag "br_nal"
+
+select doc_lit
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
+seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
 
-do while !EOF() .and. field->br_nal == nBr_nal ;
-		.and. field->r_br == nR_br
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_log_no == nDoc_log_no
 
-	cRet += "stavka: " + ALLTRIM(field->idroba2)
+	cRet += "artikal: " + PADR(g_art_desc( field->art_id ), 10)
 	cRet += "#"
-	cRet += "kol.=" + ALLTRIM(STR(field->k_1, 8, 2))
+	cRet += "kol.=" + ALLTRIM(STR(field->num_1, 8, 2))
 	cRet += ","
-	cRet += "vis.=" + ALLTRIM(STR(field->n_1, 8, 2))
+	cRet += "vis.=" + ALLTRIM(STR(field->num_2, 8, 2))
 	cRet += ","
-	cRet += "sir.=" + ALLTRIM(STR(field->n_2, 8, 2))
+	cRet += "sir.=" + ALLTRIM(STR(field->num_3, 8, 2))
 	cRet += "#"
 	
-	select rnlog_it
+	select doc_lit
+	
 	skip
 enddo
 
-select rnlog
-set order to tag "br_nal"
+select doc_log
+set order to tag "1"
 
 select (nTArea)
 return cRet
@@ -922,211 +779,61 @@ return cRet
 // ----------------------------------------------
 // vraca string napunjen promjenama tipa "01"
 // ----------------------------------------------
-function get01_stavka(nBr_nal, nR_br)
+function _lit_01_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
 
-select rnlog
-set order to tag "tip"
+select doc_log
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal) + "01" + s_r_br(nR_br)
+seek docno_str(nDoc_no) + "01" + doclog_str(nDoc_log_no)
 
 cRet += "Otvaranje naloga...#"
 	
-set order to tag "br_nal"
+set order to tag "1"
 
 select (nTArea)
 
 return cRet
 
-
-// ----------------------------------------------
-// vraca string napunjen promjenama tipa "99"
-// ----------------------------------------------
-function get99_stavka(nBr_nal, nR_br)
-local cRet := ""
-local nTArea := SELECT()
-
-select rnlog
-set order to tag "tip"
-go top
-seek s_br_nal(nBr_nal) + "99" + s_r_br(nR_br)
-
-cRet += "Zatvaranje naloga...#"
-	
-set order to tag "br_nal"
-
-select (nTArea)
-
-return cRet
 
 
 // ----------------------------------------------
 // vraca string napunjen promjenama tipa "10"
 // ----------------------------------------------
-function get10_stavka(nBr_nal, nR_br)
+function _lit_10_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
 
-select rnlog
-set order to tag "tip"
+select doc_log
+set order to tag "2"
 go top
-seek s_br_nal(nBr_nal) + "10" + s_r_br(nR_br)
+seek docno_str(nDoc_no) + "10" + doclog_str(nDoc_log_no)
 
-select rnlog_it
-set order to tag "br_nal"
+select doc_lit
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
+seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
 
-do while !EOF() .and. field->br_nal == nBr_nal ;
-		.and. field->r_br == nR_br
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_log_no == nDoc_log_no
 
-	//cRet += "Partner: " + s_partner( ALLTRIM(field->c_1) )
+	cRet += "narucioc: " + PADR( g_cust_desc( field->int_1 ), 20)
 	cRet += "#"
-	//cRet += "vrsta placanja: " + say_vr_plac( ALLTRIM(field->c_2) )
+	cRet += "vrsta placanja: " + ALLTRIM(STR(field->int_2))
 	cRet += "#"
-	//cRet += "prioritet: " + say_hitnost( ALLTRIM(field->c_3) )
+	cRet += "prioritet: " + ALLTRIM(STR(field->int_3))
 	cRet += "#"
 	
-	select rnlog_it
+	select doc_lit
 	skip
 enddo
 
-select rnlog
-set order to tag "br_nal"
+select doc_log
+set order to tag "1"
 
 select (nTArea)
 
 return cRet
-
-
-// ----------------------------------------------
-// vraca string napunjen promjenama tipa "11"
-// ----------------------------------------------
-function get11_stavka(nBr_nal, nR_br)
-local cRet := ""
-local nTArea := SELECT()
-
-select rnlog
-set order to tag "tip"
-go top
-seek s_br_nal(nBr_nal) + "11" + s_r_br(nR_br)
-
-select rnlog_it
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
-
-do while !EOF() .and. field->br_nal == nBr_nal ;
-		.and. field->r_br == nR_br
-
-	cRet += "mjesto isporuke: " + ALLTRIM(field->c_1)
-	cRet += "#"
-	cRet += "datum isporuke: " + ALLTRIM(field->c_2)
-	cRet += "#"
-	cRet += "vrijeme isporuke: " + ALLTRIM(field->c_3)
-	cRet += "#"
-	
-	select rnlog_it
-	skip
-enddo
-
-select rnlog
-set order to tag "br_nal"
-
-select (nTArea)
-
-return cRet
-
-
-
-// ----------------------------------------------
-// vraca string napunjen promjenama tipa "12"
-// ----------------------------------------------
-function get12_stavka(nBr_nal, nR_br)
-local cRet := ""
-local nTArea := SELECT()
-
-select rnlog
-set order to tag "tip"
-go top
-seek s_br_nal(nBr_nal) + "12" + s_r_br(nR_br)
-
-select rnlog_it
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
-
-do while !EOF() .and. field->br_nal == nBr_nal ;
-		.and. field->r_br == nR_br
-
-	cRet += "kontakt ime: " + ALLTRIM(field->c_1)
-	cRet += "#"
-	cRet += "kontakt telefon: " + ALLTRIM(field->c_2)
-	cRet += "#"
-	cRet += "kontakt opis: " + ALLTRIM(field->c_3)
-	cRet += "#"
-	
-	select rnlog_it
-	skip
-enddo
-
-select rnlog
-set order to tag "br_nal"
-
-select (nTArea)
-
-return cRet
-
-
-// ----------------------------------------------
-// vraca string napunjen promjenama tipa "30"
-// ----------------------------------------------
-function get30_stavka(nBr_nal, nR_br)
-local cRet := ""
-local nTArea := SELECT()
-
-select rnlog
-set order to tag "tip"
-go top
-seek s_br_nal(nBr_nal) + "30" + s_r_br(nR_br)
-
-select rnlog_it
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
-
-cTmpSirov := "XXX"
-
-do while !EOF() .and. field->br_nal == nBr_nal ;
-		.and. field->r_br == nR_br
-
-	cSirov := field->idroba2
-	
-	if cSirov <> cTmpSirov
-		cRet += "sirov.= " + ALLTRIM(field->idroba2)
-		cRet += "#"
-	endif
-	
-	//cRet += s_karakt( ALLTRIM(field->c_2) )
-	cRet += "="
-	cRet += ALLTRIM(field->c_3)
-	
-	cRet += "#"
-		
-	select rnlog_it
-	skip
-
-	cTmpSirov := cSirov
-	
-enddo
-
-select rnlog
-set order to tag "br_nal"
-
-select (nTArea)
-
-return cRet
-
 
 
