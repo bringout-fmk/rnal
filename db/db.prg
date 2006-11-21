@@ -212,6 +212,9 @@ cre_tbls(nArea, "CUSTOMS")
 cre_tbls(nArea, "CONTACTS")
 cre_sifk(nArea)
 
+// kreiranje tabele pretraga parametri
+_cre_fnd_par()
+
 return
 
 

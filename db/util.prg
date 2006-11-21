@@ -62,6 +62,11 @@ if lTemporary == .t.
 	if !used()
 		O__DOC_OPS
 	endif
+
+	SELECT (F__FND_PAR)
+	if !used()
+		O__FND_PAR
+	endif
 	
 endif
 
