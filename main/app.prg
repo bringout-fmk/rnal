@@ -90,16 +90,14 @@ endif
 
 AADD(opc, "2. lista otvorenih naloga ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "DOKLSTO"))
-	//AADD(opcexe, {|| frm_lst_nalog(1)})
-	AADD(opcexe, {|| nil})
+	AADD(opcexe, {|| frm_lst_docs(1)})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
 AADD(opc, "3. lista zatorenih naloga ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "DOKLSTZ"))
-	//AADD(opcexe, {|| frm_lst_nalog(2)})
-	AADD(opcexe, {|| nil})
+	AADD(opcexe, {|| frm_lst_docs(2)})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
