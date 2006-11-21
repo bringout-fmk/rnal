@@ -136,12 +136,12 @@ return
 
 // isprazni print tabele
 function t_pr_empty()
-O_T_RNST
-select t_rnst
+O_T_DOC_OPS
+select t_doc_ops
 zap
 
-O_T_RNOP
-select t_rnop
+O_T_DOCS
+select t_docs
 zap
 
 O_T_PARS
@@ -154,8 +154,8 @@ return
 // otvori print tabele
 function t_prn_open()
 O_T_PARS
-O_T_RNOP
-O_T_RNST
+O_T_DOC_OPS
+O_T_DOCS
 return
 
 
@@ -189,8 +189,8 @@ function a_t_rnst( cBr_nal, cR_br, cP_br, cId_pro, cPro_naz, ;
 		   nZ_sirina, nZ_visina, nD_ukupno, ;
 		   nZ_ukupno, nZ_Netto )
 
-O_T_RNST
-select t_rnst
+O_T_DOCS
+select t_docs
 append blank
 replace br_nal with cBr_nal
 replace r_br with cR_br
@@ -218,8 +218,8 @@ function a_t_rnop( cBr_nal, cR_br, cP_br, cId_roba, ;
                    cRn_op, cRn_op_naz, ;
 		   cRn_ka, cRn_ka_naz, cRn_in)
 
-O_T_RNOP
-select t_rnop
+O_T_DOC_OPS
+select t_doc_ops
 append blank
 
 replace br_nal with cBr_nal

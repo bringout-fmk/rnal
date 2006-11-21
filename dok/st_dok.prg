@@ -11,7 +11,7 @@ t_prn_create()
 // otvori tabele
 t_prn_open()
 
-o_rnal(lPriprema)
+o_tables(lPriprema)
 
 // osnovni podaci naloga
 fill_nalog_osn(lPriprema, nBrNal)
@@ -24,7 +24,7 @@ nalpr_print( .t. )
 
 close all
 
-o_rnal(lPriprema)
+o_tables(lPriprema)
 
 return DE_REFRESH
 
@@ -39,7 +39,7 @@ t_prn_create()
 // otvori tabele
 t_prn_open()
 
-o_rnal(lPriprema)
+o_tables(lPriprema)
 
 // osnovni podaci naloga
 fill_nalog_osn(lPriprema, nBrNal)
@@ -52,7 +52,7 @@ otpr_print( .t. )
 
 close all
 
-o_rnal(lPriprema)
+o_tables(lPriprema)
 
 return DE_REFRESH
 
