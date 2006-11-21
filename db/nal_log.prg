@@ -978,11 +978,11 @@ seek s_br_nal(nBr_nal) + s_r_br(nR_br)
 do while !EOF() .and. field->br_nal == nBr_nal ;
 		.and. field->r_br == nR_br
 
-	cRet += "Partner: " + s_partner( ALLTRIM(field->c_1) )
+	cRet += "Partner: "// + s_partner( ALLTRIM(field->c_1) )
 	cRet += "#"
-	cRet += "vrsta placanja: " + say_vr_plac( ALLTRIM(field->c_2) )
+	cRet += "vrsta placanja: "// + say_vr_plac( ALLTRIM(field->c_2) )
 	cRet += "#"
-	cRet += "prioritet: " + say_hitnost( ALLTRIM(field->c_3) )
+	cRet += "prioritet: "// + say_hitnost( ALLTRIM(field->c_3) )
 	cRet += "#"
 	
 	select rnlog_it
@@ -1105,7 +1105,7 @@ do while !EOF() .and. field->br_nal == nBr_nal ;
 		cRet += "#"
 	endif
 	
-	cRet += s_karakt( ALLTRIM(field->c_2) )
+	//cRet += s_karakt( ALLTRIM(field->c_2) )
 	cRet += "="
 	cRet += ALLTRIM(field->c_3)
 	

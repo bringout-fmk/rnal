@@ -1,76 +1,92 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
-// -------------------------------------------
-// procedura azuriranja naloga
-// -------------------------------------------
+// variables
 
-function azur_nalog(cOpis)
-local nBr_nal
-local cStat
+static __doc_no
+static __doc_stat
 
-o_rnal(.t.)
+
+
+// -------------------------------------------
+// azuriranje dokumenta u kumulativnu bazu
+// -------------------------------------------
+function doc_insert()
+
+o_tables(.t.)
+
+altd()
+
 
 // skloni filtere
-select p_rnop
+select _docs
 set filter to
 
-select p_rnst
+select _doc_it
 set filter to
 
-select p_rnal
+select _doc_ops
 set filter to
 
+select _docs
 go top
 
 if RECCOUNT2() == 0
 	return 0
 endif
 
-nBr_nal := p_rnal->br_nal
-cStat := p_rnal->rec_zak
+__doc_no := _docs->doc_no
+__doc_stat := _docs->doc_status
 
-if cStat <> "P" .and. !nalog_exist( nBr_nal )
-	MsgBeep("Nalog " + ALLTRIM(STR( nBr_nal )) + " nije moguce azurirati !!!")
+if !doc_exist( __doc_no )
+	MsgBeep("Nalog " + ALLTRIM(STR( __doc_no )) + " nije moguce azurirati !!!")
 	return 0
 endif
 
 MsgO("Azuriranje naloga u toku...")
+
 Beep(1)
 
-if cStat == "P"
-	// logiraj deltu
-	rnal_delta( nBr_nal, cOpis )
+// doc busy....
+if __doc_stat == 2
 	
-	// brisi kumulativ
-	b_kumulativ( nBr_nal )
+	// napravi deltu dokumenta
+	doc_delta( __doc_no )
+	
+	// brisi dokument iz kumulativa
+	doc_erase( __doc_no )
+	
 endif
 
-// azuriraj maticnu tabelu RNAL
-a_rnal( nBr_nal , cStat )
-// azuriranje stavki RNST
-a_rnst( nBr_nal )
-// azuriraj operacije RNOP
-a_rnop( nBr_nal )
+// azuriranje tabele _DOCS
+_docs_insert( __doc_no  )
 
-if cStat <> "P"
-	// logiraj promjene
-	a_rnlog( nBr_nal, cOpis )
+// azuriranje tabele _DOC_IT
+_doc_it_insert( __doc_no )
+
+// azuriranje tabele _DOC_OPS
+_doc_op_insert( __doc_no )
+
+if __doc_stat <> 2
+
+	// logiraj promjene na dokumentu
+	doc_logit( __doc_no )
+	
 endif
 
 // sve je ok brisi pripremu
-select p_rnal
+select _docs
 zap
-select p_rnop
+select _doc_it
 zap
-select p_rnst
+select _doc_ops
 zap
 
 use
 
 Beep(1)
 
-o_rnal(.t.)
+o_tables(.t.)
 
 MsgC()
 
@@ -78,75 +94,64 @@ return 1
 
 
 
-// ------------------------------------------
-// azuriranje RNAL
-// ------------------------------------------
-static function a_rnal( nBr_nal , cStat )
-local nPTrec
-local nKTrec
+// --------------------------------------------------
+// azuriranje DOCS
+// --------------------------------------------------
+static function _docs_insert( nDoc_no )
 
-select p_rnal
-set order to tag "br_nal"
+select _docs
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
 
-// ako je bio povrat
-if cStat <> "P"
-	skip
-	nPTrec := RecNo()
-	skip -1
-	Scatter("z")
+// uzmi iz _docs stavke...
+Scatter("d")
+	
+// pronadji zauzeti slog ( 3 + nDoc_no )
+select docs
+set order to tag "2"
+go top
+seek d_busy() + docno_str( nDoc_no )
 
-	// pronadji
-	select rnal
-	set order to tag "br_nal_z"
-	go top
-	seek s_br_nal(nBr_nal) + "Z"
-	select rnal
-	Scatter()
-	_rec_zak := ""
-	Gather("z")
-	select p_rnal
-	go (nPTrec)
-endif
+Scatter()
 
-do while !eof() .and. ( p_rnal->br_nal == nBr_nal )
-	Scatter()
-	select rnal
-	append blank
-	_rec_zak := ""
-	Gather()
-	select p_rnal
-	skip
-enddo
+_doc_status := 0
+
+Gather("d")
+
+set order to tag "1"
 
 return
 
-// ------------------------------------------
-// azuriranje RNST
-// ------------------------------------------
-static function a_rnst( nBr_nal )
 
-select p_rnst
+// ------------------------------------------
+// azuriranje tabele _DOC_IT
+// ------------------------------------------
+static function _doc_it_insert( nDoc_no )
+
+select _doc_it
 
 if RECCOUNT2() == 0
 	return
 endif
 
-set order to tag "br_nal"
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
-do while !EOF() .and. ( p_rnst->br_nal == nBr_nal )
+do while !EOF() .and. ( field->doc_no == nDoc_no )
+	
 	Scatter()
 	
-	select rnst
+	select doc_it
+	
 	append blank
 		
 	Gather()
 	
-	select p_rnst
+	select _doc_it
+	
 	skip
+	
 enddo
 
 return
@@ -154,278 +159,276 @@ return
 
 
 // ------------------------------------------
-// azuriranje RNOP
+// azuriranje tabele _DOC_OP
 // ------------------------------------------
-static function a_rnop( nBr_nal )
+static function _doc_op_insert( nDoc_no )
 
-select p_rnop
+select _doc_ops
 
 if RECCOUNT2() == 0
 	return
 endif
 
-set order to tag "br_nal"
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
-do while !EOF() .and. ( p_rnop->br_nal == nBr_nal )
+do while !EOF() .and. ( field->doc_no == nDoc_no )
 	
-	if !EMPTY(ALLTRIM(p_rnop->rn_instr))
+	// ako ima operacija...
+	if field->aop_id + field->aop_att_id <> 0
 		
 		Scatter()
 		
-		select rnop
+		select doc_ops
 		append blank
 		
 		Gather()
 	endif
 	
-	select p_rnop
+	select _doc_ops
 	skip
 enddo
 
 return
 
-// -------------------------------------------
-// procedura povrata naloga u pripremu
-// -------------------------------------------
-function pov_nalog( nBr_nal )
 
-o_rnal(.t.)
 
-select rnal
-set order to tag "br_nal"
+// -------------------------------------------
+// procedura povrata dokumenta u pripremu...
+// -------------------------------------------
+function doc_2__doc( nDoc_no )
+
+o_tables(.t.)
+
+select docs
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
 if !Found()
-	MsgBeep("Nalog " + ALLTRIM(STR(nBr_nal)) + " ne postoji !!!")
-	select p_rnal
+	MsgBeep("Nalog " + ALLTRIM(STR( nDoc_no )) + " ne postoji !!!")
+	select _docs
 	return 0
 endif
 
-select p_rnal
+select _docs
 
 if RECCOUNT2() > 0
-	MsgBeep("U pripremi postoji dokument#ne moze se izvrsiti povrat#operacija prekinuta !")
+	MsgBeep("U pripremi vec postoji dokument#ne moze se izvrsiti povrat#operacija prekinuta !")
 	return 0
 endif
 
 MsgO("Vrsim povrat dokumenta u pripremu....")
 
-// setuj realizovano na ""
-set_real_marker( nBr_nal, "" )
-
 // povrat maticne tabele RNAL
-p_rnal( nBr_nal )
+_docs_erase( nDoc_no )
 
 // povrat stavki RNST
-p_rnst( nBr_nal )
+_doc_it_erase( nDoc_no )
 
 // povrat operacija RNOP
-p_rnop( nBr_nal ) 
+_doc_op_erase( nDoc_no ) 
 
-// markiraj povrat u RNAL
-set_p_marker( nBr_nal, "P" )
+// markiraj da je dokument busy
+set_busy_marker( nDoc_no, .t. )
 
-
-select rnal
+select docs
 use
 
-o_rnal(.t.)
+o_tables(.t.)
 
 MsgC()
 
 return 1
 
+
 // ----------------------------------------
-// markiraj povrat....
+// markiranje statusa dokumenta busy
+// nDoc_no - dokument broj
+// lMark - .t. -> setuj, .f. -> ukini
 // ----------------------------------------
-function set_p_marker(nBr_nal, cMark)
+function set_busy_marker( nDoc_no, lMark )
 local nTArea
 nTArea := SELECT()
 
-select rnal
-set order to tag "br_nal"
+select docs
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
 if FOUND()
+	
 	Scatter()
-	_rec_zak := cMark
+	
+	if lMark == .t.
+		_doc_status := 3
+	else
+		_doc_status := 0
+	endif
+	
 	Gather()
-endif
-
-select (nTArea)
-return
-
-// ----------------------------------------
-// markiraj realizacija marker....
-// ----------------------------------------
-function set_real_marker(nBr_nal, cMark)
-local nTArea
-nTArea := SELECT()
-
-select rnal
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
-
-if FOUND()
-	Scatter()
-	_rn_real := cMark
-	Gather()
+	
 endif
 
 select (nTArea)
 return
 
 
+
 // ------------------------------------
-// vrati marker naloga
+// provjerava da li je dokument zauzet
 // ------------------------------------
-function get_p_marker()
-local cMark
-cMark := field->rec_zak
-return cMark
-
-
-
-//----------------------------------------------
-// povrat RNAL
-//----------------------------------------------
-static function p_rnal(nBr_nal)
-select rnal
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
-
-if Found()
-	// dodaj u pripremu dokument
-	do while !EOF() .and. (br_nal == nBr_nal)
-	
-		select rnal
-		Scatter()
-		
-		// ako je rn otvoreni ili zatvoreni, setuj R - razrada
-		if _rn_status $ "OZ"
-			_rn_status := "R"
-		endif
-		
-		_rec_zak := "P"
-		
-		select p_rnal
-		
-		APPEND BLANK
-		Gather()
-	
-		select rnal
-		skip
-	enddo
+function is_doc_busy()
+local lRet := .f.
+if field->doc_status == 3
+	lRet := .t.
 endif
+return lRet
+
+
+
+//----------------------------------------------
+// povrat dokumenta iz tabele DOCS
+//----------------------------------------------
+static function _docs_erase( nDoc_no )
+
+select docs
+set order to tag "1"
+go top
+seek docno_str( nDoc_no )
+
+if FOUND()
+	
+	select docs
+		
+	Scatter()
+		
+	// setuj na busy
+	_doc_status := 3
+		
+	select _docs
+		
+	APPEND BLANK
+		
+	Gather()
+endif
+
+select docs
 
 return
 
 
 //----------------------------------------------
-// povrat RNST
+// povrat tabele DOC_IT
 //----------------------------------------------
-static function p_rnst(nBr_nal)
-select rnst
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
+static function _doc_it_erase( nDoc_no )
 
-if Found()
-	// dodaj u pripremu dokument
-	do while !EOF() .and. (br_nal == nBr_nal)
+select doc_it
+set order to tag "1"
+go top
+
+seek docno_str( nDoc_no )
+
+if FOUND()
 	
-		select rnst
+	// dodaj u pripremu dokument
+	do while !EOF() .and. ( field->doc_no == nDoc_no )
+	
+		select doc_it
+		
 		Scatter()
 	
-		select p_rnst
+		select _doc_it
 		
 		APPEND BLANK
+		
 		Gather()
 	
-		select rnst
+		select doc_it
+		
 		skip
 	enddo
 endif
+
+select doc_it
 
 return
 
 
 
 //----------------------------------------------
-// povrat RNOP
+// povrat tabele DOC_OP
 //----------------------------------------------
-static function p_rnop(nBr_nal)
+static function _doc_op_erase( nDoc_no )
 
-select rnop
-set order to tag "br_nal"
+select doc_ops
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
 
-if Found()
-	// dodaj u pripremu dokument
-	do while !EOF() .and. (br_nal == nBr_nal)
+seek docno_str( nDoc_no )
+
+if FOUND()
 	
-		select rnop
+	// dodaj u pripremu dokument
+	do while !EOF() .and. (field->doc_no == nDoc_no)
+	
+		select doc_ops
 		Scatter()
 	
-		select p_rnop
+		select _doc_ops
 		APPEND BLANK
 		Gather()
 	
-		select rnop
+		select doc_ops
+		
 		skip
 	enddo
+	
 endif
+
+select doc_ops
 
 return
 
 
 
-//----------------------------------------
-// brisi nalog iz kumulativa
-//----------------------------------------
-static function b_kumulativ(nBr_nal)
+//-----------------------------------------------
+// brisi sve vezano za dokument iz kumulativa
+//-----------------------------------------------
+static function doc_erase( nDoc_no )
 
-// RNAL
-select rnal
-set order to tag "br_nal"
+// DOCS
+select docs
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
-if Found()
-	do while !eof() .and. (br_nal == nBr_nal)
-		DELETE
-		SKIP	
-	enddo
+if FOUND()
+	DELETE
 endif
 
-// RNST
-select rnst
-set order to tag "br_nal"
+// DOC_IT
+select doc_it
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
-if Found()
-	do while !eof() .and. (br_nal == nBr_nal)
+if FOUND()
+	do while !eof() .and. (field->doc_no == nDoc_no)
 		DELETE
 		SKIP
 	enddo
 endif
 
-// RNOP
-select rnop
-set order to tag "br_nal"
+// DOC_OP
+select doc_ops
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
-if Found()
-	do while !eof() .and. (br_nal == nBr_nal)
+if FOUND()
+	do while !eof() .and. (field->doc_no == nDoc_no)
 		DELETE
 		SKIP
 	enddo
@@ -435,176 +438,101 @@ return
 
 
 
-//----------------------------------------------
-// Zatvaranje naloga rnal->rn_status == "Z"
-//----------------------------------------------
-function z_rnal(nBr_nal, cRealise)
-local nTArea
-local dDatum := DATE()
-local cVrijeme := TIME()
-local cOperater := goModul:oDatabase:cUser
-
-nTArea := SELECT()
-
-select rnal
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal)
-
-if Found()
-	// setuj status na zatvoreno
-	do while !EOF() .and. (field->br_nal == nBr_nal)
-		
-		Scatter()
-		
-		_rn_status := "Z"
-		_rn_real := cRealise
-		
-		Gather()
-		
-		skip
-	enddo
-else
-	return 0
-endif
-
-// zatvaranje naloga....
-log_zatvori(nBr_nal, cOperater, "", cRealise)
-
-select (nTArea)
-
-return 1
-
-
-//---------------------------------------------
-// vraca sljedeci redni broj stavke naloga
-//---------------------------------------------
-function next_r_br()
-local nLastRbr
-local nRecNo := RECNO()
-PushWa()
-select p_rnst
-set order to tag "br_nal"
-go bottom
-nLastRbr := field->r_br
-PopWa()
-go (nRecNo)
-return nLastRbr + 1
-
-
-
-// -------------------------------------------
-// vraca sljedeci podbroj u tabeli
-// -------------------------------------------
-function next_p_br(nBr_nal, nR_br)
-local nLastPbr := 0
-
-PushWa()
-select p_rnst
-set order to tag "br_nal"
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
-
-do while !EOF() .and. field->br_nal == nBr_nal;
-                .and. field->r_br == nR_br
-
-	nLastPbr := field->p_br
-	
-	skip
-enddo
-
-PopWa()
-
-return nLastPBr + 1
-
-
-//-----------------------------------------
-// vraca sljedeci broj radnog naloga
-//-----------------------------------------
-function next_br_nal()
-
-PushWa()
-select rnal
-set order to tag "br_nal"
-go bottom
-
-nLastRbr := br_nal
-
-PopWa()
-
-return nLastRbr + 1
-
-
-
 //--------------------------------------------
-// da li postoji isti broj naloga u gl.tabeli
+// da li postoji dokument u tabeli
 //--------------------------------------------
-function nalog_exist(nBrNal)
+function doc_exist( nDoc_no )
 local nArea
 local lRet := .f.
 
 nArea := SELECT()
 
-select RNAL
-set order to tag "br_nal_z"
+select DOCS
+set order to tag "2"
 go top
-seek s_br_nal(nBrNal) + "Z"
+seek d_busy() + docno_str( nDoc_no )
 
-if Found()
+if FOUND()
 	lRet := .t.
 endif
 
+set order to tag "1"
 select (nArea)
 
 return lRet
 
 
+
 // -----------------------------------------
-// novi broj naloga
+// novi broj dokumenta
 // mrezni rad....
 // -----------------------------------------
-function _n_br_nal(lNovi)
+function _new_doc_no()
 local nTArea
-local nNewBrNal
+local nNewDocNo
 
 nTArea := SELECT()
-select p_rnal
+
+select _docs
 go top
 
-if ( p_rnal->br_nal <> 0 .or. EOF() )
+altd()
+
+if ( field->doc_no <> 0 .or. EOF() )
+
 	// vec postoji odredjen broj
-   	return p_rnal->br_nal
+   	return field->doc_no
+	
 endif
 
-// novi nalog
+// novi dokument
 // koji nema svog broja, u pripremi
-select rnal
 
-if !rnal->(FLOCK())
+select docs
+
+if !docs->(FLOCK())
+	
 	nTime := 80     
+	
 	// daj mu 10 sekundi
       	do while nTime > 0
-        	InkeySc(.125)
-         	nTime --
-         	if rnal->(FLOCK())
-            		exit
-         	endif
-      	enddo
-      	if nTime == 0 .AND. ! rnal->(FLOCK())
-        	Beep (4)
+        	
+		InkeySc(.125)
+         	
+		nTime --
+         	
+		if docs->(FLOCK())
+        		exit
+	       	endif
+	enddo
+	
+      	if nTime == 0 .AND. ! docs->(FLOCK())
+        	
+		Beep (4)
          	Msg ("Nemoguce odrediti broj dokumenta!#Ne mogu pristupiti bazi!")
          	return 0
       	endif
 endif
 
-nNewBrNal := next_br_nal()
+select docs
+set order to tag "1"
+go bottom
+
+nNewBrNal := field->doc_no + 1
 
 // pravi se fizicki append u bazi dokumenata da bi se sacuvalo mjesto
 // za ovaj dokument
-select rnal
+select docs
+
+Scatter()
+
 appblank2(.f., .f.)   
-_rec_zak := "Z"
-_br_nal := nNewBrNal
+
+_doc_status := 3
+_doc_no := nNewBrNal
+
 Gather2()
+
 DBUnlock()
 
 select (nTArea)
@@ -616,68 +544,62 @@ return nNewBrNal
 // ----------------------------------------------
 // napuni pripremne tabele sa brojem naloga
 // ----------------------------------------------
-function f_p_br_nal( nBr_nal )
+function fill__doc_no( nDoc_no )
 local nTRec
 local nTArea
 local nAPPRec
 
 // ako je broj 0 ne poduzimaj nista....
-if ( nBr_nal == 0 )
+if ( nDoc_no == 0 )
 	return
 endif
 
 nTArea := SELECT()
 nTRec := RecNo()
 
-// P_RNAL
-select p_rnal
-set order to tag "br_nal"
+// _DOCS
+select _docs
+set order to tag "1"
 go top
 
 // ako je u pripremi isti broj naloga
-if ( p_rnal->br_nal == nBr_nal )
+if ( field->doc_no == nDoc_no )
 	// nemam sta raditi nista se nije mjenjalo...
 	return 
 endif
 
+Scatter()
+_doc_no := nDoc_no
+Gather()
+	
+
+// _DOC_IT
+select _doc_it
+go top
 do while !EOF()
+	
 	skip
 	nAPPRec := RecNo()
 	skip -1
 	
 	Scatter()
-	_br_nal := nBr_nal
+	_doc_no := nDoc_no
 	Gather()
 	
 	go (nAPPRec)
 enddo
 
-
-// P_RNST
-select p_rnst
+// _DOC_OP
+select _doc_ops
 go top
 do while !EOF()
+	
 	skip
 	nAPPRec := RecNo()
 	skip -1
 	
 	Scatter()
-	_br_nal := nBr_nal
-	Gather()
-	
-	go (nAPPRec)
-enddo
-
-// P_RNOP
-select p_rnop
-go top
-do while !EOF()
-	skip
-	nAPPRec := RecNo()
-	skip -1
-	
-	Scatter()
-	_br_nal := nBr_nal
+	_doc_no := nDoc_no
 	Gather()
 	
 	go (nAPPRec)
@@ -689,171 +611,29 @@ go (nTRec)
 return
 
 
-// --------------------------------------
-// pronadji i brisi RNAL "Z" zapis
-// --------------------------------------
-function del_rnal_z( nBr_nal )
+// -----------------------------------------
+// formira string za _doc_status - opened
+// -----------------------------------------
+static function d_opened()
+return STR(0, 2)
 
-select rnal
-set order to tag "br_nal_z"
-go top
+// -----------------------------------------
+// formira string za _doc_status - closed
+// -----------------------------------------
+static function d_closed()
+return STR(1, 2)
 
-seek s_br_nal(nBr_nal) + "Z"
+// -----------------------------------------
+// formira string za _doc_status - rejected
+// -----------------------------------------
+static function d_rejected()
+return STR(2, 2)
 
-// ako sam pronasao, brisi
-if Found()
-	do while !EOF() .and. field->br_nal == nBr_nal ;
-			.and. field->rec_zak == "Z"
-			
-		delete
-		skip
-		
-	enddo
-endif
-
-set order to
-
-return
-
-
-// ----------------------------------
-// brisi operacije viska
-// ----------------------------------
-function del_op_error()
-local nTArea
-local nBr_nal
-local nR_br
-local nP_br
-local cItemId
-local cSeek
-
-nTArea := SELECT()
-
-// selektuj p_rnal
-select p_rnst
-set order to tag "br_nal"
-
-// selektuj p_rnop
-select p_rnop
-set order to tag "br_nal"
-go top
-
-do while !EOF() 
-	
-	nBr_Nal := p_rnop->br_nal
-	nR_br := p_rnop->r_br
-	nP_br := p_rnop->p_br
-	cItemId := p_rnop->item_id
-	
-	cSeek := s_br_nal(nBr_nal) + s_r_br(nR_br) + s_p_br(nP_br) + cItemId
-	
-	select p_rnst
-	go top
-	seek cSeek
-	
-	if !Found()
-		select p_rnop
-		delete
-	endif
-	
-	select p_rnop
-	skip
-enddo
-
-select (nTArea)
-
-return
-
-
-
-// ---------------------------------
-// generisi roba match code
-// ---------------------------------
-function gen_r_mc(nStavka)
-local cRet := ""
-
-Box(, 2, 60)
-	private GetList:={}
-	cMCode := SPACE(10)
-	@ m_x + 1, m_y + 2 SAY "Stavka br. " + ALLTRIM(STR(nStavka))
-	@ m_x + 2, m_y + 2 SAY "Unesi match code:" GET cMCode
-	read
-BoxC()
-
-if LastKey() <> K_ESC
-	cRet := cMCode
-endif
-
-return cRet
-
-
-// ----------------------------
-// generisi naziv artikla
-// ----------------------------
-function gen_r_naz(nBr_nal, nR_br)
-local cRet := ""
-local nTArea
-local cItemId
-
-select p_rnst
-set order to tag "br_nal"
-go top
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
-
-do while !EOF() .and. field->br_nal == nBr_nal ;
-		.and. field->r_br == nR_br
-	
-	cItemID := field->idroba
-	select roba
-	hseek cItemID
-	
-	if LEN(cRet) == 250
-		exit
-	endif
-	
-	if !EMPTY(cRet)
-		cRet += ","
-	endif
-	
-	cRet += ALLTRIM(LEFT(roba->naz, 40))
-	
-	select p_rnst
-	skip 
-enddo
-
-select (nTArea)
-return cRet
-
-
-// ------------------------------
-// generisi novi id robe
-// ------------------------------
-function gen_r_id()
-local cRet := ""
-local nTArea 
-local nPom:=0
-local cPom
-
-nTArea := SELECT()
-
-select roba
-set filter to id = "XR"
-set order to tag "ID"
-go bottom
-
-cPom := RIGHT(field->id, 8)
-
-select roba
-set filter to
-
-select (nTArea)
-
-cPom := NovaSifra(cPom)
-nPom := VAL(cPom)
-
-cRet := "XR" + PADL(ALLTRIM(STR(nPom)), 8, "0")
-
-return cRet
+// -----------------------------------------
+// formira string za _doc_status - busy
+// -----------------------------------------
+static function d_busy()
+return STR(3, 2)
 
 
 

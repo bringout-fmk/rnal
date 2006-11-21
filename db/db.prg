@@ -678,6 +678,7 @@ if (nArea==-1 .or. nArea == nArea2)
 	do case 
 		case (nArea2 == F_DOCS) .or. (nArea2 == F__DOCS)
 			CREATE_INDEX("1", "STR(doc_no,10)", cPath + cTable, .t.)
+			CREATE_INDEX("2", "STR(doc_status,2)+STR(doc_no,10)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_IT) .or. (nArea2 == F__DOC_IT)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_OPS) .or. (nArea2 == F__DOC_OPS)

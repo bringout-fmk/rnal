@@ -136,6 +136,16 @@ return
 
 
 
+
+// -----------------------------------------
+// konvert doc_no -> STR(doc_no, 10)
+// -----------------------------------------
+function docno_str(nId)
+return STR(nId, 10)
+
+
+
+
 // -------------------------------------------
 // setuje novi zapis u tabeli sifrarnika
 // nId - id sifrarnika
@@ -172,6 +182,8 @@ if !(FLOCK())
 endif
 
 _inc_id(@nId, cIdField)
+
+Scatter()
 
 appblank2(.f., .f.)   
 
