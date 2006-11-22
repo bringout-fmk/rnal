@@ -170,6 +170,9 @@ return
 // --------------------------------------------
 static function s_log_type( cType )
 local xRet:=""
+
+cType := ALLTRIM(cType)
+
 do case
 	case cType == "01"
 		xRet := "otvoranje"
@@ -240,6 +243,8 @@ static function g_log_desc(nDoc_no, nDoc_log_no, cDoc_log_type)
 local cRet := ""
 local nTArea := SELECT()
 select doc_log
+
+cDoc_log_type := ALLTRIM(cDoc_log_type)
 
 do case
 	case cDoc_log_type == "01"

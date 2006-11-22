@@ -118,7 +118,7 @@ Box( ,10, 70)
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Narucioc (prazno-svi) " GET nCustomer VALID {|| s_customers( @nCustomer), show_it( g_cust_desc(nCustomer) ) }
+@ m_x + nX, m_y + 2 SAY "Narucioc (prazno-svi) " GET nCustomer VALID {|| nCustomer == 0 .or. s_customers( @nCustomer), show_it( g_cust_desc(nCustomer) ) }
 
 nX += 2
 
@@ -303,7 +303,7 @@ do case
 			nTRec := RecNo()
 			nDoc_no := docs->doc_no
 			
-			set_doc_marker( nDoc_no, 1 )
+			set_doc_marker( nDoc_no, nDoc_status )
 			MsgBeep("Nalog zatvoren !!!")
 			
 			select docs
