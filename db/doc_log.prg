@@ -745,6 +745,8 @@ return lRet
 function _lit_20_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
+local nTRec := RECNO()
+local cTBFilter := DBFILTER()
 
 select doc_log
 set order to tag "2"
@@ -774,10 +776,11 @@ do while !EOF() .and. field->doc_no == nDoc_no ;
 	skip
 enddo
 
-select doc_log
-set order to tag "1"
-
 select (nTArea)
+set order to tag "1"
+set filter to &cTBFilter
+go (nTRec)
+
 return cRet
 
 
@@ -788,6 +791,8 @@ return cRet
 function _lit_01_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
+local nTRec := RECNO()
+local cTBFilter := DBFILTER()
 
 select doc_log
 set order to tag "1"
@@ -799,6 +804,9 @@ cRet += "Otvaranje naloga...#"
 set order to tag "1"
 
 select (nTArea)
+set order to tag "1"
+set filter to &cTBFilter
+go (nTRec)
 
 return cRet
 
@@ -810,6 +818,8 @@ return cRet
 function _lit_10_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
+local nTRec := RecNo()
+local cTbFilter := DBFILTER()
 
 select doc_log
 set order to tag "2"
@@ -835,10 +845,9 @@ do while !EOF() .and. field->doc_no == nDoc_no ;
 	skip
 enddo
 
-select doc_log
-set order to tag "1"
-
 select (nTArea)
+set filter to &cTBFilter
+go (nTRec)
 
 return cRet
 
