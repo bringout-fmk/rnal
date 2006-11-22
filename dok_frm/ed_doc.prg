@@ -239,6 +239,7 @@ local nY := m_y
 local GetList := {}
 local nRec := RecNo()
 local nDocNoNew := 0
+local cDesc := ""
 
 do case 
 
@@ -252,7 +253,7 @@ do case
 	// browse tabele
 	case Ch == K_TAB
 
-		if ALIAS() == "_DOCS" .and. RecCount2() <> 0
+		if ALIAS() == "_DOCS"
 			
 			select _doc_it
 			nRet := DE_ABORT
@@ -286,9 +287,33 @@ do case
 			
 		elseif ALIAS() == "_DOC_IT"
 
+			select _docs
+			if RECCOUNT2() == 0
+				MsgBeep("Nema definisanog naloga !!!")
+				select _doc_it
+				return DE_CONT
+			endif
+			select _doc_it
 			if e_doc_item( _doc, .t. ) <> 0
 			
 				select _doc_it
+				nRet := DE_REFRESH
+
+			endif
+	
+		elseif ALIAS() == "_DOC_OPS"
+
+			select _docs
+			if RECCOUNT2() == 0
+				MsgBeep("Nema definisanog naloga !!!")
+				select _doc_ops
+				return DE_CONT
+			endif
+			select _doc_ops
+			
+			if e_doc_ops( _doc, .t. ) <> 0
+			
+				select _doc_ops
 				nRet := DE_REFRESH
 
 			endif
@@ -298,6 +323,10 @@ do case
 	case Ch == K_F2
 	
 		nRet := DE_CONT
+		
+		if RECCOUNT2() == 0
+			return nRet
+		endif
 		
 		if ALIAS() == "_DOCS"
 		
@@ -313,6 +342,15 @@ do case
 			if e_doc_item( _doc, .f. ) <> 0
 			
 				select _doc_it
+				nRet := DE_REFRESH
+
+			endif
+	
+		elseif ALIAS() == "_DOC_OPS"
+
+			if e_doc_ops( _doc, .f. ) <> 0
+			
+				select _doc_ops
 				nRet := DE_REFRESH
 
 			endif
@@ -341,7 +379,7 @@ do case
 				
 			endif
 
-		elseif ALIAS() == "_DOC_OP"
+		elseif ALIAS() == "_DOC_OPS"
 
 			if docop_delete() == 1
 			
@@ -357,15 +395,19 @@ do case
 		
 		if ALIAS() == "_DOCS" .and. Pitanje(,"Izvrsiti azuriranje dokumenta (D/N) ?", "D") == "D"
 
-			altd()
 
+			// busy....
+			if field->doc_status == 3
+				_g_doc_desc( @cDesc )
+			endif
+			
 			// uzmi novi broj dokumenta
 			nDocNoNew := _new_doc_no()
 
 			// filuj sve tabele sa novim brojem
 			fill__doc_no( nDocNoNew )
 			
-			if doc_insert( nDocNoNew ) == 1
+			if doc_insert( cDesc ) == 1
 				
 				select _docs
 				l_auto_tab := .t.
@@ -374,6 +416,8 @@ do case
 						
 			endif
 		
+		else
+			Msgbeep("Pozicionirajte se na prvu tabelu...")
 		endif
 		
 		return nRet
@@ -384,6 +428,22 @@ m_x := nX
 m_y := nY
 
 return nRet
+
+// ----------------------------------------
+// vraca box sa opisom
+// ----------------------------------------
+function _g_doc_desc( cDesc )
+local GetList := {}
+
+Box(,1, 60)
+	cDesc := SPACE(150)
+	@ m_x + 1, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S40"
+	read
+BoxC()
+
+ESC_RETURN 0
+
+return 1
 
 
 
