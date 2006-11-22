@@ -275,7 +275,7 @@ AADD(aDBf,{ "doc_it_no", "N", 4, 0 })
 AADD(aDBf,{ "doc_op_no", "N", 4, 0 })
 AADD(aDBf,{ "aop_id", "N", 10,  0 })
 AADD(aDBf,{ "aop_att_id", "N", 10,  0 })
-AADD(aDBf,{ "doc_it_op_desc", "C", 150,  0 })
+AADD(aDBf,{ "doc_op_desc", "C", 150,  0 })
 
 return aDbf
 
