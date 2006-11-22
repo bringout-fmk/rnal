@@ -1,17 +1,23 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+// variables
+static __doc_no
+
 // ------------------------------------------
-// lista log tabele za nalog
-// nBr_nal - broj naloga
+// lista loga sa promjenama za nalog
+// nDoc_no - broj dokumenta
 // ------------------------------------------
-function frm_lst_rnlog(nBr_nal)
+function frm_lst_log( nDoc_no )
 local nTArea
 
 nTArea := SELECT()
 
+__doc_no := nDoc_no
+
 o_tables(.f.)
-tbl_lista(nBr_nal)
+
+tbl_list()
 
 select (nTArea)
 
@@ -22,30 +28,29 @@ return
 // -------------------------------------------------
 // otvori tabelu pregleda
 // -------------------------------------------------
-static function tbl_lista(nBr_nal)
+static function tbl_list()
 local cFooter
 local cHeader
 
 private ImeKol
 private Kol
 
-cHeader := " Nalog broj: " + s_br_nal(nBr_nal) + " "
+cHeader := " Nalog broj: " + docno_str(__doc_no) + " "
 cFooter := " Pregled promjena na nalogu... "
 
 Box(, 20, 77)
 
-set_box_dno()
+_set_box()
 
-select rnlog
-set_f_kol(nBr_nal)
-set order to tag "br_nal"
-go top
+select doc_log
+set order to tag "1"
 
+set_f_kol()
 set_a_kol(@ImeKol, @Kol)
 
 Beep(2)
 
-ObjDbedit("lstlog", 20, 77, {|| k_handler(nBr_nal) }, cHeader, cFooter, , , , , 5)
+ObjDbedit("lstlog", 20, 77, {|| k_handler() }, cHeader, cFooter,,,,,5)
 
 BoxC()
 
@@ -55,15 +60,15 @@ return
 // ------------------------------------------
 // setovanje dna boxa
 // ------------------------------------------
-static function set_box_dno()
+static function _set_box()
 local cLine1 := ""
 local cLine2 := ""
-local nOpcLen := 24
-local cOpcSep := "|"
+local nOptLen := 24
+local cOptSep := "|"
 
-cLine1 := PADR("<ESC> Izlaz", nOpcLen)
-cLine1 += cOpcSep + " "
-cLine1 += PADR("<c-P> Stampa liste", nOpcLen)
+cLine1 := PADR("<ESC> Izlaz", nOptLen)
+cLine1 += cOptSep + " "
+cLine1 += PADR("<c-P> Stampa liste", nOptLen)
 
 @ m_x + 20, m_y + 2 SAY cLine1
 
@@ -72,14 +77,14 @@ return
 
 // ------------------------------------------------
 // setovanje filtera
-// nBr_nal - broj naloga
 // ------------------------------------------------
-static function set_f_kol(nBr_nal)
+static function set_f_kol()
 local cFilter 
 
-cFilter := "br_nal == " + STR(nBr_nal, 10, 0)
-select rnlog
+cFilter := "doc_no == " + docno_str( __doc_no )
+select doc_log
 set filter to &cFilter
+go top
 
 return
 
@@ -88,20 +93,20 @@ return
 // ---------------------------------------------
 // pregled - key handler
 // ---------------------------------------------
-static function k_handler(nBr_nal)
+static function k_handler()
 local nTblFilt
-local cLogText := ""
+local cLogDesc := ""
 local cPom
 
 // napravi string iz rnlog/rnlog_it
-cLogText := g_log_opis( rnlog->br_nal, ;
-			rnlog->r_br, ;
-			rnlog->tip )
+cLogDesc := g_log_desc( doc_log->doc_no , ;
+			doc_log->doc_log_no , ;
+			doc_log_type )
 
-cPom := STRTRAN(cLogText, "#", ",")
+cPom := STRTRAN(cLogDesc, "#", ",")
 
 // prikaz stringa u browse - box-u
-s_log_opis_on_form( cPom )
+s_log_desc_on_form( cPom )
 
 do case
 	
@@ -117,7 +122,7 @@ do case
 	// detaljni prikaz box-a sa promjenama
 	case (Ch == K_ENTER)
 	
-		sh_log_box(cLogText)
+		sh_log_box( cLogDesc )
 		return DE_CONT
 	
 	// stampa liste log-a
@@ -126,15 +131,9 @@ do case
 			// stampa liste
 			return DE_CONT
 		endif
-		SELECT RNLOG
+		select doc_log
 		return DE_CONT
 	
-	// info - promjena
-	case ( UPPER(CHR(Ch)) == "I" ) 
-		pr_log_info()
-		SELECT RNLOG
-		return DE_CONT
-		
 endcase
 
 return DE_CONT
@@ -147,11 +146,15 @@ return DE_CONT
 static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 
-AADD(aImeKol, {"Datum", {|| datum }, "datum", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Vrijeme" , {|| PADR(vrijeme, 5) }, "vrijeme", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Operater" , {|| PADR(operater, 15) }, "operater", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Tip" , {|| PADR(s_prom_tip(tip), 12) }, "tip", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Opis" , {|| PADR(opis, 20) + "..." }, "opis", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Datum", {|| doc_log_date }, "datum", {|| .t.}, {|| .t.} })
+
+AADD(aImeKol, {"Vrijeme" , {|| PADR(doc_log_time, 5) }, "vrijeme", {|| .t.}, {|| .t.} })
+
+AADD(aImeKol, {"Operater" , {|| PADR( getusername(operater_id), 15) }, "operater", {|| .t.}, {|| .t.} })
+
+AADD(aImeKol, {"Tip" , {|| PADR(s_log_type(doc_log_type), 12) }, "tip", {|| .t.}, {|| .t.} })
+
+AADD(aImeKol, {"Opis" , {|| PADR(doc_log_desc, 20) + "..." }, "opis", {|| .t.}, {|| .t.} })
 
 aKol:={}
 
@@ -165,22 +168,22 @@ return
 // --------------------------------------------
 // vraca opis tipa promjene
 // --------------------------------------------
-static function s_prom_tip(cTip)
+static function s_log_type( cType )
 local xRet:=""
 do case
-	case cTip == "01"
-		xRet := "nal.otvoren"
-	case cTip == "99"
-		xRet := "nal.zatvoren"
-	case cTip == "10"
+	case cType == "01"
+		xRet := "otvoranje"
+	case cType == "99"
+		xRet := "zatvaranje"
+	case cType == "10"
 		xRet := "osn.podaci"
-	case cTip == "11"
+	case cType == "11"
 		xRet := "pod.isporuka"
-	case cTip == "12"
+	case cType == "12"
 		xRet := "kontakti"
-	case cTip == "20"
+	case cType == "20"
 		xRet := "artikli"
-	case cTip == "30"
+	case cType == "30"
 		xRet := "instrukcije"
 endcase
 return xRet
@@ -190,7 +193,7 @@ return xRet
 // prikaz opisa log-a na formi
 // cLogText se lomi na 3 reda...
 // -------------------------------------------
-static function s_log_opis_on_form(cLogText)
+static function s_log_desc_on_form(cLogText)
 local aLogArr:={}
 local cRow1
 local cRow2
@@ -231,117 +234,48 @@ return
 
 
 // -------------------------------------------------------
-// formira i vraca string na osnovu tabela RNLOG/RNLOG_IT
+// formira i vraca string na osnovu tabela DOC_LOG/DOC_LIT
 // -------------------------------------------------------
-static function g_log_opis(nBr_nal, nR_br, cTip)
+static function g_log_desc(nDoc_no, nDoc_log_no, cDoc_log_type)
 local cRet := ""
 local nTArea := SELECT()
-select rnlog
+select doc_log
 
 do case
-	case cTip == "01"
-		cRet := get01_stavka(nBr_nal, nR_br)
-	case cTip == "99"
-		cRet := get99_stavka(nBr_nal, nR_br)
-	case cTip == "10"
-		cRet := get10_stavka(nBr_nal, nR_br)
-	case cTip == "11"
-		cRet := get11_stavka(nBr_nal, nR_br)
-	case cTip == "12"
-		cRet := get12_stavka(nBr_nal, nR_br)
-	case cTip == "20"
-		cRet := get20_stavka(nBr_nal, nR_br)
-	case cTip == "30"
-		cRet := get30_stavka(nBr_nal, nR_br)
+	case cDoc_log_type == "01"
+		//cRet := _lit_01_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "99"
+		//cRet := _lit_99_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "10"
+		cRet := _lit_10_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "11"
+		//cRet := _lit_11_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "12"
+		//cRet := _lit_12_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "20"
+		cRet := _lit_20_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "30"
+		//cRet := _lit_30_get(nDoc_no, nDoc_log_no)
 endcase
 
 select (nTArea)
 return cRet
 
 
-// -----------------------------------------
-// prikaz info-a o promjeni
-// -----------------------------------------
-static function pr_log_info()
-local nBr_nal
-local nR_br
-local cProizvod
-local cTip
-local cSpace := SPACE(6)
-local nTArea := SELECT()
-
-nBr_nal := rnlog->br_nal
-nR_br := rnlog->r_br
-cTip := s_prom_tip(rnlog->tip)
-
-select rnlog_it
-set order to tag "br_nal"
-seek s_br_nal(nBr_nal) + s_r_br(nR_br)
-
-START PRINT CRET
-
-sh_log_zagl()
-
-? 
-
-do while !EOF() .and. rnlog_it->br_nal == nBr_nal ;
-		.and. rnlog_it->r_br == nR_br
-	
-	? STR(rnlog_it->p_br, 3, 0) + ")", ALLTRIM(rnlog_it->idroba2)
-	
-	? cSpace + "K1:", STR(rnlog_it->k_1, 8, 2)
-	? cSpace + "K2:", STR(rnlog_it->k_2, 8, 2)
-	? cSpace + "K3:", STR(rnlog_it->k_3, 8, 2)
-	
-	? cSpace + "N1:", STR(rnlog_it->n_1, 8, 2)
-	? cSpace + "N2:", STR(rnlog_it->n_2, 8, 2)
-	? cSpace + "N3:", STR(rnlog_it->n_3, 8, 2)
-	
-	? cSpace + "C1:", ALLTRIM(rnlog_it->c_1)
-	? cSpace + "C2:", ALLTRIM(rnlog_it->c_2)
-	? cSpace + "C3:", ALLTRIM(rnlog_it->c_3)
-	
-	?
-
-	skip
-enddo
-
-FF
-END PRINT
-
-select (nTArea)
-
-return
-
-
-// ----------------------------------------
-// zaglavlje prikaza info-a
-// ----------------------------------------
-static function sh_log_zagl()
-local cLine := REPLICATE("-", 60)
-
-? cLine
-? "Proizvod: ", ALLTRIM(rnlog_it->idroba)
-? "Datum promjene: ", DToC(rnlog->datum), "vrijeme promjene: ", ALLTRIM(rnlog->vrijeme)
-? "Akcija: " + g_akcija_info(rnlog_it->akcija)
-? cLine
-
-return
-
 
 // -------------------------------------------------
 // vraca opis akcije prema oznaci cAkcija
 // -------------------------------------------------
-static function g_akcija_info(cAkcija)
+static function g_action_info(cAction)
 local xRet := ""
 
 do case 
-	case cAkcija == "E"
-		xRet := "ispravka stavki"
-	case cAkcija == "+"
-		xRet := "dodavanje stavki"
-	case cAkcija == "-"
-		xRet := "brisanje stavki"
+	case cAction == "E"
+		xRet := "update"
+	case cAction == "+"
+		xRet := "insert"
+	case cAction == "-"
+		xRet := "delete"
 endcase
 
 return xRet
@@ -357,8 +291,6 @@ local cResp := "OK"
 private GetList:={}
 
 aBoxTxt := toktoniz(cLogTxt, "#") 
-
-altd()
 
 if LEN(aBoxTxt) == 0
 	return
