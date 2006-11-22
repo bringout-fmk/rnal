@@ -389,27 +389,31 @@ return nLastNo + 1
 // -----------------------------------------------
 // logiranje delte izmedju kumulativa i pripreme
 // -----------------------------------------------
-function doc_delta( nDoc_no )
+function doc_delta( nDoc_no, cDesc )
 local nTArea := SELECT()
+
+if cDesc == nil
+	cDesc := ""
+endif
 
 select _docs
 set filter to
 select _doc_it
 set filter to
-select _doc_op
+select _doc_ops
 set filter to
 select docs
 set filter to
-select doc_op
+select doc_ops
 set filter to
 select doc_it
 set filter to
 
 // delta stavki dokumenta
-_doc_it_delta( nDoc_no )
+_doc_it_delta( nDoc_no, cDesc )
 
 // delta dodatnih operacija dokumenta
-//_doc_op_delta( nDoc_no )
+//_doc_op_delta( nDoc_no, cDesc )
 
 select (nTArea)
 
@@ -423,7 +427,7 @@ return
 // 1. stavke koje nisu iste
 // 2. stavke koje su izbrisane
 // -------------------------------------------------
-static function _doc_it_delta( nDoc_no )
+static function _doc_it_delta( nDoc_no, cDesc )
 local nDoc_log_no
 local cDoc_log_type := "20"
 local cAction
@@ -527,6 +531,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	
 	skip
 enddo
+
+altd()
 
 // bilo je promjena dodaj novi log zapis
 if lLogAppend 
@@ -683,7 +689,7 @@ select (nF_DOC_IT)
 set order to tag "1"
 go top
 
-seek docno_str(nDoc_no) + docno_str(nDoc_log_no) + artid_str(nArt_id)
+seek docno_str(nDoc_no) + docno_str(nDoc_it_no) + artid_str(nArt_id)
 
 if FOUND()
 	lRet := .t.

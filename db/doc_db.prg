@@ -5,13 +5,18 @@
 
 static __doc_no
 static __doc_stat
-
+static __doc_desc
 
 
 // -------------------------------------------
 // azuriranje dokumenta u kumulativnu bazu
+// cDesc - opis kod azuriranja
 // -------------------------------------------
-function doc_insert()
+function doc_insert( cDesc )
+
+if cDesc == nil
+	cDesc := ""
+endif
 
 o_tables(.t.)
 
@@ -32,10 +37,11 @@ if RECCOUNT2() == 0
 	return 0
 endif
 
+__doc_desc := cDesc
 __doc_no := _docs->doc_no
 __doc_stat := _docs->doc_status
 
-if __doc_stat < 2 .and. !doc_exist( __doc_no )
+if __doc_stat < 3 .and. !doc_exist( __doc_no )
 	MsgBeep("Nalog " + ALLTRIM(STR( __doc_no )) + " nije moguce azurirati !!!")
 	return 0
 endif
@@ -45,10 +51,10 @@ MsgO("Azuriranje naloga u toku...")
 Beep(1)
 
 // doc busy....
-if __doc_stat == 2
+if __doc_stat == 3
 	
 	// napravi deltu dokumenta
-	doc_delta( __doc_no )
+	doc_delta( __doc_no, __doc_desc )
 	
 	// brisi dokument iz kumulativa
 	doc_erase( __doc_no )
@@ -64,7 +70,9 @@ _doc_it_insert( __doc_no )
 // azuriranje tabele _DOC_OPS
 _doc_op_insert( __doc_no )
 
-if __doc_stat <> 2
+set_doc_marker(__doc_no, 0)
+
+if __doc_stat <> 3
 
 	// logiraj promjene na dokumentu
 	doc_logit( __doc_no )
@@ -102,16 +110,20 @@ go top
 
 // uzmi iz _docs stavke...
 Scatter("d")
-	
-// pronadji zauzeti slog ( 3 + nDoc_no )
-select docs
-set order to tag "2"
-go top
-seek d_busy() + docno_str( nDoc_no )
-
-Scatter()
-
 _doc_status := 0
+
+if __doc_stat <> 3
+	// pronadji zauzeti slog ( 3 + nDoc_no )
+	select docs
+	set order to tag "2"
+	go top
+	seek d_busy() + docno_str( nDoc_no )
+	Scatter()
+else
+	select docs
+	set order to tag "1"
+	append blank
+endif
 
 Gather("d")
 
@@ -199,6 +211,13 @@ function doc_2__doc( nDoc_no )
 o_tables(.t.)
 
 select docs
+set filter to
+select doc_it
+set filter to
+select doc_ops
+set filter to
+
+select docs
 set order to tag "1"
 go top
 seek docno_str( nDoc_no )
@@ -218,6 +237,9 @@ endif
 
 MsgO("Vrsim povrat dokumenta u pripremu....")
 
+// markiraj da je dokument busy
+set_doc_marker( nDoc_no, 3 )
+
 // povrat maticne tabele RNAL
 _docs_erase( nDoc_no )
 
@@ -227,8 +249,6 @@ _doc_it_erase( nDoc_no )
 // povrat operacija RNOP
 _doc_op_erase( nDoc_no ) 
 
-// markiraj da je dokument busy
-set_busy_marker( nDoc_no, .t. )
 
 select docs
 use
@@ -243,9 +263,9 @@ return 1
 // ----------------------------------------
 // markiranje statusa dokumenta busy
 // nDoc_no - dokument broj
-// lMark - .t. -> setuj, .f. -> ukini
+// nMarker - 0, 1, 2 ili 3
 // ----------------------------------------
-function set_busy_marker( nDoc_no, lMark )
+function set_doc_marker( nDoc_no, nMarker )
 local nTArea
 nTArea := SELECT()
 
@@ -258,11 +278,7 @@ if FOUND()
 	
 	Scatter()
 	
-	if lMark == .t.
-		_doc_status := 3
-	else
-		_doc_status := 0
-	endif
+	_doc_status := nMarker
 	
 	Gather()
 	
@@ -284,6 +300,17 @@ endif
 return lRet
 
 
+// -------------------------------------
+// provjerava da li je dokument rejected
+// -------------------------------------
+function is_doc_rejected()
+local lRet := .f.
+if field->doc_status == 2
+	lRet := .t.
+endif
+return lRet
+
+
 
 //----------------------------------------------
 // povrat dokumenta iz tabele DOCS
@@ -300,9 +327,6 @@ if FOUND()
 	select docs
 		
 	Scatter()
-		
-	// setuj na rejected...
-	_doc_status := 2
 		
 	select _docs
 		
