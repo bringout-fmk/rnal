@@ -337,7 +337,7 @@ local nLeft := 20
 
 if lNewRec
 
-	_inc_id(@nEl_id, "EL_ID")
+	_set_sif_id(@nEl_id, "EL_ID")
 
 endif
 
@@ -345,7 +345,6 @@ Scatter()
 
 if lNewRec
 
-	_el_id := nEl_id
 	_art_id := nArt_id
 	_e_gr_id := 0
 endif
@@ -365,12 +364,6 @@ BoxC()
 
 if LastKey() == K_ESC
 	return DE_CONT
-endif
-
-if lNewRec
-
-	append blank
-
 endif
 
 Gather()
@@ -394,7 +387,7 @@ local nE_gr_at_id := 0
 
 if lNewRec
 
-	_inc_id(@nEl_att_id, "EL_ATT_ID")
+	_set_sif_id(@nEl_att_id, "EL_ATT_ID")
 
 endif
 
@@ -402,7 +395,6 @@ Scatter()
 
 if lNewRec
 
-	_el_att_id := nEl_att_id
 	_el_id := nEl_id
 	_e_gr_vl_id := 0
 endif
@@ -431,12 +423,6 @@ if LastKey() == K_ESC
 	return DE_CONT
 endif
 
-if lNewRec
-
-	append blank
-
-endif
-
 Gather()
 go top
 
@@ -456,7 +442,7 @@ local nEl_op_id := 0
 
 if lNewRec
 
-	_inc_id(@nEl_op_id, "EL_OP_ID")
+	_set_sif_id(@nEl_op_id, "EL_OP_ID")
 
 endif
 
@@ -464,7 +450,6 @@ Scatter()
 
 if lNewRec
 
-	_el_op_id := nEl_op_id
 	_el_id := nEl_id
 	_aop_id := 0
 	_aop_att_id := 0
@@ -487,12 +472,6 @@ BoxC()
 
 if LastKey() == K_ESC
 	return DE_CONT
-endif
-
-if lNewRec
-
-	append blank
-
 endif
 
 Gather()

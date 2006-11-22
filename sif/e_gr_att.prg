@@ -21,7 +21,6 @@ _mod_tb_direkt( _tb_direkt )
 
 cHeader := "Elementi - grupe atributi /  'V' - pr.vrijednosti"
 
-altd()
 
 
 if nGr_id == nil

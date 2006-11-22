@@ -26,9 +26,6 @@ if lAutoFind == nil
 	lAutoFind := .f.
 endif
 
-altd()
-
-
 l_auto_find := lAutoFind
 
 if ( par_count > 0 )
@@ -111,8 +108,6 @@ local cArt_desc := ""
 local nTRec := RecNO()
 local nRet
 
-altd()
-
 do case
 	
 	case l_auto_find == .t.
@@ -163,12 +158,11 @@ do case
 		
 		select articles
 		go (nTRec)
-
+		
 		return DE_CONT
 		
 	case Ch == K_CTRL_T
 
-		// brisanje sifre...
 		if art_delete( field->art_id ) == 1
 			
 			return DE_REFRESH
@@ -196,6 +190,34 @@ do case
 endcase
 return DE_CONT
 
+
+
+// -------------------------------------------
+// poruka artikal zauzet
+// -------------------------------------------
+static function msg_art_busy()
+MsgBeep("Neko vrsi ispravku artikla#Pregled onemogucen")
+return
+
+
+// -------------------------------------------
+// da li je artikal zauzet
+// -------------------------------------------
+static function is_art_busy()
+local lRet := .f.
+if field->art_status == 3
+	lRet := .t.
+endif
+return lRet
+
+// -------------------------------------------
+// setuje status artikla
+// -------------------------------------------
+static function set_art_status( nStatus )
+Scatter()
+_art_status := nStatus
+Gather()
+return
 
 
 // -------------------------------
@@ -411,7 +433,6 @@ do while !EOF() .and. field->art_id == nArt_id
 	++ nCount
 enddo
 
-
 // update art_desc..
 select articles
 set order to tag "1"
@@ -422,9 +443,11 @@ if FOUND()
 	if !EMPTY(cArt_desc) .and. lE_att == .t.
 	
 		if EMPTY(field->art_desc) .or. (!EMPTY(field->art_desc) .and. Pitanje(, "Definisati naziv artikla (D/N) ?", "D") == "D")
+			
 			Scatter()
 			_art_desc := cArt_desc
 			Gather()
+			
 			return 1
 		endif
 		
@@ -432,12 +455,21 @@ if FOUND()
 		
 		// izbrisi tu stavku....
 		art_delete(nArt_id, .t.)
+		
 		return 0
 		
 	endif
 endif
 
 return 0
+
+
+
+// ------------------------------------
+// vraca string STR(3)
+// ------------------------------------
+static function art_busy()
+return STR(3,1)
 
 
 
