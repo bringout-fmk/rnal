@@ -2,7 +2,7 @@
 
 // variables
 
-static l_new_it
+static l_new_ops
 static _doc
 
 
@@ -26,9 +26,9 @@ if lNew == nil
 	lNew := .t.
 endif
 
-l_new_it := lNew
+l_new_ops := lNew
 
-select _doc_it
+select _doc_ops
 
 UsTipke()
 
@@ -44,7 +44,7 @@ do while .t.
 		
 		select _doc_ops
 		
-		if l_new_it
+		if l_new_ops
 			append blank
 		endif
 		
@@ -80,22 +80,33 @@ static function _e_box_item( nBoxX, nBoxY )
 local nX := 1
 local nLeft := 20
 
-if l_new_it
+if l_new_ops
 	_doc_no := _doc
-	_doc_it_no := inc_docop( _doc )
+	_doc_op_no := inc_docop( _doc )
 endif
 
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("r.br stavke", nLeft) GET _doc_op_no 
 
+
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("d.operacija", nLeft) GET _aop_id VALID {|| s_aops( @_aop_id, .t. ), show_it( g_aop_desc( _aop_id ) + ".." , 30 ) }
+
+@ m_x + nX, m_y + 2 SAY PADL("d.operacija", nLeft) GET _aop_id VALID {|| s_aops( @_aop_id ), show_it( g_aop_desc( _aop_id )) }
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("atr.d.operacije:", nLeft) GET _aop_att_id VALID {|| s_aops_att(@_aop_att_id), show_it(g_aop_att_desc( _aop_att_id )) }
+@ m_x + nX, m_y + 2 SAY PADL("atr.d.operacije:", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att(@_aop_att_id, _aop_id ), show_it(g_aop_att_desc( _aop_att_id )) }
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku", nLeft) GET _doc_it_no
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("dodatni opis", nLeft) GET _doc_op_desc PICT "@S40"
+
 
 read
 
@@ -119,7 +130,7 @@ set order to tag "1"
 seek docno_str( nDoc_no )
 
 do while !EOF() .and. field->doc_no == nDoc_no
-	nRet := field->doc_it_no
+	nRet := field->doc_op_no
 	skip
 enddo
 

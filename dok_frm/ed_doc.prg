@@ -218,7 +218,7 @@ aKol:={}
 
 AADD(aImeKol, {"dod.oper", {|| PADR(g_aop_desc( aop_id ),10) }, "aop_id"})
 AADD(aImeKol, {"atr.dod.oper", {|| PADR( g_aop_att_desc( aop_att_id ), 10 )}, "aop_att_id" })
-AADD(aImeKol, {"dod.opis", {|| PADR(doc_it_op_desc, 15) + ".."}, "doc_it_op_desc" })
+AADD(aImeKol, {"dod.opis", {|| PADR(doc_op_desc, 15) + ".."}, "doc_op_desc" })
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol,i)
@@ -393,9 +393,10 @@ do case
 		
 		nRet := DE_CONT
 		
-		if ALIAS() == "_DOCS" .and. Pitanje(,"Izvrsiti azuriranje dokumenta (D/N) ?", "D") == "D"
+		if ALIAS() == "_DOCS" .and. RECCOUNT2() <> 0 .and. ;
+			Pitanje(,"Izvrsiti azuriranje dokumenta (D/N) ?", "D") == "D"
 
-
+		
 			// busy....
 			if field->doc_status == 3
 				_g_doc_desc( @cDesc )
@@ -416,8 +417,9 @@ do case
 						
 			endif
 		
-		else
-			Msgbeep("Pozicionirajte se na prvu tabelu...")
+		elseif ALIAS() <> "_DOCS"
+			Msgbeep("Pozicionirajte se na tabelu osnovnih podataka")
+		
 		endif
 		
 		return nRet
