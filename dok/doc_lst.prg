@@ -88,7 +88,7 @@ endif
 // druga linija je zajednicka
 cLine2 := PADR("<c-P> Stampa naloga", nOptLen)
 cLine2 += cOptSep
-cLine2 += PADR("<c-O> Stampa otpremnice", nOptLen)
+cLine2 += PADR("<K> Lista kontakata", nOptLen)
 cLine2 += cOptSep
 cLine2 += PADR("<L> Lista promjena", nOptLen)
 
@@ -205,38 +205,38 @@ endif
 do case
 	// stampa naloga
 	case (Ch == K_CTRL_P)
-		/*
+		
 		if Pitanje(, "Stampati nalog (D/N) ?", "D") == "D"
-			nBr_nal := rnal->br_nal
+			
+			nDoc_no := docs->doc_no
 			nTRec := RecNo()
-			cTblFilt := DBFilter()
+			cTmpFilter := DBFilter()
+			
 			set filter to
-			st_nalpr( .f., nBr_nal )
-			SELECT RNAL
-			set_f_kol(cTblFilt)
-			GO (nTRec)
+			
+			st_nalpr( .f., nDoc_no )
+			
+			select docs
+			
+			set_f_kol( cTmpFilter )
+			
+			go (nTRec)
+			
 			return DE_REFRESH
 		endif
-		SELECT RNAL
-		*/
+		
+		select docs
 		return DE_CONT
 	
-	// stampa otpremnice
-	case ( Ch == K_CTRL_O )
-		/*
-		if Pitanje(,"Stampati otpremicu (D/N ?)", "D") == "D"
-			nBr_nal := rnal->br_nal
-			nTRec := RecNo()
-			cTblFilt := DBFilter()
-			set filter to
-			st_otpremnica(.f., nBr_nal)
-			SELECT RNAL
-			set_f_kol(cTblFilt)
-			GO (nTRec)
-			return DE_REFRESH
-		endif
-		SELECT RNAL
-		*/
+	// pregled kontakata.... naloga
+	case ( UPPER(CHR(Ch)) == "K" )
+		
+		select docs 
+		
+		doc_cont_view( docs->doc_no )
+		
+		select docs
+		
 		RETURN DE_CONT
 		
 	// otvaranje naloga za doradu
@@ -298,18 +298,28 @@ do case
 		if Pitanje(, "Zatvoriti nalog (D/N) ?", "N") == "D"
 					
 			// uzmi status naloga
-			_g_doc_status( @nDoc_status, @cDesc )
+			if _g_doc_status( @nDoc_status, @cDesc ) == 1
+				
+				nTRec := RecNo()
+				nDoc_no := docs->doc_no
 			
-			nTRec := RecNo()
-			nDoc_no := docs->doc_no
+				set_doc_marker( nDoc_no, nDoc_status )
+				
+				// logiraj zatvaranje...
+				log_closed( nDoc_no, cDesc, nDoc_status )
+				
+				MsgBeep("Nalog zatvoren !!!")
 			
-			set_doc_marker( nDoc_no, nDoc_status )
-			MsgBeep("Nalog zatvoren !!!")
+				select docs
+				return DE_REFRESH
+				
+			else
 			
-			select docs
-			
-			return DE_REFRESH
-			
+				MsgBeep("Setovanje statusa obavezno !!!")
+				select docs
+				return DE_CONT
+				
+			endif
 		endif
 		
 		select docs
@@ -341,7 +351,7 @@ do case
 		
 		select docs
 		
-		return DE_REFRESH
+		return DE_CONT
 
 endcase
 
@@ -365,7 +375,7 @@ local nX := 1
 
 Beep(2)
 
-Box(,4, 50)
+Box(,8, 60)
 	cDesc := SPACE(150)
 	
 	@ m_x + nX, m_y + 2 SAY "Trenutni status naloga je:"
@@ -402,8 +412,9 @@ if cStat == "X"
 	nDoc_status := 2
 endif
 
+ESC_RETURN 0
 
-return
+return 1
 
 
 // -------------------------------------------------------
@@ -429,6 +440,120 @@ next
 return
 
 
+// -----------------------------------------
+// daje listu kontakata naloga
+// -----------------------------------------
+function doc_cont_view( nDoc_no )
+local aCont := {}
 
+if _get_doc_contacts( @aCont, nDoc_no ) > 0
+	show_c_list( aCont )
+else
+	MsgBeep("Dokument nema kontakata !!!")
+endif
+
+return
+
+
+// ----------------------------------------------
+// puni matricu aArr sa listom kontakata...
+// ----------------------------------------------
+static function _get_doc_contacts( aArr, nDoc_no )
+local nC_count := 0
+local nTArea := SELECT()
+local cLogType := PADR("12", 3)
+local nSrch := 0
+local nCont_id := 0
+
+select doc_log
+set order to tag "2"
+go top
+
+seek docno_str(nDoc_no) + cLogType
+
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_log_type == cLogType
+
+	nDoc_log_no := field->doc_log_no
+	
+	select doc_lit
+	set order to tag "1"
+	go top
+	seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
+
+	do while !EOF() .and. field->doc_no == nDoc_no ;
+			.and. field->doc_log_no == nDoc_log_no
+			
+			if field->int_1 <> 0
+				
+				nCont_id := field->int_1
+				
+				nSrch := ASCAN(aArr, {|xVal| xVal[1] == nCont_id })
+				if nSrch == 0
+					
+					AADD(aArr, { field->int_1, g_cont_desc(field->int_1), g_cont_tel(field->int_1) })
+				
+					++ nC_count
+				endif
+			endif
+		
+		skip
+	enddo
+
+	select doc_log
+	skip
+	
+enddo
+
+select (nTArea)
+return nC_count
+
+// ----------------------------------------------
+// prikazuje listu kontakata u box-u
+// ----------------------------------------------
+static function show_c_list( aArr )
+local nX := m_x
+local nY := m_y
+local nBoxX := LEN(aArr) + 2
+local nBoxY := 70
+local i
+local cGet := " "
+local lShow := .t.
+
+if LEN(aArr) == 0
+	return .f.
+endif
+
+do while lShow == .t.
+
+	Box( , nBoxX, nBoxY ) 
+		
+		for i:=1 to LEN(aArr)
+			
+			@ m_x + i, m_y + 2 SAY "(" + ALLTRIM(STR(aArr[i, 1])) + ")"
+			@ m_x + i, col() + 1 SAY ", " + ALLTRIM(aArr[i, 2])
+			
+			@ m_x + i, col() + 1 SAY ", " + ALLTRIM(aArr[i, 3])
+			
+			
+		next	
+		
+		@ m_x + LEN(aArr) + 1 , m_y + 2 GET cGet
+		
+		read
+		
+		
+	BoxC()
+	
+	if LastKey() == K_ENTER .or. LastKey() == K_ESC
+		lShow := .f.
+	endif
+
+enddo
+
+m_x := nX
+m_y := nY
+
+return .t.
 
 

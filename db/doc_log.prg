@@ -55,8 +55,11 @@ go top
 // logiranje artikala
 cDesc := "Inicijalni podaci stavki"
 
-log_items(__doc_no, cDesc)
+log_items( __doc_no, cDesc )
 
+// logiranje operacija
+cDesc := "Inicijalni podaci dodatnih operacija"
+log_aops( __doc_no, cDesc )
 
 return
 
@@ -238,7 +241,6 @@ return
 // nDoc_no - dokument no
 // cDesc - opis
 // cAction - akcija 
-// aArr - matrica sa podacima
 // ----------------------------------------------------
 function log_items( nDoc_no, cDesc, cAction )
 local nDoc_log_no
@@ -278,8 +280,52 @@ enddo
 return
 
 
+// ----------------------------------------------------
+// logiranje podataka dodatnih operacija
+// nDoc_no - dokument no
+// cDesc - opis
+// cAction - akcija 
+// ----------------------------------------------------
+function log_aops( nDoc_no, cDesc, cAction )
+local nDoc_log_no
+local cDoc_log_type
+
+select _doc_ops
+if RECCOUNT2() == 0
+	return
+endif
+
+if ( cAction == nil)
+	cAction := "+"
+endif
+
+cDoc_log_type := "30"
+nDoc_log_no := _inc_log_no( nDoc_no )
+
+_d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+
+select _doc_ops
+go top
+seek docno_str(nDoc_no)
+
+do while !EOF() .and. field->doc_no == nDoc_no
+
+	_lit_30_insert( cAction, nDoc_no, nDoc_log_no, ;
+			field->aop_id,  ;
+			field->aop_att_id,  ;
+			field->doc_op_desc )
+	
+	select _doc_ops
+	skip
+	
+enddo
+
+return
+
+
+
 // -----------------------------------
-// punjenje loga sa stavkama tipa 12
+// punjenje loga sa stavkama tipa 20
 // -----------------------------------
 function _lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
 			nArt_id, nArt_qtty, nArt_heigh, nArt_width)
@@ -301,6 +347,71 @@ replace doc_lit_action with cAction
 
 return
 
+
+// -----------------------------------
+// punjenje loga sa stavkama tipa 30
+// -----------------------------------
+function _lit_30_insert(cAction, nDoc_no, nDoc_log_no, ;
+			nAop_id, nAop_att_id, cDoc_op_desc)
+local nDoc_lit_no
+
+nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
+
+select doc_lit
+append blank
+
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_lit_no with nDoc_lit_no
+replace int_1 with nAop_id
+replace int_2 with nAop_att_id
+replace char_1 with cDoc_op_desc
+replace doc_lit_action with cAction
+
+return
+
+
+// ----------------------------------------------------
+// logiranje zatvaranje
+// nDoc_no - dokument no
+// cDesc - opis
+// cAction - akcija 
+// ----------------------------------------------------
+function log_closed( nDoc_no, cDesc, nDoc_status )
+local nDoc_log_no
+local cDoc_log_type
+
+if ( cAction == nil)
+	cAction := "+"
+endif
+
+cDoc_log_type := "99"
+nDoc_log_no := _inc_log_no( nDoc_no )
+
+_d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+_lit_99_insert( cAction, nDoc_no, nDoc_log_no, nDoc_status )
+
+return
+
+
+// -----------------------------------
+// punjenje loga sa stavkama tipa 99
+// -----------------------------------
+function _lit_99_insert(cAction, nDoc_no, nDoc_log_no, nDoc_status)
+local nDoc_lit_no
+
+nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
+
+select doc_lit
+append blank
+
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_lit_no with nDoc_lit_no
+replace int_1 with nDoc_status
+replace doc_lit_action with cAction
+
+return
 
 
 // --------------------------------------------
@@ -356,7 +467,7 @@ return nLastNo + 1
 // ----------------------------------------------
 // konvert doc_log_no -> STR(doc_log_no,10)
 // ----------------------------------------------
-static function doclog_str(nId)
+function doclog_str(nId)
 return STR(nId,10)
 
 
@@ -413,7 +524,7 @@ set filter to
 _doc_it_delta( nDoc_no, cDesc )
 
 // delta dodatnih operacija dokumenta
-//_doc_op_delta( nDoc_no, cDesc )
+_doc_op_delta( nDoc_no, cDesc )
 
 select (nTArea)
 
@@ -517,7 +628,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		
 		cAction := "+"
 		
-		_lit_20_insert(cAction, nDoc_no, nDoc_it_no, ;
+		_lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
 			   nArt_id, ;
 			   nDoc_it_qtty, ;
 			   nDoc_it_heigh, ;
@@ -532,8 +643,6 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	skip
 enddo
 
-altd()
-
 // bilo je promjena dodaj novi log zapis
 if lLogAppend 
 	_d_log_insert(nDoc_no, nDoc_log_no, cDoc_log_type, cDesc)
@@ -542,129 +651,123 @@ endif
 return
 
 
-/*
-// -------------------------------------------------
-// function op_delta() - delta operacija naloga
-// -------------------------------------------------
-static function op_delta(nBr_nal, cOpis)
-local nR_br
-local nP_br
-local cAkcija
-local nLOGR_br
-local cTip := "30"
-local lSetRNLOG := .f.
-local cOperater := goModul:oDataBase:cUser
-local cIdOper
-local cIdKarakt
-local cInstr
-local cItemID
 
-// uzmi sljedeci broj RNLOG
-nLOGR_br := n_log_rbr( nBr_nal )
+// -------------------------------------------------
+// function _doc_op_delta() - delta d.operacija
+// nDoc_no - broj naloga
+// funkcija gleda _doc_ops na osnovu doc_ops i trazi
+// 1. stavke koje nisu iste
+// 2. stavke koje su izbrisane
+// -------------------------------------------------
+static function _doc_op_delta( nDoc_no, cDesc )
+local nDoc_log_no
+local cDoc_log_type := "30"
+local cAction
+local lLogAppend := .f.
 
-// pozicioniraj se na trazeni radni nalog
-select rnop
-set order to tag "br_nal"
+// uzmi sljedeci broj DOC_LOG
+nDoc_log_no := _inc_log_no( nDoc_no )
+
+// pozicioniraj se na trazeni dokument
+select doc_ops
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( nDoc_no )
 
-do while !EOF() .and. field->br_nal == nBr_nal
+do while !EOF() .and. field->doc_no == nDoc_no
 
-	nR_br := field->r_br
-	nP_br := field->p_br
-	cIdOper := field->id_rnop
-	cIdKarakt := field->id_rnka
-	cItemID := field->item_id
-	cInstr := field->rn_instr
+	nDoc_it_no := field->doc_it_no
+	nDoc_op_no := field->doc_op_no
 	
-	// provjeri da li rnop(stavka) postoji u p_rnop 
+	nAop_id := field->aop_id
+	nAop_att_id := field->aop_att_id
+	cDoc_op_desc := field->doc_op_desc
+	
+	// DOC_OPS -> _DOC_OPS - provjeri da li je sta brisano
 	// akcija "-"
 	
-	if !op_exist(nBr_nal, nR_br, nP_br, cItemID, cIdOper, cIdKarakt, .f.)
+	if !aop_exist( nDoc_no, nDoc_it_no, nDoc_op_no, nAop_id, nAop_att_id, .f.)
 		
-		cAkcija := "-"
+		cAction := "-"
 		
-		f30_stavke(cAkcija, nBr_nal, nLOGR_br,;
-			   cItemID, ;
-			   "", ;
-			   cIdOper, ;
-			   cIdKarakt, ;
-			   cInstr)
+		_lit_30_insert(cAction, nDoc_no, nDoc_log_no, ;
+			   nAop_id , ;
+			   nAop_att_id, ;
+			   cDoc_op_desc )
 			
-		lSetRNLOG := .t.
+		lLogAppend := .t.
 		
-		select rnop
+		select doc_ops
+		
 		skip
 		loop
 		
 	endif
 
-	// provjeri integritet stavki RNOP <-> P_RNOP (idroba)
+	// DOC_OPS -> _DOC_OPS - da li je sta mjenjano od podataka 
 	// akcija "E"
 	
-	if !op_value(nBr_nal, nR_br, nP_br, cItemID, cIdOper, ;
-		      cIdKarakt, cInstr, .f.)
+	if !aop_value(nDoc_no, nDoc_it_no, nDoc_op_no, nAop_id, ;
+		      nAop_att_id, ;
+		      cDoc_op_desc, .f.)
 		
-		cAkcija := "E"
+		cAction := "E"
 		
-		f30_stavke(cAkcija, nBr_nal, nLOGR_br, ;
-			   cItemID, ;
-			   "", ;
-			   cIdOper, ;
-			   cIdKarakt, ;
-			   cInstr)
+		_lit_30_insert(cAction, nDoc_no, nDoc_log_no, ;
+			   _doc_ops->aop_id, ;
+			   _doc_ops->aop_att_id, ;
+			   _doc_ops->doc_op_desc )
 	
-		lSetRNLOG := .t.
+		lLogAppend := .t.
 	endif
 	
-	select rnop
+	select doc_ops
+	
 	skip
 enddo
 
-// pozicioniraj se na P_RNOP
-select p_rnop
-set order to tag "br_nal"
+// pozicioniraj se na _DOC_IT
+select _doc_ops
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str(nDoc_no)
 
-do while !EOF() .and. field->br_nal == nBr_nal
+do while !EOF() .and. field->doc_no == nDoc_no
 
-	nR_br := field->r_br
-	nP_br := field->p_br
-	cIdOper := field->id_rnop
-	cIdKarakt := field->id_rnka
-	cItemID := field->item_id
-	cInstr := field->rn_instr
-
-	// provjeri da li stavka postoji u kumulativu
+	nDoc_it_no := field->doc_it_no
+	nDoc_op_no := field->doc_op_no
+	nAop_id := field->aop_id
+	nAop_att_id := field->aop_att_id
+	cDoc_op_desc := field->doc_op_desc
+	
+	// _DOC_OPS -> DOC_OPS, da li stavka postoji u kumulativu
 	// akcija "+"
 	
-	if !op_exist(nBr_nal, nR_br, nP_br, cItemID, cIdOper, cIdKarakt, .t.)
+	if !aop_exist(nDoc_no, nDoc_it_no, nDoc_op_no, nAop_id, nAop_att_id,.t.)
 		
-		cAkcija := "+"
+		cAction := "+"
 		
-		f30_stavke(cAkcija, nBr_nal, nLOGR_br,;
-			   cItemID, ;
-			   "", ;
-			   cIdOper, ;
-			   cIdKarakt, ;
-			   cInstr)
-	
-		lSetRNLOG := .t.
+		_lit_30_insert(cAction, nDoc_no, nDoc_log_no, ;
+			   nAop_id, ;
+			   nAop_att_id, ;
+			   cDoc_op_desc )
+
+		lLogAppend := .t.
 	
 	endif
 	
-	select p_rnst
+	select _doc_ops
+	
 	skip
 enddo
 
-// ako je bilo promjena upisi i u RNLOG...
-if lSetRNLOG 
-	f_rnlog(nBr_nal, nLOGR_br, cTip, cOperater, cOpis)
+// bilo je promjena dodaj novi log zapis
+if lLogAppend 
+	_d_log_insert(nDoc_no, nDoc_log_no, cDoc_log_type, cDesc)
 endif
 
 return
-*/
+
 
 
 // --------------------------------------
@@ -689,7 +792,7 @@ select (nF_DOC_IT)
 set order to tag "1"
 go top
 
-seek docno_str(nDoc_no) + docno_str(nDoc_it_no) + artid_str(nArt_id)
+seek docno_str(nDoc_no) + docit_str(nDoc_it_no) + artid_str(nArt_id)
 
 if FOUND()
 	lRet := .t.
@@ -723,7 +826,7 @@ endif
 select (nF_DOC_IT)
 set order to tag "1"
 go top
-seek docno_str(nDoc_no) + docno_str(nDoc_it_no) + artid_str(nArt_id)
+seek docno_str(nDoc_no) + docit_str(nDoc_it_no) + artid_str(nArt_id)
  
 if (field->doc_it_qtty == nDoc_it_qtty) .and. ;
    (field->doc_it_heigh == nDoc_it_heigh) .and. ;
@@ -738,6 +841,85 @@ return lRet
 
 
 
+// --------------------------------------
+// da li postoji item u tabelama
+// _DOC_OPS, DOC_OPS
+// --------------------------------------
+static function aop_exist( nDoc_no, nDoc_it_no, nDoc_op_no, ;
+				nAop_id, nAop_att_id, lKumul)
+local nF_DOC_OPS := F__DOC_OPS
+local nTArea := SELECT()
+local nTRec := RecNo()
+local lRet := .f.
+
+if (lKumul == nil)
+	lKumul := .f.
+endif
+
+if ( lKumul == .t. )
+	nF_DOC_OPS := F_DOC_OPS
+endif
+
+select (nF_DOC_OPS)
+set order to tag "1"
+go top
+
+seek docno_str(nDoc_no) + ;
+	docit_str(nDoc_it_no) + ;
+	docop_str(nDoc_op_no) + ;
+	aopid_str(nAop_id) + ;
+	aopid_str(nAop_att_id)
+
+if FOUND()
+	lRet := .t.
+endif
+
+select (nTArea)
+go (nTRec)
+
+return lRet
+
+
+
+// --------------------------------------
+// da li je stavka operacije ista....
+// --------------------------------------
+static function aop_value(nDoc_no, nDoc_it_no, nDoc_op_no, nAop_id,;
+			   nAop_att_id, nDoc_op_desc, lKumul)
+local nF_DOC_OPS := F__DOC_OPS
+local nTArea := SELECT()
+local nTRec := RecNo()
+local lRet := .f.
+
+if (lKumul == nil)
+	lKumul := .f.
+endif
+
+if (lKumul == .t.)
+	nF_DOC_OPS := F_DOC_OPS
+endif
+
+select (nF_DOC_OPS)
+set order to tag "1"
+go top
+seek docno_str(nDoc_no) + ;
+	docit_str(nDoc_it_no) + ;
+	docop_str(nDoc_op_no)
+ 
+if (field->aop_id == nAop_id) .and. ;
+   (field->aop_att_id == nAop_att_id ) .and. ;
+   (field->doc_op_desc == nDoc_op_desc)
+	lRet := .t.
+endif
+
+select (nTArea)
+go (nTRec)
+
+return lRet
+
+
+
+
 
 // ----------------------------------------------
 // vraca string napunjen promjenama tipa "20"
@@ -745,14 +927,6 @@ return lRet
 function _lit_20_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
-local nTRec := RECNO()
-local cTBFilter := DBFILTER()
-
-select doc_log
-set order to tag "2"
-go top
-seek docno_str( nDoc_no ) + "20" + doclog_str( nDoc_log_no )
-
 
 select doc_lit
 set order to tag "1"
@@ -777,11 +951,42 @@ do while !EOF() .and. field->doc_no == nDoc_no ;
 enddo
 
 select (nTArea)
-set order to tag "1"
-set filter to &cTBFilter
-go (nTRec)
 
 return cRet
+
+
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "30"
+// ----------------------------------------------
+function _lit_30_get(nDoc_no, nDoc_log_no)
+local cRet := ""
+local nTArea := SELECT()
+
+select doc_lit
+set order to tag "1"
+go top
+seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
+
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_log_no == nDoc_log_no
+
+	cRet += "d.oper.: " + g_aop_desc( field->int_1 )
+	cRet += "#"
+	cRet += "atr.d.oper.:" + g_aop_att_desc(field->int_2)
+	cRet += ","
+	cRet += "d.opis:" + ALLTRIM(field->char_1)
+	cRet += "#"
+	
+	select doc_lit
+	
+	skip
+enddo
+
+select (nTArea)
+
+return cRet
+
 
 
 
@@ -791,25 +996,26 @@ return cRet
 function _lit_01_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
-local nTRec := RECNO()
-local cTBFilter := DBFILTER()
-
-select doc_log
-set order to tag "1"
-go top
-seek docno_str(nDoc_no) + "01" + doclog_str(nDoc_log_no)
 
 cRet += "Otvaranje naloga...#"
 	
-set order to tag "1"
-
 select (nTArea)
-set order to tag "1"
-set filter to &cTBFilter
-go (nTRec)
 
 return cRet
 
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "99"
+// ----------------------------------------------
+function _lit_99_get(nDoc_no, nDoc_log_no)
+local cRet := ""
+local nTArea := SELECT()
+
+cRet += "Zatvaranje naloga...#"
+
+select (nTArea)
+
+return cRet
 
 
 // ----------------------------------------------
@@ -818,13 +1024,6 @@ return cRet
 function _lit_10_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
-local nTRec := RecNo()
-local cTbFilter := DBFILTER()
-
-select doc_log
-set order to tag "2"
-go top
-seek docno_str(nDoc_no) + "10" + doclog_str(nDoc_log_no)
 
 select doc_lit
 set order to tag "1"
@@ -846,9 +1045,69 @@ do while !EOF() .and. field->doc_no == nDoc_no ;
 enddo
 
 select (nTArea)
-set filter to &cTBFilter
-go (nTRec)
 
 return cRet
+
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "11"
+// ----------------------------------------------
+function _lit_11_get(nDoc_no, nDoc_log_no)
+local cRet := ""
+local nTArea := SELECT()
+
+select doc_lit
+set order to tag "1"
+go top
+seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
+
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_log_no == nDoc_log_no
+
+	cRet += "datum isp.: " + DTOC(field->date_1)
+	cRet += "#"
+	cRet += "vrij.isp.: " + ALLTRIM(field->char_1)
+	cRet += "#"
+	cRet += "mjesto isp.: " + ALLTRIM(field->char_2)
+	cRet += "#"
+	
+	select doc_lit
+	skip
+enddo
+
+select (nTArea)
+
+return cRet
+
+
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "12"
+// ----------------------------------------------
+function _lit_12_get(nDoc_no, nDoc_log_no)
+local cRet := ""
+local nTArea := SELECT()
+
+select doc_lit
+set order to tag "1"
+go top
+seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
+
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_log_no == nDoc_log_no
+
+	cRet += "kontakt.: " + g_cont_desc( field->int_1 )
+	cRet += "#"
+	cRet += "kont.d.opis.: " + ALLTRIM(field->char_1)
+	cRet += "#"
+	
+	select doc_lit
+	skip
+enddo
+
+select (nTArea)
+
+return cRet
+
+
 
 

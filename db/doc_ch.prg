@@ -63,13 +63,13 @@ log_main(__doc_no, cDesc, "E", aArr)
 select docs
 Scatter()
 
-if field->_cust_id <> nCustId
+if _cust_id <> nCustId
 	_cust_id := nCustId
 endif
-if field->_doc_priority <> nDoc_priority
+if _doc_priority <> nDoc_priority
 	_doc_priority := nDoc_priority
 endif
-if field->_doc_pay_id <> nDoc_pay_type
+if _doc_pay_id <> nDoc_pay_type
 	_doc_pay_id := nDoc_pay_type
 endif
 
@@ -121,12 +121,14 @@ if Pitanje(,"Zelite izmjeniti podatke o isporuci naloga (D/N)?", "D") == "N"
 	return
 endif
 
+select docs
+
 cShipPlace := field->doc_ship_place
 dDvrDate := field->doc_dvr_date
 cDvrTime := field->doc_dvr_time
 
 // box sa unosom podataka
-if _box_ship(@dDvrDate, @cDvrTime, @cShipPlace, @cDesc) == 0
+if _box_ship(@cShipPlace, @cDvrTime, @dDvrDate, @cDesc) == 0
 	return
 endif
 
@@ -138,15 +140,15 @@ select docs
 
 Scatter()
 
-if field->_doc_ship_place <> cShipPlace
+if _doc_ship_place <> cShipPlace
 	_doc_ship_place := cShipPlace
 endif
 
-if field->_doc_dvr_time <> cDvrTime
+if _doc_dvr_time <> cDvrTime
 	_doc_dvr_time := cDvrTime
 endif
 
-if field->_doc_dvr_date <> dDvrDate
+if _doc_dvr_date <> dDvrDate
 	_doc_dvr_date := dDvrDate
 endif
 
@@ -189,15 +191,19 @@ local cDesc
 local aArr
 local cType := "E"
 local nCont_id := VAL(STR(0, 10))
-local nCont_desc := SPACE(150)
+local cCont_desc := SPACE(150)
 
 if lNew == nil
 	lNew := .f.
 endif
 
 if !lNew
+	
+	select docs
+	
 	nCont_id := field->cont_id
 	cCont_desc := field->cont_add_desc
+	
 endif
 
 if _box_cont(@nCont_id, @cCont_desc, @cDesc) == 0
@@ -205,7 +211,7 @@ if _box_cont(@nCont_id, @cCont_desc, @cDesc) == 0
 endif
 
 // logiraj promjenu kontakta
-aArr := a_log_cont( nCont_id, nCont_desc )
+aArr := a_log_cont( nCont_id, cCont_desc )
 
 if lNew 
 	cType := "+"
@@ -216,10 +222,11 @@ log_cont(__doc_no, cDesc, cType, aArr)
 select docs
 	
 Scatter()
-if field->_cont_id <> nCont_id
+
+if _cont_id <> nCont_id
 	_cont_id := nCont_id
 endif
-if field->_cont_add_desc <> cCont_desc
+if _cont_add_desc <> cCont_desc
 	_cont_add_desc := cCont_desc
 endif
 
@@ -236,8 +243,8 @@ return
 // ------------------------------------
 // box sa podatkom o kontaktu
 // ------------------------------------
-static function _box_cont(nCont, cCont_desc, cDesc)
-local nNew := .f.
+static function _box_cont(nCont, cContdesc, cDesc)
+local lNew := .f.
 
 if nCont == 0
 	lNew := .t.

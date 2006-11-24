@@ -1,30 +1,38 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+// variables
+static __temp
+static __doc_no
+
 // -------------------------------------
 // stampa naloga, filovanje prn tabela
 // -------------------------------------
-function st_nalpr( lPriprema, nBrNal )
+function st_nalpr( lTemporary, nDoc_no )
+
+__temp := lTemporary
+__doc_no := nDoc_no
 
 // kreiraj print tabele
-t_prn_create()
+t_rpt_create()
 // otvori tabele
-t_prn_open()
+t_rpt_open()
 
-o_tables(lPriprema)
+o_tables( __temp )
 
 // osnovni podaci naloga
-fill_nalog_osn(lPriprema, nBrNal)
+_fill_main()
 // stavke naloga
-fill_stavke(lPriprema, nBrNal)
+_fill_items()
 // operacije
-fill_rn_oper(lPriprema, nBrNal)
+_fill_aops()
 
+// printaj nalog
 nalpr_print( .t. )
 
 close all
 
-o_tables(lPriprema)
+o_tables( __temp )
 
 return DE_REFRESH
 
@@ -32,27 +40,10 @@ return DE_REFRESH
 // -------------------------------------
 // stampa otpremnice, filovanje prn tabela
 // -------------------------------------
-function st_otpremnica( lPriprema, nBrNal )
+function st_otpremnica( lTemporary, nDoc_no )
 
-// kreiraj print tabele
-t_prn_create()
-// otvori tabele
-t_prn_open()
-
-o_tables(lPriprema)
-
-// osnovni podaci naloga
-fill_nalog_osn(lPriprema, nBrNal)
-// stavke naloga
-fill_stavke(lPriprema, nBrNal)
-// operacije
-fill_rn_oper(lPriprema, nBrNal)
-
-otpr_print( .t. )
-
-close all
-
-o_tables(lPriprema)
+__temp := lTemporary
+__doc_no := nDoc_no
 
 return DE_REFRESH
 
@@ -62,114 +53,95 @@ return DE_REFRESH
 // ----------------------------------
 // filuj tabele za stampu
 // ----------------------------------
-static function fill_stavke( lPriprema, nBr_Nal )
-local nTb_st := F_RNST
-local cIdRoba
-local cRobaNaz
-local cRobaJmj
-local cBr_nal
-local cR_br
-local nKolicina
-local nD_sirina
-local nD_visina
-local nZ_sirina
-local nZ_visina
-local nD_ukupno
-local nZ_ukupno
-local nZ_Netto
-local nNUZTotal := 0
-local nNUDTotal := 0
-local nNUNeto := 0
+static function _fill_items()
+local nTable := F_DOC_IT
+local nArt_id
+local cArt_desc
+local nDoc_it_no
+local nQtty
+local nTotal
+local nHeigh
+local nWidth
 
-if ( lPriprema == .t. )
-	nTb_st := F_P_RNST
+if ( __temp == .t. )
+	nTable := F__DOC_IT
 endif
 
-select (nTb_st)
-set order to tag "br_nal"
+select (nTable)
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str(__doc_no)
 
 // filuj stavke
-do while !EOF() .and. field->br_nal == nBr_nal
+do while !EOF() .and. field->doc_no == __doc_no
 	
-	cItemID := field->item_id
-	nR_br := field->r_br
+	nArt_id := field->art_id
+	nDoc_it_no := field->doc_it_no
 	
 	// nadji proizvod
-	select roba
-	hseek cItemID
+	select articles
+	hseek artid_str( nArt_id )
 
-	cItemNaz := ALLTRIM(roba->naz)
-	cItemJmj := ALLTRIM(roba->jmj)
+	cArt_desc := ALLTRIM(articles->art_desc)
 	
-	nKolicina := field->item_kol
-	nSirina := field->item_sir
-	nVisina := field->item_vis
+	select ( nTable )
+	
+	nQtty := field->doc_it_qtty
+	nHeigh := field->doc_it_heigh
+	nWidth := field->doc_it_width
+	nTotal := nQtty * (nHeigh * nWidth)
 
-	a_t_rnst( cBr_nal, cR_br, cItemID, cItemNaz, cItemJmj, ;
-                  nKolicina, nSirina, nVisina, ;
-	          nZ_sirina, nZ_visina, nD_ukupno, ;
-	          nZ_ukupno, nZ_Netto )
+	a_t_docit( __doc_no, nDoc_it_no, nArt_id, cArt_desc ,;
+                  nQtty, nHeigh, nWidth, nTotal )
 	
-	select (nTb_ST)
+	select ( nTable )
 	skip
 enddo
 	
-// dodaj i nalog ukupno itd...
-add_tpars("N10", TRANSFORM(nNUDTotal, PIC_IZN()))
-add_tpars("N11", TRANSFORM(nNUZTotal, PIC_IZN()))
-add_tpars("N12", TRANSFORM(nNUNeto, PIC_IZN()))
-
 return
 
 
 // --------------------------------------------------
 // filovanje operacija 
 // --------------------------------------------------
-static function fill_rn_oper( lPriprema, nBr_Nal )
-local nTb_OP := F_RNOP
-local cBr_nal
-local cR_br
-local cIdRoba
-local cRn_op
-local cRn_op_naz
-local cRn_ka
-local cRn_ka_naz
-local cRn_instr
+static function _fill_aops()
+local nTable := F_DOC_OPS
+local nDoc_op_no
+local nDoc_it_no
+local nAop_id
+local cAop_desc
+local nAop_att_id
+local cAop_att_desc
+local cDoc_op_desc
 
-if ( lPriprema == .t. )
-	nTb_OP := F_P_RNOP
+if ( __temp == .t. )
+	nTable := F__DOC_OPS
 endif
 
 // filuj operacije
-select (nTb_OP)
-set order to tag "br_nal"
+select (nTable)
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str(__doc_no)
 
-do while !EOF() .and. field->br_nal == nBr_nal
+do while !EOF() .and. field->doc_no == __doc_no
 
-	if EMPTY(field->rn_instr)
-		skip
-		loop
-	endif
+	nDoc_it_no := field->doc_it_no
+	nDoc_op_no := field->doc_op_no
 	
-	cBr_nal := str_nal(field->br_nal)
-	cR_br := str_rbr(field->r_br)
-	cP_br := str_rbr(field->p_br)
-	cIdRoba := field->idroba
-	cRn_op := field->id_rnop
-	cRn_op_naz := s_operacija(cRn_op)
-	cRn_ka := field->id_rnka
-	cRn_ka_naz := s_karakt(cRn_ka)
-	cRn_instr := field->rn_instr
-	
-	a_t_rnop( cBr_nal, cR_br, cP_br, cIdroba, ;
-                   cRn_op, cRn_op_naz, ;
-		   cRn_ka, cRn_ka_naz, cRn_instr)
+	nAop_id := field->aop_id
+	nAop_att_id := field->aop_att_id
 
-	select (nTb_OP)
+	cAop_desc := g_aop_desc( nAop_id )
+	cAop_att_desc := g_aop_att_desc( nAop_att_id )
+
+	cDoc_op_desc := ALLTRIM( field->doc_op_desc )
+	
+	a_t_docop( __doc_no, nDoc_op_no, nDoc_it_no, ;
+                   nAop_id, cAop_desc, ;
+		   nAop_att_id, cAop_att_desc, cDoc_op_desc)
+
+	select (nTable)
 	skip
 enddo
 
@@ -179,37 +151,35 @@ return
 // --------------------------------------
 // napuni podatke narucioca i ostalo
 // --------------------------------------
-static function fill_nalog_osn(lPriprema, nBr_Nal)
-local nTb_RN := F_RNAL
+static function _fill_main()
+local nTable := F_DOCS
 
-if ( lPriprema == .t. )
-	nTb_RN := F_P_RNAL
+if ( __temp == .t. )
+	nTable := F__DOCS
 endif
 
-select (nTb_RN)
-set order to tag "br_nal"
+select (nTable)
+set order to tag "1"
 go top
-seek s_br_nal(nBr_nal)
+seek docno_str( __doc_no )
 
-f_narucioc(field->idpartner)
+_fill_customer( field->cust_id )
+_fill_contacts( field->cont_id )
 
-select (nTb_RN)
-
-// iz prvog sloga odmah uzmi osnovne podatke naloga
-// partner, datumi itd...
+select (nTable)
 
 // broj naloga
-add_tpars("N01", str_nal(nBr_nal) )
+add_tpars("N01", docno_str( __doc_no ) )
 // datum naloga
-add_tpars("N02", DToC(field->dat_nal) )
+add_tpars("N02", DToC( field->doc_date ) )
 // datum isporuke
-add_tpars("N03", DToC(field->dat_isp) )
+add_tpars("N03", DToC( field->doc_dvr_date ) )
 // vrijeme isporuke
-add_tpars("N04", PADR(field->vr_isp, 5))
+add_tpars("N04", PADR( field->doc_dvr_time, 5))
 // hitnost - prioritet
-add_tpars("N05", say_hitnost(field->hitnost))
+add_tpars("N05", s_priority( field->doc_priority ))
 // nalog vrsta placanja
-add_tpars("N06", say_vr_plac(field->vr_plac))
+add_tpars("N06", s_pay_id( field->doc_pay_id ))
 
 return
 
@@ -218,34 +188,38 @@ return
 // ----------------------------------------
 // dodaj podatke o naruciocu
 // ----------------------------------------
-static function f_narucioc( cIdPartn )
-local cPartNaz
-local cPartAdr
-local cPartMje
-local cPartPtt
-local cPartTel
-local cPartFax
+static function _fill_customer( nCust_id )
+local nTArea := SELECT()
+select customs
+set order to tag "1"
+go top
+seek custid_str(nCust_id)
 
-select partn
-seek cIdPartn
+add_tpars("P01", custid_str(nCust_id))
+add_tpars("P02", ALLTRIM( customs->cust_desc ))
+add_tpars("P03", ALLTRIM( customs->cust_addr ))
+add_tpars("P04", ALLTRIM( customs->cust_tel ))
 
-cPartNaz := ALLTRIM(partn->naz)
-cPartMje := ALLTRIM(partn->mjesto)
-cPartPtt := ALLTRIM(partn->ptt)
-cPartAdr := ALLTRIM(partn->adresa)
-cPartTel := ALLTRIM(partn->telefon)
-cPartFax := ALLTRIM(partn->fax)
-cIdPartn := ALLTRIM(cIdPartn)
-
-add_tpars("P01", cIdPartn)
-add_tpars("P02", cPartNaz)
-add_tpars("P03", cPartAdr)
-add_tpars("P04", cPartMje)
-add_tpars("P05", cPartPtt)
-add_tpars("P06", cPartTel)
-add_tpars("P07", cPartFax)
-
+select (nTArea)
 return
 
 
+// ----------------------------------------
+// dodaj podatke o kontaktu
+// ----------------------------------------
+static function _fill_contact( nCont_id )
+local nTArea := SELECT()
+
+select contacts
+set order to tag "1"
+go top
+seek contid_str(nCont_id)
+
+add_tpars("P10", contid_str(nCont_id))
+add_tpars("P11", ALLTRIM( contacts->cont_desc ))
+add_tpars("P12", ALLTRIM( contacts->cont_tel ))
+add_tpars("P13", ALLTRIM( contacts->cont_add_desc ))
+
+select (nTArea)
+return
 

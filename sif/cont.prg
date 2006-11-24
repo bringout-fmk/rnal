@@ -39,7 +39,7 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(cont_id)}, "cont_id", {|| _inc_id(@wcont_id, "CONT_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("Narucioc", 10), {|| g_cust_desc( cust_id ) }, "cust_id", {|| .t. }, {|| s_customers(@wcust_id), show_it( g_cust_desc( wcust_id ) ) }})
+AADD(aImeKol, {PADC("Narucioc", 10), {|| g_cust_desc( cust_id ) }, "cust_id", {|| .t. }, {|| IF(nCust_id <> -1, cust_id == nCust_id, nil), s_customers(@wcust_id), show_it( g_cust_desc( wcust_id ) ) }})
 AADD(aImeKol, {PADC("Ime i prezime", 20), {|| PADR(cont_desc, 20)}, "cont_desc"})
 AADD(aImeKol, {PADC("Telefon", 20), {|| PADR(cont_tel, 20)}, "cont_tel"})
 AADD(aImeKol, {PADC("Dodatni opis", 20), {|| PADR(cont_add_desc, 20)}, "cont_add_desc"})
@@ -101,6 +101,28 @@ select (nTArea)
 
 return cContDesc
 
+// -------------------------------
+// get cont_tel by cont_id
+// -------------------------------
+function g_cont_tel(nCont_id)
+local cContTel := "?????"
+local nTArea := SELECT()
+
+O_CONTACTS
+select contacts
+set order to tag "1"
+go top
+seek contid_str(nCont_id)
+
+if FOUND()
+	if !EMPTY(field->cont_tel)
+		cContTel := ALLTRIM(field->cont_tel)
+	endif
+endif
+
+select (nTArea)
+
+return cContTel
 
 
 

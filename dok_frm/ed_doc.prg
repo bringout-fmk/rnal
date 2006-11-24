@@ -423,6 +423,29 @@ do case
 		endif
 		
 		return nRet
+
+	case Ch == K_CTRL_P
+
+		// stampa naloga
+		nTArea := SELECT()
+		
+		select _docs
+		
+		// uzmi novi broj dokumenta
+		nDocNoNew := _new_doc_no()
+
+		// filuj sve tabele sa novim brojem
+		fill__doc_no( nDocNoNew )
+		
+		select _docs
+		go top
+		
+		st_nalpr( .t. , _docs->doc_no )
+		
+		select (nTArea)
+		go top
+
+		nRet := DE_CONT
 	
 endcase
 

@@ -95,15 +95,15 @@ nX += 2
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("sirina (mm):", nLeft + 3) GET _doc_it_heigh PICT "99999.99"
+@ m_x + nX, m_y + 2 SAY PADL("sirina (mm):", nLeft + 3) GET _doc_it_heigh PICT "99999.99" VALID val_heigh(_doc_it_heigh)
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("visina (mm):", nLeft + 3) GET _doc_it_width PICT "99999.99"
+@ m_x + nX, m_y + 2 SAY PADL("visina (mm):", nLeft + 3) GET _doc_it_width PICT "99999.99" VALID val_width(_doc_it_width)
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("kolicina:", nLeft + 3) GET _doc_it_qtty PICT "99999"
+@ m_x + nX, m_y + 2 SAY PADL("kolicina:", nLeft + 3) GET _doc_it_qtty PICT "99999" VALID val_qtty(_doc_it_qtty)
 
 read
 
@@ -139,5 +139,52 @@ go (nTRec)
 return nRet
 
 
+// -------------------------------------
+// validacija kolicine
+// -------------------------------------
+static function val_qtty( nVal )
+local lRet := .f.
+if nVal <> 0
+	lRet := .t.
+endif
+val_msg(lRet, "Kolicina mora biti <> 0 !")
+return lRet
+
+
+
+// ----------------------------------
+// validacija visine
+// ----------------------------------
+static function val_width( nVal )
+local lRet := .f.
+if nVal <> 0
+	lRet := .t.
+endif
+val_msg(lRet, "Dimenzija mora biti <> 0 !")
+return lRet
+
+
+
+// ----------------------------------
+// validacija sirine
+// ----------------------------------
+static function val_heigh( nVal )
+local lRet := .f.
+if nVal <> 0
+	lRet := .t.
+endif
+val_msg(lRet, "Dimenzija mora biti <> 0 !")
+return lRet
+
+
+
+// -------------------------------------
+// poruka pri validaciji
+// -------------------------------------
+static function val_msg(lRet, cMsg)
+if lRet == .f.
+	MsgBeeP(cMsg)
+endif
+return 
 
 

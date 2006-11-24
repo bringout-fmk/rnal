@@ -146,15 +146,11 @@ return DE_CONT
 static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 
-AADD(aImeKol, {"Datum", {|| doc_log_date }, "datum", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"dat./vr./oper.", {|| DTOC(doc_log_date) + " / " + PADR(doc_log_time, 5) + " " + PADR( getusername( operater_id ), 10) + ".." }, "datum", {|| .t.}, {|| .t.} })
 
-AADD(aImeKol, {"Vrijeme" , {|| PADR(doc_log_time, 5) }, "vrijeme", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"prom.tip" , {|| PADR(s_log_type(doc_log_type), 12) }, "tip", {|| .t.}, {|| .t.} })
 
-AADD(aImeKol, {"Operater" , {|| PADR( getusername(operater_id), 15) }, "operater", {|| .t.}, {|| .t.} })
-
-AADD(aImeKol, {"Tip" , {|| PADR(s_log_type(doc_log_type), 12) }, "tip", {|| .t.}, {|| .t.} })
-
-AADD(aImeKol, {"Opis" , {|| PADR(doc_log_desc, 20) + "..." }, "opis", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"kratki opis" , {|| PADR(doc_log_desc, 30) + ".." }, "opis", {|| .t.}, {|| .t.} })
 
 aKol:={}
 
@@ -242,28 +238,35 @@ return
 static function g_log_desc(nDoc_no, nDoc_log_no, cDoc_log_type)
 local cRet := ""
 local nTArea := SELECT()
+local nTRec := RECNO()
+local cTBFilter := DBFILTER()
+
 select doc_log
+set order to tag "1"
 
 cDoc_log_type := ALLTRIM(cDoc_log_type)
 
 do case
 	case cDoc_log_type == "01"
-		//cRet := _lit_01_get(nDoc_no, nDoc_log_no)
+		cRet := _lit_01_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "99"
-		//cRet := _lit_99_get(nDoc_no, nDoc_log_no)
+		cRet := _lit_99_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "10"
 		cRet := _lit_10_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "11"
-		//cRet := _lit_11_get(nDoc_no, nDoc_log_no)
+		cRet := _lit_11_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "12"
-		//cRet := _lit_12_get(nDoc_no, nDoc_log_no)
+		cRet := _lit_12_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "20"
 		cRet := _lit_20_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "30"
-		//cRet := _lit_30_get(nDoc_no, nDoc_log_no)
+		cRet := _lit_30_get(nDoc_no, nDoc_log_no)
 endcase
 
 select (nTArea)
+set filter to &cTBFILTER
+go (nTRec)
+
 return cRet
 
 

@@ -144,6 +144,19 @@ function docno_str(nId)
 return STR(nId, 10)
 
 
+// -----------------------------------------
+// konvert doc_op -> STR(doc_op, 4)
+// -----------------------------------------
+function docop_str(nId)
+return STR(nId, 4)
+
+
+// -----------------------------------------
+// konvert doc_it -> STR(doc_it, 4)
+// -----------------------------------------
+function docit_str(nId)
+return STR(nId, 4)
+
 
 
 // -------------------------------------------

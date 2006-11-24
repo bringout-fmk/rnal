@@ -1,16 +1,19 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+// ----------------------------------
 // brisanje print tabela
-function d_prn_dbfs()
+// ----------------------------------
+function d_rpt_dbfs()
 close all
-// t_rnst.dbf
-FErase(PRIVPATH + "T_RNST.DBF")
-FErase(PRIVPATH + "T_RNST.CDX")
 
-// t_rnop.dbf
-FErase(PRIVPATH + "T_RNOP.DBF")
-FErase(PRIVPATH + "T_RNOP.CDX")
+// t_docit.dbf
+FErase(PRIVPATH + "T_DOCIT.DBF")
+FErase(PRIVPATH + "T_DOCIT.CDX")
+
+// t_docop.dbf
+FErase(PRIVPATH + "T_DOCOP.DBF")
+FErase(PRIVPATH + "T_DOCOP.CDX")
 
 // t_pars.dbf
 FErase(PRIVPATH + "T_PARS.DBF")
@@ -19,87 +22,81 @@ FErase(PRIVPATH + "T_PARS.CDX")
 return 1
 
 
+// ------------------------------------
 // kreiranje print tabela
-function t_prn_create()
-local cT_RNST := "T_RNST.DBF"
-local cT_RNOP := "T_RNOP.DBF"
+// ------------------------------------
+function t_rpt_create()
+local cT_DOCIT := "T_DOCIT.DBF"
+local cT_DOCOP := "T_DOCOP.DBF"
 local cT_PARS := "T_PARS.DBF"
-local aT_RNST:={}
-local aT_RNOP:={}
+local aT_DOCIT:={}
+local aT_DOCOP:={}
 local aT_PARS:={}
 
-if d_prn_dbfs() == 0
+// brisi tabele....
+if d_rpt_dbfs() == 0
 	MsgBeep("Greska: brisanje pomocnih tabela !!!")
 	return
 endif
 
-// kreiraj T_RNST
-if !FILE(PRIVPATH + cT_RNST)
-	g_t_st_fields(@aT_RNST)
-	dbcreate2(PRIVPATH + cT_RNST, aT_RNST)
+// kreiraj T_DOCIT
+if !FILE(PRIVPATH + cT_DOCIT)
+	g_docit_fields(@aT_DOCIT)
+	dbcreate2(PRIVPATH + cT_DOCIT, aT_DOCIT)
 endif
 
-// kreiraj T_RNOP
-if !FILE(PRIVPATH + cT_RNOP)
-	g_t_op_fields(@aT_RNOP)
-	dbcreate2(PRIVPATH + cT_RNOP, aT_RNOP)
+// kreiraj T_DOCOP
+if !FILE(PRIVPATH + cT_DOCOP)
+	g_docop_fields(@aT_DOCOP)
+	dbcreate2(PRIVPATH + cT_DOCOP, aT_DOCOP)
 endif
 
 // kreiraj T_PARS
 if !FILE(PRIVPATH + cT_PARS)
-	g_t_pars_fields(@aT_PARS)
+	g_pars_fields(@aT_PARS)
 	dbcreate2(PRIVPATH + cT_PARS, aT_PARS)
 endif
 
 // kreiraj indexe
-CREATE_INDEX("br_nal", "br_nal+r_br+idproizvod", PRIVPATH + "T_RNST")
-CREATE_INDEX("br_nal", "br_nal+r_br+p_br+idroba", PRIVPATH + "T_RNOP")
+CREATE_INDEX("1", "doc_no+doc_it_no+art_id", PRIVPATH + "T_DOCIT")
+CREATE_INDEX("1", "doc_no+doc_op_no", PRIVPATH + "T_DOCOP")
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
 
 return
 
+// -----------------------------------------------
+// setovanje polja tabele T_DOCIT
+// -----------------------------------------------
+static function g_docit_fields(aArr)
 
-// setovanje polja tabele T_RNST
-static function g_t_st_fields(aArr)
-
-AADD(aArr,{ "br_nal"     , "C" ,  10 ,  0 })
-AADD(aArr,{ "r_br"       , "C" ,   4 ,  0 })
-AADD(aArr,{ "p_br"       , "C" ,   4 ,  0 })
-AADD(aArr,{ "idproizvod" , "C" ,  10 ,  0 })
-AADD(aArr,{ "pro_naz"    , "C" , 250 ,  0 })
-AADD(aArr,{ "idroba"     , "C" ,  10 ,  0 })
-AADD(aArr,{ "roba_naz"   , "C" , 250 ,  0 })
-AADD(aArr,{ "jmj"        , "C" ,   3 ,  0 })
-AADD(aArr,{ "pro_kol"    , "N" ,  15 ,  5 })
-AADD(aArr,{ "sir_kol"    , "N" ,  15 ,  5 })
-AADD(aArr,{ "d_sirina"   , "N" ,  15 ,  5 })
-AADD(aArr,{ "z_sirina"   , "N" ,  15 ,  5 })
-AADD(aArr,{ "d_visina"   , "N" ,  15 ,  5 })
-AADD(aArr,{ "z_visina"   , "N" ,  15 ,  5 })
-AADD(aArr,{ "d_ukupno"   , "N" ,  15 ,  5 })
-AADD(aArr,{ "z_ukupno"   , "N" ,  15 ,  5 })
-AADD(aArr,{ "z_netto"    , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_no"     , "N" ,  10 ,  0 })
+AADD(aArr,{ "doc_it_no"  , "N" ,   4 ,  0 })
+AADD(aArr,{ "art_id"     , "N" ,  10 ,  0 })
+AADD(aArr,{ "art_desc"   , "C" , 250 ,  0 })
+AADD(aArr,{ "doc_it_qtty", "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_heigh" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_width" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_total" , "N" ,  15 ,  5 })
 
 return
 
-// setovanje polja tabele T_RNOP
-static function g_t_op_fields(aArr)
+// setovanje polja tabele T_DOCOP
+static function g_docop_fields(aArr)
 
-AADD(aArr,{ "br_nal"     , "C" ,  10 ,  0 })
-AADD(aArr,{ "r_br"       , "C" ,   4 ,  0 })
-AADD(aArr,{ "p_br"       , "C" ,   4 ,  0 })
-AADD(aArr,{ "idroba"     , "C" ,  10 ,  0 })
-AADD(aArr,{ "rn_op"      , "C" ,   6 ,  0 })
-AADD(aArr,{ "rn_op_naz"  , "C" ,  40 ,  0 })
-AADD(aArr,{ "rn_ka"      , "C" ,   6 ,  0 })
-AADD(aArr,{ "rn_ka_naz"  , "C" , 100 ,  0 })
-AADD(aArr,{ "rn_instr"   , "C" , 100 ,  0 })
+AADD(aArr,{ "doc_no"     , "N" ,  10 ,  0 })
+AADD(aArr,{ "doc_op_no"  , "N" ,   4 ,  0 })
+AADD(aArr,{ "doc_it_no"  , "N" ,   4 ,  0 })
+AADD(aArr,{ "aop_id"     , "N" ,  10 ,  0 })
+AADD(aArr,{ "aop_desc"   , "C" , 150 ,  0 })
+AADD(aArr,{ "aop_att_id" , "N" ,  10 ,  0 })
+AADD(aArr,{ "aop_att_desc" , "C" , 150 ,  0 })
+AADD(aArr,{ "doc_op_desc", "C" , 150 ,  0 })
 
 return
 
 
 // setovanje polja tabele T_PARS
-static function g_t_pars_fields(aArr)
+static function g_pars_fields(aArr)
 AADD(aArr, {"id_par", "C",   3, 0})
 AADD(aArr, {"opis"  , "C", 200, 0})
 return
@@ -135,13 +132,13 @@ return
 
 
 // isprazni print tabele
-function t_pr_empty()
-O_T_DOC_OPS
-select t_doc_ops
+function t_rpt_empty()
+O_T_DOCOP
+select t_docop
 zap
 
-O_T_DOCS
-select t_docs
+O_T_DOCIT
+select t_docit
 zap
 
 O_T_PARS
@@ -152,10 +149,10 @@ return
 
 
 // otvori print tabele
-function t_prn_open()
+function t_rpt_open()
 O_T_PARS
-O_T_DOC_OPS
-O_T_DOCS
+O_T_DOCOP
+O_T_DOCIT
 return
 
 
@@ -183,54 +180,42 @@ return xRet
 
 
 // dodaj stavke u tabelu T_RNST
-function a_t_rnst( cBr_nal, cR_br, cP_br, cId_pro, cPro_naz, ;
-		   cId_roba, cRoba_naz, cJmj, nPro_kol, ;
-                   nSir_kol, nD_sirina, nD_visina, ;
-		   nZ_sirina, nZ_visina, nD_ukupno, ;
-		   nZ_ukupno, nZ_Netto )
+function a_t_docit( nDoc_no, nDoc_it_no, nArt_id, cArt_desc, ;
+		    nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, ;
+		    nDoc_it_total )
 
-O_T_DOCS
-select t_docs
+O_T_DOCIT
+select t_docit
 append blank
-replace br_nal with cBr_nal
-replace r_br with cR_br
-replace p_br with cP_br
-replace idproizvod with cId_pro
-replace pro_naz with cPro_naz
-replace idroba with cId_roba
-replace roba_naz with cRoba_naz
-replace jmj with cJmj
-replace pro_kol with nPro_kol
-replace sir_kol with nSir_kol
-replace d_sirina with nD_sirina
-replace d_visina with nD_visina
-replace z_sirina with nZ_sirina
-replace z_visina with nZ_visina
-replace d_ukupno with nD_ukupno
-replace z_ukupno with nZ_ukupno
-replace z_netto with nZ_Netto
+replace doc_no with nDoc_no
+replace doc_it_no with nDoc_it_no
+replace art_id with nArt_id
+replace art_desc with cArt_desc
+replace doc_it_qtty with nDoc_it_qtty
+replace doc_it_heigh with nDoc_it_heigh
+replace doc_it_width with nDoc_it_width
+replace doc_it_total with nDoc_it_total
 
 return
 
 
-// dodaj stavke u tabelu T_RNOP
-function a_t_rnop( cBr_nal, cR_br, cP_br, cId_roba, ;
-                   cRn_op, cRn_op_naz, ;
-		   cRn_ka, cRn_ka_naz, cRn_in)
+// dodaj stavke u tabelu T_DOCOP
+function a_t_docop( nDoc_no, nDoc_op_no, nDoc_it_no, ;
+                   nAop_id, cAop_desc, nAop_att_id, cAop_att_desc , ;
+		   cDoc_op_desc)
 
-O_T_DOC_OPS
-select t_doc_ops
+O_T_DOCOP
+select t_docop
 append blank
 
-replace br_nal with cBr_nal
-replace r_br with cR_br
-replace p_br with cP_br
-replace idroba with cId_roba
-replace rn_op with cRn_op
-replace rn_op_naz with cRn_op_naz
-replace rn_ka with cRn_ka
-replace rn_ka_naz with cRn_ka_naz
-replace rn_instr with cRn_in
+replace doc_no with nDoc_no
+replace doc_op_no with nDoc_op_no
+replace doc_it_no with nDoc_it_no
+replace aop_id with nAop_id
+replace aop_desc with cAop_desc
+replace aop_att_id with nAop_att_id
+replace aop_att_desc with cAop_att_desc
+replace doc_op_desc with cDoc_op_desc
 
 return
 

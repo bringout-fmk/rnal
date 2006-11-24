@@ -117,11 +117,11 @@ nX += 1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("Prioritet:", nLeft) GET _doc_priority VALID (_doc_priority > 0 .and. _doc_priority < 4) PICT "9"
+@ m_x + nX, m_y + 2 SAY PADL("Prioritet (1/2/3):", nLeft) GET _doc_priority VALID {|| (_doc_priority > 0 .and. _doc_priority < 4), show_it(s_priority(_doc_priority))} PICT "9"
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("Vrsta placanja:", nLeft) GET _doc_pay_id VALID (_doc_pay_id > 0 .and. _doc_pay_id < 3) PICT "9"
+@ m_x + nX, m_y + 2 SAY PADL("Vrsta placanja (1/2):", nLeft) GET _doc_pay_id VALID {|| (_doc_pay_id > 0 .and. _doc_pay_id < 3), show_it(s_pay_id( _doc_pay_id ))} PICT "9"
 
 nX += 2
 
@@ -137,6 +137,34 @@ ESC_RETURN 0
 
 return 1
 
+
+// ----------------------------
+// vrati opis prioriteta
+// ----------------------------
+function s_priority( _doc_prior )
+local xRet := ""
+do case
+	case _doc_prior == 1
+		xRet := "LOW"
+	case _doc_prior == 2
+		xRet := "NORMAL"
+	case _doc_prior == 3
+		xRet := "HIGH"
+endcase
+return xRet
+
+// ------------------------------
+// vrati opis vrste placanja
+// ------------------------------
+function s_pay_id( _pay_id )
+local xRet := ""
+do case
+	case _pay_id == 1
+		xRet := "ziro racun"
+	case _pay_id == 2
+		xRet := "kes"
+endcase
+return xRet
 
 
 
