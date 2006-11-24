@@ -172,7 +172,7 @@ static function e_att_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("atribut", 10), {|| PADR(g_gr_at_desc( g_gr_att_val( e_gr_vl_id ) ), 20) }, "el_id" })
+AADD(aImeKol, {PADC("atribut", 10), {|| PADR(g_gr_at_desc( e_gr_at_id ), 20) }, "e_gr_at_id" })
 AADD(aImeKol, {PADC("vrijedost atributa", 30), {|| PADR(g_e_gr_vl_desc( e_gr_vl_id ), 30) }, "e_gr_vl_id"})
 
 for i:=1 to LEN(aImeKol)
@@ -261,20 +261,29 @@ do case
 	
 		// nove stavke
 
+		cTBFilter := DBFILTER()
+
 		if ALIAS() == "ELEMENTS"
 			
 			nRet := elem_edit( art_id , .t. )
 			l_auto_tab := .t.
-			
-			
+			set filter to &cTBFilter
+			go top
+
+			 
 		elseif ALIAS() == "E_ATT"
 
 			nRet := e_att_edit( nEl_id, .t. )
+			set filter to &cTBFilter
+			go top
+
 		
 		elseif ALIAS() == "E_AOPS"
 		
 			nRet := e_aops_edit( nEl_id, .t. )
-		
+			set filter to &cTBFilter
+			go top
+	
 		endif
 
 	case Ch == K_F2
@@ -363,14 +372,63 @@ Box(,4,60)
 BoxC()
 
 if LastKey() == K_ESC
-	return DE_CONT
+
+	Gather()
+	delete
+	
+	return DE_REFRESH
+	
 endif
 
 Gather()
 
+if lNewRec
+	// nafiluj odmah atribute za ovu grupu...
+	__fill_att__( e_gr_id, nEl_id )
+	select elements
+endif
+
+
 return DE_REFRESH
 
 
+
+// ----------------------------------------------------
+// filovanje tabele e_att sa atributima grupe
+// ----------------------------------------------------
+static function __fill_att__( __gr_id, __el_id )
+local nTArea := SELECT()
+local nEl_att_id := 0
+
+select e_gr_att
+set order to tag "2"
+go top
+seek e_gr_id_str( __gr_id ) + "*"
+
+do while !EOF() .and. field->e_gr_id == __gr_id ;	
+		.and. field->e_gr_at_re == "*"
+
+	
+	select e_att
+	
+	_set_sif_id(@nEl_att_id, "EL_ATT_ID")
+
+	Scatter()
+
+	_el_id := __el_id
+	_el_att_id := nEl_att_id
+	_e_gr_at_id := e_gr_att->e_gr_at_id
+	_e_gr_vl_id := 0
+
+	Gather()
+	
+	select e_gr_att
+	skip
+
+enddo
+
+select (nTArea)
+return
 
 
 
@@ -383,7 +441,6 @@ static function e_att_edit( nEl_id, lNewRec )
 local GetList:={}
 local nLeft := 15
 local nEl_att_id := 0
-local nE_gr_at_id := 0
 
 if lNewRec
 
@@ -407,24 +464,24 @@ Box(,6,65)
 		@ m_x + 1, m_y + 2 SAY "Ispravka atributa elementa *******"
 	endif
 	
-	if !lNewRec
-		// uzmi koji je atribut....
-		nE_gr_at_id := g_gr_att_val( _e_gr_vl_id )
-	endif
-
-	@ m_x + 3, m_y + 2 SAY PADL("atribut grupe", nLeft) GET nE_gr_at_id VALID {|| s_e_gr_att(@nE_gr_at_id, el_gr_id), show_it( g_gr_at_desc( nE_gr_at_id ) ) }
+	@ m_x + 3, m_y + 2 SAY PADL("atribut grupe", nLeft) GET _e_gr_at_id VALID {|| s_e_gr_att(@_e_gr_at_id, el_gr_id), show_it( g_gr_at_desc( _e_gr_at_id ) ) }
 		
-	@ m_x + 4, m_y + 2 SAY PADL("vrijednost ->", nLeft) GET _e_gr_vl_id VALID s_e_gr_val(@_e_gr_vl_id, nE_gr_at_id)
+	@ m_x + 4, m_y + 2 SAY PADL("vrijednost ->", nLeft) GET _e_gr_vl_id VALID s_e_gr_val(@_e_gr_vl_id, _e_gr_at_id)
 	
 	read
 BoxC()
 
+
 if LastKey() == K_ESC
-	return DE_CONT
+	
+	Gather()
+	delete
+	
+	return DE_REFRESH
+	
 endif
 
 Gather()
-go top
 
 return DE_REFRESH
 
@@ -471,7 +528,12 @@ Box(,6,65)
 BoxC()
 
 if LastKey() == K_ESC
-	return DE_CONT
+
+	Gather()
+	delete
+	
+	return DE_REFRESH
+	
 endif
 
 Gather()

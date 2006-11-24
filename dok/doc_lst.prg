@@ -1,6 +1,5 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
-
 // variables
 static _status
 
@@ -14,7 +13,7 @@ local nTblRet
 
 _status := nStatus
 
-o_tables(.f.)
+o_tables( .f. )
 
 nTblRet := tbl_list()
 
@@ -106,8 +105,10 @@ static function lst_args()
 local nX := 2
 local dDateFrom := CToD("")
 local dDateTo := DATE()
-local nCustomer := VAL(STR(0,10))
+local nCustomer := VAL(STR(0, 10))
+local nContact := VAL(STR(0, 10))
 local cTblList := "D"
+local cShowRejected := "N"
 local nRet := 1
 local cFilter
 
@@ -120,9 +121,21 @@ nX += 2
 
 @ m_x + nX, m_y + 2 SAY "Narucioc (prazno-svi) " GET nCustomer VALID {|| nCustomer == 0 .or. s_customers( @nCustomer), show_it( g_cust_desc(nCustomer) ) }
 
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY "Kontakt (prazno-svi) " GET nContact VALID {|| nContact == 0 .or. s_contacts( @nContact ), show_it( g_cont_desc( nContact ) ) }
+
 nX += 2
 
 @ m_x + nX, m_y + 2 SAY "Tabelarni pregled (D/N) " GET cTblList VALID cTblList $ "DN" PICT "@!"
+
+if _status == 2
+
+	nX += 2
+
+	@ m_x + nX, m_y + 2 SAY "Prikaz i ponistenih dokumenata (D/N) " GET cShowRejected VALID cShowRejected $ "DN" PICT "@!"
+
+endif
 
 read
 
@@ -134,7 +147,11 @@ endif
 
 ESC_RETURN 0
 
-cFilter := gen_filter(dDateFrom, dDateTo, nCustomer)
+cFilter := gen_filter(dDateFrom, ;
+			dDateTo, ;
+			nCustomer, ;
+			nContact, ;
+			cShowRejected )
 
 set_f_kol(cFilter)
 
@@ -145,7 +162,8 @@ return nRet
 // ---------------------------------
 // generise string filtera
 // ---------------------------------
-static function gen_filter(dDateFrom, dDateTo, nCustomer)
+static function gen_filter( dDateFrom, dDateTo, ;
+			nCustomer, nContact, cShReject )
 local nClosed := 1
 local cFilter := ""
 
@@ -154,7 +172,13 @@ if _status == 1
 	cFilter += "doc_status == 3 .or. doc_status == 0"
 else
 	// samo zatvoreni nalozi
-	cFilter += "doc_status == 1 .or. doc_status == 2"
+	cFilter += "doc_status == 1"
+	
+	// prikazi i ponistene
+	if cShReject == "D"
+		cFilter += " .or. doc_status == 2"
+	endif
+	
 endif
 
 if !EMPTY(dDateFrom)
@@ -167,6 +191,10 @@ endif
 
 if nCustomer <> 0
 	cFilter += " .and. cust_id == " + custid_str(nCustomer)
+endif
+
+if nContact <> 0
+	cFilter += " .and. cont_id == " + contid_str(nContact)
 endif
 
 return cFilter
@@ -194,7 +222,7 @@ static function key_handler()
 local nDoc_no
 local nDoc_status
 local cDesc
-local cTmpFilter
+local cTmpFilter := DBFILTER()
 
 if ( _status == 2 )
 	if ( UPPER(CHR(Ch)) $ "ZP" )
@@ -210,7 +238,6 @@ do case
 			
 			nDoc_no := docs->doc_no
 			nTRec := RecNo()
-			cTmpFilter := DBFilter()
 			
 			set filter to
 			
@@ -253,14 +280,10 @@ do case
 		
 		if Pitanje(, "Otvoriti nalog radi dorade (D/N) ?", "N") == "D"
 			
-			cTmpFilter := DBFilter()
 			nTRec := RecNo()
 			nDoc_no := docs->doc_no
 			
 			if doc_2__doc( nDoc_no ) == 1
-				
-				// logiraj otvaranje
-				//log_otvori( nBr_nal )
 				
 				MsgBeep("Nalog otvoren!#Prelazim u pripremu...")
 				
@@ -274,8 +297,6 @@ do case
 			
 			select docs
 			set_f_kol(cTmpFilter)
-			
-			go (nTRec)
 			
 			return DE_REFRESH
 		endif
@@ -310,7 +331,10 @@ do case
 				
 				MsgBeep("Nalog zatvoren !!!")
 			
+				select doks
+				set_f_kol(cTmpFilter)
 				select docs
+				
 				return DE_REFRESH
 				
 			else
@@ -375,7 +399,7 @@ local nX := 1
 
 Beep(2)
 
-Box(,8, 60)
+Box(, 8, 60)
 	cDesc := SPACE(150)
 	
 	@ m_x + nX, m_y + 2 SAY "Trenutni status naloga je:"
@@ -407,6 +431,7 @@ if cStat == "R"
 	// closed
 	nDoc_status := 1
 endif
+
 if cStat == "X"
 	// rejected
 	nDoc_status := 2
@@ -424,7 +449,7 @@ static function set_a_kol(aImeKol, aKol, nStatus)
 aImeKol := {}
 
 AADD(aImeKol, {PADC("Dok.br",10), {|| doc_no }, "doc_no", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Narucioc", {|| PADR(g_cust_desc(cust_id), 30) }, "cust_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Narucioc", {|| _reject_info( doc_status ) + PADR(g_cust_desc(cust_id), 30) }, "cust_id", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Datum", {|| doc_date }, "doc_date", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp." , {|| doc_dvr_date }, "doc_dvr_date", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| doc_dvr_time }, "doc_dvr_time", {|| .t.}, {|| .t.} })
@@ -438,6 +463,16 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
+// ---------------------------------------------
+// daje info o statusu naloga
+// ---------------------------------------------
+static function _reject_info( doc_status )
+local xRet := ""
+if doc_status == 2
+	xRet := "(R) "
+endif
+return xRet
 
 
 // -----------------------------------------

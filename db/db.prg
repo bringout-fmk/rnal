@@ -371,6 +371,7 @@ local aDbf
 aDbf:={}
 AADD(aDBf,{ "el_att_id", "N", 10, 0 })
 AADD(aDBf,{ "el_id", "N", 10, 0 })
+AADD(aDBf,{ "e_gr_at_id", "N", 10, 0 })
 AADD(aDBf,{ "e_gr_vl_id", "N", 10, 0 })
 
 return aDbf
@@ -420,6 +421,7 @@ aDbf:={}
 AADD(aDBf,{ "e_gr_at_id", "N", 10, 0 })
 AADD(aDBf,{ "e_gr_id", "N", 10, 0 })
 AADD(aDBf,{ "e_gr_at_desc", "C", 100, 0 })
+AADD(aDBf,{ "e_gr_at_required", "C", 1, 0 })
 AADD(aDBf,{ "match_code", "C", 10, 0 })
 
 return aDbf
@@ -712,6 +714,7 @@ if (nArea==-1 .or. nArea == nArea2)
 		
 		case (nArea2 == F_E_GR_ATT)
 			CREATE_INDEX("1","STR(e_gr_at_id,10,0)", cPath + cTable, .t.)
+			CREATE_INDEX("2","STR(e_gr_id,10,0)+e_gr_at_re", cPath + cTable, .t.)
 		
 		case (nArea2 == F_E_GR_VAL)
 			CREATE_INDEX("1","STR(e_gr_vl_id,10,0)", cPath + cTable, .t.)

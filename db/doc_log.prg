@@ -380,10 +380,7 @@ return
 function log_closed( nDoc_no, cDesc, nDoc_status )
 local nDoc_log_no
 local cDoc_log_type
-
-if ( cAction == nil)
-	cAction := "+"
-endif
+local cAction := "+"
 
 cDoc_log_type := "99"
 nDoc_log_no := _inc_log_no( nDoc_no )

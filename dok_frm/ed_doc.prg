@@ -460,9 +460,9 @@ return nRet
 function _g_doc_desc( cDesc )
 local GetList := {}
 
-Box(,1, 60)
+Box(,3, 70)
 	cDesc := SPACE(150)
-	@ m_x + 1, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S40"
+	@ m_x + 2, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S60"
 	read
 BoxC()
 

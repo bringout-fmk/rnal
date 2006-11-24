@@ -19,9 +19,7 @@ nTArea := SELECT()
 _tb_direkt := gTBDir
 _mod_tb_direkt( _tb_direkt )
 
-cHeader := "Elementi - grupe atributi /  'V' - pr.vrijednosti"
-
-
+cHeader := "Elementi - grupe atributi /  'V' - pr.vrijednosti / required '*'"
 
 if nGr_id == nil
 	nGr_id := -1
@@ -38,7 +36,7 @@ go top
 set_a_kol(@ImeKol, @Kol)
 gr_filter(nGr_id, cE_gr_at_desc)
 	
-cRet := PostojiSifra(F_E_GR_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
+cRet := PostojiSifra(F_E_GR_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|| key_handler() })
 
 if VALTYPE(cE_gr_at_desc) == "N"
 	cE_gr_at_desc := STR(cE_gr_at_desc, 10)
@@ -94,8 +92,12 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(e_gr_at_id)}, "e_gr_at_id", {|| _inc_id(@we_gr_at_id, "E_GR_AT_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("Elem.grupa", 20), {|| PADR(g_e_gr_desc(e_gr_id), 20)}, "e_gr_id", {|| .t.}, {|| s_e_groups(@we_gr_id), show_it( g_e_gr_desc( we_gr_id ) ) }})
-AADD(aImeKol, {PADC("Opis", 35), {|| PADR(e_gr_at_desc, 35)}, "e_gr_at_desc"})
+
+AADD(aImeKol, {PADC("Elem.grupa", 10), {|| PADR(g_e_gr_desc(e_gr_id), 10)}, "e_gr_id", {|| .t.}, {|| s_e_groups(@we_gr_id), show_it( g_e_gr_desc( we_gr_id ) ) }})
+
+AADD(aImeKol, {PADC("Neoph", 5), {|| e_gr_at_required}, "e_gr_at_required", {|| .t.}, {|| .t. } })
+
+AADD(aImeKol, {PADC("Opis", 30), {|| PADR(e_gr_at_desc, 30)}, "e_gr_at_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -104,18 +106,46 @@ next
 return
 
 
+
+// ------------------------------------
+// setuje polje required
+// ------------------------------------
+static function set_required()
+
+Scatter()
+	
+if _e_gr_at_re == "*"
+	_e_gr_at_re := " "
+else
+	_e_gr_at_re := "*"
+endif
+
+Gather()	
+	
+return
+
+
+
 // -----------------------------------------
 // key handler funkcija
 // -----------------------------------------
-static function key_handler(Ch)
+static function key_handler()
 local nE_gr_at_id := field->e_gr_at_id
 local nTRec := RecNo()
 
 do case
+	
 	case UPPER(CHR(Ch)) == "V"
 		s_e_gr_val(nil, nE_gr_at_id)
 		go (nTRec)
 		return DE_CONT
+	
+	case UPPER(CHR(Ch)) == "R"
+		
+		Beep(1)
+		set_required()
+		
+		return DE_REFRESH
 endcase
 
 return DE_CONT
