@@ -13,13 +13,26 @@
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="0.44.1"
-   sodipodi:docbase="C:\dev\fmk\rnal\db\model"
+   sodipodi:docbase="C:\dev\Fmk\RNAL\db\model"
    sodipodi:docname="rnal.svg"
    inkscape:export-filename="C:\dev\fmk\rnal\db\model\er_model_data_samples.png"
    inkscape:export-xdpi="90.000000"
    inkscape:export-ydpi="90.000000">
   <defs
      id="defs4">
+    <marker
+       inkscape:stockid="Arrow2Mstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Mstart"
+       style="overflow:visible">
+      <path
+         id="path3343"
+         style="font-size:12.0;fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(0.6) translate(0,0)" />
+    </marker>
     <marker
        inkscape:stockid="Arrow1Mend"
        orient="auto"
@@ -95,10 +108,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.0388466"
-     inkscape:cx="526.18111"
-     inkscape:cy="385.38891"
+     inkscape:cx="526.18113"
+     inkscape:cy="385.38892"
      inkscape:document-units="px"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer6"
      inkscape:window-width="1400"
      inkscape:window-height="994"
      inkscape:window-x="-4"
@@ -132,13 +145,14 @@
          id="tspan2264"
          x="936.612"
          y="19.773386"
-         style="font-weight:bold">RNAL: DB model ver. 1.1</tspan></text>
+         style="font-weight:bold">RNAL: DB model ver. 1.2</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Background"
-     style="opacity:1;display:inline">
+     style="opacity:1;display:inline"
+     sodipodi:insensitive="true">
     <rect
        style="opacity:0.1;fill:yellow;fill-opacity:1;stroke:none;stroke-width:1.09776354;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
        id="rect4593"
@@ -1111,6 +1125,17 @@
            y="575.39087"
            x="496.23193"
            sodipodi:role="line">elem_gr_attrib_val_id</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text2303"
+         y="589.32965"
+         x="496.1011"
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;opacity:1;fill:black;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Arial"
+         xml:space="preserve"><tspan
+           id="tspan2305"
+           y="589.32965"
+           x="496.1011"
+           sodipodi:role="line">elem_gr_attrib_id</tspan></text>
     </g>
     <g
        id="g3329">
@@ -1299,8 +1324,9 @@
        id="path8113" />
     <path
        style="opacity:1;fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:black;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow1Mend);stroke-opacity:1;display:inline"
-       d="M 180.29982,549.48516 L 443.59479,585.73591 L 634.38824,584.78195 L 680.17867,559.9788"
-       id="path8111" />
+       d="M 180.29982,549.48516 L 447.44521,601.13761 L 634.38824,601.14625 L 680.17867,559.9788"
+       id="path8111"
+       sodipodi:nodetypes="cccc" />
     <path
        style="opacity:1;fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:black;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow1Mend);stroke-opacity:1;display:inline"
        d="M 314.8092,376.81708 L 494.15505,557.11689"
@@ -1346,6 +1372,10 @@
          id="tspan3243"
          x="204.15488"
          y="124.63826">1:n</tspan></text>
+    <path
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:black;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow1Mend);stroke-opacity:1"
+       d="M 677.67466,540.9846 L 597.77836,587.1897"
+       id="path2307" />
   </g>
   <g
      inkscape:groupmode="layer"
