@@ -289,18 +289,25 @@ do case
 	case Ch == K_F2
 	
 		// ispravka stavki
+		cTBFilter := DBFILTER()
 
 		if ALIAS() == "ELEMENTS"
 			
 			nRet := elem_edit( art_id , .f. )
+			set filter to &cTBFilter
+			go top
 			
 		elseif ALIAS() == "E_ATT"
 			
 			nRet := e_att_edit( nEl_id, .f. )
+			set filter to &cTbFilter
+			go top
 		
 		elseif ALIAS() == "E_AOPS"
 		
 			nRet := e_aops_edit( nEl_id, .f. )
+			set filter to &cTbFilter
+			go top
 		
 		endif
 
@@ -340,9 +347,9 @@ return nRet
 //   lNewRec - novi zapis .t. or .f.
 // ----------------------------------------------
 static function elem_edit( nArt_id, lNewRec )
-local GetList:={}
 local nEl_id := 0
 local nLeft := 20
+private GetList:={}
 
 if lNewRec
 
@@ -438,9 +445,9 @@ return
 //   lNewRec - novi zapis .t. or .f.
 // ----------------------------------------------
 static function e_att_edit( nEl_id, lNewRec )
-local GetList:={}
 local nLeft := 15
 local nEl_att_id := 0
+private GetList:={}
 
 if lNewRec
 
@@ -454,6 +461,7 @@ if lNewRec
 
 	_el_id := nEl_id
 	_e_gr_vl_id := 0
+	_e_gr_at_id := 0
 endif
 
 Box(,6,65)
@@ -493,9 +501,9 @@ return DE_REFRESH
 //   lNewRec - novi zapis .t. or .f.
 // ----------------------------------------------
 static function e_aops_edit( nEl_id, lNewRec )
-local GetList:={}
 local nLeft := 20
 local nEl_op_id := 0
+private GetList:={}
 
 if lNewRec
 

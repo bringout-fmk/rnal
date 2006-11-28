@@ -1,30 +1,66 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
+static _tb_direkt
 
 
 // -----------------------------------------
 // otvara sifrarnik dodatnih operacija
 // -----------------------------------------
-function s_aops(cId, dx, dy)
+function s_aops(cId, cDesc, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
 private Kol
 
-nTArea := SELECT()
+_tb_direkt := gTBDir
+_mod_tb_direkt( _tb_direkt )
 
+nTArea := SELECT()
 cHeader := "Dodatne operacije /  'A' - pregled atributa"
+
+if cDesc == nil
+	cDesc := ""
+endif
 
 select aops
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
+set_f_kol(cDesc)
+
 	
 cRet := PostojiSifra(F_AOPS, 1, 12, 70, cHeader, @cId, dx, dy, {|Ch| key_handler(Ch) } )
+
+if VALTYPE(cDesc) == "N"
+	cDesc := STR(cDesc, 10)
+endif
+
+if cDesc <> ""
+	set filter to
+endif
 
 select (nTArea)
 
 return cRet
+
+
+// ---------------------------------------------------
+// setuje filter na sifraniku
+// ---------------------------------------------------
+static function set_f_kol(cDesc)
+local cFilter := ""
+
+if !EMPTY(cDesc)
+
+	cFilter += 'UPPER(aop_desc) = ' + cm2str(UPPER(ALLTRIM(cDesc))) 
+endif
+
+if !EMPTY(cFilter)
+	set filter to &cFilter
+	go top
+endif
+
+return
 
 
 // -----------------------------------------

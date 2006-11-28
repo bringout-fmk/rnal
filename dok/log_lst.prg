@@ -180,10 +180,12 @@ do case
 		xRet := "pod.isporuka"
 	case cType == "12"
 		xRet := "kontakti"
+	case cType == "13"
+		xRet := "placanje"
 	case cType == "20"
 		xRet := "artikli"
 	case cType == "30"
-		xRet := "instrukcije"
+		xRet := "d.operacije"
 endcase
 return xRet
 
@@ -257,6 +259,8 @@ do case
 		cRet := _lit_11_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "12"
 		cRet := _lit_12_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "13"
+		cRet := _lit_13_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "20"
 		cRet := _lit_20_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "30"

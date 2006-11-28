@@ -16,7 +16,6 @@
 //        3 |   ATT      |    5    |   11    | 
 // -------------------------------------------
 // ----------------------------------------------------------------------
-
 function _cre_fnd_par()
 local cFndDbf := "_FND_PAR"
 local aDbf := {}
@@ -56,6 +55,7 @@ nTArea := SELECT()
 
 cHeader := "Uslovi za pretragu artikala"
 
+O__FND_PAR
 select _fnd_par 
 go top
 
@@ -176,20 +176,20 @@ AADD(aImeKol, ;
 // atribut
 AADD(aImeKol, ;
 	{PADC("Atribut", 15),;
-	{|| IF(ALLTRIM(fnd_par_type) $ "ATT#AOP", "(" + ALLTRIM(g_egr_by_att(VAL(fnd_att))) + ") /" + PADR(g_gr_at_desc(VAL(fnd_att)), 15), PADR("*****", 10) ) },;
+	{|| IF(ALLTRIM(fnd_par_type) == "ATT", "(" + ALLTRIM(g_egr_by_att(VAL(fnd_att))) + ") /" + PADR(g_gr_at_desc(VAL(fnd_att)), 15), IF( ALLTRIM(fnd_par_type) == "AOP" , PADR( ALLTRIM(g_aop_desc(VAL(fnd_att))), 15), PADR("----->", 15) ) ) },;
 	"fnd_att",;
 	{|| ALLTRIM(fnd_par_type) $ "ATT#AOP" .or. not_att_msg() },;
-	{|| s_e_gr_att( @wfnd_att, nil, @wfnd_att ), to_str(@wfnd_att) },;
+	{|| IF(ALLTRIM(fnd_par_type) == "ATT", s_e_gr_att( @wfnd_att, nil, @wfnd_att ), IF( ALLTRIM(fnd_par_type) == "AOP", s_aops(@wfnd_att, @wfnd_att) , .t.  )), to_str(@wfnd_att) },;
 	"V" })
 
 
 // vrijednost atributa
 AADD(aImeKol, ;
 	{PADC("Vrijednost", 40), ;
-	{|| IF( ALLTRIM(fnd_par_type) $ "ATT#AOP" , PADR(g_e_gr_vl_desc(val(fnd_val)), 40), PADR(fnd_val, 40))  },;
+	{|| IF( ALLTRIM(fnd_par_type) == "ATT" , PADR(g_e_gr_vl_desc(val(fnd_val)), 40), IF( ALLTRIM(fnd_par_type) == "AOP", PADR(g_aop_att_desc(val(fnd_val)), 40), PADR(fnd_val, 40)))  },;
 	"fnd_val",;
 	{|| .t. },;
-	{|| IF(ALLTRIM(fnd_par_type) $ "ATT#AOP" , s_e_gr_val(@wfnd_val, VAL(fnd_att), @wfnd_val), .t.), to_str(@wfnd_val)},;
+	{|| IF(ALLTRIM(fnd_par_type) == "ATT" , s_e_gr_val(@wfnd_val, VAL(fnd_att), @wfnd_val) , IF( ALLTRIM(fnd_par_type) == "AOP", s_aops_att(@wfnd_val, VAL(fnd_att), @wfnd_val) , .t.)), to_str(@wfnd_val) },;
 	"V"  })
 
 for i:=1 to LEN(aImeKol)
@@ -207,6 +207,7 @@ if VALTYPE(nPar) == "N"
 	nPar := STR(nPar,10)
 endif
 return .t.
+
 
 // -----------------------------------------
 // poruka sekcija nema atributa

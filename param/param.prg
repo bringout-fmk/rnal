@@ -7,19 +7,12 @@
 */
 
 // picture iznos
-static gPIC_IZN
+static gPIC_VAL
 // picture dimenzije
 static gPIC_DIM
 // picture kolicina
-static gPIC_KOL
+static gPIC_QTTY
 
-// dimenzije
-static gDEB_MIN
-static gDEB_MAX
-static gVIS_MIN
-static gVIS_MAX
-static gSIR_MIN
-static gSIR_MAX
 
 // -----------------------------------------
 // set parametara pri pokretanju modula
@@ -39,9 +32,9 @@ return
 function ed_zf_params()
 local cDimPict := "99999.99"
 
-gPIC_IZN:= PADR(gPIC_IZN, 20)
+gPIC_VAL:= PADR(gPIC_VAL, 20)
 gPIC_DIM:= PADR(gPIC_DIM, 20)
-gPIC_KOL:= PADR(gPIC_KOL, 20)
+gPIC_QTTY:= PADR(gPIC_QTTY, 20)
 
 nX:=1
 Box(, 15, 70)
@@ -51,39 +44,21 @@ set cursor on
 @ m_x + nX, m_y+2 SAY "1. Prikaz ***"
 nX ++
 
-@ m_x + nX, m_y+2 SAY PADL(" kolicina ", 30)   GET gPIC_KOL
+@ m_x + nX, m_y+2 SAY PADL(" kolicina ", 30)   GET gPIC_QTTY
 nX ++
 
 @ m_x + nX, m_y+2 SAY PADL(" dimenzija ", 30)   GET gPIC_DIM
 nX ++
 
-@ m_x + nX, m_y+2 SAY PADL(" iznos ", 30)   GET gPIC_IZN
-
-nX := nX + 2
-
-@ m_x + nX, m_y+2 SAY "2. min/max vrijednosti ***"
-nX ++
-
-@ m_x + nX, m_y+2 SAY PADL(" debljina (mm)   MIN:", 30) GET gDEB_MIN PICT cDimPict
-@ m_x + nX, m_y+43 SAY "MAX:" GET gDEB_MAX PICT cDimPict
-
-nX ++
-
-@ m_x + nX, m_y+2 SAY PADL(" sirina (mm)   MIN:", 30) GET gSIR_MIN PICT cDimPict
-@ m_x + nX, m_y+43 SAY "MAX:" GET gSIR_MAX PICT cDimPict
-
-nX ++
-
-@ m_x + nX, m_y+2 SAY PADL(" visina (mm)   MIN:", 30) GET gVIS_MIN PICT cDimPict
-@ m_x + nX, m_y+43 SAY "MAX:" GET gVIS_MAX PICT cDimPict
+@ m_x + nX, m_y+2 SAY PADL(" iznos ", 30)   GET gPIC_VAL
 
 read
 
 BoxC()
 
-gPIC_KOL := ALLTRIM(gPIC_KOL)
+gPIC_QTTY := ALLTRIM(gPIC_QTTY)
 gPIC_DIM := ALLTRIM(gPIC_DIM)
-gPIC_IZN := ALLTRIM(gPIC_IZN)
+gPIC_VAL := ALLTRIM(gPIC_VAL)
 
 if lastkey()<>K_ESC
 	write_zf_params()
@@ -306,16 +281,9 @@ return
 // --------------------------------------
 function read_zf_params()
 
-gPIC_IZN := "9999999.99"
+gPIC_VAL := "9999999.99"
 gPIC_DIM := "9999999.99"
-gPIC_KOL := "9999999999"
-
-gDEB_MIN := 2
-gDEB_MAX := 100
-gVIS_MIN := 200
-gVIS_MAX := 1000
-gSIR_MIN := 200
-gSIR_MAX := 1000
+gPIC_QTTY := "9999999999"
 
 SELECT F_KPARAMS
 
@@ -327,15 +295,9 @@ private cSection:="5"
 private cHistory:=" "
 private aHistory:={}
 
-RPar("P1", @gPIC_IZN)
+RPar("P1", @gPIC_VAL)
 RPar("P2", @gPIC_DIM)
-RPar("P3", @gPIC_KOL)
-RPar("P4", @gDEB_MIN)
-RPar("P5", @gDEB_MAX)
-RPar("P6", @gSIR_MIN)
-RPar("P7", @gSIR_MAX)
-RPar("P8", @gVIS_MIN)
-RPar("P9", @gVIS_MAX)
+RPar("P3", @gPIC_QTTY)
 
 close
 return
@@ -354,29 +316,22 @@ private cSection:="5"
 private cHistory:=" "
 private aHistory:={}
 
-WPar("P1", gPIC_IZN)
+WPar("P1", gPIC_VAL)
 WPar("P2", gPIC_DIM)
-WPar("P3", gPIC_KOL)
-RPar("P4", gDEB_MIN)
-RPar("P5", gDEB_MAX)
-RPar("P6", gSIR_MIN)
-RPar("P7", gSIR_MAX)
-RPar("P8", gVIS_MIN)
-RPar("P9", gVIS_MAX)
+WPar("P3", gPIC_QTTY)
 
 close
 
 return
 
 
-
 // -------------------------------
 // -------------------------------
-function PIC_IZN(xVal)
+function PIC_VAL(xVal)
 if xVal <> nil
-	gPIC_IZN := xVal
+	gPIC_VAL := xVal
 endif
-return gPIC_IZN
+return gPIC_VAL
 
 // -------------------------------
 // -------------------------------
@@ -389,32 +344,10 @@ return gPIC_DIM
 
 // -------------------------------
 // -------------------------------
-function PIC_KOL(xVal)
+function PIC_QTTY(xVal)
 if xVal <> nil
-	gPIC_KOL := xVal
+	gPIC_QTTY := xVal
 endif
-return gPIC_KOL
-
-
-function MAX_DEBLJINA()
-return gDEB_MAX
-
-function MIN_DEBLJINA()
-return gDEB_MIN
-
-function MIN_VISINA()
-return gVIS_MIN
-
-function MAX_VISINA()
-return gVIS_MAX
-
-function MAX_SIRINA()
-return gSIR_MIN
-
-function MIN_SIRINA()
-return gSIR_MIN
-
-
-
+return gPIC_QTTY
 
 

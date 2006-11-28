@@ -44,6 +44,8 @@ cHeader := "Artikli /"
 cFooter := ""
 
 select articles
+set relation to
+set filter to
 set order to tag "1"
 go top
 
@@ -66,7 +68,6 @@ if l_open_dbedit
 	
 	@ m_x + 16, m_y + 2 SAY "<c-N> Novi | <c-T> Brisi | <F2> Ispravi ..."
 
-	altd()
 	ObjDbedit(, 16, 77, {|| key_handler(Ch)}, cHeader, cFooter , .t.,,,,1)
 
 	BoxC()
@@ -328,6 +329,7 @@ return 1
 // ----------------------------------------------
 function _art_set_descr( nArt_id )
 local cArt_desc := ""
+local cArt_mcode := ""
 local nEl_id
 local nEl_gr_id
 local nCount := 0
@@ -413,12 +415,12 @@ do while !EOF() .and. field->art_id == nArt_id
 		nAop_att_id := field->aop_att_id
 		cAop_att_desc := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
 
-		if !EMPTY(cAop_desc) .or. cAop_desc <> "?????"
+		if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
 			cArt_desc += cAop_desc 
 			cArt_desc += " "
 		endif
 
-		if !EMPTY(cAop_att_desc) .or. cAop_att_desc <> "?????"
+		if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
 			cArt_desc += cAop_att_desc
 			cArt_desc += " "
 		endif
@@ -440,16 +442,25 @@ go top
 seek artid_str( nArt_id )
 
 if FOUND()
+
 	if !EMPTY(cArt_desc) .and. lE_att == .t.
-	
-		if EMPTY(field->art_desc) .or. (!EMPTY(field->art_desc) .and. Pitanje(, "Definisati naziv artikla (D/N) ?", "D") == "D")
+
+		cArt_desc := PADR(cArt_desc, 250)
+		cArt_mcode := PADR(cArt_mcode, 10)
+		
+		// daj box za pregled korekciju
+		if _box_art_desc( @cArt_desc, @cArt_mcode ) == 1
 			
 			Scatter()
-			_art_desc := cArt_desc
-			Gather()
 			
-			return 1
+			_art_desc := cArt_desc
+			_match_code := cArt_mcode
+			
+			Gather()
+		
 		endif
+		
+		return 1
 		
 	else
 		
@@ -464,6 +475,29 @@ endif
 return 0
 
 
+// ------------------------------------------------------
+// box za unos naziva artikla i match_code-a
+// ------------------------------------------------------
+static function _box_art_desc( cArt_desc, cArt_mcode )
+private GetList:={}
+
+Box(, 4, 70)
+	
+	@ m_x + 1, m_y + 2 SAY "*** pregled/korekcija podataka artikla"
+	
+	@ m_x + 3, m_y + 2 SAY "Naziv:" GET cArt_desc PICT "@S60" VALID !EMPTY(cArt_desc)
+	
+	@ m_x + 4, m_y + 2 SAY "Match code:" GET cArt_mcode
+	
+	read
+	
+BoxC()
+
+ESC_RETURN 0
+
+return 1
+
+
 
 // ------------------------------------
 // vraca string STR(3)
@@ -471,5 +505,66 @@ return 0
 static function art_busy()
 return STR(3,1)
 
+
+
+// ------------------------------------------------
+// napuni matricu aElem sa elementima artikla
+// aElem - matrica sa elementima
+// nArt_id - id artikla
+// 
+// aElem = { tip, naz, mc, e_gr_at_id, e_gr_vl_id }
+// ------------------------------------------------
+function _fill_a_article(aElem, nArt_id)
+local nTArea := SELECT()
+local cArt_desc := ""
+local cArt_mc := ""
+
+aElem := {}
+
+// artikli
+select articles
+set order to tag "1"
+go top
+seek artid_str( nArt_id )
+
+if FOUND()
+	cArt_desc := ALLTRIM(field->art_desc)
+	cArt_mc := ALLTRIM(field->match_code)
+endif
+
+// elementi
+select elements
+set order to tag "1"
+go top
+seek elid_str( nArt_id )
+
+nEl_id := field->el_id
+	
+// atributi
+select e_att
+set order to tag "1"
+go top
+seek artid_str( nEl_id )
+	
+do while !EOF() .and. field->el_id == nEl_id
+
+	AADD(aElem, { "ATT",  cArt_desc, cArt_mc, field->e_gr_at_id, field->e_gr_vl_id })
+	skip
+
+enddo
+	
+// operacije
+select e_aops
+set order to tag "1"
+go top
+seek artid_str( nEl_id )
+
+do while !EOF() .and. field->el_id == nEl_id
+	AADD(aElem, { "AOP",  cArt_desc, cArt_mc, field->aop_id, field->aop_att_id })
+	skip
+enddo
+	
+select (nTArea)
+return
 
 

@@ -1,33 +1,45 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+static _tb_direkt
+
 
 // ------------------------------------------------
 // otvara sifrarnik dodatnih operacija, atributa
 // ------------------------------------------------
-function s_aops_att(cId, nAop_id, dx, dy)
+function s_aops_att(cId, nAop_id, cAop_desc, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
 private Kol
 
+_tb_direkt := gTBDir
+_mod_tb_direkt( _tb_direkt )
+
 if nAop_id == nil
 	nAop_id := -1
 endif
 
-nTArea := SELECT()
+if cAop_desc == nil
+	cAop_desc := ""
+endif
 
+nTArea := SELECT()
 cHeader := "Dodatne operacije, atributi /"
 
 select aops_att
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
-aop_filter(nAop_id)
+aop_filter(nAop_id, cAop_desc)
 	
 cRet := PostojiSifra(F_AOPS_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|Ch| key_handler(Ch) })
 
-if nAop_id > 0
+if VALTYPE(cAop_desc) == "N"
+	cAop_desc := STR(cAop_desc, 10)
+endif
+
+if nAop_id > 0 .or. cAop_desc <> ""
 	set filter to
 endif
 
@@ -36,18 +48,28 @@ select (nTArea)
 return cRet
 
 
-
-// ------------------------------------------
-// setovanje filtera po nAop_id
-// ------------------------------------------
-static function aop_filter( nAop_id )
-local cFilter
+// ---------------------------------------------------
+// setuje filter na sifraniku
+// ---------------------------------------------------
+static function aop_filter( nAop_id, cAop_desc )
+local cFilter := ""
 
 if nAop_id > 0
-	cFilter := "aop_id == " + aopid_str(nAop_id)
+	cFilter += 'aop_id == ' + aopid_str(nAop_id)
+endif
+
+if !EMPTY(cAop_desc)
+
+	if !EMPTY(cFilter)
+		cFilter += ' .and. '
+	endif
+
+	cFilter += 'UPPER(aop_att_desc) = ' + cm2str(UPPER(ALLTRIM(cAop_desc))) 
+endif
+
+if !EMPTY(cFilter)
 	set filter to &cFilter
-else
-	set filter to
+	go top
 endif
 
 return

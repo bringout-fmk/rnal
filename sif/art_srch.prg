@@ -59,34 +59,100 @@ nRet := _srch_art()
 return nRet
 
 
-
-// ---------------------------------------------
-// pretraga artikla pomoæu tabele _FND_PAR
-//
-// ---------------------------------------------
+// -------------------------------------------------------
+// funkcija koja pregleda artikle i tabelu _FND_PAR
+//   te setuje i markira artikle u _ART_TMP
+// -------------------------------------------------------
 static function _srch_art()
-local nRet := 0
- 
-cFiltMC := ""
-
-select articles
-set relation to
-set filter to
-select elements 
-set filter to
-select e_att
-set filter to
-select e_aops
-set filter to
+local aEl
+local nTREC
+local nSeekAtt := 1
+local nSeekAop := 1
+local lFoundAtt := .t.
+local lFoundAop := .t.
 
 // kreiraj pomocnu tabelu _ART_TMP i otvori je
 _cre_art_tmp()
 
-// gen atribut elementa filter ...
-nRet += _set_att_filter( _gen_att_filter() )
+select articles
+set relation to
+set filter to
+go top
 
-// gen add ops.. filter...
-nRet += _set_aop_filter( _gen_aop_filter() )
+MsgO("Pronalazim artikle ...")
+
+do while !EOF()
+
+	nTREC := RECNO()
+	
+	// uzmi u matricu elemente artikla
+	_fill_a_articles( @aEl, field->art_id )
+
+	select _fnd_par
+	go top
+
+	lFoundAtt := .t.
+	lFoundAop := .t.
+
+	do while !EOF()
+		
+		// ako je match code preskoci
+		if ALLTRIM(field->fnd_par_type) == "MC"
+			skip
+			loop
+		endif
+	
+		if ALLTRIM(field->fnd_par_type) == "ATT"
+			
+			nSeekAtt := ASCAN(aEl, { |xVal| STR(xVal[4]) + STR(xVal[5]) == STR(VAL(field->fnd_att)) + STR(VAL(field->fnd_val)) .and. ALLTRIM(xVal[1]) == "ATT" })
+			if nSeekAtt == 0
+				// izadji jer nisi pronasao...
+				lFoundAtt := .f.
+				skip
+				loop
+			endif
+			
+		endif
+		
+		if ALLTRIM(field->fnd_par_type) == "AOP"
+			
+			nSeekAop := ASCAN(aEl, { |xVal| xVal[4] == VAL(field->fnd_att) .and. xVal[1] = "AOP" })
+			
+			if nSeekAop == 0
+				// izadji jer nisi pronasao...
+				lFoundAop := .f.
+				skip
+				loop
+			endif
+			
+		endif
+		
+		select _fnd_par
+		skip
+	enddo
+
+	if lFoundAtt == .t. .and. lFoundAop == .t.
+		// ubaci artikal u _ART_TMP i markiraj ga
+		select _art_tmp
+		go top
+		
+		seek artid_str(articles->art_id)
+		
+		if !FOUND()
+			append blank
+		endif
+		
+		replace art_id with articles->art_id
+		replace art_marker with "*"
+	endif
+	
+	select articles
+	
+	go (nTREC)
+	
+	skip
+
+enddo
 
 // gen match_code filter...
 cFiltMC := _gen_mc_filter()
@@ -101,113 +167,13 @@ go top
 // postavi relaciju ARTICLES -> _ART_TMP
 // setuj filter po _ART_TMP->ART_MARKER = '*' i ARTICLES->MATCH_CODE
 
-if nRet > 0
-
-	set relation to STR(articles->art_id, 10) into _art_tmp
-	set filter to _art_tmp->(art_marker) == '*' .and. &cFiltMC
-	go top
-
-endif
-
-return nRet
-
-
-
-// --------------------------------------------
-// FILTER.GEN. att_filter
-// --------------------------------------------
-static function _gen_att_filter()
-local cUsl := ""
-local nTArea := SELECT()
-local cFilt := ""
-
-select _fnd_par
-set order to tag "1"
+set relation to STR(articles->art_id, 10) into _art_tmp
+set filter to _art_tmp->(art_marker) == '*' .and. &cFiltMC
 go top
 
-do while !EOF()
+MsgC()
 
-	if ALLTRIM( field->fnd_par_type ) <> "ATT"
-		skip
-		loop
-	endif
-
-	if !EMPTY(field->fnd_val)
-		cUsl += ALLTRIM( fnd_val ) + "#"
-	endif
-	
-	skip
-enddo
-
-if !EMPTY(cUsl)
-
-	cUsl := "#" + cUsl
-
-	cFilt := "'#' + ALLTRIM(STR(E_ATT->e_gr_vl_id)) + '#' $ " + cm2str( cUsl )
-
-endif
-
-select (nTArea)
-
-return cFilt
-
-
-
-// ---------------------------------------------------
-// setuje filter za atribute elemenata
-// ---------------------------------------------------
-static function _set_att_filter( cFilter ) 
-local nTArea := SELECT()
-local nEl_id := 0
-local nArt_id := 0
-local nCount := 0
-
-// ako nema filtera nemoj nista raditi
-if cFilter == ""
-	return nCount
-endif
-
-select e_att
-set filter to &cFilter
-go top
-
-do while !EOF()
-
-	nEl_id := e_att->el_id
-	select elements
-	set order to tag "1"
-	go top
-	seek elid_str(nEl_id)
-
-	nArt_id := elements->art_id
-
-	select _art_tmp
-	set order to tag "1"
-	go top
-	seek artid_str( nArt_id )
-		
-	if !FOUND()
-		append blank
-		Scatter()
-		_art_id := nArt_id
-		_art_marker := "*"
-		Gather()
-	endif
-	
-	select e_att
-	skip
-
-	++ nCount
-
-enddo
-
-select e_att
-set filter to
-
-select (nTArea)
-
-return nCount
-
+return 1
 
 
 // --------------------------------------------
@@ -240,158 +206,5 @@ enddo
 select (nTArea)
 
 return cFilt
-
-
-
-// ---------------------------------------------------
-// setuje filter za match_code artikla
-// ---------------------------------------------------
-static function _set_mc_filter( cFilter ) 
-local nTArea := SELECT()
-local nCount := 0
-
-// ako nema filtera nemoj nista raditi
-if cFilter == ""
-	return nCount
-endif
-
-select articles
-set filter to &cFilter
-go top
-
-do while !EOF()
-	
-	nArt_id := field->art_id
-
-	select _art_tmp
-	set order to tag "1"
-	go top
-	seek artid_str( nArt_id )
-		
-	if !FOUND()
-		append blank
-		Scatter()
-		_art_id := nArt_id
-		_art_marker := "*"
-		Gather()
-	endif
-	
-	select articles
-	skip
-
-	++ nCount
-	
-enddo
-
-select articles
-set filter to
-
-select (nTArea)
-
-return nCount
-
-
-
-// --------------------------------------------
-// FILTER.GEN. dodatne operacije
-// --------------------------------------------
-static function _gen_aop_filter()
-local cUsl := ""
-local cUsl2 := ""
-local nTArea := SELECT()
-local cFilt := ""
-
-select _fnd_par
-set order to tag "1"
-go top
-
-do while !EOF()
-
-	if ALLTRIM( field->fnd_par_type ) <> "AOP"
-		skip
-		loop
-	endif
-
-	if !EMPTY(field->fnd_val)
-		
-		cUsl += ALLTRIM( fnd_val ) + "#"
-	
-	endif
-	
-	skip
-enddo
-
-if !EMPTY(cUsl)
-
-	cUsl := "#" + cUsl
-	
-	cFilt := "'#' + ALLTRIM(STR(E_AOPS->aop_id)) + '#' $ " + cm2str( cUsl )
-
-endif
-
-select (nTArea)
-
-return cFilt
-
-
-
-// ---------------------------------------------------
-// setuje filter za dodatne operacije elemenata
-// ---------------------------------------------------
-static function _set_aop_filter( cFilter ) 
-local nTArea := SELECT()
-local nEl_id := 0
-local nArt_id := 0
-local nCount := 0
-
-// ako nema filtera nemoj nista raditi
-if cFilter == ""
-	return nCount
-endif
-
-select e_aops
-set filter to &cFilter
-go top
-
-do while !EOF()
-
-	nEl_id := e_aops->el_id
-	
-	select elements
-	set order to tag "1"
-	go top
-	seek elid_str(nEl_id)
-
-	if FOUND()
-		
-		nArt_id := elements->art_id
-		
-		select _art_tmp
-		set order to tag "1"
-		go top
-		seek artid_str( nArt_id )
-		
-		if !FOUND()
-			append blank
-			Scatter()
-			_art_id := nArt_id
-			_art_marker := "*"
-			Gather()
-		endif
-	endif
-	
-	select e_aops
-	skip
-
-	++ nCount
-	
-enddo
-
-select e_aops
-set filter to
-
-select (nTArea)
-
-return nCount
 
 

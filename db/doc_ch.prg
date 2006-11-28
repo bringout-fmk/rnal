@@ -16,13 +16,15 @@ private izbor:=1
 __doc_no := nDoc_no
 __oper_id := GetUserID()
 
-AADD(opc, "1. promjena osnovnih podataka naloga ")
+AADD(opc, "promjena osnovnih podataka naloga ")
 AADD(opcexe, {|| _ch_main() })
-AADD(opc, "2. promjena podataka o isporuci ")
+AADD(opc, "promjena podataka o isporuci ")
 AADD(opcexe, {|| _ch_ship() })
-AADD(opc, "3. promjena kontakta na nalogu")
+AADD(opc, "promjena podataka o placanju ")
+AADD(opcexe, {|| _ch_pay() })
+AADD(opc, "promjena kontakta na nalogu")
 AADD(opcexe, {|| _ch_cont() })
-AADD(opc, "4. dodaj novi kontakt ")
+AADD(opc, "dodaj novi kontakt ")
 AADD(opcexe, {|| _ch_cont(.t.) })
 
 Menu_sc("changes")
@@ -38,7 +40,6 @@ function _ch_main()
 local nTRec := RecNo()
 local nCustId
 local nDoc_priority
-local nDoc_pay_type
 local cDesc
 local aArr
 
@@ -50,14 +51,13 @@ select docs
 
 nCustId := field->cust_id
 nDoc_priority := field->doc_priority
-nDoc_pay_type := field->doc_pay_id
 
 // box sa unosom podataka
-if _box_main(@nCustId, @nDoc_priority, @nDoc_pay_type, @cDesc) == 0
+if _box_main(@nCustId, @nDoc_priority, @cDesc) == 0
 	return
 endif
 
-aArr := a_log_main( nCustId, nDoc_priority, nDoc_pay_type ) 
+aArr := a_log_main( nCustId, nDoc_priority ) 
 log_main(__doc_no, cDesc, "E", aArr)
 
 select docs
@@ -68,9 +68,6 @@ if _cust_id <> nCustId
 endif
 if _doc_priority <> nDoc_priority
 	_doc_priority := nDoc_priority
-endif
-if _doc_pay_id <> nDoc_pay_type
-	_doc_pay_id := nDoc_pay_type
 endif
 
 _operater_id := __oper_id
@@ -88,14 +85,13 @@ return
 // --------------------------------------
 // box sa unosom podataka osnovnih
 // --------------------------------------
-static function _box_main(nCust, nPrior, nPay, cDesc)
+static function _box_main(nCust, nPrior, cDesc)
 
 Box(, 7, 65)
 	cDesc := SPACE(150)
 	@ m_x + 1, m_y + 2 SAY "Promjena na osnovnim podacima naloga:"
 	@ m_x + 3, m_y + 2 SAY "Narucioc:" GET nCust VALID {|| s_customers(@nCust), show_it( g_cust_desc( nCust ) ) }
 	@ m_x + 4, m_y + 2 SAY "Prioritet (1/2/3):" GET nPrior VALID nPrior > 0 .and. nPrior < 4
-	@ m_x + 5, m_y + 2 SAY "Vrsta placanja 1-kes, 2-ziro rn.:" GET nPay VALID nPay > 0 .and. nPay < 3
 	@ m_x + 7, m_y + 2 SAY "Opis promjene:" GET cDesc PICT "@S40"
 	read
 BoxC()
@@ -180,6 +176,83 @@ BoxC()
 ESC_RETURN 0
 
 return 1
+
+
+// ---------------------------------
+// promjena podataka o placanju
+// ---------------------------------
+function _ch_pay()
+local nTRec := RecNo()
+local cDoc_paid
+local nDoc_pay_id
+local cDoc_pay_desc
+local cDesc
+local aArr
+
+if Pitanje(,"Zelite izmjeniti podatke o placanju naloga (D/N)?", "D") == "N"
+	return
+endif
+
+select docs
+
+cDoc_paid := field->doc_paid
+nDoc_pay_id := field->doc_pay_id
+cDoc_pay_desc := field->doc_pay_desc
+
+// box sa unosom podataka
+if _box_pay(@nDoc_pay_id, @cDoc_paid, @cDoc_pay_desc, @cDesc) == 0
+	return
+endif
+
+// logiraj placanje..
+aArr := a_log_pay( nDoc_pay_id, cDoc_paid, cDoc_pay_desc )
+log_pay(__doc_no, cDesc, "E", aArr)
+
+select docs
+
+Scatter()
+
+if _doc_paid <> cDoc_paid
+	_doc_paid := cDoc_paid
+endif
+
+if _doc_pay_desc <> cDoc_pay_desc
+	_doc_pay_desc := cDoc_pay_desc
+endif
+
+if _doc_pay_id <> nDoc_pay_id
+	_doc_pay_id := nDoc_pay_id
+endif
+
+_operater_id := __oper_id
+
+Gather()
+
+select docs
+//go (nTRec)
+
+return
+
+
+// --------------------------------------
+// box sa unosom podataka o placanju
+// --------------------------------------
+static function _box_pay(nPay_id, cPaid, cPayDesc, cDesc)
+
+Box(, 7, 65)
+	cDesc := SPACE(150)
+	@ m_x + 1, m_y + 2 SAY "Promjena podataka o placanju:"
+	@ m_x + 3, m_y + 2 SAY PADL("Vrsta placanja:",22) GET nPay_id VALID {|| nPay_id > 0 .and. nPay_id < 3, show_it( s_pay_id( nPay_id ) )  }
+	@ m_x + 4, m_y + 2 SAY PADL("Placeno (D/N):",22) GET cPaid VALID cPaid $ "DN"
+	@ m_x + 5, m_y + 2 SAY PADL("dod.napomene:",22) GET cPayDesc PICT "@S40"
+	@ m_x + 7, m_y + 2 SAY PADL("Opis promjene:",22) GET cDesc PICT "@S40"
+	read
+BoxC()
+
+ESC_RETURN 0
+
+return 1
+
 
 
 // ---------------------------------

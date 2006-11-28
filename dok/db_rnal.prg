@@ -58,8 +58,8 @@ if !FILE(PRIVPATH + cT_PARS)
 endif
 
 // kreiraj indexe
-CREATE_INDEX("1", "doc_no+doc_it_no+art_id", PRIVPATH + "T_DOCIT")
-CREATE_INDEX("1", "doc_no+doc_op_no", PRIVPATH + "T_DOCOP")
+CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
+CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_op_no,4)", PRIVPATH + "T_DOCOP")
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
 
 return

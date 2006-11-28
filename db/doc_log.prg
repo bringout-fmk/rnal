@@ -48,6 +48,14 @@ aArr := a_log_cont( field->cont_id, field->cont_add_desc )
 
 log_cont(__doc_no, cDesc, nil, aArr)
 
+select _docs
+go top
+
+// logiranje podataka o placanju
+cDesc := "Inicijalni podaci placanja"
+aArr := a_log_pay( field->doc_pay_id, field->doc_paid, field->doc_pay_desc )
+
+log_pay(__doc_no, cDesc, nil, aArr)
 
 select _doc_it
 go top
@@ -66,11 +74,21 @@ return
 
 // -------------------------------------------------
 // puni matricu sa osnovnim podacima dokumenta
-// aArr = { customer_id, doc_pay_id, doc_priority }
+// aArr = { customer_id, doc_priority }
 // -------------------------------------------------
-function a_log_main(nCustId, nDocPay, nPriority)
+function a_log_main(nCustId, nPriority)
 local aArr := {}
-AADD(aArr, { nCustId, nDocPay, nPriority })
+AADD(aArr, { nCustId, nPriority })
+return aArr
+
+
+// -------------------------------------------------
+// puni matricu sa podacima placanja
+// aArr = { doc_pay_id, doc_paid, doc_pay_desc }
+// -------------------------------------------------
+function a_log_pay(nPayId, cDocPaid, cDocPayDesc)
+local aArr := {}
+AADD(aArr, { nPayId, cDocPaid, cDocPayDesc })
 return aArr
 
 
@@ -137,7 +155,6 @@ replace doc_log_no with nDoc_log_no
 replace doc_lit_no with nDoc_lit_no
 replace int_1 with aArr[1, 1]
 replace int_2 with aArr[1, 2]
-replace int_3 with aArr[1, 3]
 replace doc_lit_action with cAction
 
 return
@@ -230,6 +247,52 @@ replace doc_log_no with nDoc_log_no
 replace doc_lit_no with nDoc_lit_no
 replace int_1 with aArr[1, 1]
 replace char_1 with aArr[1, 2]
+replace doc_lit_action with cAction
+
+return
+
+
+// ----------------------------------------------------
+// logiranje podataka placanja
+// nDoc_no - dokument no
+// cDesc - opis
+// cAction - akcija 
+// aArr - matrica sa osnovnim podacima
+// ----------------------------------------------------
+function log_pay( nDoc_no, cDesc, cAction, aArr )
+local nDoc_log_no
+local cDoc_log_type
+
+if ( cAction == nil)
+	cAction := "+"
+endif
+
+cDoc_log_type := "13"
+nDoc_log_no := _inc_log_no( nDoc_no )
+
+_d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+_lit_13_insert( cAction, nDoc_no, nDoc_log_no, aArr )
+
+return
+
+
+// -----------------------------------
+// punjenje loga sa stavkama tipa 13
+// -----------------------------------
+function _lit_13_insert(cAction, nDoc_no, nDoc_log_no, aArr)
+local nDoc_lit_no
+
+nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
+
+select doc_lit
+append blank
+
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_lit_no with nDoc_lit_no
+replace int_1 with aArr[1, 1]
+replace char_1 with aArr[1, 2]
+replace char_2 with aArr[1, 3]
 replace doc_lit_action with cAction
 
 return
@@ -1032,8 +1095,6 @@ do while !EOF() .and. field->doc_no == nDoc_no ;
 
 	cRet += "narucioc: " + PADR( g_cust_desc( field->int_1 ), 20)
 	cRet += "#"
-	cRet += "vrsta placanja: " + ALLTRIM(STR(field->int_2))
-	cRet += "#"
 	cRet += "prioritet: " + ALLTRIM(STR(field->int_3))
 	cRet += "#"
 	
@@ -1106,5 +1167,34 @@ select (nTArea)
 return cRet
 
 
+// ----------------------------------------------
+// vraca string napunjen promjenama tipa "13"
+// ----------------------------------------------
+function _lit_13_get(nDoc_no, nDoc_log_no)
+local cRet := ""
+local nTArea := SELECT()
+
+select doc_lit
+set order to tag "1"
+go top
+seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
+
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_log_no == nDoc_log_no
+
+	cRet += "vr.plac: " + s_pay_id( field->int_1 )
+	cRet += "#"
+	cRet += "placeno: " + ALLTRIM(field->char_1)
+	cRet += "#"
+	cRet += "opis: " + ALLTRIM(field->char_2)
+	cRet += "#"
+	
+	select doc_lit
+	skip
+enddo
+
+select (nTArea)
+
+return cRet
 
 

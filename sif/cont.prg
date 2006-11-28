@@ -51,6 +51,21 @@ next
 return
 
 
+// --------------------------------------------------
+// generisi match code za contakt...
+// --------------------------------------------------
+static function gen_cont_mc( m_code, cont_desc )
+local aPom := TokToNiz( ALLTRIM(cont_desc), " ")
+local i
+
+for i:=1 to LEN(aPom)
+	m_code += UPPER(LEFT(aPom, 2))
+next
+
+return .t.
+
+
+
 
 // -------------------------------------------
 // filter po cust_id

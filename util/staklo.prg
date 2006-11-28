@@ -1,16 +1,6 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
-// ------------------------------------------
-// provjerava da li je zadata vrsta staklo
-// ------------------------------------------
-function is_staklo(cVrsta)
-if ALLTRIM(cVrsta) == "S"
-	return .t.
-endif
-return .f.
-
-
 // -----------------------------------------------------
 // kalkulise kvadratne metre
 // nDim1, nDim2 u mm

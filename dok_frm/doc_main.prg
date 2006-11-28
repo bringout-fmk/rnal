@@ -13,7 +13,7 @@ static _doc
 function e_doc_main_data( lNew )
 local nRecCnt := 0
 local GetList:={}
-local nGetBoxX := 18
+local nGetBoxX := 20
 local nGetBoxY := 70
 
 nRecCnt := RECCOUNT2()
@@ -32,6 +32,7 @@ select _docs
 UsTipke()
 
 Box(, nGetBoxX, nGetBoxY, .f., "Unos osnovnih podataka naloga")
+@ m_x + nGetBoxX, m_y + 2 SAY PADL("(*) popuna nije obavezna", nGetBoxY - 2 )
 
 Scatter()
 _doc := _doc_no
@@ -62,17 +63,19 @@ return 1
 // ---------------------------------------------
 static function _e_box_main( nBoxX, nBoxY )
 local nX := 1
-local nLeft := 20
+local nLeft := 21
 
 // setuj def.vrijednosti polja za novi dokument
 if l_new_doc
 
 	_doc_date := DATE()
 	_doc_dvr_date := DATE() + 2
-	_doc_dvr_time := PADR(TIME(), 8)
+	_doc_dvr_time := PADR( PADR(TIME(), 5), 8)
 	_doc_ship_place := SPACE( LEN(_doc_ship_place) )
 	_doc_priority := 2
 	_doc_pay_id := 1
+	_doc_paid := "N"
+	_doc_pay_desc := SPACE( LEN(_doc_pay_desc) )
 	_doc_status := 0
 
 endif
@@ -119,17 +122,21 @@ nX += 2
 
 @ m_x + nX, m_y + 2 SAY PADL("Prioritet (1/2/3):", nLeft) GET _doc_priority VALID {|| (_doc_priority > 0 .and. _doc_priority < 4), show_it(s_priority(_doc_priority))} PICT "9"
 
-nX += 1
+nX += 2
 
 @ m_x + nX, m_y + 2 SAY PADL("Vrsta placanja (1/2):", nLeft) GET _doc_pay_id VALID {|| (_doc_pay_id > 0 .and. _doc_pay_id < 3), show_it(s_pay_id( _doc_pay_id ))} PICT "9"
 
-nX += 2
+nX += 1
+	
+@ m_x + nX, m_y + 2 SAY PADL("Vec placeno (D/N):", nLeft) GET _doc_paid WHEN _doc_pay_id == 2 VALID _doc_paid $ "DN" PICT "@!"
+	
+@ m_x + nX, col() + 2 SAY "dod.nap.plac:" GET _doc_pay_desc WHEN _doc_pay_id == 2 PICT "@S29"
+@ m_x + nX, col() SAY ">" COLOR "I"
+	
+nX += 2 
 
 @ m_x + nX, m_y + 2 SAY PADL("Dod.opis naloga (*):", nLeft) GET _doc_desc PICT "@S46"
 @ m_x + nX, col() SAY ">" COLOR "I"
-
-
-@ m_x + nBoxX, m_y + 2 SAY PADL("(*) popuna nije obavezna", nBoxY - 2 )
 
 read
 

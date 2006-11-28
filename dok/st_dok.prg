@@ -180,6 +180,12 @@ add_tpars("N04", PADR( field->doc_dvr_time, 5))
 add_tpars("N05", s_priority( field->doc_priority ))
 // nalog vrsta placanja
 add_tpars("N06", s_pay_id( field->doc_pay_id ))
+// mjesto isporuke
+add_tpars("N07", ALLTRIM(field->doc_ship_place) )
+// dokument dodatni podaci
+add_tpars("N08", ALLTRIM(field->doc_desc) )
+// dokument, kontakt dodatni podaci...
+add_tpars("N09", ALLTRIM(field->cont_add_desc) )
 
 return
 
