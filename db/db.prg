@@ -260,6 +260,8 @@ AADD(aDBf,{ "art_id", "N", 10, 0 })
 AADD(aDBf,{ "doc_it_width", "N", 15,  5 })
 AADD(aDBf,{ "doc_it_heihg", "N", 15,  5 })
 AADD(aDBf,{ "doc_it_qtty",  "N", 15,  5 })
+AADD(aDBf,{ "doc_it_schema",  "C", 1,  0 })
+AADD(aDBf,{ "doc_it_desc",  "C", 150,  0 })
 
 return aDbf
 
@@ -685,6 +687,7 @@ if (nArea==-1 .or. nArea == nArea2)
 			CREATE_INDEX("2", "STR(doc_status,2)+STR(doc_no,10)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_IT) .or. (nArea2 == F__DOC_IT)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", cPath + cTable, .t.)
+			CREATE_INDEX("2", "STR(art_id,10)+STR(doc_no,10)+STR(doc_it_no,4)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_OPS) .or. (nArea2 == F__DOC_OPS)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_op_no,4)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_LOG)
@@ -716,7 +719,7 @@ if (nArea==-1 .or. nArea == nArea2)
 		
 		case (nArea2 == F_E_GR_ATT)
 			CREATE_INDEX("1","STR(e_gr_at_id,10,0)", cPath + cTable, .t.)
-			CREATE_INDEX("2","STR(e_gr_id,10,0)+e_gr_at_re", cPath + cTable, .t.)
+			CREATE_INDEX("2","STR(e_gr_id,10,0)+e_gr_at_re+STR(e_gr_at_id,10)", cPath + cTable, .t.)
 		
 		case (nArea2 == F_E_GR_VAL)
 			CREATE_INDEX("1","STR(e_gr_vl_id,10,0)", cPath + cTable, .t.)

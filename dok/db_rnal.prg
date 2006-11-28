@@ -76,6 +76,8 @@ AADD(aArr,{ "art_desc"   , "C" , 250 ,  0 })
 AADD(aArr,{ "doc_it_qtty", "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_heigh" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_width" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_schema" , "C" ,   1 ,  0 })
+AADD(aArr,{ "doc_it_desc" , "C" , 150 ,  0 })
 AADD(aArr,{ "doc_it_total" , "N" ,  15 ,  5 })
 
 return
@@ -181,6 +183,7 @@ return xRet
 
 // dodaj stavke u tabelu T_RNST
 function a_t_docit( nDoc_no, nDoc_it_no, nArt_id, cArt_desc, ;
+		    cDoc_it_schema, cDoc_it_desc, ;
 		    nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, ;
 		    nDoc_it_total )
 
@@ -195,6 +198,8 @@ replace doc_it_qtty with nDoc_it_qtty
 replace doc_it_heigh with nDoc_it_heigh
 replace doc_it_width with nDoc_it_width
 replace doc_it_total with nDoc_it_total
+replace doc_it_schema with cDoc_it_schema
+replace doc_it_desc with cDoc_it_desc
 
 return
 

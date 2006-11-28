@@ -16,9 +16,9 @@ local nX := m_x
 local nY := m_y
 local nGetBoxX := 10
 local nGetBoxY := 70
-local GetList:={}
 local nRet := 0
 local nFuncRet := 0
+private GetList:={}
 
 _doc := nDoc_no
 
@@ -78,7 +78,7 @@ return nRet
 // -------------------------------------------------
 static function _e_box_item( nBoxX, nBoxY )
 local nX := 1
-local nLeft := 20
+local nLeft := 22
 
 if l_new_ops
 	_doc_no := _doc
@@ -87,13 +87,13 @@ endif
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("r.br stavke", nLeft) GET _doc_op_no 
+@ m_x + nX, m_y + 2 SAY PADL("r.br stavke:", nLeft) GET _doc_op_no 
 
 
 nX += 2
 
 
-@ m_x + nX, m_y + 2 SAY PADL("d.operacija", nLeft) GET _aop_id VALID {|| s_aops( @_aop_id ), show_it( g_aop_desc( _aop_id )) }
+@ m_x + nX, m_y + 2 SAY PADL("d.operacija:", nLeft) GET _aop_id VALID {|| s_aops( @_aop_id ), show_it( g_aop_desc( _aop_id )) }
 
 nX += 1
 
@@ -101,11 +101,11 @@ nX += 1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku", nLeft) GET _doc_it_no
+@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku:", nLeft) GET _doc_it_no VALID show_it( g_item_desc( _doc_it_no ) )
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("dodatni opis", nLeft) GET _doc_op_desc PICT "@S40"
+@ m_x + nX, m_y + 2 SAY PADL("dodatni opis:", nLeft) GET _doc_op_desc PICT "@S40"
 
 
 read
@@ -114,6 +114,17 @@ ESC_RETURN 0
 
 return 1
 
+// --------------------------------------------
+// vrati opis odnosi se na stavku
+// --------------------------------------------
+static function g_item_desc( doc_it_no )
+local xRet := ""
+if doc_it_no == 0
+	xRet := "na sve stavke"
+else
+	xRet := "na " + ALLTRIM(STR(doc_it_no)) + " stavku naloga"
+endif
+return xRet
 
 
 // -------------------------------------------

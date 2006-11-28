@@ -12,9 +12,9 @@ static _doc
 // -------------------------------------------------
 function e_doc_main_data( lNew )
 local nRecCnt := 0
-local GetList:={}
 local nGetBoxX := 20
 local nGetBoxY := 70
+private GetList:={}
 
 nRecCnt := RECCOUNT2()
 
@@ -130,7 +130,7 @@ nX += 1
 	
 @ m_x + nX, m_y + 2 SAY PADL("Vec placeno (D/N):", nLeft) GET _doc_paid WHEN _doc_pay_id == 2 VALID _doc_paid $ "DN" PICT "@!"
 	
-@ m_x + nX, col() + 2 SAY "dod.nap.plac:" GET _doc_pay_desc WHEN _doc_pay_id == 2 PICT "@S29"
+@ m_x + nX, col() + 2 SAY "dod.nap.plac:" GET _doc_pay_desc WHEN _doc_pay_id == 2 VALID IF(EMPTY(_doc_pay_desc) ,_doc_pay_desc == "--", .t.) PICT "@S29"
 @ m_x + nX, col() SAY ">" COLOR "I"
 	
 nX += 2 

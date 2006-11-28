@@ -158,12 +158,16 @@ function e_gr_at_str(nId)
 return STR(nId, 10)
 
 
-// ----------------------------------
+// --------------------------------------------------
 // get e_gr_at_desc by e_gr_att_id
-// ----------------------------------
-function g_gr_at_desc(nE_gr_att_id)
+// --------------------------------------------------
+function g_gr_at_desc(nE_gr_att_id, lShowRequired )
 local cEGrAttDesc := "?????"
 local nTArea := SELECT()
+
+if lShowRequired == nil
+	lShowRequired := .f.
+endif
 
 O_E_GR_ATT
 select e_gr_att
@@ -173,7 +177,23 @@ seek e_gr_at_str(nE_gr_att_id)
 
 if FOUND()
 	if !EMPTY(field->e_gr_at_desc)
-		cEGrAttDesc := ALLTRIM(field->e_gr_at_desc)
+		
+		cEGrAttDesc := ""
+		
+		if lShowRequired == .t.
+			
+			if !EMPTY(field->e_gr_at_required)
+			
+				cEGrAttDesc += "(" 
+				cEGrAttDesc += ALLTRIM(field->e_gr_at_required) 
+				cEGrAttDesc += ")"
+			
+			endif
+			
+		endif
+		
+		cEGrAttDesc += " "
+		cEGrAttDesc += ALLTRIM(field->e_gr_at_desc)
 	endif
 endif
 

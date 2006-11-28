@@ -131,12 +131,14 @@ do case
 		select articles
 		set filter to
 		set relation to
+		nTRec := RECNO()
 		
 		_set_sif_id(@nArt_id, "ART_ID")
 		
 		if s_elements( nArt_id, .t. ) == 1
 			
 			select articles
+			go (nTRec)
 			return DE_REFRESH
 			
 		endif
@@ -144,7 +146,7 @@ do case
 		select articles
 		go (nTRec)
 		
-		return DE_CONT
+		return DE_REFRESH
 		
 	case Ch == K_F2
 		
@@ -164,7 +166,7 @@ do case
 		
 	case Ch == K_CTRL_T
 
-		if art_delete( field->art_id ) == 1
+		if art_delete( field->art_id, .t. ) == 1
 			
 			return DE_REFRESH
 		
@@ -252,16 +254,38 @@ select (nTArea)
 return cArtDesc
 
 
-// ---------------------------------------------
+// -------------------------------------------------------
 // brisanje sifre iz sifrarnika
 // nArt_id - artikal id
 // lSilent - tihi nacin rada, bez pitanja .t.
-// ---------------------------------------------
-static function art_delete( nArt_id, lSilent )
+// lChkKum - check kumulativ...
+// -------------------------------------------------------
+static function art_delete( nArt_id, lChkKum, lSilent )
 local nEl_id 
 
 if lSilent == nil
 	lSilent := .f.
+endif
+
+if lChkKum == nil
+	lChkKum := .f.
+endif
+
+if lChkKum == .t.
+	O_DOC_IT
+	select doc_it
+	set order to tag "2"
+	go top
+	
+	seek artid_str( nArt_id )
+	
+	if FOUND()
+		
+		MsgBeep("Artikal vec postoji u dokumentima!#Brisanje onemoguceno")
+		select articles
+		return 0	
+		
+	endif
 endif
 
 select articles
@@ -326,8 +350,9 @@ return 1
 //   ELEMENTS, E_AOPS, E_ATT
 //
 //  nArt_id - artikal id
+//  lNew - novi artikal
 // ----------------------------------------------
-function _art_set_descr( nArt_id )
+function _art_set_descr( nArt_id, lNew )
 local cArt_desc := ""
 local cArt_mcode := ""
 local nEl_id
@@ -381,18 +406,42 @@ do while !EOF() .and. field->art_id == nArt_id
 		// atributi...
 		nE_gr_att := g_gr_att_val( nE_gr_val )
 		cE_gr_att := ALLTRIM(g_gr_at_desc( nE_gr_att ))
-		
-		cArt_desc += cE_gr_val
-
-		if "deblj" $ cE_gr_att
+	
+		// generisi samo za tip i debljinu...
+		if "tip" $ cE_gr_att .or.  ;
+			"deblj" $ cE_gr_att
+	
+			cArt_desc += cE_gr_val
 			
-			cArt_desc += "mm"
+			if "tip" $ cE_gr_att
+				cArt_mcode += UPPER(LEFT(cE_gr_val, 3))
+			endif
+			
+			if "deblj" $ cE_gr_att
+			
+				cArt_desc += "mm"
+				cArt_mcode += cE_gr_val
+				
+			endif
+		
+			cArt_desc += " "
+		
+			lE_Att := .t.
 			
 		endif
 		
-		cArt_desc += " "
+		// vrsta sirovine
+		if "vrsta" $ cE_gr_att
 		
-		lE_Att := .t.
+			if cE_gr_val $ "kupac#narucioc"
+			
+				cArt_desc += "(" + cE_gr_val + ")"
+				cArt_desc += " "
+				cArt_mcode += UPPER(LEFT(cE_gr_val, 3))
+				
+			endif
+			
+		endif
 		
 		skip
 		
@@ -418,6 +467,7 @@ do while !EOF() .and. field->art_id == nArt_id
 		if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
 			cArt_desc += cAop_desc 
 			cArt_desc += " "
+			cArt_mcode += UPPER(LEFT(cAop_desc, 3))
 		endif
 
 		if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
@@ -443,7 +493,8 @@ seek artid_str( nArt_id )
 
 if FOUND()
 
-	if !EMPTY(cArt_desc) .and. lE_att == .t.
+	if !EMPTY(cArt_desc) .and. lE_att == .t. ;
+		.and. (!lNew .or. (lNew .and. Pitanje(,"Novi artikal, snimiti promjene ?", "D") == "D"))
 
 		cArt_desc := PADR(cArt_desc, 250)
 		cArt_mcode := PADR(cArt_mcode, 10)
@@ -458,18 +509,15 @@ if FOUND()
 			
 			Gather()
 		
+			return 1
+		
 		endif
 		
-		return 1
-		
-	else
-		
-		// izbrisi tu stavku....
-		art_delete(nArt_id, .t.)
-		
-		return 0
-		
 	endif
+		
+	// izbrisi tu stavku....
+	art_delete( nArt_id, .t. , .t. )
+	
 endif
 
 return 0

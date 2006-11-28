@@ -454,7 +454,9 @@ AADD(aImeKol, {"Datum", {|| doc_date }, "doc_date", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp." , {|| doc_dvr_date }, "doc_dvr_date", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| doc_dvr_time }, "doc_dvr_time", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Kontakt" , {|| PADR(g_cont_desc(cont_id), 20) }, "cont_id", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Prioritet" , {|| PADR(doc_priority,10) }, "doc_priority", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Prioritet" , {|| PADR( s_priority(doc_priority) ,10) }, "doc_priority", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Vr.plac" , {|| PADR( s_pay_id(doc_pay_id) ,10) }, "doc_pay_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Plac." , {|| PADR( doc_paid , 4) }, "doc_paid", {|| .t.}, {|| .t.} })
 
 aKol:={}
 

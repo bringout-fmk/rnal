@@ -14,11 +14,11 @@ static _doc
 function e_doc_item( nDoc_no, lNew )
 local nX := m_x
 local nY := m_y
-local nGetBoxX := 10
+local nGetBoxX := 11
 local nGetBoxY := 70
-local GetList:={}
 local nRet := 0
 local nFuncRet := 0
+private GetList:={}
 
 _doc := nDoc_no
 
@@ -83,6 +83,7 @@ local nLeft := 20
 if l_new_it
 	_doc_no := _doc
 	_doc_it_no := inc_docit( _doc )
+	_doc_it_schema := "N"
 endif
 
 nX += 1
@@ -95,6 +96,14 @@ nX += 2
 
 nX += 2
 
+@ m_x + nX, m_y + 2 SAY PADL("shema u prilogu (D/N):", nLeft + 6) GET _doc_it_schema PICT "@!" VALID _doc_it_schema $ "DN"
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL("dod.napomene:", nLeft) GET _doc_it_desc PICT "@S40"
+
+nX += 2
+
 @ m_x + nX, m_y + 2 SAY PADL("sirina (mm):", nLeft + 3) GET _doc_it_heigh PICT "99999.99" VALID val_heigh(_doc_it_heigh)
 
 nX += 1
@@ -104,6 +113,7 @@ nX += 1
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("kolicina:", nLeft + 3) GET _doc_it_qtty PICT "99999" VALID val_qtty(_doc_it_qtty)
+
 
 read
 
@@ -157,10 +167,10 @@ return lRet
 // ----------------------------------
 static function val_width( nVal )
 local lRet := .f.
-if nVal <> 0
+if nVal >= 0
 	lRet := .t.
 endif
-val_msg(lRet, "Dimenzija mora biti <> 0 !")
+val_msg(lRet, "Dimenzija mora biti >= 0 !")
 return lRet
 
 
@@ -170,10 +180,10 @@ return lRet
 // ----------------------------------
 static function val_heigh( nVal )
 local lRet := .f.
-if nVal <> 0
+if nVal >= 0
 	lRet := .t.
 endif
-val_msg(lRet, "Dimenzija mora biti <> 0 !")
+val_msg(lRet, "Dimenzija mora biti >= 0 !")
 return lRet
 
 

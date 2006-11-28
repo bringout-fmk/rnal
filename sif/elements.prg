@@ -11,7 +11,7 @@ static l_auto_tab
 // input: nArt_id - id artikla
 // output: art_desc update u articles
 // ----------------------------------------------
-function s_elements( nArt_id )
+function s_elements( nArt_id, lNew )
 local i
 local nX
 local nY
@@ -20,6 +20,10 @@ private nEl_id := 0
 private nEl_gr_id := 0
 private ImeKol
 private Kol
+
+if lNew == nil
+	lNew := .f.
+endif
 
 art_id := nArt_id
 l_auto_tab := .f.
@@ -86,12 +90,16 @@ do while .t.
 
 	if LastKey() == K_ESC
 	
-		select articles
-		// generisi naziv artikla i update-uj
-		nRet := _art_set_descr( art_id )
-		go top
+		// provjeri req.elements i da li postoji vec artikal...
+		if _chk_req_elements( art_id ) == 1 .or. !_art_elem_exist()
+		
+			// generisi naziv artikla i update-uj
+			select articles
+			nRet := _art_set_descr( art_id, lNew )
+			go top
 
-		exit
+			exit
+		endif
 		
 	endif
 
@@ -102,6 +110,30 @@ BoxC()
 return nRet
 
 
+
+// ------------------------------------------------------
+// provjeri da li artikal posjeduje required elemente
+// vraca 0 ili 1
+// ------------------------------------------------------
+static function _chk_req_elements( art_id )
+local nRet := 1
+return nRet
+
+
+
+// ----------------------------------------------------------------
+// provjerava da li vec postoji isti artikal sa istim elementima
+// vraca .t. ili .f.
+// ----------------------------------------------------------------
+static function _art_elem_exist()
+local lRet := .f.
+return lRet
+
+
+
+// ------------------------------------
+// automatski pozovi TAB
+// ------------------------------------
 static function auto_tab()
 altd()
 if l_auto_tab == .t.
@@ -172,7 +204,7 @@ static function e_att_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("atribut", 10), {|| PADR(g_gr_at_desc( e_gr_at_id ), 20) }, "e_gr_at_id" })
+AADD(aImeKol, {PADC("atribut", 10), {|| PADR(g_gr_at_desc( e_gr_at_id, .t. ), 20) }, "e_gr_at_id" })
 AADD(aImeKol, {PADC("vrijedost atributa", 30), {|| PADR(g_e_gr_vl_desc( e_gr_vl_id ), 30) }, "e_gr_vl_id"})
 
 for i:=1 to LEN(aImeKol)
@@ -180,6 +212,7 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
 
 
 
@@ -268,7 +301,7 @@ do case
 			nRet := elem_edit( art_id , .t. )
 			l_auto_tab := .t.
 			set filter to &cTBFilter
-			go top
+			//go top
 
 			 
 		elseif ALIAS() == "E_ATT"

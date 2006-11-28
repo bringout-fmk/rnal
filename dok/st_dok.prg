@@ -89,10 +89,12 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nQtty := field->doc_it_qtty
 	nHeigh := field->doc_it_heigh
 	nWidth := field->doc_it_width
+	cDoc_it_schema := field->doc_it_schema
+	cDoc_it_desc := field->doc_it_desc
 	nTotal := nQtty * (nHeigh * nWidth)
 
-	a_t_docit( __doc_no, nDoc_it_no, nArt_id, cArt_desc ,;
-                  nQtty, nHeigh, nWidth, nTotal )
+	a_t_docit( __doc_no, nDoc_it_no, nArt_id, cArt_desc , cDoc_it_schema, ;
+                  cDoc_it_desc, nQtty, nHeigh, nWidth, nTotal )
 	
 	select ( nTable )
 	skip

@@ -1,6 +1,6 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
-static LEN_IT_NO := 5
+static LEN_IT_NO := 7
 static LEN_DESC := 70
 
 static LEN_QTTY := 12
@@ -126,13 +126,27 @@ do while !EOF()
 	// proizvod, naziv robe, jmj
 	?? aArt_desc[1]
 	
-	?? " "
+	
+	if field->doc_it_heigh == 0 .and. !EMPTY(field->doc_it_desc)
+		
+		// prikazi opis stavke
+		?? " "
 
-	?? show_number(field->doc_it_heigh, PIC_DIMENSION)
+		?? PADC(ALLTRIM(field->doc_it_desc), ; 
+			LEN_DIMENSION + LEN_DIMENSION + 1 )
+		
+	else
+		// prikazi prave dimenzije
+	
+		?? " "
+	
+		?? show_number(field->doc_it_heigh, PIC_DIMENSION)
 
-	?? " "
+		?? " "
 
-	?? show_number(field->doc_it_width, PIC_DIMENSION)
+		?? show_number(field->doc_it_width, PIC_DIMENSION)
+	
+	endif
 	
 	?? " "
 
@@ -164,6 +178,17 @@ do while !EOF()
 		
 	endif
 
+	// ako je shema u prilogu
+	if field->doc_it_schema <> ""
+	
+		? RAZMAK
+		?? PADL("", LEN_IT_NO)
+		?? " "
+	
+		// shema
+		?? "napomena: shema u prilogu"
+	endif
+	
 	// dodatne operacije operacije....
 	
 	select t_docop
@@ -180,7 +205,7 @@ do while !EOF()
 
 		?? " "
 		
-		?? "OPERACIJA -> "
+		?? "d.operacija ---> "
 
 		?? " "
 		
@@ -365,7 +390,7 @@ cLine := g_line()
 ? cLine
 
 cRow1 := RAZMAK 
-cRow1 += PADC("r.br", LEN_IT_NO + 1) 
+cRow1 += PADC("r.br", LEN_IT_NO) 
 cRow1 += " " + PADR("artikal/naziv", LEN_DESC)
 cRow1 += " " + PADC("sirina(mm)", LEN_DIMENSION)
 cRow1 += " " + PADC("visina(mm)", LEN_DIMENSION)
@@ -418,7 +443,7 @@ static function g_line()
 local cLine
 
 cLine := RAZMAK
-cLine += REPLICATE("-", LEN_IT_NO + 1) 
+cLine += REPLICATE("-", LEN_IT_NO ) 
 cLine += " " + REPLICATE("-", LEN_DESC)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
@@ -511,7 +536,7 @@ cPom := "Kontakti: "
 p_line( cRazmak + cPom, 12, .f.)
 
 // ime, telefon, opis
-cPom := ALLTRIM(cCont_desc) + ", " + ALLTRIM("tel: " + cCont_tel) + ", " + ALLTRIM(cCont_add_desc) + ", " + ALLTRIM(cContadesc)
+cPom := ALLTRIM(cCont_desc) + " (" + ALLTRIM(cContadesc) + "), " + ALLTRIM("tel: " + cCont_tel) + ", " + ALLTRIM(cCont_add_desc)
 p_line( cRazmak + SPACE(1) + cPom, 12, .f. )
 
 ?
