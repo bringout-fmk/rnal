@@ -15,8 +15,9 @@ static __item_no
 function e_doc_ops( nDoc_no, lNew, nItem_no )
 local nX := m_x
 local nY := m_y
-local nGetBoxX := 10
+local nGetBoxX := 12
 local nGetBoxY := 70
+local cBoxNaz := "unos dodatnih operacija stavke"
 local nRet := 0
 local nFuncRet := 0
 private GetList:={}
@@ -34,11 +35,18 @@ endif
 
 l_new_ops := lNew
 
+if l_new_ops == .f.
+	cBoxNaz := "ispravka dodatne operacije stavke"
+endif
+
 select _doc_ops
 
 UsTipke()
 
 Box(, nGetBoxX, nGetBoxY, .f., "Unos dodatnih operacija naloga")
+
+@ m_x + 1, m_y + 2 SAY PADL("***** " + cBoxNaz, nGetBoxY - 2)
+@ m_x + nGetBoxX, m_y + 2 SAY PADL("(*) popuna nije obavezna", nGetBoxY - 2)
 
 Scatter()
 
@@ -87,15 +95,28 @@ local nX := 1
 local nLeft := 22
 
 if l_new_ops
+
 	_doc_no := _doc
 	_doc_op_no := inc_docop( _doc )
+	_aop_id := 0
+	_aop_att_id := 0
+	_doc_op_desc := PADR("", LEN(_doc_op_desc))
+	
 endif
 
 _doc_it_no := __item_no
 
-nX += 1
+nX += 2
 
 @ m_x + nX, m_y + 2 SAY PADL("r.br stavke:", nLeft) GET _doc_op_no 
+
+if __item_no == 0
+
+	nX += 2
+
+	@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku:", nLeft) GET _doc_it_no VALID show_it( g_item_desc( _doc_it_no ) )
+
+endif
 
 nX += 2
 
@@ -103,15 +124,11 @@ nX += 2
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("atr.d.operacije:", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att(@_aop_att_id, _aop_id ), show_it(g_aop_att_desc( _aop_att_id )) }
+@ m_x + nX, m_y + 2 SAY PADL("atr.d.operacije (*):", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att(@_aop_att_id, _aop_id ), show_it(g_aop_att_desc( _aop_att_id )) }
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku:", nLeft) GET _doc_it_no VALID show_it( g_item_desc( _doc_it_no ) )
-
-nX += 2
-
-@ m_x + nX, m_y + 2 SAY PADL("dodatni opis:", nLeft) GET _doc_op_desc PICT "@S40"
+@ m_x + nX, m_y + 2 SAY PADL("dodatni opis (*):", nLeft) GET _doc_op_desc PICT "@S40"
 
 
 read

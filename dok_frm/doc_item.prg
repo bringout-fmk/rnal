@@ -14,8 +14,9 @@ static _doc
 function e_doc_item( nDoc_no, lNew )
 local nX := m_x
 local nY := m_y
-local nGetBoxX := 13
+local nGetBoxX := 15
 local nGetBoxY := 70
+local cBoxNaz := "unos nove stavke"
 local nRet := 0
 local nFuncRet := 0
 local cGetDOper := "N"
@@ -29,11 +30,20 @@ endif
 
 l_new_it := lNew
 
+if l_new_it == .f.
+	cBoxNaz := "ispravka stavke"
+endif
+
+
 select _doc_it
 
 UsTipke()
 
 Box(, nGetBoxX, nGetBoxY, .f., "Unos stavki naloga")
+
+// say top, bottom
+@ m_x + 1, m_y + 2 SAY PADL("***** " + cBoxNaz , nGetBoxY - 2)
+@ m_x + nGetBoxX, m_y + 2 SAY PADL("(*) popuna nije obavezna", nGetBoxY - 2)
 
 Scatter()
 
@@ -92,18 +102,23 @@ local nLeft := 20
 cGetDOper := "N"
 
 if l_new_it
+	
 	_doc_no := _doc
 	_doc_it_no := inc_docit( _doc )
-	_doc_it_schema := "N"
+	
+	if _doc_it_schema == " "
+		_doc_it_schema := "N"
+	endif
+	
 endif
 
-nX += 1
+nX += 2
 
 @ m_x + nX, m_y + 2 SAY PADL("r.br stavke", nLeft) GET _doc_it_no 
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL:", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .t. ), show_it( g_art_desc( _art_id ) + ".." , 30 ) }
+@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL:", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .t. ), show_it( g_art_desc( _art_id ) + ".." , 35 ) }
 
 nX += 2
 
@@ -111,7 +126,7 @@ nX += 2
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("dod.napomene:", nLeft) GET _doc_it_desc PICT "@S40"
+@ m_x + nX, m_y + 2 SAY PADL("dod.nap.stavke (*):", nLeft) GET _doc_it_desc PICT "@S40"
 
 nX += 2
 
@@ -123,11 +138,11 @@ nX += 1
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("kolicina:", nLeft + 3) GET _doc_it_qtty PICT "99999" VALID val_qtty(_doc_it_qtty)
+@ m_x + nX, m_y + 2 SAY PADL("kolicina (kom):", nLeft + 3) GET _doc_it_qtty PICT "99999" VALID val_qtty(_doc_it_qtty)
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("unesi d.oper.stavke:", nLeft + 6) GET cGetDOper PICT "@!" VALID cGetDOper $ "DN"
+@ m_x + nX, m_y + 2 SAY PADL("unesi dod.oper.stavke (D/N):", nLeft + 6) GET cGetDOper PICT "@!" VALID cGetDOper $ "DN"
 
 read
 

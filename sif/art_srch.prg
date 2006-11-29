@@ -102,7 +102,8 @@ do while !EOF()
 			loop
 		endif
 	
-		if ALLTRIM(field->fnd_par_type) == "ATT"
+		// ako je ATT i nije prazan fnd_val
+		if ALLTRIM(field->fnd_par_type) == "ATT" .and. !EMPTY(field->fnd_val)
 			
 			nSeekAtt := ASCAN(aEl, { |xVal| STR(xVal[5]) + STR(xVal[6]) == STR(VAL(field->fnd_att)) + STR(VAL(field->fnd_val)) .and. ALLTRIM(xVal[2]) == "ATT" })
 			if nSeekAtt == 0
@@ -114,7 +115,8 @@ do while !EOF()
 			
 		endif
 		
-		if ALLTRIM(field->fnd_par_type) == "AOP"
+		// ako je AOP i nije prazan fnd_val
+		if ALLTRIM(field->fnd_par_type) == "AOP" .and. !EMPTY(field->fnd_val)
 			
 			nSeekAop := ASCAN(aEl, { |xVal| xVal[5] == VAL(field->fnd_att) .and. xVal[2] = "AOP" })
 			

@@ -563,7 +563,7 @@ Box(,6,65)
 	
 	@ m_x + 3, m_y + 2 SAY PADL("dodatna operacija", nLeft) GET _aop_id VALID {|| s_aops(@_aop_id), show_it( g_aop_desc( _aop_id ) ) }
 		
-	@ m_x + 4, m_y + 2 SAY PADL("atribut operacije", nLeft) GET _aop_att_id VALID {|| s_aops_att( @_aop_att_id, _aop_id ), show_it( g_aop_att_desc( _aop_att_id ) )  }
+	@ m_x + 4, m_y + 2 SAY PADL("atribut operacije", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att( @_aop_att_id, _aop_id ), show_it( g_aop_att_desc( _aop_att_id ) )  }
 	
 	read
 BoxC()
