@@ -436,7 +436,6 @@ do while !EOF() .and. field->art_id == nArt_id
 			if cE_gr_val $ "kupac#narucioc"
 			
 				cArt_desc += "(" + cE_gr_val + ")"
-				cArt_desc += " "
 				cArt_mcode += UPPER(LEFT(cE_gr_val, 3))
 				
 			endif
@@ -465,14 +464,14 @@ do while !EOF() .and. field->art_id == nArt_id
 		cAop_att_desc := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
 
 		if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
-			cArt_desc += cAop_desc 
 			cArt_desc += " "
+			cArt_desc += cAop_desc 
 			cArt_mcode += UPPER(LEFT(cAop_desc, 3))
 		endif
 
 		if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
-			cArt_desc += cAop_att_desc
 			cArt_desc += " "
+			cArt_desc += cAop_att_desc
 		endif
 
 		skip
