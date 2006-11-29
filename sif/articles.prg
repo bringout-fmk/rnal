@@ -15,6 +15,7 @@ function s_articles(cId, lAutoFind)
 local nTArea
 local cHeader
 local cFooter
+local cOptions := ""
 local GetList:={}
 private ImeKol
 private Kol
@@ -64,9 +65,14 @@ if l_open_dbedit
 	
 	set_a_kol(@ImeKol, @Kol)
 
+	cOptions += "<c-N> novi |"
+	cOptions += "<c-T> brisi |"
+	cOptions += "<F2> ispravi |"
+	cOptions += "<F4> dupliciraj"
+
 	Box(, 16, 77, .t.)
 	
-	@ m_x + 16, m_y + 2 SAY "<c-N> Novi | <c-T> Brisi | <F2> Ispravi ..."
+	@ m_x + 16, m_y + 2 SAY cOptions
 
 	ObjDbedit(, 16, 77, {|| key_handler(Ch)}, cHeader, cFooter , .t.,,,,1)
 
