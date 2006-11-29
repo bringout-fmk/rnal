@@ -131,7 +131,6 @@ do case
 		select articles
 		set filter to
 		set relation to
-		nTRec := RECNO()
 		
 		_set_sif_id(@nArt_id, "ART_ID")
 		
@@ -144,7 +143,7 @@ do case
 		endif
 		
 		select articles
-		go (nTRec)
+		go bottom
 		
 		return DE_REFRESH
 		
@@ -163,7 +162,26 @@ do case
 		go (nTRec)
 		
 		return DE_CONT
+	
+	case Ch == K_F4
+
+		// dupliciranje (kloniranje) artikla....
+		select articles
+
+		nArt_new := clone_article( articles->art_id ) 
 		
+		if nArt_new > 0 .and. s_elements( nArt_new, .t. ) == 1
+		
+			select articles
+			go (nTRec)
+		
+			return DE_REFRESH
+		endif
+		
+		select articles
+		go (nTRec)
+		return DE_REFRESH
+	
 	case Ch == K_CTRL_T
 
 		if art_delete( field->art_id, .t. ) == 1
@@ -252,6 +270,7 @@ endif
 select (nTArea)
 
 return cArtDesc
+
 
 
 // -------------------------------------------------------
@@ -343,6 +362,146 @@ select articles
 
 return 1
 
+// ----------------------------------------------
+// kloniranje artikla
+// ----------------------------------------------
+static function clone_article( nArt_id )
+local nArtNewid
+local nElRecno
+local nOldEl_id
+local nElGr_id
+local nElNewid := 0
+
+if Pitanje(, "Duplicirati artikal (D/N)?", "D") == "N"
+	return -1
+endif
+
+select articles
+
+_set_sif_id( @nArtNewid, "ART_ID" )
+
+altd()
+
+
+// ELEMENTS
+select elements
+set order to tag "1"
+go top
+seek artid_str( nArt_id ) 
+
+do while !EOF() .and. field->art_id == nArt_id
+
+	nOldEl_id := field->el_id
+	nElGr_id := field->e_gr_id
+
+	skip 1
+	nElRecno := RECNO()
+	skip -1
+	
+	// daj mi novi element
+	_set_sif_id( @nElNewid, "EL_ID" )
+	
+	Scatter("w")
+	
+	wart_id := nArtNewid
+	we_gr_id := nElGr_id
+	
+	Gather("w")
+
+	// atributi...
+	_clone_att( nOldEl_id, nElNewid )
+
+	// operacije...
+	_clone_aops( nOldEl_id, nElNewid )
+
+	select elements
+	go (nElRecno)
+	
+enddo
+
+return nArtNewid
+
+
+// ------------------------------------------------
+// kloniranje atributa prema elementu
+// nOldEl_id - stari element id
+// nNewEl_id - novi element id
+// ------------------------------------------------
+static function _clone_att( nOldEl_id, nNewEl_id )
+local nElRecno
+local nNewAttId
+
+select e_att
+set order to tag "1"
+go top
+
+seek elid_str( nOldEl_id )
+
+do while !EOF() .and. field->el_id == nOldEl_id
+	
+	skip 1
+	nElRecno := RECNO()
+	skip -1
+	
+	Scatter("w")
+	
+	_set_sif_id( @nNewAttId, "EL_ATT_ID" )
+	
+	Scatter()
+
+	wel_att_id := nNewAttId
+	wel_id := nNewEl_id
+	
+	Gather("w")
+	
+	select e_att
+	go (nElRecno)
+	
+enddo
+
+return
+
+
+// ------------------------------------------------
+// kloniranje operacija prema elementu
+// nOldEl_id - stari element id
+// nNewEl_id - novi element id
+// ------------------------------------------------
+static function _clone_aops( nOldEl_id, nNewEl_id )
+local nElRecno
+local nNewAopId
+
+select e_aops
+set order to tag "1"
+go top
+
+seek elid_str( nOldEl_id )
+
+do while !EOF() .and. field->el_id == nOldEl_id
+	
+	skip 1
+	nElRecno := RECNO()
+	skip -1
+	
+	Scatter("w")
+	
+	_set_sif_id( @nNewAopId, "EL_OP_ID" )
+	
+	Scatter()
+	
+	wel_op_id := nNewAopid
+	wel_id := nNewEl_id
+	
+	Gather("w")
+	
+	select e_aops
+	go (nElRecno)
+	
+enddo
+
+return
+
+
 
 
 // ----------------------------------------------
@@ -388,8 +547,8 @@ do while !EOF() .and. field->art_id == nArt_id
 	endif
 
 	// grupa_naziv, npr: staklo
-	cArt_desc += ALLTRIM( g_e_gr_desc( nEl_gr_id) )
-	cArt_desc += " "
+	
+	__add_to_str( @cArt_desc, ALLTRIM( g_e_gr_desc(nEl_gr_id) ))
 
 	// predji na atribute elemenata...
 	select e_att
@@ -411,20 +570,19 @@ do while !EOF() .and. field->art_id == nArt_id
 		if "tip" $ cE_gr_att .or.  ;
 			"deblj" $ cE_gr_att
 	
-			cArt_desc += cE_gr_val
+			__add_to_str( @cArt_desc, cE_gr_val )
 			
 			if "tip" $ cE_gr_att
-				cArt_mcode += UPPER(LEFT(cE_gr_val, 3))
+				__add_to_str( @cArt_mcode, ;
+					UPPER( LEFT(cE_gr_val, 2) ) )
 			endif
 			
 			if "deblj" $ cE_gr_att
 			
-				cArt_desc += "mm"
-				cArt_mcode += cE_gr_val
+				__add_to_str( @cArt_desc, "mm" )
+				__add_to_str( @cArt_mcode, cE_gr_val )
 				
 			endif
-		
-			cArt_desc += " "
 		
 			lE_Att := .t.
 			
@@ -435,8 +593,11 @@ do while !EOF() .and. field->art_id == nArt_id
 		
 			if cE_gr_val $ "kupac#narucioc"
 			
-				cArt_desc += "(" + cE_gr_val + ")"
-				cArt_mcode += UPPER(LEFT(cE_gr_val, 3))
+				__add_to_str( @cArt_desc, ;
+					"(" + cE_gr_val + ")" )
+				
+				__add_to_str( @cArt_mcode, ;
+					UPPER(LEFT(cE_gr_val, 2)) )
 				
 			endif
 			
@@ -464,14 +625,17 @@ do while !EOF() .and. field->art_id == nArt_id
 		cAop_att_desc := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
 
 		if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
-			cArt_desc += " "
-			cArt_desc += cAop_desc 
-			cArt_mcode += UPPER(LEFT(cAop_desc, 3))
+			
+			__add_to_str( @cArt_desc, cAop_desc )
+			__add_to_str( @cArt_mcode, ;
+				UPPER(LEFT(cAop_desc, 2)))
+		
 		endif
 
 		if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
-			cArt_desc += " "
-			cArt_desc += cAop_att_desc
+			
+			__add_to_str( @cArt_desc, cAop_att_desc )
+			
 		endif
 
 		skip
@@ -522,6 +686,24 @@ endif
 return 0
 
 
+// ------------------------------------------------
+// dodaj na string cStr string cAdd
+// ------------------------------------------------
+static function __add_to_str( cStr, cAdd )
+local cSpace := SPACE(1)
+
+if EMPTY(cStr)
+	cSpace := ""
+endif
+
+if RIGHT(cStr, 1) <> " "
+	cStr += cSpace + cAdd
+endif
+
+return
+
+
+
 // ------------------------------------------------------
 // box za unos naziva artikla i match_code-a
 // ------------------------------------------------------
@@ -540,7 +722,7 @@ Box(, 4, 70)
 	
 BoxC()
 
-ESC_RETURN 0
+ESC_RETURN 1
 
 return 1
 
@@ -559,7 +741,7 @@ return STR(3,1)
 // aElem - matrica sa elementima
 // nArt_id - id artikla
 // 
-// aElem = { tip, naz, mc, e_gr_at_id, e_gr_vl_id }
+// aElem = { el_id, tip, naz, mc, e_gr_at_id, e_gr_vl_id }
 // ------------------------------------------------
 function _fill_a_article(aElem, nArt_id)
 local nTArea := SELECT()
@@ -585,32 +767,39 @@ set order to tag "1"
 go top
 seek elid_str( nArt_id )
 
-nEl_id := field->el_id
-	
-// atributi
-select e_att
-set order to tag "1"
-go top
-seek artid_str( nEl_id )
-	
-do while !EOF() .and. field->el_id == nEl_id
+do while !EOF() .and. field->art_id == nArt_id
 
-	AADD(aElem, { "ATT",  cArt_desc, cArt_mc, field->e_gr_at_id, field->e_gr_vl_id })
+	nEl_id := field->el_id
+
+	// atributi
+	select e_att
+	set order to tag "1"
+	go top
+	seek artid_str( nEl_id )
+	
+	do while !EOF() .and. field->el_id == nEl_id
+
+		AADD(aElem, { field->el_id, "ATT",  cArt_desc, cArt_mc, field->e_gr_at_id, field->e_gr_vl_id })
+		skip
+
+	enddo
+	
+	// operacije
+	select e_aops
+	set order to tag "1"
+	go top
+	seek artid_str( nEl_id )
+
+	do while !EOF() .and. field->el_id == nEl_id
+		AADD(aElem, { field->el_id, "AOP",  cArt_desc, cArt_mc, field->aop_id, field->aop_att_id })
+		skip
+	enddo
+	
+	select elements
 	skip
-
-enddo
 	
-// operacije
-select e_aops
-set order to tag "1"
-go top
-seek artid_str( nEl_id )
-
-do while !EOF() .and. field->el_id == nEl_id
-	AADD(aElem, { "AOP",  cArt_desc, cArt_mc, field->aop_id, field->aop_att_id })
-	skip
 enddo
-	
+
 select (nTArea)
 return
 

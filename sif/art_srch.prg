@@ -104,7 +104,7 @@ do while !EOF()
 	
 		if ALLTRIM(field->fnd_par_type) == "ATT"
 			
-			nSeekAtt := ASCAN(aEl, { |xVal| STR(xVal[4]) + STR(xVal[5]) == STR(VAL(field->fnd_att)) + STR(VAL(field->fnd_val)) .and. ALLTRIM(xVal[1]) == "ATT" })
+			nSeekAtt := ASCAN(aEl, { |xVal| STR(xVal[5]) + STR(xVal[6]) == STR(VAL(field->fnd_att)) + STR(VAL(field->fnd_val)) .and. ALLTRIM(xVal[2]) == "ATT" })
 			if nSeekAtt == 0
 				// izadji jer nisi pronasao...
 				lFoundAtt := .f.
@@ -116,7 +116,7 @@ do while !EOF()
 		
 		if ALLTRIM(field->fnd_par_type) == "AOP"
 			
-			nSeekAop := ASCAN(aEl, { |xVal| xVal[4] == VAL(field->fnd_att) .and. xVal[1] = "AOP" })
+			nSeekAop := ASCAN(aEl, { |xVal| xVal[5] == VAL(field->fnd_att) .and. xVal[2] = "AOP" })
 			
 			if nSeekAop == 0
 				// izadji jer nisi pronasao...

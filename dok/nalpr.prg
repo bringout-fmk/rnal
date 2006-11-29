@@ -126,27 +126,13 @@ do while !EOF()
 	// proizvod, naziv robe, jmj
 	?? aArt_desc[1]
 	
+	?? " "
 	
-	if field->doc_it_heigh == 0 .and. !EMPTY(field->doc_it_desc)
-		
-		// prikazi opis stavke
-		?? " "
+	?? show_number(field->doc_it_heigh, PIC_DIMENSION)
 
-		?? PADC(ALLTRIM(field->doc_it_desc), ; 
-			LEN_DIMENSION + LEN_DIMENSION + 1 )
-		
-	else
-		// prikazi prave dimenzije
-	
-		?? " "
-	
-		?? show_number(field->doc_it_heigh, PIC_DIMENSION)
+	?? " "
 
-		?? " "
-
-		?? show_number(field->doc_it_width, PIC_DIMENSION)
-	
-	endif
+	?? show_number(field->doc_it_width, PIC_DIMENSION)
 	
 	?? " "
 
@@ -164,9 +150,13 @@ do while !EOF()
 	if LEN(aArt_desc) > 1
 		
 		for i:=2 to LEN(aArt_desc)
+		
 			? RAZMAK
+			
 			?? PADL("", LEN_IT_NO)
-			?? ""
+			
+			?? " "
+			
 			?? aArt_desc[i]
 		
 			// provjeri za novu stranicu
@@ -178,18 +168,45 @@ do while !EOF()
 		
 	endif
 
+	// napomene stavke:
+	if !EMPTY(field->doc_it_desc)
+	
+		aDoc_it_desc := SjeciStr(ALLTRIM(field->doc_it_desc), 70)
+		
+		? 
+		
+		for i:=1 to LEN(aDoc_it_desc)
+						
+			? RAZMAK
+
+			?? PADL("", LEN_IT_NO)
+
+			?? " "
+			
+			?? aDoc_it_desc[i]
+		next
+		
+	endif
+
 	// ako je shema u prilogu
 	if field->doc_it_schema <> ""
 	
+		?
+
 		? RAZMAK
+		
 		?? PADL("", LEN_IT_NO)
+		
 		?? " "
 	
 		// shema
 		?? "napomena: shema u prilogu"
+		
 	endif
 	
 	// dodatne operacije operacije....
+	
+	?
 	
 	select t_docop
 	set order to tag "1"
