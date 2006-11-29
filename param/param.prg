@@ -281,9 +281,9 @@ return
 // --------------------------------------
 function read_zf_params()
 
-gPIC_VAL := "9999999.99"
-gPIC_DIM := "9999999.99"
-gPIC_QTTY := "9999999999"
+gPIC_VAL := "9999.99"
+gPIC_DIM := "9999.99"
+gPIC_QTTY := "99999"
 
 SELECT F_KPARAMS
 

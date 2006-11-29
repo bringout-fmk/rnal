@@ -130,7 +130,13 @@ local nTArea := SELECT()
 local cHeader
 local cFooter
 
-cFooter := "<TAB> browse tabela |<c+N> nova stavka..."
+cFooter := "<TAB> brow.tab "
+cFooter += "<c-N> nova "
+cFooter += "<c-T> brisi "
+cFooter += "<F2> ispravka "
+cFooter += "<c-P> stampa "
+cFooter += "<a-A> azur."
+
 
 cHeader := "dok.broj: "
 cHeader += doc_str( _doc )
