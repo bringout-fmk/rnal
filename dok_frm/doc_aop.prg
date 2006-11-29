@@ -4,14 +4,15 @@
 
 static l_new_ops
 static _doc
-
+static __item_no
 
 // ------------------------------------------
 // unos ispravka operacija naloga
 // nDoc_no - dokument broj
 // lNew - nova stavka .t. or .f.
+// nItem_no - stavka broj
 // ------------------------------------------
-function e_doc_ops( nDoc_no, lNew )
+function e_doc_ops( nDoc_no, lNew, nItem_no )
 local nX := m_x
 local nY := m_y
 local nGetBoxX := 10
@@ -20,7 +21,12 @@ local nRet := 0
 local nFuncRet := 0
 private GetList:={}
 
+if nItem_no == nil
+	nItem_no := 0
+endif
+
 _doc := nDoc_no
+__item_no := nItem_no
 
 if lNew == nil
 	lNew := .t.
@@ -85,13 +91,13 @@ if l_new_ops
 	_doc_op_no := inc_docop( _doc )
 endif
 
+_doc_it_no := __item_no
+
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("r.br stavke:", nLeft) GET _doc_op_no 
 
-
 nX += 2
-
 
 @ m_x + nX, m_y + 2 SAY PADL("d.operacija:", nLeft) GET _aop_id VALID {|| s_aops( @_aop_id ), show_it( g_aop_desc( _aop_id )) }
 
@@ -113,6 +119,7 @@ read
 ESC_RETURN 0
 
 return 1
+
 
 // --------------------------------------------
 // vrati opis odnosi se na stavku

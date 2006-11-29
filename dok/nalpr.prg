@@ -189,7 +189,7 @@ do while !EOF()
 	endif
 
 	// ako je shema u prilogu
-	if field->doc_it_schema <> ""
+	if field->doc_it_schema == "D"
 	
 		?
 
@@ -200,7 +200,7 @@ do while !EOF()
 		?? " "
 	
 		// shema
-		?? "napomena: shema u prilogu"
+		?? "Napomena: (SHEMA U PRILOGU)"
 		
 	endif
 	

@@ -52,7 +52,7 @@ Box(, 20, 77)
 _set_box()
 
 select docs
-set order to tag "1"
+set order to tag "2"
 go top
 
 set_a_kol(@ImeKol, @Kol)
@@ -206,7 +206,7 @@ return cFilter
 // ------------------------------------------------
 static function set_f_kol(cFilter)
 select docs
-set order to tag "1"
+set order to tag "2"
 set filter to &cFilter
 set relation to cust_id into customs
 go top

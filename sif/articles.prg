@@ -143,7 +143,8 @@ do case
 		if s_elements( nArt_id, .t. ) == 1
 			
 			select articles
-			go (nTRec)
+			go bottom
+			
 			return DE_REFRESH
 			
 		endif
@@ -383,11 +384,10 @@ if Pitanje(, "Duplicirati artikal (D/N)?", "D") == "N"
 endif
 
 select articles
+set filter to
+set relation to
 
 _set_sif_id( @nArtNewid, "ART_ID" )
-
-altd()
-
 
 // ELEMENTS
 select elements
@@ -549,7 +549,7 @@ do while !EOF() .and. field->art_id == nArt_id
 	nEl_gr_id := field->e_gr_id
 	
 	if nCount > 0
-		cArt_desc += ";"
+		__add_to_str( @cArt_desc, ";", .t. )
 	endif
 
 	// grupa_naziv, npr: staklo
@@ -580,13 +580,13 @@ do while !EOF() .and. field->art_id == nArt_id
 			
 			if "tip" $ cE_gr_att
 				__add_to_str( @cArt_mcode, ;
-					UPPER( LEFT(cE_gr_val, 2) ) )
+					UPPER( LEFT(cE_gr_val, 2) ) , .t.)
 			endif
 			
 			if "deblj" $ cE_gr_att
 			
 				__add_to_str( @cArt_desc, "mm" )
-				__add_to_str( @cArt_mcode, cE_gr_val )
+				__add_to_str( @cArt_mcode, cE_gr_val, .t. )
 				
 			endif
 		
@@ -601,9 +601,6 @@ do while !EOF() .and. field->art_id == nArt_id
 			
 				__add_to_str( @cArt_desc, ;
 					"(" + cE_gr_val + ")" )
-				
-				__add_to_str( @cArt_mcode, ;
-					UPPER(LEFT(cE_gr_val, 2)) )
 				
 			endif
 			
@@ -633,8 +630,9 @@ do while !EOF() .and. field->art_id == nArt_id
 		if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
 			
 			__add_to_str( @cArt_desc, cAop_desc )
+			
 			__add_to_str( @cArt_mcode, ;
-				UPPER(LEFT(cAop_desc, 2)))
+				UPPER(LEFT(cAop_desc, 1)), .t.)
 		
 		endif
 
@@ -694,17 +692,22 @@ return 0
 
 // ------------------------------------------------
 // dodaj na string cStr string cAdd
+// cStr - po referenci string na koji se stikla
+// cAdd - dodatak za string
+// lNoSpace - .t. - nema razmaka
 // ------------------------------------------------
-static function __add_to_str( cStr, cAdd )
+static function __add_to_str( cStr, cAdd, lNoSpace )
 local cSpace := SPACE(1)
 
-if EMPTY(cStr)
+if lNoSpace == nil
+	lNoSpace := .f.
+endif
+
+if EMPTY(cStr) .or. lNoSpace == .t.
 	cSpace := ""
 endif
 
-if RIGHT(cStr, 1) <> " "
-	cStr += cSpace + cAdd
-endif
+cStr += cSpace + cAdd
 
 return
 

@@ -152,11 +152,11 @@ function s_priority( _doc_prior )
 local xRet := ""
 do case
 	case _doc_prior == 1
-		xRet := "LOW"
+		xRet := "HIGH"
 	case _doc_prior == 2
 		xRet := "NORMAL"
 	case _doc_prior == 3
-		xRet := "HIGH"
+		xRet := "LOW"
 endcase
 return xRet
 

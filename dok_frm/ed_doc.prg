@@ -339,6 +339,13 @@ do case
 		
 		if ALIAS() == "_DOCS"
 		
+			if _docs->doc_status == 3
+			
+				MsgBeep("Ispravka osnovnih podataka onemogucena kod dorade#Opcija promjena sluzi u tu svrhu !!!")
+				return DE_CONT
+				
+			endif
+			
 			if e_doc_main_data( .f. ) == 1
 			
 				select _docs

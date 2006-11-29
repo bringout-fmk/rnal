@@ -14,10 +14,11 @@ static _doc
 function e_doc_item( nDoc_no, lNew )
 local nX := m_x
 local nY := m_y
-local nGetBoxX := 11
+local nGetBoxX := 13
 local nGetBoxY := 70
 local nRet := 0
 local nFuncRet := 0
+local cGetDOper := "N"
 private GetList:={}
 
 _doc := nDoc_no
@@ -38,7 +39,7 @@ Scatter()
 
 do while .t.
 
-	nFuncRet := _e_box_item( nGetBoxX, nGetBoxY )
+	nFuncRet := _e_box_item( nGetBoxX, nGetBoxY, @cGetDOper )
 	
 	if nFuncRet == 1
 		
@@ -49,6 +50,13 @@ do while .t.
 		endif
 		
 		Gather()
+		
+		if cGetDOper == "D"
+			
+			e_doc_ops( _doc, lNew, _doc_it->doc_it_no )
+			select _doc_it
+			
+		endif
 		
 		if l_new_it
 			loop
@@ -75,10 +83,13 @@ return nRet
 
 // -------------------------------------------------
 // forma za unos podataka 
+// cGetDOper , D - unesi dodatne operacije...
 // -------------------------------------------------
-static function _e_box_item( nBoxX, nBoxY )
+static function _e_box_item( nBoxX, nBoxY, cGetDOper )
 local nX := 1
 local nLeft := 20
+
+cGetDOper := "N"
 
 if l_new_it
 	_doc_no := _doc
@@ -114,6 +125,9 @@ nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("kolicina:", nLeft + 3) GET _doc_it_qtty PICT "99999" VALID val_qtty(_doc_it_qtty)
 
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("unesi d.oper.stavke:", nLeft + 6) GET cGetDOper PICT "@!" VALID cGetDOper $ "DN"
 
 read
 

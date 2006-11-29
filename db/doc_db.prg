@@ -583,19 +583,13 @@ select _docs
 set order to tag "1"
 go top
 
-// ako je u pripremi isti broj naloga
-if ( field->doc_no == nDoc_no )
-	// nemam sta raditi nista se nije mjenjalo...
-	return 
-endif
-
 Scatter()
 _doc_no := nDoc_no
 Gather()
-	
 
 // _DOC_IT
 select _doc_it
+set order to tag "1"
 go top
 do while !EOF()
 	
@@ -610,8 +604,9 @@ do while !EOF()
 	go (nAPPRec)
 enddo
 
-// _DOC_OP
+// _DOC_OPS
 select _doc_ops
+set order to tag "1"
 go top
 do while !EOF()
 	
