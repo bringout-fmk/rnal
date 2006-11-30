@@ -120,6 +120,7 @@ do case
 	case l_auto_find == .t.
 
 		pick_articles()
+		
 		l_auto_find := .f.
 		
 		Tb:RefreshAll()
@@ -141,9 +142,6 @@ do case
 		_set_sif_id(@nArt_id, "ART_ID")
 		
 		if s_elements( nArt_id, .t. ) == 1
-			
-			select articles
-			go bottom
 			
 			return DE_REFRESH
 			

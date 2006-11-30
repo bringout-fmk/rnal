@@ -81,7 +81,6 @@ do while .t.
 	
 	endif
 	
-	
 	ObjDbedit("elem", nX, nY, {|Ch| elem_hand(Ch)}, "", "",,,,,1)
 
 	if ALIAS() == "ELEMENTS"
@@ -90,16 +89,13 @@ do while .t.
 
 	if LastKey() == K_ESC
 	
-		// provjeri req.elements i da li postoji vec artikal...
-		if _chk_req_elements( art_id ) == 1 .or. !_art_elem_exist()
-		
-			// generisi naziv artikla i update-uj
-			select articles
-			nRet := _art_set_descr( art_id, lNew )
-			go top
+		// generisi naziv artikla i update-uj artikal art_id
+		select articles
+		nRet := _art_set_descr( art_id, lNew )
+		select articles
+		go bottom
 
-			exit
-		endif
+		exit
 		
 	endif
 
@@ -112,11 +108,57 @@ return nRet
 
 
 // ------------------------------------------------------
-// provjeri da li artikal posjeduje required elemente
+// provjeri da li su svi atributi elementa uneseni...
 // vraca 0 ili 1
 // ------------------------------------------------------
-static function _chk_req_elements( art_id )
+static function _chk_elements( nArt_id )
 local nRet := 1
+local nTArea := SELECT()
+local nEl_id := 0
+
+select elements
+set order to tag "1"
+go top
+seek artid_str( art_id )
+
+do while !EOF() .and. field->art_id == nArt_id
+	
+	nEl_id := field->el_id
+
+	select e_att
+	set order to tag "1"
+	go top
+	seek elid_str( nEl_id )
+
+	do while !EOF() .and. field->el_id == nEl_id
+		
+		// ako postoji vrijednost ok
+		if field->e_gr_vl_id <> 0
+		
+			select e_att
+			skip
+			loop
+			
+		endif
+	
+		// inace izbaci da nije sve ok.
+		
+		nRet := 0
+		
+		MsgBeep("Atribut: '" + ;
+			ALLTRIM(g_gr_at_desc(field->e_gr_at_id)) + ;
+			"' nije definisan !!!" )
+		
+		select (nTArea)
+		return nRet
+	
+	enddo
+
+	select elements
+	skip
+enddo
+
+select (nTArea)
 return nRet
 
 
@@ -125,7 +167,7 @@ return nRet
 // provjerava da li vec postoji isti artikal sa istim elementima
 // vraca .t. ili .f.
 // ----------------------------------------------------------------
-static function _art_elem_exist()
+static function _art_exist()
 local lRet := .f.
 return lRet
 
@@ -135,7 +177,6 @@ return lRet
 // automatski pozovi TAB
 // ------------------------------------
 static function auto_tab()
-altd()
 if l_auto_tab == .t.
 	KEYBOARD K_TAB
 	l_auto_tab := .f.
@@ -259,6 +300,17 @@ do case
 		KEYBOARD CHR(K_TAB)
 		l_auto_tab := .f.
 		return DE_REFRESH
+	
+	case Ch == K_ESC
+		
+		// na izlazu provjeri da li su svi elementi ok... 
+		// ako nisu ne izlazi iz elemenata... nastavi rad
+	
+		if _chk_elements( art_id ) <> 1
+			
+			return DE_REFRESH
+			
+		endif
 		
 	case Ch == K_TAB
 		
@@ -272,8 +324,10 @@ do case
 		elseif ALIAS() == "ELEMENTS"
 			
 			if field->el_id == 0
+				
 				MsgBeep("Nema unesenih elemenata !!!!")
 				nRet := DE_CONT
+				
 			else
 			
 				nEl_id := field->el_id
@@ -281,6 +335,7 @@ do case
 			
 				select e_att
 				nRet := DE_ABORT
+				
 			endif
 			
 		elseif ALIAS() == "E_AOPS"
@@ -301,8 +356,6 @@ do case
 			nRet := elem_edit( art_id , .t. )
 			l_auto_tab := .t.
 			set filter to &cTBFilter
-			//go top
-
 			 
 		elseif ALIAS() == "E_ATT"
 
@@ -319,9 +372,10 @@ do case
 	
 		endif
 
-	case Ch == K_F2
+	case Ch == K_F2 .or. Ch == K_ENTER
 	
 		// ispravka stavki
+		
 		cTBFilter := DBFILTER()
 
 		if ALIAS() == "ELEMENTS"
@@ -383,6 +437,13 @@ static function elem_edit( nArt_id, lNewRec )
 local nEl_id := 0
 local nLeft := 20
 private GetList:={}
+
+if !lNewRec .and. field->el_id == 0
+
+	MsgBeep("Stavka ne postoji !!!#Koristite c-N da dodate novu!")
+	return DE_REFRESH
+	
+endif
 
 if lNewRec
 
@@ -482,6 +543,13 @@ local nLeft := 15
 local nEl_att_id := 0
 private GetList:={}
 
+if !lNewRec .and. field->el_id == 0
+
+	MsgBeep("Stavka ne postoji !!!#Koristite c-N da dodate novu!")
+	return DE_REFRESH
+	
+endif
+
 if lNewRec
 
 	_set_sif_id(@nEl_att_id, "EL_ATT_ID")
@@ -537,6 +605,13 @@ static function e_aops_edit( nEl_id, lNewRec )
 local nLeft := 20
 local nEl_op_id := 0
 private GetList:={}
+
+if !lNewRec .and. field->el_id == 0
+
+	Msgbeep("Stavka ne postoji !!!#Koristite c-N da bi dodali novu!")
+	return DE_REFRESH
+	
+endif
 
 if lNewRec
 

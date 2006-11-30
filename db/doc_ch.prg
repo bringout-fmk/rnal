@@ -29,7 +29,7 @@ AADD(opcexe, {|| _ch_cont(.t.) })
 
 Menu_sc("changes")
 
-return DE_CONT
+return
 
 
 

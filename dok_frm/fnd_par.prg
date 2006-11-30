@@ -48,6 +48,7 @@ local nBoxX := 12
 local nBoxY := 77
 local cHeader := ""
 local cFooter := ""
+local cBoxOpt := ""
 private ImeKol
 private Kol
 
@@ -61,7 +62,17 @@ go top
 
 Box(, nBoxX, nBoxY)
 
-@ m_x + nBoxX, m_y + 2 SAY "<c-N> Nova stavka | <c-T> Brisi | <c-F9> Brisi sve"
+cBoxOpt += "<c-N> nova stavka"
+cBoxOpt += " "
+cBoxOpt += "<c-T> brisi"
+cBoxOpt += " "
+cBoxOpt += "<c-F9> brisi sve"
+cBoxOpt += " "
+cBoxOpt += "<a-F> trazi"
+cBoxOpt += " "
+cBoxOpt += "<ESC> izadji"
+
+@ m_x + nBoxX, m_y + 2 SAY cBoxOpt
 
 set_a_kol(@ImeKol, @Kol)
 
@@ -84,6 +95,10 @@ ObjDbedit("fnd_par", nBoxX, nBoxY, {|Ch| key_handler(Ch)}, cHeader, cFooter,,,,,
 BoxC()
 
 select (nTArea)
+
+if LastKey() == K_ESC
+	return 0
+endif
 
 return 1
   
@@ -145,7 +160,8 @@ do case
 		
 		//dodaj novi parametar u _fnd_par
 		_add_fnd_par( _new_fnd_par() )
-		go top
+		
+		//go top
 		
 		return DE_REFRESH
 	

@@ -52,7 +52,7 @@ Box(, 20, 77)
 _set_box()
 
 select docs
-set order to tag "2"
+set order to tag "1"
 go top
 
 set_a_kol(@ImeKol, @Kol)
@@ -206,7 +206,7 @@ return cFilter
 // ------------------------------------------------
 static function set_f_kol(cFilter)
 select docs
-set order to tag "2"
+set order to tag "1"
 set filter to &cFilter
 set relation to cust_id into customs
 go top
@@ -285,7 +285,7 @@ do case
 			
 			if doc_2__doc( nDoc_no ) == 1
 				
-				MsgBeep("Nalog otvoren!#Prelazim u pripremu...")
+				MsgBeep("Nalog otvoren!#Prelazim u pripremu##Pritisni nesto za nastavak...")
 				
 			endif
 			
@@ -361,6 +361,8 @@ do case
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )
 		
+		nTRec := RECNO()
+		
 		if is_doc_busy()
 			
 			msg_busy_doc()
@@ -373,9 +375,14 @@ do case
 		
 		m_changes( nDoc_no )
 		
+		if LastKey() == K_ESC
+			Ch := 0
+		endif
+	
 		select docs
+		go (nTRec)
 		
-		return DE_CONT
+		return DE_REFRESH
 
 endcase
 
@@ -465,6 +472,7 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
 
 // ---------------------------------------------
 // daje info o statusu naloga

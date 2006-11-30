@@ -200,7 +200,7 @@ do while !EOF()
 		cFilt += " .or. "
 	endif
 	
-	cFilt += " match_code = " + cm2str( ALLTRIM(field->fnd_val) )
+	cFilt += " UPPER(match_code) = " + cm2str( UPPER(ALLTRIM(field->fnd_val)) )
 
 	skip
 enddo

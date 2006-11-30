@@ -23,7 +23,6 @@ __doc_no := field->doc_no
 cDesc := "Inicijalni osnovni podaci"
 
 aArr := a_log_main(field->cust_id, ;
-		field->doc_pay_id, ;
 		field->doc_priority )
 
 log_main(__doc_no, cDesc, nil, aArr)
@@ -391,7 +390,8 @@ return
 // punjenje loga sa stavkama tipa 20
 // -----------------------------------
 function _lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
-			nArt_id, nArt_qtty, nArt_heigh, nArt_width)
+			nArt_id, cDoc_desc, cDoc_sch, ;
+			nArt_qtty, nArt_heigh, nArt_width)
 local nDoc_lit_no
 
 nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
@@ -406,6 +406,8 @@ replace art_id with nArt_id
 replace num_1 with nArt_qtty
 replace num_2 with nArt_heigh
 replace num_3 with nArt_width
+replace char_1 with cDoc_desc
+replace char_2 with cDoc_sch
 replace doc_lit_action with cAction
 
 return
@@ -620,6 +622,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	nDoc_it_qtty := field->doc_it_qtty
 	nDoc_it_heigh := field->doc_it_heigh
 	nDoc_it_width := field->doc_it_width
+	cDoc_it_desc := field->doc_it_desc
+	cDoc_it_sch := field->doc_it_schema
 	
 	// DOC_IT -> _DOC_IT - provjeri da li je sta brisano
 	// akcija "-"
@@ -630,6 +634,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		
 		_lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
 			   nArt_id , ;
+			   cDoc_it_desc, ;
+			   cDoc_it_sch, ;
 			   nDoc_it_qtty , ;
 			   nDoc_it_heigh , ;
 			   nDoc_it_width )
@@ -655,6 +661,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		
 		_lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
 			   _doc_it->art_id, ;
+			   _doc_it->doc_it_desc, ;
+			   _doc_it->doc_it_schema, ;
 			   _doc_it->doc_it_qtty, ;
 			   _doc_it->doc_it_heigh, ;
 			   _doc_it->doc_it_width )
@@ -680,6 +688,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	nDoc_it_qtty := field->doc_it_qtty
 	nDoc_it_heigh := field->doc_it_heigh
 	nDoc_it_width := field->doc_it_width
+	cDoc_it_desc := field->doc_it_desc
+	cDoc_it_sch := field->doc_it_schema
 	
 	// _DOC_IT -> DOC_IT, da li stavka postoji u kumulativu
 	// akcija "+"
@@ -690,6 +700,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		
 		_lit_20_insert(cAction, nDoc_no, nDoc_log_no, ;
 			   nArt_id, ;
+			   cDoc_it_desc, ;
+			   cDoc_it_sch, ;
 			   nDoc_it_qtty, ;
 			   nDoc_it_heigh, ;
 			   nDoc_it_width)
@@ -706,6 +718,9 @@ enddo
 // bilo je promjena dodaj novi log zapis
 if lLogAppend 
 	_d_log_insert(nDoc_no, nDoc_log_no, cDoc_log_type, cDesc)
+else
+	//cDesc := "Nije bilo nikakvih promjena..."
+	//_d_log_insert(nDoc_no, nDoc_log_no, cDoc_log_type, cDesc)
 endif
 
 return
@@ -823,7 +838,14 @@ enddo
 
 // bilo je promjena dodaj novi log zapis
 if lLogAppend 
+
 	_d_log_insert(nDoc_no, nDoc_log_no, cDoc_log_type, cDesc)
+	
+else
+
+	//cDesc := "Nije bilo promjena ..."
+	//_d_log_insert(nDoc_no, nDoc_log_no, cDoc_log_type, cDesc)
+	
 endif
 
 return
@@ -1005,6 +1027,16 @@ do while !EOF() .and. field->doc_no == nDoc_no ;
 	cRet += "sir.=" + ALLTRIM(STR(field->num_3, 8, 2))
 	cRet += "#"
 	
+	if !EMPTY(field->char_1)
+		cRet += "opis.=" + ALLTRIM(field->char_1)
+		cRet += "#"
+	endif
+	
+	if !EMPTY(field->char_2)
+		cRet += "shema.=" + ALLTRIM(field->char_2)
+		cRet += "#"
+	endif
+
 	select doc_lit
 	
 	skip
@@ -1095,7 +1127,7 @@ do while !EOF() .and. field->doc_no == nDoc_no ;
 
 	cRet += "narucioc: " + PADR( g_cust_desc( field->int_1 ), 20)
 	cRet += "#"
-	cRet += "prioritet: " + ALLTRIM(STR(field->int_3))
+	cRet += "prioritet: " + ALLTRIM(STR(field->int_2))
 	cRet += "#"
 	
 	select doc_lit

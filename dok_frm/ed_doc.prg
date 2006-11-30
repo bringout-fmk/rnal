@@ -110,6 +110,12 @@ do while .t.
 
 	if LastKey() == K_ESC
 	
+		if _docs->doc_status == 3
+		
+			MsgBeep("Dokument ostavljen za doradu !!!")
+		
+		endif
+		
 		exit
 	
 	endif
@@ -390,9 +396,9 @@ do case
 		nRet := DE_CONT
 		
 		if ALIAS() == "_DOCS"
-			
+		
 			if docs_delete() == 1
-			
+				
 				l_auto_tab := .t.
 				KEYBOARD CHR(K_TAB)
 				nRet := DE_REFRESH
@@ -505,6 +511,9 @@ return 1
 // lSilent - tihi nacin rada bez upita
 // --------------------------------------------
 static function docs_delete( lSilent )
+local nDoc_no
+local nDoc_status 
+
 if lSilent == nil
 	lSilent := .f.
 endif
@@ -512,6 +521,9 @@ endif
 if !lSilent .and. Pitanje(,"Izbrisati nalog iz pripreme (D/N) ?!???", "N") == "N"
 	return 0
 endif
+
+nDoc_no := field->doc_no
+nDoc_status := field->doc_status
 
 // brisi dokument
 delete
@@ -529,6 +541,14 @@ do while !EOF()
 	delete
 	skip
 enddo
+
+if nDoc_status == 3
+
+	// ukloni marker sa azuriranog dokumenta (busy)
+
+	set_doc_marker( nDoc_no, 0 )
+
+endif
 
 select _docs
 go top
