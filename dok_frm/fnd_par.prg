@@ -121,6 +121,7 @@ endif
 
 
 do case
+
 	case (Ch == K_ESC) 
 		
 		gTBDir:="N"
@@ -196,7 +197,7 @@ AADD(aImeKol, ;
 	{|| IF(ALLTRIM(fnd_par_type) == "ATT", ALLTRIM(g_egr_by_att(VAL(fnd_att), .t. )) + "/" + PADR(g_gr_at_desc(VAL(fnd_att), nil, .t.), 15), IF( ALLTRIM(fnd_par_type) == "AOP" , PADR( ALLTRIM(g_aop_desc(VAL(fnd_att), .t.)), 20), PADR("----->", 20) ) ) },;
 	"fnd_att",;
 	{|| ALLTRIM(fnd_par_type) $ "ATT#AOP" .or. not_att_msg() },;
-	{|| IF(ALLTRIM(fnd_par_type) == "ATT", s_e_gr_att( @wfnd_att, nil, @wfnd_att ), IF( ALLTRIM(fnd_par_type) == "AOP", s_aops(@wfnd_att, @wfnd_att) , .t.  )), to_str(@wfnd_att) },;
+	{|| IF(ALLTRIM(fnd_par_type) == "ATT", s_e_gr_att( @wfnd_att, nil, @wfnd_att ), IF( ALLTRIM(fnd_par_type) == "AOP", s_aops(@wfnd_att, @wfnd_att) , .t.  )), to_str(@wfnd_att), go_right() },;
 	"V" })
 
 
@@ -214,6 +215,16 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
+
+// -------------------------------------------
+// pomjeri se u browsu na desno
+// -------------------------------------------
+static function go_right()
+TB:right()
+while !TB:stabilize()
+end
+return .t.
 
 
 

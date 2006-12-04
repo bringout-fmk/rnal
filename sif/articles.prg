@@ -65,10 +65,11 @@ if l_open_dbedit
 	
 	set_a_kol(@ImeKol, @Kol)
 
-	cOptions += "<c-N> novi |"
-	cOptions += "<c-T> brisi |"
-	cOptions += "<F2> ispravi |"
-	cOptions += "<F4> dupliciraj"
+	cOptions += "<c-N> novi "
+	cOptions += "<c-T> brisi "
+	cOptions += "<F2> ispravi "
+	cOptions += "<F4> dupliciraj "
+	cOptions += "<P> pregled"
 
 	Box(, 16, 77, .t.)
 	
@@ -198,6 +199,13 @@ do case
 		
 		return DE_CONT
 
+	case UPPER(CHR(Ch)) == "P"
+		
+		// preview
+		show_preview()
+		
+		return DE_CONT
+	
 	case Ch == K_ENTER
 
 		// izaberi sifru....
@@ -216,6 +224,57 @@ do case
 		
 endcase
 return DE_CONT
+
+
+// ---------------------------------------------
+// prikazi u boxu preview artikla
+// ---------------------------------------------
+static function show_preview()
+local nX := m_x
+local nY := m_y
+local aDesc := {}
+local cOk := "OK"
+local nBoxX := 0
+local nBoxY := 77
+local i
+private GetList:={}
+
+aDesc := TokToNiz( articles->art_desc, ";" )
+
+nBoxX := LEN(aDesc) + 6
+
+Box(, nBoxX, nBoxY)
+	
+	@ m_x + 1, m_y + 2 SAY "- artikal id: " + artid_str(articles->art_id)
+	
+	@ m_x + 2, m_y + 2 SAY "- match code: " + articles->match_code
+	
+	@ m_x + 3, m_y + 2 SAY "- elementi / d.operacije: "
+
+	for i:=1 to LEN(aDesc)
+		
+		@ m_x + 4 + i, m_y + 4 SAY "* " + PADR(ALLTRIM(aDesc[i]), 72) COLOR "BG+/B"
+	
+	next
+	
+	@ m_x + nBoxX, m_y + 2 GET cOk
+
+	read
+BoxC()
+
+if LastKey() == K_ENTER .or. LastKey() == K_ESC
+	
+	m_x := nX
+	m_y := nY
+	
+	return 1
+endif
+
+m_x := nX
+m_y := nY
+
+return 1
+
 
 
 
