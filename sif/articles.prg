@@ -139,16 +139,17 @@ do case
 		set filter to
 		set relation to
 		
-		_set_sif_id(@nArt_id, "ART_ID")
-		
-		if s_elements( nArt_id, .t. ) == 1
-			
-			return DE_REFRESH
-			
+		if _set_sif_id(@nArt_id, "ART_ID") == 0
+			return DE_CONT
 		endif
-		
-		select articles
-		go bottom
+			
+		if s_elements( nArt_id, .t. ) == 1
+			select articles
+			go bottom
+		else
+			select articles
+			go (nTRec)
+		endif
 		
 		return DE_REFRESH
 		
@@ -385,7 +386,9 @@ select articles
 set filter to
 set relation to
 
-_set_sif_id( @nArtNewid, "ART_ID" )
+if _set_sif_id( @nArtNewid, "ART_ID" ) == 0
+	return -1
+endif
 
 // ELEMENTS
 select elements

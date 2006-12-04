@@ -330,6 +330,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	_lit_20_insert( cAction, nDoc_no, nDoc_log_no, ;
 			field->art_id,  ;
+			field->doc_it_desc, ;
+			field->doc_it_schema, ;
 			field->doc_it_qtty,  ;
 			field->doc_it_heigh, ;
 			field->doc_it_width )

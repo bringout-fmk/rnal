@@ -1,7 +1,7 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
-static _tb_direkt := "N"
+static _e_gr_id
 
 
 // -------------------------------------------------------
@@ -16,9 +16,6 @@ private GetList:={}
 
 nTArea := SELECT()
 
-_tb_direkt := gTBDir
-_mod_tb_direkt( _tb_direkt )
-
 cHeader := "Elementi - grupe atributi /  'V' - pr.vrijednosti / required '*'"
 
 if nGr_id == nil
@@ -29,13 +26,19 @@ if cE_gr_at_desc == nil
 	cE_gr_at_desc := ""
 endif
 
+_e_gr_id := nGr_id
+
 select e_gr_att
 set order to tag "1"
-go top
 
 set_a_kol(@ImeKol, @Kol)
 gr_filter(nGr_id, cE_gr_at_desc)
-	
+
+select e_gr_att
+go top
+
+private gTBDir:="N"
+
 cRet := PostojiSifra(F_E_GR_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|| key_handler() })
 
 if VALTYPE(cE_gr_at_desc) == "N"
@@ -91,9 +94,9 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(e_gr_at_id)}, "e_gr_at_id", {|| _inc_id(@we_gr_at_id, "E_GR_AT_ID"), .f.}, {|| .t.}})
+AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(e_gr_at_id, .t.)}, "e_gr_at_id", {|| _inc_id(@we_gr_at_id, "E_GR_AT_ID"), .f.}, {|| .t.}})
 
-AADD(aImeKol, {PADC("Elem.grupa", 10), {|| PADR(g_e_gr_desc(e_gr_id), 10)}, "e_gr_id", {|| .t.}, {|| s_e_groups(@we_gr_id), show_it( g_e_gr_desc( we_gr_id ) ) }})
+AADD(aImeKol, {PADC("Elem.grupa", 10), {|| PADR(g_e_gr_desc(e_gr_id), 10)}, "e_gr_id", {|| set_gr_id(@we_gr_id) }, {|| s_e_groups(@we_gr_id), show_it( g_e_gr_desc( we_gr_id ) ) }})
 
 AADD(aImeKol, {PADC("Neoph", 5), {|| e_gr_at_required}, "e_gr_at_required", {|| .t.}, {|| .t. } })
 
@@ -105,6 +108,18 @@ next
 
 return
 
+
+// ---------------------------------------------------
+// setuje polje e_gr_id pri unosu automatski
+// ---------------------------------------------------
+static function set_gr_id( nE_gr_id )
+if _e_gr_id > 0
+	nE_gr_id := _e_gr_id
+	return .f.
+else
+	return .t.
+endif
+return 
 
 
 // ------------------------------------
@@ -161,9 +176,13 @@ return STR(nId, 10)
 // --------------------------------------------------
 // get e_gr_at_desc by e_gr_att_id
 // --------------------------------------------------
-function g_gr_at_desc(nE_gr_att_id, lShowRequired )
+function g_gr_at_desc(nE_gr_att_id, lShowRequired, lNull )
 local cEGrAttDesc := "?????"
 local nTArea := SELECT()
+
+if lNull == .t.
+	cEGrAttDesc := ""
+endif
 
 if lShowRequired == nil
 	lShowRequired := .f.

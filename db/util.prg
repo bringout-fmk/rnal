@@ -167,8 +167,7 @@ return STR(nId, 4)
 function _set_sif_id(nId, cIdField)
 local nTArea := SELECT()
 local nTime
-
-go top
+local cIndex
 
 if !(FLOCK())
 	
@@ -183,18 +182,24 @@ if !(FLOCK())
 		nTime --
          	
 		if FLOCK()
-            		exit
-         	endif
+          		exit
+        	endif
       	enddo
 	
       	if nTime == 0 .AND. !(FLOCK())
-        	Beep (4)
-         	Msg ("Dodavanje nove stavke onemoguceno !!!# POKUSAJTE PONOVO")
+        	Beep (2)
+         	MsgBeep("Dodavanje nove stavke onemoguceno !!!#Pokusajte ponovo...")
          	return 0
       	endif
 endif
 
-_inc_id(@nId, cIdField)
+if cIdField == "ART_ID"
+	cIndex := "1"
+else
+	cIndex := "2"
+endif
+
+_inc_id(@nId, cIdField, cIndex)
 
 Scatter()
 
@@ -205,6 +210,7 @@ cIdField := "_" + cIdField
 &cIdField := nId
 
 Gather2()
+
 DBUnlock()
 
 select (nTArea)

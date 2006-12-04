@@ -2,7 +2,7 @@
 
 // variables
 static _status
-
+static _sort_priority
 
 // ------------------------------------------
 // lista dokumenata....
@@ -33,8 +33,11 @@ return
 static function tbl_list()
 local cFooter
 local nLstRet
+local cSortPrior 
 
-nLstRet := lst_args()
+nLstRet := lst_args( @cSortPrior )
+
+_sort_priority := cSortPrior
 
 if nLstRet == 2
 	return 2
@@ -52,7 +55,13 @@ Box(, 20, 77)
 _set_box()
 
 select docs
-set order to tag "1"
+
+if _sort_priority == "D"
+	set order to tag "3"
+else
+	set order to tag "1"
+endif
+
 go top
 
 set_a_kol(@ImeKol, @Kol)
@@ -101,10 +110,12 @@ return
 // -------------------------------------------------
 // otvori formu sa uslovima te postavi filtere
 // -------------------------------------------------
-static function lst_args()
+static function lst_args( cSortPrior )
 local nX := 2
 local dDateFrom := CToD("")
 local dDateTo := DATE()
+local dDvrDFrom := CTOD("")
+local dDvrDTo := CTOD("")
 local nCustomer := VAL(STR(0, 10))
 local nContact := VAL(STR(0, 10))
 local cTblList := "D"
@@ -112,12 +123,11 @@ local cShowRejected := "N"
 local nRet := 1
 local cFilter
 
-Box( ,10, 70)
-	
-@ m_x + nX, m_y + 2 SAY "Datum od " GET dDateFrom
-@ m_x + nX, col() + 2 SAY "do" GET dDateTo
+cSortPrior := "D"
 
-nX += 2
+Box( ,12, 70)
+
+nX += 1
 
 @ m_x + nX, m_y + 2 SAY "Narucioc (prazno-svi) " GET nCustomer VALID {|| nCustomer == 0 .or. s_customers( @nCustomer), show_it( g_cust_desc(nCustomer) ) }
 
@@ -127,7 +137,25 @@ nX += 1
 
 nX += 2
 
+@ m_x + nX, m_y + 2 SAY "Datum naloga od " GET dDateFrom
+@ m_x + nX, col() + 2 SAY "do" GET dDateTo
+
+if _status == 1
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY "Datum isporuke od " GET dDvrDFrom
+	@ m_x + nX, col() + 2 SAY "do" GET dDvrDTo
+
+endif
+
+nX += 2
+
 @ m_x + nX, m_y + 2 SAY "Tabelarni pregled (D/N) " GET cTblList VALID cTblList $ "DN" PICT "@!"
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY "Sortirati po prioritetu (D/N) " GET cSortPrior VALID cSortPrior $ "DN" PICT "@!"
 
 if _status == 2
 
@@ -149,6 +177,8 @@ ESC_RETURN 0
 
 cFilter := gen_filter(dDateFrom, ;
 			dDateTo, ;
+			dDvrDFrom, ;
+			dDvrDTo, ;
 			nCustomer, ;
 			nContact, ;
 			cShowRejected )
@@ -162,7 +192,7 @@ return nRet
 // ---------------------------------
 // generise string filtera
 // ---------------------------------
-static function gen_filter( dDateFrom, dDateTo, ;
+static function gen_filter( dDateFrom, dDateTo, dDvrDFrom, dDvrDTo, ;
 			nCustomer, nContact, cShReject )
 local nClosed := 1
 local cFilter := ""
@@ -189,6 +219,14 @@ if !Empty(dDateTo)
 	cFilter += " .and. doc_date <= " + Cm2Str(dDateTo)
 endif
 
+if !EMPTY(dDvrDFrom)
+	cFilter += " .and. doc_dvr_date >= " + Cm2Str(dDvrDFrom)
+endif
+
+if !Empty(dDvrDTo)
+	cFilter += " .and. doc_dvr_date <= " + Cm2Str(dDvrDTo)
+endif
+
 if nCustomer <> 0
 	cFilter += " .and. cust_id == " + custid_str(nCustomer)
 endif
@@ -206,9 +244,19 @@ return cFilter
 // ------------------------------------------------
 static function set_f_kol(cFilter)
 select docs
-set order to tag "1"
+
+if _sort_priority == "D"
+
+	set order to tag "3"
+
+else
+
+	set order to tag "1"
+
+endif
+
 set filter to &cFilter
-set relation to cust_id into customs
+//set relation to cust_id into customs
 go top
 
 return
@@ -331,7 +379,7 @@ do case
 				
 				MsgBeep("Nalog zatvoren !!!")
 			
-				select doks
+				select docs
 				set_f_kol(cTmpFilter)
 				select docs
 				
@@ -423,13 +471,9 @@ Box(, 8, 60)
 	
 	@ m_x + nX, m_y + 2 SAY "postavi trenutni status na:" GET cStat VALID cStat $ "RX" PICT "@!"
 	
-	read
-	
 	nX += 2
 	
-	if cStat == "X"
-		@ m_x + nX, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S40"
-	endif
+	@ m_x + nX, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S40"
 	
 	read
 BoxC()
@@ -455,12 +499,11 @@ return 1
 static function set_a_kol(aImeKol, aKol, nStatus)
 aImeKol := {}
 
-AADD(aImeKol, {PADC("Dok.br",10), {|| doc_no }, "doc_no", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Narucioc", {|| _reject_info( doc_status ) + PADR(g_cust_desc(cust_id), 30) }, "cust_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Narucioc / kontakt", {|| _reject_info( doc_status ) + PADR(g_cust_desc(cust_id), 20) + "/" + PADR(g_cont_desc(cont_id), 15) }, "cust_id", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Datum", {|| doc_date }, "doc_date", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp." , {|| doc_dvr_date }, "doc_dvr_date", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| doc_dvr_time }, "doc_dvr_time", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Kontakt" , {|| PADR(g_cont_desc(cont_id), 20) }, "cont_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {PADC("Dok.br",10), {|| doc_no }, "doc_no", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Prioritet" , {|| PADR( s_priority(doc_priority) ,10) }, "doc_priority", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.plac" , {|| PADR( s_pay_id(doc_pay_id) ,10) }, "doc_pay_id", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Plac." , {|| PADR( doc_paid , 4) }, "doc_paid", {|| .t.}, {|| .t.} })

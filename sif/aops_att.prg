@@ -2,6 +2,7 @@
 
 
 static _tb_direkt
+static _aop_id
 
 
 // ------------------------------------------------
@@ -13,9 +14,6 @@ local cHeader
 private ImeKol
 private Kol
 
-_tb_direkt := gTBDir
-_mod_tb_direkt( _tb_direkt )
-
 if nAop_id == nil
 	nAop_id := -1
 endif
@@ -23,6 +21,8 @@ endif
 if cAop_desc == nil
 	cAop_desc := ""
 endif
+
+_aop_id := nAop_id
 
 nTArea := SELECT()
 cHeader := "Dodatne operacije, atributi /"
@@ -32,7 +32,9 @@ set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
 aop_filter(nAop_id, cAop_desc)
-	
+
+private gTBDir := "N"
+
 cRet := PostojiSifra(F_AOPS_ATT, 1, 10, 70, cHeader, @cId, dx, dy, {|Ch| key_handler(Ch) })
 
 if VALTYPE(cAop_desc) == "N"
@@ -84,7 +86,7 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(aop_att_id)}, "aop_att_id", {|| _inc_id(@waop_att_id, "AOP_ATT_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| .t. }, {|| s_aops( @waop_id ), show_it(g_aop_desc(waop_id))  }})
+AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| set_aop_id(@waop_id) }, {|| s_aops( @waop_id ), show_it(g_aop_desc(waop_id))  }})
 AADD(aImeKol, {PADR("Opis", 40), {|| PADR(aop_att_desc, 40)}, "aop_att_desc"})
 
 for i:=1 to LEN(aImeKol)
@@ -92,6 +94,18 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
+// ---------------------------------------------------
+// setuje polje aop_id pri unosu automatski
+// ---------------------------------------------------
+static function set_aop_id( nAop_id )
+if _aop_id > 0
+	nAop_id := _aop_id
+	return .f.
+else
+	return .t.
+endif
+return 
 
 
 // -----------------------------------------

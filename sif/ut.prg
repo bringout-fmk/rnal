@@ -32,12 +32,20 @@ return xRet
 // prikaz id/mc za stavku u browse-u sifrarnika
 // nFieldId - vrijednost id polja
 // ---------------------------------------------
-function sif_idmc(nFieldId)
+function sif_idmc(nFieldId, lOnlyMc )
 local cId := STR(nFieldId)
 local cMCode := IF(FIELDPOS("MATCH_CODE") <> 0, ALLTRIM(field->match_code), "")
-local xRet
+local xRet := ""
 
-xRet := ALLTRIM(cId)
+if lOnlyMC == nil
+	lOnlyMC := .f.
+endif
+
+if lOnlyMC <> .t.
+	xRet += ALLTRIM(cId)
+else
+	xRet += "--"
+endif
 
 if !EMPTY(cMCode)
 	xRet += "/"
@@ -73,9 +81,13 @@ return .t.
 // wId - polje id proslijedjeno po ref.
 // cFieldName - ime id polja
 // --------------------------------------
-function _inc_id( wid, cFieldName )
+function _inc_id( wid, cFieldName, cIndexTag )
 local nTRec
-local cDbFilter
+local cTBFilter := DBFILTER()
+
+if cIndexTag == nil
+	cIndexTag := "1"
+endif
 
 if ((Ch == K_CTRL_N) .or. (Ch == K_F4))
 	
@@ -83,16 +95,16 @@ if ((Ch == K_CTRL_N) .or. (Ch == K_F4))
 		return .f.
 	endif
 	
-	nTRec := RecNo()
-	cDbFilter := DBFilter()
-
+	altd()
 	set filter to
+	set order to tag &cIndexTag
 	
 	wid := _last_id( cFieldName ) + 1
 	
-	set filter to &cDbFilter
-	go top
-	go (nTRec)
+	set filter to &cTBFilter
+	set order to tag "1"
+	go bottom
+	
 	
 	AEVAL(GetList,{|o| o:display()})
 
@@ -108,7 +120,11 @@ return .t.
 static function _last_id( cFieldName )
 local nLast_rec := 0
 
-go bottom
+altd()
+
+go top
+seek STR(9999999999, 10)
+skip -1
 
 nLast_rec := field->&cFieldName
 

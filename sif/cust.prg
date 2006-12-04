@@ -3,7 +3,7 @@
 // -----------------------------------------
 // otvara sifrarnik narucioca
 // -----------------------------------------
-function s_customers(cId, dx, dy)
+function s_customers(cId, cCustDesc, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
@@ -18,13 +18,43 @@ cHeader += "/ c+K - pregled kontakata"
 select customs
 set order to tag "1"
 
+if cCustDesc == nil
+	cCustDesc := ""
+endif
+
 set_a_kol(@ImeKol, @Kol)
+// postavi filter...
+set_f_kol(cCustDesc)	
 	
 cRet := PostojiSifra(F_CUSTOMS, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
+
+if !EMPTY(cCustDesc)
+	set filter to
+	go top
+endif
 
 select (nTArea)
 
 return cRet
+
+
+// --------------------------------------------------
+// setovanje filtera nad tabelom customers
+// --------------------------------------------------
+static function set_f_kol(cCustDesc)
+local cFilter := ""
+
+if !EMPTY(cCustDesc)
+	cFilter += "cust_desc = " + cm2str(cCustDesc)
+endif
+
+if !EMPTY(cFilter)
+	set filter to &cFilter
+	go top
+endif
+
+return .t.
+
 
 
 // -----------------------------------------

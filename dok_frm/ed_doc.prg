@@ -341,7 +341,7 @@ do case
 			
 		endif
 				
-	case Ch == K_F2
+	case Ch == K_F2 .or. Ch == K_ENTER
 	
 		nRet := DE_CONT
 		
@@ -430,7 +430,6 @@ do case
 		if ALIAS() == "_DOCS" .and. RECCOUNT2() <> 0 .and. ;
 			Pitanje(,"Izvrsiti azuriranje dokumenta (D/N) ?", "D") == "D"
 
-		
 			// busy....
 			if field->doc_status == 3
 				_g_doc_desc( @cDesc )
@@ -438,6 +437,11 @@ do case
 			
 			// uzmi novi broj dokumenta
 			nDocNoNew := _new_doc_no()
+
+			// ako je baza zauzeta...
+			if nDocNoNew == -1
+				return DE_CONT
+			endif
 
 			// filuj sve tabele sa novim brojem
 			fill__doc_no( nDocNoNew )
@@ -468,6 +472,11 @@ do case
 		// uzmi novi broj dokumenta
 		nDocNoNew := _new_doc_no()
 
+		// ako je baza zauzeta
+		if nDocNoNew == -1
+			return DE_CONT
+		endif
+
 		// filuj sve tabele sa novim brojem
 		fill__doc_no( nDocNoNew )
 		
@@ -494,9 +503,10 @@ return nRet
 function _g_doc_desc( cDesc )
 local GetList := {}
 
-Box(,3, 70)
+Box(,5, 70)
 	cDesc := SPACE(150)
-	@ m_x + 2, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S60"
+	@ m_x + 1, m_y + 2 SAY "Unesi opis promjene na nalogu:"
+	@ m_x + 3, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S60"
 	read
 BoxC()
 
@@ -631,5 +641,38 @@ return STR(nNo, 4)
 function docop_str(nNo)
 return STR(nNo, 4)
 
+
+// ------------------------------------------------
+// validacija vrijednosti, mora se unjeti
+// ------------------------------------------------
+function must_enter( xVal )
+local lRet := .t.
+
+if VALTYPE(xVal) == "C"
+	if EMPTY(xVal)
+		lRet := .f.
+	endif
+elseif VALTYPE(xVal) == "N"
+	if xVal == 0
+		lRet := .f.
+	endif
+elseif VALTYPE(xVal) == "D"
+	if CTOD("") == xVal
+		lRet := .f.
+	endif
+endif
+
+msg_must_enter( lRet )
+
+return lRet
+
+// -----------------------------------------
+// poruka za must_enter validaciju
+// -----------------------------------------
+static function msg_must_enter( lVal )
+if lVal == .f.
+	MsgBeep("Unos polja obavezan !!!")
+endif
+return
 
 

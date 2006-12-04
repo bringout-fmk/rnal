@@ -497,8 +497,6 @@ nTArea := SELECT()
 select _docs
 go top
 
-altd()
-
 if ( field->doc_no <> 0 .or. EOF() )
 
 	// vec postoji odredjen broj
@@ -513,26 +511,27 @@ select docs
 
 if !docs->(FLOCK())
 	
-	nTime := 80     
+	//nTime := 80     
 	
 	// daj mu 10 sekundi
-      	do while nTime > 0
+      	//do while nTime > 0
         	
-		InkeySc(.125)
+	//	InkeySc(.125)
          	
-		nTime --
+	//	nTime --
          	
-		if docs->(FLOCK())
-        		exit
-	       	endif
-	enddo
+	//	if docs->(FLOCK())
+        //		exit
+	//       	endif
+	//enddo
 	
-      	if nTime == 0 .AND. ! docs->(FLOCK())
+      	//if nTime == 0 .AND. ! docs->(FLOCK())
         	
-		Beep (4)
-         	Msg ("Nemoguce odrediti broj dokumenta!#Ne mogu pristupiti bazi!")
-         	return 0
-      	endif
+	Beep(2)
+        MsgBeep("Nemoguce odrediti broj dokumenta!#Pokusajte ponovo...")
+        return -1
+      	
+	//endif
 endif
 
 select docs

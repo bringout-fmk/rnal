@@ -75,9 +75,13 @@ return STR(nId, 10)
 // -------------------------------
 // get e_gr_desc by e_gr_id
 // -------------------------------
-function g_e_gr_desc(nE_gr_id)
+function g_e_gr_desc(nE_gr_id, lNull)
 local cEGrDesc := "?????"
 local nTArea := SELECT()
+
+if lNull == .t.
+	cEGrDesc := ""
+endif
 
 O_E_GROUPS
 select e_groups
@@ -92,6 +96,10 @@ if FOUND()
 endif
 
 select (nTArea)
+
+if !EMPTY(cEGrDesc) .and. lNull == .t.
+	cEGrDesc := PADR(cEGrDesc, 6)
+endif
 
 return cEGrDesc
 

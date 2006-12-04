@@ -1,6 +1,8 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+static _direkt_mod
+
 
 // ----------------------------------------------------------------------
 // Kreiranje pomocne tabele za parametre 
@@ -90,7 +92,9 @@ private nTBLastLine:=1
 private TBPomjerise:="" 
 private TBScatter:="N"  
 
-ObjDbedit("fnd_par", nBoxX, nBoxY, {|Ch| key_handler(Ch)}, cHeader, cFooter,,,,,1)
+private gTBDir := "D"
+
+ObjDbedit("fnd_par", nBoxX, nBoxY, {|| key_handler()}, cHeader, cFooter,,,,,1)
 
 BoxC()
 
@@ -109,17 +113,12 @@ return 1
 // ------------------------------------------
 static function key_handler()
 local nTRec := RECNO()
+local nRet := DE_CONT
 
 if ( Ch == K_CTRL_T .or. Ch == K_CTRL_F9) .and. RecCount2() == 0
 	return DE_CONT
 endif
 
-// setuj direktni edit mod
-if gTBDir=="N"
-	gTBDir:="D"
-        select _fnd_par
-        DaTBDirektni()
-endif
 
 do case
 	case (Ch == K_ESC) 
@@ -132,11 +131,9 @@ do case
 		if Pitanje(, "Zelite izbrisati ovu stavku ?","D")=="D"
       			
 			delete
-      			return DE_REFRESH
+      			nRet := DE_REFRESH
 			
       		endif
-     		
-		return DE_CONT
 		
 	case (Ch == K_CTRL_F9)
 
@@ -148,33 +145,30 @@ do case
 				skip
 			enddo
 			
-			return DE_REFRESH
+			nRet := DE_REFRESH
 		endif
 		
-		return DE_CONT
-	
 	case (Ch == K_CTRL_N)
 		
-		gTbDir:="N"
-		NeTBDirektni()
-		
 		//dodaj novi parametar u _fnd_par
-		_add_fnd_par( _new_fnd_par() )
+		if _add_fnd_par( _new_fnd_par() ) == 0
+			go top
+		endif
 		
-		//go top
-		
-		return DE_REFRESH
+		nRet := DE_REFRESH
 	
 	case ( Ch == K_ALT_F )
 		
 		// zapocni pretragu prema unesenim vrijednostima
 		gTBDir:="N"
         	NeTBDirektni()
-		return DE_ABORT
-	
+
+		nRet := DE_ABORT
+
 endcase
 
-return DE_CONT
+
+return nRet
 
 
 // -------------------------------------------------------
@@ -191,8 +185,8 @@ AADD(aImeKol, ;
 
 // atribut
 AADD(aImeKol, ;
-	{PADC("Atribut", 15),;
-	{|| IF(ALLTRIM(fnd_par_type) == "ATT", "(" + ALLTRIM(g_egr_by_att(VAL(fnd_att))) + ") /" + PADR(g_gr_at_desc(VAL(fnd_att)), 15), IF( ALLTRIM(fnd_par_type) == "AOP" , PADR( ALLTRIM(g_aop_desc(VAL(fnd_att))), 15), PADR("----->", 15) ) ) },;
+	{PADC("Atribut", 20),;
+	{|| IF(ALLTRIM(fnd_par_type) == "ATT", ALLTRIM(g_egr_by_att(VAL(fnd_att), .t. )) + "/" + PADR(g_gr_at_desc(VAL(fnd_att), nil, .t.), 15), IF( ALLTRIM(fnd_par_type) == "AOP" , PADR( ALLTRIM(g_aop_desc(VAL(fnd_att), .t.)), 20), PADR("----->", 20) ) ) },;
 	"fnd_att",;
 	{|| ALLTRIM(fnd_par_type) $ "ATT#AOP" .or. not_att_msg() },;
 	{|| IF(ALLTRIM(fnd_par_type) == "ATT", s_e_gr_att( @wfnd_att, nil, @wfnd_att ), IF( ALLTRIM(fnd_par_type) == "AOP", s_aops(@wfnd_att, @wfnd_att) , .t.  )), to_str(@wfnd_att) },;
@@ -201,11 +195,11 @@ AADD(aImeKol, ;
 
 // vrijednost atributa
 AADD(aImeKol, ;
-	{PADC("Vrijednost", 40), ;
-	{|| IF( ALLTRIM(fnd_par_type) == "ATT" , PADR(g_e_gr_vl_desc(val(fnd_val)), 40), IF( ALLTRIM(fnd_par_type) == "AOP", PADR(g_aop_att_desc(val(fnd_val)), 40), PADR(fnd_val, 40)))  },;
+	{PADC("Vrijednost", 35), ;
+	{|| IF( ALLTRIM(fnd_par_type) == "ATT" , PADR(g_e_gr_vl_desc(val(fnd_val), .t.), 35), IF( ALLTRIM(fnd_par_type) == "AOP", PADR(g_aop_att_desc(val(fnd_val), .t.), 35), PADR(fnd_val, 35)))  },;
 	"fnd_val",;
 	{|| .t. },;
-	{|| IF(ALLTRIM(fnd_par_type) == "ATT" , s_e_gr_val(@wfnd_val, VAL(fnd_att), @wfnd_val) , IF( ALLTRIM(fnd_par_type) == "AOP", s_aops_att(@wfnd_val, VAL(fnd_att), @wfnd_val) , .t.)), to_str(@wfnd_val) },;
+	{|| IF(ALLTRIM(fnd_par_type) == "ATT" , EMPTY(wfnd_val) .or. s_e_gr_val(@wfnd_val, VAL(fnd_att), @wfnd_val) , IF( ALLTRIM(fnd_par_type) == "AOP", EMPTY(wfnd_val) .or. s_aops_att(@wfnd_val, VAL(fnd_att), @wfnd_val) , .t.)), to_str(@wfnd_val) },;
 	"V"  })
 
 for i:=1 to LEN(aImeKol)
@@ -213,6 +207,7 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
 
 
 // -----------------------------------------
@@ -256,6 +251,10 @@ Menu_SC("fnd_par_add")
 m_x := nX
 m_y := nY
 
+if LastKey() == K_ESC
+	nSelection := -1
+endif
+
 return nSelection
 
 
@@ -283,6 +282,7 @@ endcase
 select _fnd_par
 set order to tag "1"
 go bottom
+
 nFndParNo := field->fnd_par_no
 nFndParNo += 1
 
@@ -293,7 +293,7 @@ _fnd_par_no := nFndParNo
 _fnd_par_type := PADR(cFndParType, 10)
 Gather()
 
-go (nTRec)
+go top
 
 return 1
 

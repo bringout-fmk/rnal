@@ -1,7 +1,8 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
-static _tb_direkt := "N"
+static _e_gr_at
+
 
 // -------------------------------------------------------------
 // otvara sifrarnik artikala
@@ -12,9 +13,6 @@ local cHeader
 private ImeKol
 private Kol
 private GetList:={}
-
-_tb_direkt := gTbDir
-_mod_tb_direkt( _tb_direkt )
 
 nTArea := SELECT()
 
@@ -28,12 +26,16 @@ if cE_gr_vl_desc == nil
 	cE_gr_vl_desc := ""
 endif
 
+_e_gr_at := nE_gr_at_id
+
 select e_gr_val
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
 gr_att_filter(nE_gr_at_id, cE_gr_vl_desc)
-	
+
+private gTBDir := "N"
+
 cRet := PostojiSifra(F_E_GR_VAL, 1, 16, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
 if VALTYPE(cE_gr_vl_desc) == "N"
@@ -56,9 +58,9 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("ID/MC", 10), {|| PADR(sif_idmc(e_gr_vl_id),10)}, "e_gr_vl_id", {|| _inc_id(@we_gr_vl_id, "E_GR_VL_ID"), .f.}, {|| .t.}})
+AADD(aImeKol, {PADC("ID/MC", 10), {|| PADR(sif_idmc(e_gr_vl_id, .t.),10)}, "e_gr_vl_id", {|| _inc_id(@we_gr_vl_id, "E_GR_VL_ID"), .f.}, {|| .t.}})
 
-AADD(aImeKol, {PADC("Grupa/atribut", 15), {|| "(" + ALLTRIM(g_egr_by_att(e_gr_at_id)) + ") / " + PADR(g_gr_at_desc(e_gr_at_id), 15)}, "e_gr_at_id", {|| .t.}, {|| s_e_gr_att( @we_gr_at_id ), show_it( g_gr_at_desc( we_gr_at_id ) ) }})
+AADD(aImeKol, {PADC("Grupa/atribut", 15), {|| "(" + ALLTRIM(g_egr_by_att(e_gr_at_id)) + ") / " + PADR(g_gr_at_desc(e_gr_at_id), 15)}, "e_gr_at_id", {|| set_e_gr_at(@we_gr_at_id) }, {|| s_e_gr_att( @we_gr_at_id ), show_it( g_gr_at_desc( we_gr_at_id ) ) }})
 
 AADD(aImeKol, {PADC("Vrijednost", 20), {|| PADR(e_gr_vl_desc, 20) + ".." }, "e_gr_vl_desc"})
 
@@ -67,6 +69,19 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
+// ---------------------------------------------------
+// setuje polje e_gr_at_id pri unosu automatski
+// ---------------------------------------------------
+static function set_e_gr_at( nE_gr_at )
+if _e_gr_at > 0
+	nE_gr_at := _e_gr_at
+	return .f.
+else
+	return .t.
+endif
+return 
+
 
 
 
@@ -117,9 +132,13 @@ return STR(nId, 10)
 // -------------------------------
 // get e_gr_desc by e_gr_id
 // -------------------------------
-function g_e_gr_vl_desc(nE_gr_vl_id)
+function g_e_gr_vl_desc(nE_gr_vl_id, lNull)
 local cEGrValDesc := "?????"
 local nTArea := SELECT()
+
+if lNull == .t.
+	cEGrValDesc := ""
+endif
 
 O_E_GR_VAL
 select e_gr_val
@@ -141,10 +160,14 @@ return cEGrValDesc
 // --------------------------------------------------
 // vraæa grupu elementa po vrijednosti atributa
 // --------------------------------------------------
-function g_egr_by_att(nE_gr_att)
+function g_egr_by_att(nE_gr_att, lNull)
 local cGr := "????"
 local nTArea := SELECT()
 local nTRec := RecNo()
+
+if lNull == .t.
+	cGr := ""
+endif
 
 select e_gr_att
 set order to tag "1"
@@ -152,7 +175,7 @@ go top
 seek e_gr_at_str(nE_gr_att)
 
 if FOUND()
-	cGr := ALLTRIM( g_e_gr_desc(field->e_gr_id) )
+	cGr := ALLTRIM( g_e_gr_desc(field->e_gr_id, lNull) )
 endif
 
 select (nTArea)

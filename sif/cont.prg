@@ -1,11 +1,13 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+static __cust_id
+
 
 // -------------------------------------
 // otvara tabelu kontakata
 // -------------------------------------
-function s_contacts(cId, nCust_id, dx, dy)
+function s_contacts(cId, nCust_id, cContDesc, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
@@ -15,6 +17,12 @@ if nCust_id == nil
 	nCust_id := -1
 endif
 
+if cContDesc == nil
+	cContDesc := ""
+endif
+
+__cust_id := nCust_id
+
 nTArea := SELECT()
 
 cHeader := "Kontakti /"
@@ -23,7 +31,7 @@ select contacts
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol, nCust_id)
-cust_filter(nCust_id)
+cust_filter(nCust_id, cContDesc)
 	
 cRet := PostojiSifra(F_CONTACTS, 1, 10, 70, cHeader, @cId, dx, dy)
 
@@ -39,7 +47,7 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(cont_id)}, "cont_id", {|| _inc_id(@wcont_id, "CONT_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("Narucioc", 10), {|| g_cust_desc( cust_id ) }, "cust_id", {|| .t. }, {|| IF(nCust_id <> -1, cust_id == nCust_id, nil), s_customers(@wcust_id), show_it( g_cust_desc( wcust_id ) ) }})
+AADD(aImeKol, {PADC("Narucioc", 10), {|| g_cust_desc( cust_id ) }, "cust_id", {|| set_cust_id(@wcust_id) }, {|| s_customers(@wcust_id), show_it( g_cust_desc(wcust_id)) }})
 AADD(aImeKol, {PADC("Ime i prezime", 20), {|| PADR(cont_desc, 20)}, "cont_desc"})
 AADD(aImeKol, {PADC("Telefon", 20), {|| PADR(cont_tel, 20)}, "cont_tel"})
 AADD(aImeKol, {PADC("Dodatni opis", 20), {|| PADR(cont_add_desc, 20)}, "cont_add_desc"})
@@ -49,6 +57,19 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
+// ----------------------------------------------
+// setuje cust_id pri unosu automatski
+// ----------------------------------------------
+static function set_cust_id( nCust_id )
+if __cust_id > 0
+	nCust_id := __cust_id
+	return .f.
+else
+	return .t.
+endif
+return
+
 
 
 // --------------------------------------------------
@@ -71,14 +92,26 @@ return .t.
 // filter po cust_id
 // nCust_id - id customer
 // -------------------------------------------
-static function cust_filter(nCust_id)
-local cFilter
+static function cust_filter(nCust_id, cContDesc)
+local cFilter := ""
 
 if nCust_id > 0
-	cFilter := "cust_id == " + custid_str(nCust_id)
+	cFilter += "cust_id == " + custid_str(nCust_id)
+endif
+
+if !EMPTY(cContDesc)
+	
+	if !EMPTY(cFilter)
+		cFilter += " .and. "
+	endif
+	
+	cFilter += " cont_desc = " + cm2str(cContDesc)
+	
+endif
+
+if !EMPTY(cFilter)
 	set filter to &cFilter
-else
-	set filter to
+	go top
 endif
 
 return

@@ -30,12 +30,12 @@ l_auto_tab := .f.
 
 Box(,21,77)
 
-@ m_x, m_y + 25 SAY " DEFINISANJE ELEMENATA ARTIKLA "
+@ m_x, m_y + 15 SAY " DEFINISANJE ELEMENATA ARTIKLA: " + artid_str(art_id) + " "
 @ m_x + 20, m_y + 1 SAY REPLICATE("Í", 77)
-@ m_x + 17, m_y + 1 SAY "<c+N> nova"
-@ m_x + 18, m_y + 1 SAY "<F2> ispravka"
-@ m_x + 19, m_y + 1 SAY "<c+T> brisi"
-@ m_x + 21, m_y + 15 SAY "<TAB> - browse tabela"
+@ m_x + 16, m_y + 1 SAY "<c+N> nova"
+@ m_x + 17, m_y + 1 SAY "<F2> ispravka"
+@ m_x + 18, m_y + 1 SAY "<c+T> brisi"
+@ m_x + 21, m_y + 1 SAY "<TAB> - browse tabela  | <ESC> snimanje promjena "
 
 for i:=1 to 19
 	@ m_x + i, m_y + 21 SAY "º"
@@ -93,8 +93,7 @@ do while .t.
 		select articles
 		nRet := _art_set_descr( art_id, lNew )
 		select articles
-		go bottom
-
+		
 		exit
 		
 	endif
@@ -291,6 +290,7 @@ local nX := m_x
 local nY := m_y
 local GetList:={}
 local nRec := RecNo()
+local nTRec := 0
 local nRet := DE_CONT
 
 do case
@@ -301,16 +301,6 @@ do case
 		l_auto_tab := .f.
 		return DE_REFRESH
 	
-	case Ch == K_ESC
-		
-		// na izlazu provjeri da li su svi elementi ok... 
-		// ako nisu ne izlazi iz elemenata... nastavi rad
-	
-		if _chk_elements( art_id ) <> 1
-			
-			return DE_REFRESH
-			
-		endif
 		
 	case Ch == K_TAB
 		
@@ -353,22 +343,41 @@ do case
 
 		if ALIAS() == "ELEMENTS"
 			
-			nRet := elem_edit( art_id , .t. )
-			l_auto_tab := .t.
-			set filter to &cTBFilter
+			nRet := DE_REFRESH
+			
+			if elem_edit( art_id , .t. ) == 1
+			
+				l_auto_tab := .t.
+				//set filter to &cTBFilter
+				
+			else
+			
+				//set filter to &cTBFilter
+				go top
+			
+			endif
 			 
 		elseif ALIAS() == "E_ATT"
 
-			nRet := e_att_edit( nEl_id, .t. )
-			set filter to &cTBFilter
-			go top
-
+			nRet := DE_REFRESH
+			
+			if e_att_edit( nEl_id, .t. ) == 1
+				//set filter to &cTBFilter
+			else
+				//set filter to &cTBFilter
+				go top
+			endif
 		
 		elseif ALIAS() == "E_AOPS"
 		
-			nRet := e_aops_edit( nEl_id, .t. )
-			set filter to &cTBFilter
-			go top
+			nRet := DE_REFRESH
+		
+			if e_aops_edit( nEl_id, .t. ) == 1
+				//set filter to &cTBFilter
+			else
+				//set filter to &cTBFilter
+				go top
+			endif
 	
 		endif
 
@@ -380,19 +389,24 @@ do case
 
 		if ALIAS() == "ELEMENTS"
 			
-			nRet := elem_edit( art_id , .f. )
-			set filter to &cTBFilter
-			go top
+			//nRet := elem_edit( art_id , .f. )
+			//set filter to &cTBFilter
+			//go top
+			
+			Msgbeep("Opcija onemogucena##Koristiti c-N ili c-T")
+			nRet := DE_CONT
 			
 		elseif ALIAS() == "E_ATT"
 			
-			nRet := e_att_edit( nEl_id, .f. )
+			nRet := DE_REFRESH
+			e_att_edit( nEl_id, .f. )
 			set filter to &cTbFilter
 			go top
 		
 		elseif ALIAS() == "E_AOPS"
 		
-			nRet := e_aops_edit( nEl_id, .f. )
+			nRet := DE_REFRESH
+			e_aops_edit( nEl_id, .f. )
 			set filter to &cTbFilter
 			go top
 		
@@ -436,6 +450,7 @@ return nRet
 static function elem_edit( nArt_id, lNewRec )
 local nEl_id := 0
 local nLeft := 20
+local nRet := DE_CONT
 private GetList:={}
 
 if !lNewRec .and. field->el_id == 0
@@ -446,8 +461,12 @@ if !lNewRec .and. field->el_id == 0
 endif
 
 if lNewRec
-
-	_set_sif_id(@nEl_id, "EL_ID")
+	
+	altd()
+	
+	if _set_sif_id(@nEl_id, "EL_ID") == 0
+		return 0
+	endif
 
 endif
 
@@ -472,12 +491,12 @@ Box(,4,60)
 	read
 BoxC()
 
-if LastKey() == K_ESC
+if LastKey() == K_ESC .and. lNewRec
 
 	Gather()
 	delete
 	
-	return DE_REFRESH
+	return 0
 	
 endif
 
@@ -489,8 +508,7 @@ if lNewRec
 	select elements
 endif
 
-
-return DE_REFRESH
+return 1
 
 
 
@@ -512,7 +530,10 @@ do while !EOF() .and. field->e_gr_id == __gr_id ;
 	
 	select e_att
 	
-	_set_sif_id(@nEl_att_id, "EL_ATT_ID")
+	if _set_sif_id(@nEl_att_id, "EL_ATT_ID") == 0
+		select e_gr_att
+		loop
+	endif
 
 	Scatter()
 
@@ -552,7 +573,9 @@ endif
 
 if lNewRec
 
-	_set_sif_id(@nEl_att_id, "EL_ATT_ID")
+	if _set_sif_id(@nEl_att_id, "EL_ATT_ID") == 0
+		return 0
+	endif
 
 endif
 
@@ -580,19 +603,18 @@ Box(,6,65)
 	read
 BoxC()
 
-
-if LastKey() == K_ESC
+if LastKey() == K_ESC .and. lNewRec
 	
 	Gather()
 	delete
 	
-	return DE_REFRESH
+	return 0
 	
 endif
 
 Gather()
 
-return DE_REFRESH
+return 1
 
 
 
@@ -615,7 +637,9 @@ endif
 
 if lNewRec
 
-	_set_sif_id(@nEl_op_id, "EL_OP_ID")
+	if _set_sif_id(@nEl_op_id, "EL_OP_ID") == 0
+		return 0
+	endif
 
 endif
 
@@ -643,18 +667,18 @@ Box(,6,65)
 	read
 BoxC()
 
-if LastKey() == K_ESC
+if LastKey() == K_ESC .and. lNewRec
 
 	Gather()
 	delete
 	
-	return DE_REFRESH
+	return 0
 	
 endif
 
 Gather()
 
-return DE_REFRESH
+return 1
 
 
 
