@@ -154,7 +154,14 @@ do case
 		if _add_fnd_par( _new_fnd_par() ) == 0
 			go top
 		endif
-		
+	
+		TB:left()
+		TB:left()
+		TB:down()
+
+		while !TB:stabilize()
+		end
+	
 		nRet := DE_REFRESH
 	
 	case ( Ch == K_ALT_F )
