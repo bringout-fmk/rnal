@@ -8,6 +8,7 @@ static _doc
 static _doc_it
 static l_auto_tab
 
+
 // ---------------------------------------------
 // edit dokument
 // lNewDoc - novi dokument .t. or .f.
@@ -257,11 +258,11 @@ do case
 
 	// automatski tab
 	case l_auto_tab == .t.
-
+			
 		KEYBOARD CHR(K_TAB)
 		l_auto_tab := .f.
 		return DE_REFRESH
-
+			
 	// browse tabele
 	case Ch == K_TAB
 

@@ -2,17 +2,23 @@
 
 
 static _e_gr_id
-
+static __wo_id
 
 // -------------------------------------------------------
 // otvara sifrarnik atributa grupa
 // -------------------------------------------------------
-function s_e_gr_att(cId, nGr_id, cE_gr_at_desc, dx, dy)
+function s_e_gr_att(cId, nGr_id, cE_gr_at_desc, lwoID, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
 private Kol
 private GetList:={}
+
+if lwoID == nil
+	lwoID := .f.
+endif
+
+__wo_id := lwoID
 
 nTArea := SELECT()
 
@@ -94,7 +100,9 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(e_gr_at_id, .t.)}, "e_gr_at_id", {|| _inc_id(@we_gr_at_id, "E_GR_AT_ID"), .f.}, {|| .t.}})
+if __wo_id == .f.
+	AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(e_gr_at_id)}, "e_gr_at_id", {|| _inc_id(@we_gr_at_id, "E_GR_AT_ID"), .f.}, {|| .t.}})
+endif
 
 AADD(aImeKol, {PADC("Elem.grupa", 10), {|| PADR(g_e_gr_desc(e_gr_id), 10)}, "e_gr_id", {|| set_gr_id(@we_gr_id) }, {|| s_e_groups(@we_gr_id), show_it( g_e_gr_desc( we_gr_id ) ) }})
 
@@ -151,6 +159,7 @@ local nTRec := RecNo()
 do case
 	
 	case UPPER(CHR(Ch)) == "V"
+		
 		s_e_gr_val(nil, nE_gr_at_id)
 		go (nTRec)
 		return DE_CONT
@@ -161,6 +170,13 @@ do case
 		set_required()
 		
 		return DE_REFRESH
+		
+	case Ch == K_CTRL_N .or. Ch == K_F4
+		
+		__wo_id := .f.
+		set_a_kol(@ImeKol, @Kol)
+		
+		return DE_CONT
 endcase
 
 return DE_CONT
@@ -176,13 +192,9 @@ return STR(nId, 10)
 // --------------------------------------------------
 // get e_gr_at_desc by e_gr_att_id
 // --------------------------------------------------
-function g_gr_at_desc(nE_gr_att_id, lShowRequired, lNull )
+function g_gr_at_desc(nE_gr_att_id, lShowRequired )
 local cEGrAttDesc := "?????"
 local nTArea := SELECT()
-
-if lNull == .t.
-	cEGrAttDesc := ""
-endif
 
 if lShowRequired == nil
 	lShowRequired := .f.

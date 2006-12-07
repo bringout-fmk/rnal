@@ -1,5 +1,7 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
+
+
 // -----------------------------------------
 // otvara sifrarnik narucioca
 // -----------------------------------------
@@ -13,7 +15,7 @@ nTArea := SELECT()
 
 cHeader := "Narucioci"
 cHeader += SPACE(5)
-cHeader += "/ c+K - pregled kontakata"
+cHeader += "/ 'K' - pregled kontakata"
 
 select customs
 set order to tag "1"
@@ -68,7 +70,7 @@ AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(cust_id)}, "cust_id", {|| _inc_id
 AADD(aImeKol, {PADC("Naziv", 20), {|| PADR(cust_desc, 20)}, "cust_desc"})
 AADD(aImeKol, {PADC("Adresa", 20), {|| PADR(cust_addr, 20)}, "cust_addr"})
 AADD(aImeKol, {PADC("Telefon", 20), {|| PADR(cust_tel, 20)}, "cust_tel"})
-AADD(aImeKol, { "ID broj", {|| cust_ident_no } , "cust_ident_no"})
+AADD(aImeKol, { "ID broj", {|| cust_ident_no } , "cust_ident_no", {|| set_cust_mc(@wmatch_code, @wcust_desc) }, {|| .t.} })
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -77,15 +79,32 @@ next
 return
 
 
+// --------------------------------------------------
+// generisi match code za contakt...
+// --------------------------------------------------
+static function set_cust_mc( m_code, cust_desc )
+
+if !EMPTY(m_code)
+	return .t.
+endif
+
+m_code := UPPER( PADR( cust_desc, 5 ) )
+m_code := PADR( m_code, 10 )
+
+return .t.
+
+
 // -----------------------------------------
 // key handler funkcija
 // -----------------------------------------
 static function key_handler(Ch)
 do case
-	case Ch == K_CTRL_K
+	case UPPER(CHR(Ch)) == "K"
+	
 		// pregled kontakata
 		s_contacts(nil, field->cust_id)
 		return DE_CONT
+		
 endcase
 return DE_CONT
 

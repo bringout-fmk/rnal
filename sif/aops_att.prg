@@ -3,12 +3,12 @@
 
 static _tb_direkt
 static _aop_id
-
+static __wo_id
 
 // ------------------------------------------------
 // otvara sifrarnik dodatnih operacija, atributa
 // ------------------------------------------------
-function s_aops_att(cId, nAop_id, cAop_desc, dx, dy)
+function s_aops_att(cId, nAop_id, cAop_desc, lwo_ID, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
@@ -22,7 +22,12 @@ if cAop_desc == nil
 	cAop_desc := ""
 endif
 
+if lwo_ID == nil
+	lwo_ID := .f.
+endif
+
 _aop_id := nAop_id
+__wo_id := lwo_ID
 
 nTArea := SELECT()
 cHeader := "Dodatne operacije, atributi /"
@@ -85,7 +90,12 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(aop_att_id)}, "aop_att_id", {|| _inc_id(@waop_att_id, "AOP_ATT_ID"), .f.}, {|| .t.}})
+if __wo_id == .f.
+	
+	AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(aop_att_id)}, "aop_att_id", {|| _inc_id(@waop_att_id, "AOP_ATT_ID"), .f.}, {|| .t.}})
+
+endif
+
 AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| set_aop_id(@waop_id) }, {|| s_aops( @waop_id ), show_it(g_aop_desc(waop_id))  }})
 AADD(aImeKol, {PADR("Opis", 40), {|| PADR(aop_att_desc, 40)}, "aop_att_desc"})
 
@@ -112,6 +122,13 @@ return
 // key handler funkcija
 // -----------------------------------------
 static function key_handler(Ch)
+do case
+	case Ch == K_CTRL_N .or. Ch == K_F4
+		__wo_id := .f.
+		set_a_kol(@ImeKol, @Kol)
+		return DE_CONT
+
+endcase
 return DE_CONT
 
 

@@ -486,7 +486,7 @@ Box(,4,60)
 		@ m_x + 1, m_y + 2 SAY "Ispravka elementa *******"
 	endif
 	
-	@ m_x + 3, m_y + 2 SAY PADL("elem.grupa", nLeft) GET _e_gr_id VALID s_e_groups(@_e_gr_id)
+	@ m_x + 3, m_y + 2 SAY PADL("elem.grupa", nLeft) GET _e_gr_id VALID s_e_groups( @_e_gr_id, .t. )
 	
 	read
 BoxC()
@@ -596,9 +596,9 @@ Box(,6,65)
 		@ m_x + 1, m_y + 2 SAY "Ispravka atributa elementa *******"
 	endif
 	
-	@ m_x + 3, m_y + 2 SAY PADL("atribut grupe", nLeft) GET _e_gr_at_id VALID {|| s_e_gr_att(@_e_gr_at_id, el_gr_id), show_it( g_gr_at_desc( _e_gr_at_id ) ) }
+	@ m_x + 3, m_y + 2 SAY PADL("atribut grupe", nLeft) GET _e_gr_at_id VALID {|| s_e_gr_att(@_e_gr_at_id, el_gr_id, nil, .t. ), show_it( g_gr_at_desc( _e_gr_at_id ) ) }
 		
-	@ m_x + 4, m_y + 2 SAY PADL("vrijednost ->", nLeft) GET _e_gr_vl_id VALID s_e_gr_val(@_e_gr_vl_id, _e_gr_at_id)
+	@ m_x + 4, m_y + 2 SAY PADL("vrijednost ->", nLeft) GET _e_gr_vl_id VALID s_e_gr_val(@_e_gr_vl_id, _e_gr_at_id, nil, .t.)
 	
 	read
 BoxC()
@@ -660,9 +660,9 @@ Box(,6,65)
 		@ m_x + 1, m_y + 2 SAY "Ispravka dodatnih operacija elementa *******"
 	endif
 	
-	@ m_x + 3, m_y + 2 SAY PADL("dodatna operacija", nLeft) GET _aop_id VALID {|| s_aops(@_aop_id), show_it( g_aop_desc( _aop_id ) ) }
+	@ m_x + 3, m_y + 2 SAY PADL("dodatna operacija", nLeft) GET _aop_id VALID {|| s_aops(@_aop_id, nil, .t.), show_it( g_aop_desc( _aop_id ) ) }
 		
-	@ m_x + 4, m_y + 2 SAY PADL("atribut operacije", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att( @_aop_att_id, _aop_id ), show_it( g_aop_att_desc( _aop_att_id ) )  }
+	@ m_x + 4, m_y + 2 SAY PADL("atribut operacije", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att( @_aop_att_id, _aop_id, nil, .t. ), show_it( g_aop_att_desc( _aop_att_id ) )  }
 	
 	read
 BoxC()

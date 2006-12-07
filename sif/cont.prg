@@ -50,7 +50,7 @@ AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(cont_id)}, "cont_id", {|| _inc_id
 AADD(aImeKol, {PADC("Narucioc", 10), {|| g_cust_desc( cust_id ) }, "cust_id", {|| set_cust_id(@wcust_id) }, {|| s_customers(@wcust_id), show_it( g_cust_desc(wcust_id)) }})
 AADD(aImeKol, {PADC("Ime i prezime", 20), {|| PADR(cont_desc, 20)}, "cont_desc"})
 AADD(aImeKol, {PADC("Telefon", 20), {|| PADR(cont_tel, 20)}, "cont_tel"})
-AADD(aImeKol, {PADC("Dodatni opis", 20), {|| PADR(cont_add_desc, 20)}, "cont_add_desc"})
+AADD(aImeKol, {PADC("Dodatni opis", 20), {|| PADR(cont_add_desc, 20)}, "cont_add_desc", {|| set_cont_mc(@wmatch_code, @wcont_desc) }, {|| .t.} })
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -75,13 +75,21 @@ return
 // --------------------------------------------------
 // generisi match code za contakt...
 // --------------------------------------------------
-static function gen_cont_mc( m_code, cont_desc )
+static function set_cont_mc( m_code, cont_desc )
 local aPom := TokToNiz( ALLTRIM(cont_desc), " ")
 local i
 
+if !EMPTY(m_code)
+	return .t.
+endif
+
+m_code := ""
+
 for i:=1 to LEN(aPom)
-	m_code += UPPER(LEFT(aPom, 2))
+	m_code += UPPER( LEFT( aPom[i], 2 ) )
 next
+
+m_code := PADR( m_code, 10 )
 
 return .t.
 

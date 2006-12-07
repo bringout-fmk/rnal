@@ -15,7 +15,7 @@ static __item_no
 function e_doc_ops( nDoc_no, lNew, nItem_no )
 local nX := m_x
 local nY := m_y
-local nGetBoxX := 12
+local nGetBoxX := 16
 local nGetBoxY := 70
 local cBoxNaz := "unos dodatnih operacija stavke"
 local nRet := 0
@@ -45,8 +45,10 @@ UsTipke()
 
 Box(, nGetBoxX, nGetBoxY, .f., "Unos dodatnih operacija naloga")
 
+set_opc_box( nGetBoxX, 50 )
+
 @ m_x + 1, m_y + 2 SAY PADL("***** " + cBoxNaz, nGetBoxY - 2)
-@ m_x + nGetBoxX, m_y + 2 SAY PADL("(*) popuna nije obavezna", nGetBoxY - 2)
+@ m_x + nGetBoxX, m_y + 2 SAY PADL("(*) popuna nije obavezna", nGetBoxY - 2) COLOR "BG+/B"
 
 Scatter()
 
@@ -108,27 +110,27 @@ _doc_it_no := __item_no
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("r.br stavke:", nLeft) GET _doc_op_no 
+@ m_x + nX, m_y + 2 SAY PADL("r.br stavke:", nLeft) GET _doc_op_no WHEN set_opc_box( nBoxX, 50 )
 
 if __item_no == 0
 
 	nX += 2
 
-	@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku:", nLeft) GET _doc_it_no VALID show_it( g_item_desc( _doc_it_no ) )
+	@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku:", nLeft) GET _doc_it_no VALID {|| _doc_it_no >= 0 .and. show_it( g_item_desc( _doc_it_no ), 30 )} WHEN set_opc_box( nBoxX, 50, "ova operacija ce se odnositi", "eksplicitno na unesenu stavku")
 
 endif
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("d.operacija:", nLeft) GET _aop_id VALID {|| s_aops( @_aop_id ), show_it( g_aop_desc( _aop_id )) }
+@ m_x + nX, m_y + 2 SAY PADL("d.operacija:", nLeft) GET _aop_id VALID {|| s_aops( @_aop_id ), show_it( g_aop_desc( _aop_id )) } WHEN set_opc_box( nBoxX, 50, "odaberi dodatnu operaciju", "0 - otvori sifrarnik")
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("atr.d.operacije (*):", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att(@_aop_att_id, _aop_id ), show_it(g_aop_att_desc( _aop_att_id )) }
+@ m_x + nX, m_y + 2 SAY PADL("atr.d.operacije (*):", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att(@_aop_att_id, _aop_id ), show_it(g_aop_att_desc( _aop_att_id )) } WHEN set_opc_box( nBoxX, 50, "odaberi atribut dodatne operacije", "99 - otvori sifrarnik")
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("dodatni opis (*):", nLeft) GET _doc_op_desc PICT "@S40"
+@ m_x + nX, m_y + 2 SAY PADL("dodatni opis (*):", nLeft) GET _doc_op_desc PICT "@S40" WHEN set_opc_box( nBoxX, 50, "dodatni opis vezan uz navedene", "operacije" )
 
 
 read

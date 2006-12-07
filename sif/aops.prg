@@ -1,19 +1,17 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 static _tb_direkt
+static __wo_id
 
 
 // -----------------------------------------
 // otvara sifrarnik dodatnih operacija
 // -----------------------------------------
-function s_aops(cId, cDesc, dx, dy)
+function s_aops(cId, cDesc, lwo_ID, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
 private Kol
-
-_tb_direkt := gTBDir
-_mod_tb_direkt( _tb_direkt )
 
 nTArea := SELECT()
 cHeader := "Dodatne operacije /  'A' - pregled atributa"
@@ -22,13 +20,20 @@ if cDesc == nil
 	cDesc := ""
 endif
 
+if lwo_ID == nil
+	lwo_ID := .f.
+endif
+
+__wo_id := lwo_ID
+
 select aops
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
 set_f_kol(cDesc)
 
-	
+private gTBDir := "N"
+
 cRet := PostojiSifra(F_AOPS, 1, 12, 70, cHeader, @cId, dx, dy, {|Ch| key_handler(Ch) } )
 
 if VALTYPE(cDesc) == "N"
@@ -70,7 +75,12 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(aop_id)}, "aop_id", {|| _inc_id(@waop_id, "AOP_ID"), .f.}, {|| .t.}})
+if __wo_id == .f.
+
+	AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(aop_id)}, "aop_id", {|| _inc_id(@waop_id, "AOP_ID"), .f.}, {|| .t.}})
+
+endif
+
 AADD(aImeKol, {PADC("Opis", 40), {|| PADR(aop_desc, 40)}, "aop_desc"})
 
 for i:=1 to LEN(aImeKol)
@@ -94,6 +104,13 @@ do case
 		go (nTRec)
 		
 		return DE_CONT
+
+	case Ch == K_CTRL_N .or. Ch == K_F4
+		
+		__wo_id := .f.
+		set_a_kol(@ImeKol, @Kol)
+		return DE_CONT
+	
 endcase
 return DE_CONT
 

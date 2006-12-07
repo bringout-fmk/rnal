@@ -2,12 +2,12 @@
 
 
 static _e_gr_at
-
+static __wo_id
 
 // -------------------------------------------------------------
 // otvara sifrarnik artikala
 // -------------------------------------------------------------
-function s_e_gr_val(cId, nE_gr_at_id, cE_gr_vl_desc, dx, dy)
+function s_e_gr_val(cId, nE_gr_at_id, cE_gr_vl_desc, lwo_ID, dx, dy)
 local nTArea
 local cHeader
 private ImeKol
@@ -26,7 +26,12 @@ if cE_gr_vl_desc == nil
 	cE_gr_vl_desc := ""
 endif
 
+if lwo_ID == nil
+	lwo_ID := .f.
+endif
+
 _e_gr_at := nE_gr_at_id
+__wo_id := lwo_ID
 
 select e_gr_val
 set order to tag "1"
@@ -58,7 +63,11 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("ID/MC", 10), {|| PADR(sif_idmc(e_gr_vl_id, .t.),10)}, "e_gr_vl_id", {|| _inc_id(@we_gr_vl_id, "E_GR_VL_ID"), .f.}, {|| .t.}})
+if __wo_id == .f.
+
+	AADD(aImeKol, {PADC("ID/MC", 10), {|| PADR(sif_idmc(e_gr_vl_id),10)}, "e_gr_vl_id", {|| _inc_id(@we_gr_vl_id, "E_GR_VL_ID"), .f.}, {|| .t.}})
+
+endif
 
 AADD(aImeKol, {PADC("Grupa/atribut", 15), {|| "(" + ALLTRIM(g_egr_by_att(e_gr_at_id)) + ") / " + PADR(g_gr_at_desc(e_gr_at_id), 15)}, "e_gr_at_id", {|| set_e_gr_at(@we_gr_at_id) }, {|| s_e_gr_att( @we_gr_at_id ), show_it( g_gr_at_desc( we_gr_at_id ) ) }})
 
@@ -119,6 +128,16 @@ return
 // key handler funkcija
 // -----------------------------------------
 static function key_handler(Ch)
+
+do case
+
+	case Ch == K_CTRL_N .or. Ch == K_F4
+		__wo_ID := .f.
+		set_a_kol(@ImeKol, @Kol)
+		return DE_CONT
+
+endcase
+
 return DE_CONT
 
 
@@ -132,13 +151,9 @@ return STR(nId, 10)
 // -------------------------------
 // get e_gr_desc by e_gr_id
 // -------------------------------
-function g_e_gr_vl_desc(nE_gr_vl_id, lNull)
+function g_e_gr_vl_desc(nE_gr_vl_id)
 local cEGrValDesc := "?????"
 local nTArea := SELECT()
-
-if lNull == .t.
-	cEGrValDesc := ""
-endif
 
 O_E_GR_VAL
 select e_gr_val
@@ -160,14 +175,10 @@ return cEGrValDesc
 // --------------------------------------------------
 // vraæa grupu elementa po vrijednosti atributa
 // --------------------------------------------------
-function g_egr_by_att(nE_gr_att, lNull)
+function g_egr_by_att(nE_gr_att)
 local cGr := "????"
 local nTArea := SELECT()
 local nTRec := RecNo()
-
-if lNull == .t.
-	cGr := ""
-endif
 
 select e_gr_att
 set order to tag "1"
@@ -175,7 +186,7 @@ go top
 seek e_gr_at_str(nE_gr_att)
 
 if FOUND()
-	cGr := ALLTRIM( g_e_gr_desc(field->e_gr_id, lNull) )
+	cGr := ALLTRIM( g_e_gr_desc(field->e_gr_id) )
 endif
 
 select (nTArea)
