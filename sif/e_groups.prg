@@ -94,9 +94,17 @@ return STR(nId, 10)
 // -------------------------------
 // get e_gr_desc by e_gr_id
 // -------------------------------
-function g_e_gr_desc(nE_gr_id)
+function g_e_gr_desc(nE_gr_id, lEmpty)
 local cEGrDesc := "?????"
 local nTArea := SELECT()
+
+if lEmpty == nil
+	lEmpty := .f.
+endif
+
+if lEmpty == .t.
+	cEGrDesc := ""
+endif
 
 O_E_GROUPS
 select e_groups

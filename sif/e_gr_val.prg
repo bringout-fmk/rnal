@@ -151,9 +151,17 @@ return STR(nId, 10)
 // -------------------------------
 // get e_gr_desc by e_gr_id
 // -------------------------------
-function g_e_gr_vl_desc(nE_gr_vl_id)
+function g_e_gr_vl_desc( nE_gr_vl_id, lEmpty )
 local cEGrValDesc := "?????"
 local nTArea := SELECT()
+
+if lEmpty == nil
+	lEmpty := .f.
+endif
+
+if lEmpty == .t.
+	cEGrValDesc := ""
+endif
 
 O_E_GR_VAL
 select e_gr_val
@@ -175,10 +183,18 @@ return cEGrValDesc
 // --------------------------------------------------
 // vraæa grupu elementa po vrijednosti atributa
 // --------------------------------------------------
-function g_egr_by_att(nE_gr_att)
-local cGr := "????"
+function g_egr_by_att( nE_gr_att, lEmpty )
+local cGr := "?????"
 local nTArea := SELECT()
 local nTRec := RecNo()
+
+if lEmpty == nil
+	lEmpty := .f.
+endif
+
+if lEmpty == .t.
+	cGr := ""
+endif
 
 select e_gr_att
 set order to tag "1"
@@ -186,7 +202,7 @@ go top
 seek e_gr_at_str(nE_gr_att)
 
 if FOUND()
-	cGr := ALLTRIM( g_e_gr_desc(field->e_gr_id) )
+	cGr := ALLTRIM( g_e_gr_desc( field->e_gr_id, lEmpty ) )
 endif
 
 select (nTArea)

@@ -317,6 +317,16 @@ do case
 	// otvaranje naloga za doradu
 	case (UPPER(CHR(Ch)) == "D")
 		
+		// provjeri ima li pravo pristupa...
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "DORADA")
+			
+			MsgBeep( cZabrana )
+			
+			select docs
+			return DE_CONT
+			
+		endif
+		
 		// provjeri da li je zauzet
 		if is_doc_busy()
 			
@@ -354,6 +364,16 @@ do case
 
 	// zatvaranje naloga
 	case (UPPER(CHR(Ch)) == "Z")
+		
+		// ima li pravo pristupa...
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "ZATVORI")
+			
+			MsgBeep( cZabrana )
+
+			select docs
+			return DE_CONT
+			
+		endif
 		
 		// provjeri da li je zauzet
 		if is_doc_busy()
@@ -400,6 +420,15 @@ do case
 	// lista promjena na nalogu
 	case (UPPER(CHR(Ch)) == "L")
 		
+		// ima li pravo pristupa
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "LOGVIEW")
+			
+			MsgBeep( cZabrana )
+			select docs
+			return DE_CONT
+			
+		endif
+	
 		nDoc_no := docs->doc_no
 		
 		frm_lst_log( nDoc_no )
@@ -408,6 +437,16 @@ do case
 
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )
+		
+		// ima li pravo pristupa...
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "PROMJENE")
+			
+			MsgBeep( cZabrana )
+			
+			select docs
+			return DE_CONT
+			
+		endif
 		
 		nTRec := RECNO()
 		

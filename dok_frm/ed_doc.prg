@@ -6,6 +6,8 @@
 static l_new
 static _doc
 static _doc_it
+static __item_no
+static __art_id
 static l_auto_tab
 
 
@@ -41,6 +43,7 @@ local i
 local nX
 local nY
 local nRet := 1
+local cColor := "GR+/B"
 private ImeKol
 private Kol
 
@@ -72,7 +75,7 @@ do while .t.
 		m_x -= 6
 		m_y -= 50
 		
-		@ m_x + 1, m_y + 2 SAY "*** osnovni podaci" COLOR "I"
+		@ m_x + 1, m_y + 1 SAY PADR("*** osnovni podaci",20) COLOR cColor
 		
 		docs_kol(@ImeKol, @Kol)
 		
@@ -83,7 +86,7 @@ do while .t.
 		
 		m_x += 6
 		
-		@ m_x + 1, m_y + 2 SAY "*** stavke naloga" COLOR "I"
+		@ m_x + 1, m_y + 1 SAY PADR("*** stavke naloga",20) COLOR cColor
 		
 		docit_kol(@ImeKol, @Kol)
 
@@ -94,7 +97,7 @@ do while .t.
 		
 		m_y += 50
 		
-		@ m_x + 1, m_y + 2 SAY "*** dod.oper." COLOR "I"
+		@ m_x + 1, m_y + 1 SAY PADR("*** dod.oper.",20) COLOR cColor
 		
 		docop_kol(@ImeKol, @Kol)
 		
@@ -273,6 +276,9 @@ do case
 			
 		elseif ALIAS() == "_DOC_IT"
 			
+			__art_id := field->art_id
+			__item_no := field->doc_it_no
+			
 			select _doc_ops
 			nRet := DE_ABORT
 
@@ -331,7 +337,7 @@ do case
 			
 			select _doc_ops
 			
-			if e_doc_ops( _doc, .t. ) <> 0
+			if e_doc_ops( _doc, .t., __art_id ) <> 0
 			
 				select _doc_ops
 				nRet := DE_REFRESH
@@ -381,7 +387,7 @@ do case
 	
 		elseif ALIAS() == "_DOC_OPS"
 
-			if e_doc_ops( _doc, .f. ) <> 0
+			if e_doc_ops( _doc, .f., __art_id ) <> 0
 			
 				select _doc_ops
 				nRet := DE_REFRESH

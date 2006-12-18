@@ -25,10 +25,22 @@ if cCustDesc == nil
 endif
 
 set_a_kol(@ImeKol, @Kol)
+
+if VALTYPE(cId) == "C"
+	//try to validate
+	if VAL(cId) <> 0
+		cId := VAL(cId)
+		cCustDesc := ""
+	endif
+endif
+
 // postavi filter...
 set_f_kol(cCustDesc)	
-	
+
+altd()
+
 cRet := PostojiSifra(F_CUSTOMS, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
+
 
 if !EMPTY(cCustDesc)
 	set filter to
@@ -47,7 +59,10 @@ static function set_f_kol(cCustDesc)
 local cFilter := ""
 
 if !EMPTY(cCustDesc)
-	cFilter += "cust_desc = " + cm2str(cCustDesc)
+	
+	cCustDesc := ALLTRIM(cCustDesc)
+	cFilter += "ALLTRIM(UPPER(cust_desc)) = " + cm2str( UPPER(cCustDesc) )
+	
 endif
 
 if !EMPTY(cFilter)
@@ -120,9 +135,17 @@ return STR(nId, 10)
 // -------------------------------
 // get cust_id_desc by cust_id
 // -------------------------------
-function g_cust_desc(nCust_id)
+function g_cust_desc(nCust_id, lEmpty)
 local cCustDesc := "?????"
 local nTArea := SELECT()
+
+if lEmpty == nil
+	lEmpty := .f.
+endif
+
+if lEmpty == .t.
+	cCustDesc := ""
+endif
 
 O_CUSTOMS
 select customs

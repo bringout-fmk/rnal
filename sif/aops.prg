@@ -30,6 +30,17 @@ select aops
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
+
+if VALTYPE(cId) == "C"
+	//try to validate
+	if VAL(cId) <> 0
+		
+		cId := VAL(cId)
+		cDesc := ""
+		
+	endif
+endif
+
 set_f_kol(cDesc)
 
 private gTBDir := "N"
@@ -57,7 +68,7 @@ local cFilter := ""
 
 if !EMPTY(cDesc)
 
-	cFilter += 'UPPER(aop_desc) = ' + cm2str(UPPER(ALLTRIM(cDesc))) 
+	cFilter += 'ALLTRIM(UPPER(aop_desc)) = ' + cm2str(UPPER(ALLTRIM(cDesc))) 
 endif
 
 if !EMPTY(cFilter)
@@ -82,12 +93,37 @@ if __wo_id == .f.
 endif
 
 AADD(aImeKol, {PADC("Opis", 40), {|| PADR(aop_desc, 40)}, "aop_desc"})
+AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
 next
 
 return
+
+
+
+// -----------------------------------------------
+// dodatna operacija u naziv artikla ???
+// -----------------------------------------------
+function aop_in_desc( nAop_id )
+local lRet := .f.
+local nTArea := SELECT()
+
+select aops
+set order to tag "1"
+go top
+seek aopid_str( nAop_id )
+
+if FOUND()
+	if field->in_art_desc == "*"
+		lRet := .t.
+	endif
+endif
+
+select (nTArea)
+return lRet
+
 
 
 // -----------------------------------------
@@ -125,9 +161,17 @@ return STR(nId, 10)
 // -------------------------------
 // get aop_desc by aop_id
 // -------------------------------
-function g_aop_desc(nAop_id)
+function g_aop_desc( nAop_id, lEmpty )
 local cAopDesc := "?????"
 local nTArea := SELECT()
+
+if lEmpty == nil
+	lEmpty := .f.
+endif
+
+if lEmpty == .t.
+	cAopDesc := ""
+endif
 
 O_AOPS
 select aops

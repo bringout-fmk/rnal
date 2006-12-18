@@ -122,6 +122,13 @@ do case
 	// detaljni prikaz box-a sa promjenama
 	case (Ch == K_ENTER)
 	
+		// ima li pravo pristupa
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "LOGDETAIL")
+			msgbeep( cZabrana )
+			select docs
+			return DE_CONT
+		endif
+		
 		sh_log_box( cLogDesc )
 		return DE_CONT
 	

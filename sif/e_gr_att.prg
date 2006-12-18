@@ -106,9 +106,10 @@ endif
 
 AADD(aImeKol, {PADC("Elem.grupa", 10), {|| PADR(g_e_gr_desc(e_gr_id), 10)}, "e_gr_id", {|| set_gr_id(@we_gr_id) }, {|| s_e_groups(@we_gr_id), show_it( g_e_gr_desc( we_gr_id ) ) }})
 
-AADD(aImeKol, {PADC("Neoph", 5), {|| e_gr_at_required}, "e_gr_at_required", {|| .t.}, {|| .t. } })
-
 AADD(aImeKol, {PADC("Opis", 30), {|| PADR(e_gr_at_desc, 30)}, "e_gr_at_desc"})
+
+AADD(aImeKol, {PADC("Neoph", 5), {|| e_gr_at_required}, "e_gr_at_required", {|| .t.}, {|| .t. } })
+AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -192,9 +193,17 @@ return STR(nId, 10)
 // --------------------------------------------------
 // get e_gr_at_desc by e_gr_att_id
 // --------------------------------------------------
-function g_gr_at_desc(nE_gr_att_id, lShowRequired )
+function g_gr_at_desc( nE_gr_att_id, lShowRequired, lEmpty )
 local cEGrAttDesc := "?????"
 local nTArea := SELECT()
+
+if lEmpty == nil
+	lEmpty := .f.
+endif
+
+if lEmpty == .t.
+	cEGrAttDesc := ""
+endif
 
 if lShowRequired == nil
 	lShowRequired := .f.
@@ -233,6 +242,28 @@ select (nTArea)
 return cEGrAttDesc
 
 
+// ------------------------------------------
+// gr_att in art_desc ???
+// ------------------------------------------
+function gr_att_in_desc( nE_gr_att )
+local lRet := .f.
+local nTArea := SELECT()
+
+select e_gr_att
+set order to tag "1"
+seek e_gr_at_str( nE_gr_att )
+
+if FOUND()
+	if field->in_art_desc == "*"
+		lRet := .t.
+	endif
+endif
+
+select (nTArea)
+return lRet
+
+
+
 // ------------------------------------------------------
 // napuni matricu aAtt sa atributima grupa
 // ------------------------------------------------------
@@ -251,3 +282,4 @@ set filter to
 
 select (nTArea)
 return
+

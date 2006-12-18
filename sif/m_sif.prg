@@ -14,23 +14,59 @@ gTBDir := "N"
 o_sif_tables()
 
 AADD(opc, "1. narucioci                      ")
-AADD(opcexe, {|| s_customers() })
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "CUSTOMERS")
+	AADD(opcexe, {|| s_customers() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
 AADD(opc, "2. kontakti")
-AADD(opcexe, {|| s_contacts() })
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "CONTACTS")
+	AADD(opcexe, {|| s_contacts() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
 AADD(opc, "-------------------------")
 AADD(opcexe, {|| nil})
+
 AADD(opc, "5. artikli")
-AADD(opcexe, {|| s_articles() })
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "ARTICLES")
+	AADD(opcexe, {|| s_articles() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
 AADD(opc, "6. elementi, grupe ")
-AADD(opcexe, {|| s_e_groups() })
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "E_GROUPS")
+	AADD(opcexe, {|| s_e_groups() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
 AADD(opc, "7. elementi atributi grupe")
-AADD(opcexe, {|| s_e_gr_vals() })
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "E_GR_ATT")
+	AADD(opcexe, {|| s_e_gr_vals() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
 AADD(opc, "-------------------------")
 AADD(opcexe, {|| nil})
+
 AADD(opc, "8. dodatne operacije")
-AADD(opcexe, {|| s_aops() })
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "AOPS")
+	AADD(opcexe, {|| s_aops() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
 AADD(opc, "9. dodatne operacije, atributi")
-AADD(opcexe, {|| s_aops_att() })
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "AOPS_ATT")
+	AADD(opcexe, {|| s_aops_att() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
 
 Izbor := 1
 

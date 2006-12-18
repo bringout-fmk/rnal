@@ -12,6 +12,8 @@ static l_auto_find
 // cId - artikal id
 // ------------------------------------------------
 function s_articles(cId, lAutoFind)
+local nBoxX := 22
+local nBoxY := 77
 local nTArea
 local cHeader
 local cFooter
@@ -69,13 +71,12 @@ if l_open_dbedit
 	cOptions += "<c-T> brisi "
 	cOptions += "<F2> ispravi "
 	cOptions += "<F4> dupliciraj "
-	cOptions += "<P> pregled"
 
-	Box(, 16, 77, .t.)
+	Box(, nBoxX, nBoxY, .t.)
 	
-	@ m_x + 16, m_y + 2 SAY cOptions
+	@ m_x + nBoxX, m_y + 2 SAY cOptions
 
-	ObjDbedit(, 16, 77, {|| key_handler(Ch)}, cHeader, cFooter , .t.,,,,1)
+	ObjDbedit(, nBoxX, nBoxY, {|| key_handler(Ch)}, cHeader, cFooter , .t.,,,,7)
 
 	BoxC()
 
@@ -116,6 +117,9 @@ local cArt_desc := ""
 local nTRec := RecNO()
 local nRet
 
+// prikazi box preview
+box_preview( 17, 1, 77 )
+
 do case
 	
 	case l_auto_find == .t.
@@ -134,6 +138,14 @@ do case
 	case Ch == K_CTRL_N
 		
 		// novi artikal...
+		
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "ARTNEW")
+			
+			MsgBeep( cZabrana )
+			select articles
+			
+			return DE_CONT
+		endif
 		
 		// dodijeli i zauzmi novu sifru...
 		select articles
@@ -158,6 +170,14 @@ do case
 		
 		// ispravka sifre
 		
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "ARTEDIT")
+			
+			MsgBeep( cZabrana )
+			select articles
+			return DE_CONT
+			
+		endif
+		
 		if s_elements( field->art_id ) == 1
 			
 			select articles
@@ -172,6 +192,15 @@ do case
 	
 	case Ch == K_F4
 
+		// ima li pravo pristupa...
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "ARTDUPLI")
+			
+			Msgbeep( cZabrana )
+			select articles
+			return DE_CONT
+			
+		endif
+		
 		// dupliciranje (kloniranje) artikla....
 		select articles
 
@@ -191,6 +220,12 @@ do case
 	
 	case Ch == K_CTRL_T
 
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "ARTNEW")
+			msgbeep( cZabrana )
+			select articles
+			return DE_CONT
+		endif
+		
 		if art_delete( field->art_id, .t. ) == 1
 			
 			return DE_REFRESH
@@ -199,12 +234,6 @@ do case
 		
 		return DE_CONT
 
-	case UPPER(CHR(Ch)) == "P"
-		
-		// preview
-		show_preview()
-		
-		return DE_CONT
 	
 	case Ch == K_ENTER
 
@@ -226,83 +255,27 @@ endcase
 return DE_CONT
 
 
-// ---------------------------------------------
-// prikazi u boxu preview artikla
-// ---------------------------------------------
-static function show_preview()
-local nX := m_x
-local nY := m_y
+// ----------------------------------------
+// prikazi info artikla u box preview
+// ----------------------------------------
+static function box_preview(nX, nY, nLen)
 local aDesc := {}
-local cOk := "OK"
-local nBoxX := 0
-local nBoxY := 77
 local i
-private GetList:={}
 
 aDesc := TokToNiz( articles->art_desc, ";" )
 
-nBoxX := LEN(aDesc) + 6
+@ nX, nY SAY PADR("ID: " + artid_str(articles->art_id) + SPACE(3) + "MATCH CODE: " + articles->match_code, nLen) COLOR "GR+/G" 
 
-Box(, nBoxX, nBoxY)
-	
-	@ m_x + 1, m_y + 2 SAY "- artikal id: " + artid_str(articles->art_id)
-	
-	@ m_x + 2, m_y + 2 SAY "- match code: " + articles->match_code
-	
-	@ m_x + 3, m_y + 2 SAY "- elementi / d.operacije: "
+for i:=1 to 5
+	@ nX + i, nY SAY PADR("", nLen) COLOR "BG+/B"
+next
 
-	for i:=1 to LEN(aDesc)
-		
-		@ m_x + 4 + i, m_y + 4 SAY "* " + PADR(ALLTRIM(aDesc[i]), 72) COLOR "BG+/B"
-	
-	next
-	
-	@ m_x + nBoxX, m_y + 2 GET cOk
+for i:=1 to LEN(aDesc)
 
-	read
-BoxC()
+	@ nX + i, nY SAY PADR( " * " + ALLTRIM(aDesc[i]), nLen ) COLOR "BG+/B"
 
-if LastKey() == K_ENTER .or. LastKey() == K_ESC
-	
-	m_x := nX
-	m_y := nY
-	
-	return 1
-endif
+next
 
-m_x := nX
-m_y := nY
-
-return 1
-
-
-
-
-// -------------------------------------------
-// poruka artikal zauzet
-// -------------------------------------------
-static function msg_art_busy()
-MsgBeep("Neko vrsi ispravku artikla#Pregled onemogucen")
-return
-
-
-// -------------------------------------------
-// da li je artikal zauzet
-// -------------------------------------------
-static function is_art_busy()
-local lRet := .f.
-if field->art_status == 3
-	lRet := .t.
-endif
-return lRet
-
-// -------------------------------------------
-// setuje status artikla
-// -------------------------------------------
-static function set_art_status( nStatus )
-Scatter()
-_art_status := nStatus
-Gather()
 return
 
 
@@ -316,9 +289,17 @@ return STR(nId, 10)
 // -------------------------------
 // get art_desc by art_id
 // -------------------------------
-function g_art_desc(nArt_id)
+function g_art_desc(nArt_id, lEmpty)
 local cArtDesc := "?????"
 local nTArea := SELECT()
+
+if lEmpty == nil
+	lEmpty := .f.
+endif
+
+if lEmpty == .t.
+	cArtDesc := ""
+endif
 
 O_ARTICLES
 select articles
@@ -587,7 +568,7 @@ local nE_gr_att
 local nE_gr_val
 local cE_gr_val
 local cE_gr_att
-local lE_att := .f.
+local lAppend := .f.
 
 // ukini filtere
 select elements
@@ -631,38 +612,20 @@ do while !EOF() .and. field->art_id == nArt_id
 		// atributi...
 		nE_gr_att := g_gr_att_val( nE_gr_val )
 		cE_gr_att := ALLTRIM(g_gr_at_desc( nE_gr_att ))
-	
-		// generisi samo za tip i debljinu...
-		if "tip" $ cE_gr_att .or.  ;
-			"deblj" $ cE_gr_att
-	
+
+		if gr_att_in_desc( nE_gr_att )
+		
+			// dodaj u art_desc
+			
 			__add_to_str( @cArt_desc, cE_gr_val )
 			
-			if "tip" $ cE_gr_att
-				__add_to_str( @cArt_mcode, ;
-					UPPER( LEFT(cE_gr_val, 2) ) , .t.)
-			endif
-			
+			// samo ako je debljina nastiklaj mm
 			if "deblj" $ cE_gr_att
-			
 				__add_to_str( @cArt_desc, "mm" )
-				__add_to_str( @cArt_mcode, cE_gr_val, .t. )
-				
 			endif
-		
-			lE_Att := .t.
-			
-		endif
-		
-		// vrsta sirovine
-		if "vrsta" $ cE_gr_att
-		
-			if cE_gr_val $ "kupac#narucioc"
-			
-				__add_to_str( @cArt_desc, ;
-					"(" + cE_gr_val + ")" )
-				
-			endif
+
+			// dodaj u mcode...
+			__add_to_str( @cArt_mcode, UPPER(LEFT(cE_gr_val, 2)), .t.)
 			
 		endif
 		
@@ -687,21 +650,28 @@ do while !EOF() .and. field->art_id == nArt_id
 		nAop_att_id := field->aop_att_id
 		cAop_att_desc := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
 
-		if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
+		// da li operacija ide u naziv...
+		if aop_in_desc( nAop_id )
 			
-			__add_to_str( @cArt_desc, cAop_desc )
+			if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
+				__add_to_str( @cArt_desc, cAop_desc )
+				__add_to_str( @cArt_mcode, ;
+					UPPER(LEFT(cAop_desc, 1)), .t.)
+			endif
 			
-			__add_to_str( @cArt_mcode, ;
-				UPPER(LEFT(cAop_desc, 1)), .t.)
+		endif
 		
-		endif
-
-		if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
+		// da li atribut ide u naziv...
+		if aop_att_in_desc( nAop_att_id )
+		
+			if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
 			
-			__add_to_str( @cArt_desc, cAop_att_desc )
+				__add_to_str( @cArt_desc, cAop_att_desc )
+			
+			endif
 			
 		endif
-
+		
 		skip
 	enddo
 
@@ -720,7 +690,15 @@ seek artid_str( nArt_id )
 
 if FOUND()
 
-	if !EMPTY(cArt_desc) .and. lE_att == .t. ;
+	if !lNew
+		if ALLTRIM(cArt_desc) <> ALLTRIM(articles->art_desc)
+			lAppend := .t.
+		endif
+	else
+		lAppend := .t.
+	endif
+
+	if !EMPTY(cArt_desc) .and. lAppend == .t. ;
 		.and. (!lNew .or. (lNew .and. Pitanje(,"Novi artikal, snimiti promjene ?", "D") == "D"))
 
 		cArt_desc := PADR(cArt_desc, 250)
@@ -742,8 +720,10 @@ if FOUND()
 		
 	endif
 		
-	// izbrisi tu stavku....
-	art_delete( nArt_id, .t. , .t. )
+	if lNew	
+		// izbrisi tu stavku....
+		art_delete( nArt_id, .t. , .t. )
+	endif
 	
 endif
 
@@ -794,14 +774,6 @@ BoxC()
 ESC_RETURN 1
 
 return 1
-
-
-
-// ------------------------------------
-// vraca string STR(3)
-// ------------------------------------
-static function art_busy()
-return STR(3,1)
 
 
 
@@ -872,4 +844,63 @@ enddo
 select (nTArea)
 return
 
+
+
+// ------------------------------------------------
+// napuni matricu aElem cisto sa elementima artikla
+// aElem - matrica sa elementima
+// nArt_id - id artikla
+// 
+// aElem = { el_id, grupa }
+// ------------------------------------------------
+function _g_art_elements(aElem, nArt_id)
+local nTArea := SELECT()
+local cPom := ""
+
+aElem := {}
+
+// elementi
+select elements
+set order to tag "1"
+go top
+seek elid_str( nArt_id )
+
+do while !EOF() .and. field->art_id == nArt_id
+
+	cPom := g_e_gr_desc( field->e_gr_id )
+	cPom += " "
+	cPom += get_el_desc( field->el_id )
+
+	AADD(aElem, { field->el_id, cPom } )
+		
+	skip
+
+enddo
+	
+select (nTArea)
+return
+
+
+
+// -------------------------------------
+// get element description 
+// -------------------------------------
+static function get_el_desc( nEl_id )
+local xRet := ""
+local nTArea := SELECT()
+
+select e_att
+set order to tag "1"
+go top
+seek elid_str( nEl_id )
+
+do while !EOF() .and. field->el_id == nEl_id
+	
+	xRet += ALLTRIM(  g_e_gr_vl_desc(field->e_gr_vl_id) ) + " "
+	
+	skip
+enddo
+
+select (nTArea)
+return xRet
 

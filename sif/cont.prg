@@ -31,6 +31,18 @@ select contacts
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol, nCust_id)
+
+if VALTYPE(cId) == "C"
+	//try to validate
+	if VAL(cId) <> 0
+	
+		cId := VAL(cId)
+		nCust_id := -1
+		cContDesc := ""
+		
+	endif
+endif
+
 cust_filter(nCust_id, cContDesc)
 	
 cRet := PostojiSifra(F_CONTACTS, 1, 10, 70, cHeader, @cId, dx, dy)
@@ -113,7 +125,8 @@ if !EMPTY(cContDesc)
 		cFilter += " .and. "
 	endif
 	
-	cFilter += " cont_desc = " + cm2str(cContDesc)
+	cContDesc := ALLTRIM(cContDesc)
+	cFilter += " ALLTRIM(UPPER(cont_desc)) = " + cm2str(UPPER(cContDesc))
 	
 endif
 

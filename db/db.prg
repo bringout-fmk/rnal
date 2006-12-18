@@ -276,6 +276,7 @@ local aDbf
 aDbf:={}
 AADD(aDBf,{ "doc_no", "N", 10, 0 })
 AADD(aDBf,{ "doc_it_no", "N", 4, 0 })
+AADD(aDBf,{ "doc_it_el_no", "N", 10, 0 })
 AADD(aDBf,{ "doc_op_no", "N", 4, 0 })
 AADD(aDBf,{ "aop_id", "N", 10,  0 })
 AADD(aDBf,{ "aop_att_id", "N", 10,  0 })
@@ -426,6 +427,7 @@ AADD(aDBf,{ "e_gr_at_id", "N", 10, 0 })
 AADD(aDBf,{ "e_gr_id", "N", 10, 0 })
 AADD(aDBf,{ "e_gr_at_desc", "C", 100, 0 })
 AADD(aDBf,{ "e_gr_at_required", "C", 1, 0 })
+AADD(aDBf,{ "in_art_desc", "C", 1, 0 })
 AADD(aDBf,{ "match_code", "C", 10, 0 })
 
 return aDbf
@@ -458,6 +460,7 @@ local aDbf
 aDbf:={}
 AADD(aDBf,{ "aop_id", "N", 10, 0 })
 AADD(aDBf,{ "aop_desc", "C", 100, 0 })
+AADD(aDBf,{ "in_art_desc", "C", 1, 0 })
 AADD(aDBf,{ "match_code", "C", 10, 0 })
 
 return aDbf
@@ -474,6 +477,7 @@ aDbf:={}
 AADD(aDBf,{ "aop_att_id", "N", 10, 0 })
 AADD(aDBf,{ "aop_id", "N", 10, 0 })
 AADD(aDBf,{ "aop_att_desc", "C", 100, 0 })
+AADD(aDBf,{ "in_art_desc", "C", 1, 0 })
 AADD(aDBf,{ "match_code", "C", 10, 0 })
 
 return aDbf

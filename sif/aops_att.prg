@@ -36,6 +36,18 @@ select aops_att
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
+
+if VALTYPE(cId) == "C"
+	//try to validate
+	if VAL(cId) <> 0
+		
+		cId := VAL(cId)
+		nAop_id := -1
+		cAop_Desc := ""
+		
+	endif
+endif
+
 aop_filter(nAop_id, cAop_desc)
 
 private gTBDir := "N"
@@ -71,7 +83,7 @@ if !EMPTY(cAop_desc)
 		cFilter += ' .and. '
 	endif
 
-	cFilter += 'UPPER(aop_att_desc) = ' + cm2str(UPPER(ALLTRIM(cAop_desc))) 
+	cFilter += 'ALLTRIM(UPPER(aop_att_desc)) = ' + cm2str(UPPER(ALLTRIM(cAop_desc))) 
 endif
 
 if !EMPTY(cFilter)
@@ -98,6 +110,7 @@ endif
 
 AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| set_aop_id(@waop_id) }, {|| s_aops( @waop_id ), show_it(g_aop_desc(waop_id))  }})
 AADD(aImeKol, {PADR("Opis", 40), {|| PADR(aop_att_desc, 40)}, "aop_att_desc"})
+AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -139,12 +152,42 @@ function aop_att_str(nId)
 return STR(nId, 10)
 
 
+// -----------------------------------------------
+// dodatna operacija atribut u naziv artikla ???
+// -----------------------------------------------
+function aop_att_in_desc( nAop_att_id )
+local lRet := .f.
+local nTArea := SELECT()
+
+select aops_att
+set order to tag "1"
+go top
+seek aop_att_str( nAop_att_id )
+
+if FOUND()
+	if field->in_art_desc == "*"
+		lRet := .t.
+	endif
+endif
+
+select (nTArea)
+return lRet
+
+
 // -------------------------------
 // get aop_desc by aop_id
 // -------------------------------
-function g_aop_att_desc(nAop_att_id)
+function g_aop_att_desc( nAop_att_id, lEmpty )
 local cAopAttDesc := "?????"
 local nTArea := SELECT()
+
+if lEmpty == nil
+	lEmpty := .f.
+endif
+
+if lEmpty == .t.
+	cAopAttDesc := ""
+endif
 
 O_AOPS_ATT
 select aops_att
