@@ -1137,9 +1137,9 @@ seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
 do while !EOF() .and. field->doc_no == nDoc_no ;
 		.and. field->doc_log_no == nDoc_log_no
 
-	cRet += "artikal: " + PADR(g_art_desc( field->art_id ), 10)
+	cRet += ALLTRIM("artikal: " + PADR(g_art_desc( field->art_id ), 30))
 	cRet += "#"
-	cRet += "opis:" + ALLTRIM( field->char_1 )
+	cRet += "opis: " + ALLTRIM( field->char_1 )
 	
 	select doc_lit
 	

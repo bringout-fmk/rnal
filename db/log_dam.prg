@@ -19,6 +19,9 @@ tmp_damage( @aDbf )
 
 // kreiraj pomocnu tabelu...
 cre_tmp1( aDbf )
+o_tmp1()
+select _tmp1
+zap
 
 select docs
 __doc_no := field->doc_no
@@ -60,6 +63,7 @@ static function tmp_damage( aDbf )
 AADD(aDbf, { "doc_no", "N", 10, 0 })
 AADD(aDbf, { "doc_it_no", "N", 4, 0 })
 AADD(aDbf, { "art_id", "N", 10, 0 })
+AADD(aDbf, { "doc_it_qtty", "N", 12, 2 })
 AADD(aDbf, { "art_marker", "C", 1, 0 })
 AADD(aDbf, { "art_desc", "C", 150, 0 })
 
@@ -88,6 +92,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	_doc_no := doc_it->doc_no
 	_doc_it_no := doc_it->doc_it_no
 	_art_id := doc_it->art_id
+	_doc_it_qtty := doc_it->doc_it_qtty
 	
 	Gather()
 	
@@ -107,6 +112,7 @@ static function _box_damage( cDesc )
 local nBoxX := 14
 local nBoxY := 77
 local cHeader
+local lLogCh := .f.
 local cFooter
 local cOptions
 private GetList:={}
@@ -135,19 +141,31 @@ BoxC()
 
 if LastKey() == K_ESC
 
-	if Pitanje(, "Logirati promjene (D/N) ?", "D") == "N"
+	// provjeri da li treba logirati ista...
+	select _tmp1
+	go top
+
+	do while !EOF()
+		if field->art_marker == "*"
+			lLogCh := .t.
+			exit
+		endif
+		skip
+	enddo
+	
+	if lLogCh == .t. .and. Pitanje(, "Logirati promjene (D/N) ?", "D") == "D"
+		// daj opis promjene
+		_get_ch_desc( @cDesc )
+		cDesc := ""
+		return 1
 		
-		// unesi opis....
+	else
 		cDesc := ""
 		return 0
-		
 	endif
-	
-	_get_ch_desc( @cDesc )
-	
 endif
 
-return 1
+return 0
 
 
 // ------------------------------------------
@@ -158,15 +176,41 @@ aImeKol := {}
 aKol := {}
 
 AADD(aImeKol, {"rbr" , {|| docit_str( doc_it_no ) }, "doc_it_no", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"artikal" , {|| PADR(g_art_desc( art_id ), 15) }, "art_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"artikal/kol" , {|| sh_article( art_id, doc_it_qtty ) }, "art_id", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"mark" , {|| PADR( art_marker, 4 ) }, "art_marker", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"opis" , {|| PADR( art_desc, 20 ) }, "art_desc", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"opis" , {|| PADR( art_desc, 35 ) }, "art_desc", {|| .t.}, {|| .t.} })
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
 next
 
 return
+
+// -----------------------------------------
+// prikaz artikla u tabeli
+// -----------------------------------------
+static function sh_article( nArt_id , nQtty )
+local xRet := "???"
+local cTmp 
+local nTmp
+
+cTmp := ALLTRIM( g_art_desc( nArt_id ) )
+nTmp := LEN( cTmp )
+
+if nTmp < 18
+	xRet := cTmp 
+else
+	xRet := PADR(cTmp, 15)
+endif
+
+if !EMPTY(xRet)
+
+	xRet += " /"
+	xRet += ALLTRIM( STR( nQtty, 12, 2 ) )
+	
+endif
+
+return PADR(xRet, 25)
 
 
 // ---------------------------------------

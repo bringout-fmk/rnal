@@ -256,8 +256,6 @@ _del_tmp( PRIVPATH + cTbName + ".DBF" )
 
 DBcreate2(PRIVPATH + cTbName + ".DBF", aFields)
 
-o_tmp1()
-
 return
 
 // ------------------------------------------
@@ -274,8 +272,6 @@ endif
 _del_tmp( PRIVPATH + cTbName + ".DBF" )  
 
 DBcreate2(PRIVPATH + cTbName + ".DBF", aFields)
-
-o_tmp2()
 
 return
 
