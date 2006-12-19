@@ -191,6 +191,8 @@ do case
 		xRet := "placanje"
 	case cType == "20"
 		xRet := "artikli"
+	case cType == "21"
+		xRet := "lom"
 	case cType == "30"
 		xRet := "d.operacije"
 endcase
@@ -270,6 +272,8 @@ do case
 		cRet := _lit_13_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "20"
 		cRet := _lit_20_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "21"
+		cRet := _lit_21_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "30"
 		cRet := _lit_30_get(nDoc_no, nDoc_log_no)
 endcase
@@ -334,4 +338,6 @@ if LastKey() == K_ESC .or. cResp == "OK"
 endif
 
 return 
+
+
 

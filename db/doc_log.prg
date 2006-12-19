@@ -275,6 +275,7 @@ _lit_13_insert( cAction, nDoc_no, nDoc_log_no, aArr )
 return
 
 
+
 // -----------------------------------
 // punjenje loga sa stavkama tipa 13
 // -----------------------------------
@@ -293,6 +294,53 @@ replace int_1 with aArr[1, 1]
 replace char_1 with aArr[1, 2]
 replace char_2 with aArr[1, 3]
 replace doc_lit_action with cAction
+
+return
+
+
+
+// ----------------------------------------------------
+// logiranje podataka o lomu...
+// nDoc_no - dokument no
+// cDesc - opis
+// cAction - akcija 
+// ----------------------------------------------------
+function log_damage( nDoc_no, cDesc, cAction )
+local nDoc_log_no
+local cDoc_log_type
+
+select _tmp1
+if RECCOUNT2() == 0
+	return
+endif
+
+if ( cAction == nil)
+	cAction := "+"
+endif
+
+cDoc_log_type := "21"
+nDoc_log_no := _inc_log_no( nDoc_no )
+
+_d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
+
+select _tmp1
+go top
+
+do while !EOF() 
+
+	if field->art_marker <> "*"
+		skip
+		loop
+	endif
+	
+	_lit_21_insert( cAction, nDoc_no, nDoc_log_no, ;
+			field->art_id,  ;
+			field->art_desc )
+	
+	select _tmp1
+	skip
+	
+enddo
 
 return
 
@@ -413,6 +461,30 @@ replace char_2 with cDoc_sch
 replace doc_lit_action with cAction
 
 return
+
+
+// -----------------------------------
+// punjenje loga sa stavkama tipa 21
+// -----------------------------------
+function _lit_21_insert(cAction, nDoc_no, nDoc_log_no, ;
+			nArt_id, cArt_desc )
+local nDoc_lit_no
+
+nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
+
+select doc_lit
+append blank
+
+replace doc_no with nDoc_no
+replace doc_log_no with nDoc_log_no
+replace doc_lit_no with nDoc_lit_no
+replace art_id with nArt_id
+replace char_1 with cArt_desc
+replace doc_lit_action with cAction
+
+return
+
+
 
 
 // -----------------------------------
@@ -1051,6 +1123,35 @@ return cRet
 
 
 // ----------------------------------------------
+// vraca string napunjen promjenama tipa "21"
+// ----------------------------------------------
+function _lit_21_get(nDoc_no, nDoc_log_no)
+local cRet := ""
+local nTArea := SELECT()
+
+select doc_lit
+set order to tag "1"
+go top
+seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
+
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_log_no == nDoc_log_no
+
+	cRet += "artikal: " + PADR(g_art_desc( field->art_id ), 10)
+	cRet += "#"
+	cRet += "opis:" + ALLTRIM( field->char_1 )
+	
+	select doc_lit
+	
+	skip
+enddo
+
+select (nTArea)
+
+return cRet
+
+
+// ----------------------------------------------
 // vraca string napunjen promjenama tipa "30"
 // ----------------------------------------------
 function _lit_30_get(nDoc_no, nDoc_log_no)
@@ -1172,6 +1273,7 @@ select (nTArea)
 return cRet
 
 
+
 // ----------------------------------------------
 // vraca string napunjen promjenama tipa "12"
 // ----------------------------------------------
@@ -1199,6 +1301,7 @@ enddo
 select (nTArea)
 
 return cRet
+
 
 
 // ----------------------------------------------
@@ -1230,5 +1333,6 @@ enddo
 select (nTArea)
 
 return cRet
+
 
 

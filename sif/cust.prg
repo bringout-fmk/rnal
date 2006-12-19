@@ -37,10 +37,7 @@ endif
 // postavi filter...
 set_f_kol(cCustDesc)	
 
-altd()
-
 cRet := PostojiSifra(F_CUSTOMS, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
-
 
 if !EMPTY(cCustDesc)
 	set filter to

@@ -16,16 +16,18 @@ private izbor:=1
 __doc_no := nDoc_no
 __oper_id := GetUserID()
 
-AADD(opc, "promjena osnovnih podataka naloga ")
+AADD(opc, "promjena, osnovni podaci naloga ")
 AADD(opcexe, {|| _ch_main() })
-AADD(opc, "promjena podataka o isporuci ")
+AADD(opc, "promjena, podaci isporuke ")
 AADD(opcexe, {|| _ch_ship() })
-AADD(opc, "promjena podataka o placanju ")
+AADD(opc, "promjena, podaci o placanju ")
 AADD(opcexe, {|| _ch_pay() })
-AADD(opc, "promjena kontakta na nalogu")
+AADD(opc, "promjena, podaci kontakta")
 AADD(opcexe, {|| _ch_cont() })
-AADD(opc, "dodaj novi kontakt ")
+AADD(opc, "promjena, novi kontakt naloga ")
 AADD(opcexe, {|| _ch_cont(.t.) })
+AADD(opc, "promjena, lom artikala ")
+AADD(opcexe, {|| _ch_damage( __oper_id ) })
 
 Menu_sc("changes")
 
@@ -344,8 +346,6 @@ BoxC()
 ESC_RETURN 0
 
 return 1
-
-
 
 
 

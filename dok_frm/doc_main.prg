@@ -143,7 +143,7 @@ nX += 1
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("Mjesto isporuke (*):", nLeft) GET _doc_ship_place VALID must_enter( _doc_ship_place ) PICT "@S46" WHEN set_opc_box( nBoxX, 50 )
+@ m_x + nX, m_y + 2 SAY PADL("Mjesto isporuke (*):", nLeft) GET _doc_ship_place VALID {|| must_enter( _doc_ship_place ), sh_place_pattern(@_doc_ship_place) } PICT "@S46" WHEN set_opc_box( nBoxX, 50, "mjesto gdje se roba isporucuje", "/RP - ramaglas" )
 @ m_x + nX, col() SAY ">" COLOR "I"
 
 nX += 2
@@ -183,7 +183,7 @@ return 1
 
 
 // ------------------------------------------
-// set varijabla N -> C, C -> N
+// set N polje iz C varijable
 // ------------------------------------------
 function set_var( _field, xVar, nLen )
 
@@ -201,6 +201,23 @@ if VALTYPE(xVar) == "N"
 	xVar := PADL( STR(xVar, nLen), nLen )
 	
 endif
+
+return .t.
+
+
+
+// -----------------------------------------------------
+// setuje nazive za mjesto isporuke prema patternu
+// recimo /RP - ramaglas prodaja
+// "/" + nastavak je pattern
+// -----------------------------------------------------
+static function sh_place_pattern( cPattern )
+local nLen := LEN(cPattern)
+
+do case
+	case ALLTRIM(cPattern) == "/RP"
+		cPattern := PADR("Rama-glas prodaja", nLen)
+endcase
 
 return .t.
 

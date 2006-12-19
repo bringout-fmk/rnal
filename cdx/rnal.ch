@@ -12,6 +12,8 @@
 #xcommand O_T_DOCIT => select (F_T_DOCIT); usex (PRIVPATH + "T_DOCIT"); set order to tag "1"
 #xcommand O_T_DOCOP => select (F_T_DOCOP); usex (PRIVPATH + "T_DOCOP"); set order to tag "1"
 #xcommand O_T_PARS => select (F_T_PARS); usex (PRIVPATH + "T_PARS"); set order to tag "id_par"
+#xcommand O__TMP1 => select (F__TMP1); usex (PRIVPATH + "_TMP1"); set order to tag "1"
+#xcommand O__TMP2 => select (F__TMP2); usex (PRIVPATH + "_TMP2"); set order to tag "1"
 
 
 // -----------------------------------

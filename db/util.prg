@@ -136,6 +136,29 @@ return
 
 
 
+// -----------------------------
+// otvori tabelu _TMP1
+// -----------------------------
+function o_tmp1()
+select F__TMP1
+if !used()
+	O__TMP1
+endif
+return
+
+
+
+// -----------------------------
+// otvori tabelu _TMP2
+// -----------------------------
+function o_tmp2()
+select F__TMP2
+if !used()
+	O__TMP2
+endif
+return
+
+
 
 // -----------------------------------------
 // konvert doc_no -> STR(doc_no, 10)
@@ -216,5 +239,55 @@ DBUnlock()
 select (nTArea)
 
 return 1
+
+
+// ------------------------------------------
+// kreiranje tabele PRIVPATH + _TMP1
+// ------------------------------------------
+function cre_tmp1( aFields )
+local cTbName := "_TMP1"
+
+if LEN(aFields) == 0
+	MsgBeep("Nema definicije polja u matrici!")
+	return
+endif
+
+_del_tmp( PRIVPATH + cTbName + ".DBF" )  
+
+DBcreate2(PRIVPATH + cTbName + ".DBF", aFields)
+
+o_tmp1()
+
+return
+
+// ------------------------------------------
+// kreiranje tabele PRIVPATH + _TMP1
+// ------------------------------------------
+function cre_tmp2( aFields )
+local cTbName := "_TMP2"
+
+if LEN(aFields) == 0
+	MsgBeep("Nema definicije polja u matrici!")
+	return
+endif
+
+_del_tmp( PRIVPATH + cTbName + ".DBF" )  
+
+DBcreate2(PRIVPATH + cTbName + ".DBF", aFields)
+
+o_tmp2()
+
+return
+
+
+
+// --------------------------------------------
+// brisanje fajla 
+// --------------------------------------------
+static function _del_tmp( cPath )
+if FILE( cPath )
+	FERASE( cPath )
+endif
+return
 
 
