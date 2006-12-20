@@ -116,8 +116,12 @@ local dDateFrom := CToD("")
 local dDateTo := DATE()
 local dDvrDFrom := CTOD("")
 local dDvrDTo := CTOD("")
+local cCustomer := PADR("", 10)
 local nCustomer := VAL(STR(0, 10))
+local cContact := PADR("", 10)
 local nContact := VAL(STR(0, 10))
+local nOperater := VAL(STR(0, 6))
+local cOperater := PADR("", 6)
 local cTblList := "D"
 local cShowRejected := "N"
 local nRet := 1
@@ -129,11 +133,11 @@ Box( ,12, 70)
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Narucioc (prazno-svi) " GET nCustomer VALID {|| nCustomer == 0 .or. s_customers( @nCustomer), show_it( g_cust_desc(nCustomer) ) }
+@ m_x + nX, m_y + 2 SAY "Narucioc (prazno-svi) " GET cCustomer VALID {|| EMPTY(cCustomer) .or. s_customers( @cCustomer, cCustomer), set_var(@nCustomer, cCustomer),  show_it( g_cust_desc(nCustomer) ) }
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Kontakt (prazno-svi) " GET nContact VALID {|| nContact == 0 .or. s_contacts( @nContact ), show_it( g_cont_desc( nContact ) ) }
+@ m_x + nX, m_y + 2 SAY "Kontakt (prazno-svi) " GET cContact VALID {|| EMPTY(cContact) .or. s_contacts( @cContact, nCustomer, cContact ), set_var(@nContact, cContact), show_it( g_cont_desc( nContact ) ) }
 
 nX += 2
 
@@ -148,6 +152,10 @@ if _status == 1
 	@ m_x + nX, col() + 2 SAY "do" GET dDvrDTo
 
 endif
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY "Operater (prazno-svi): " GET nOperater VALID {|| nOperater == 0 .or. p_users(@nOperater), show_it( getusername( nOperater ) ) }
 
 nX += 2
 
