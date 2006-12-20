@@ -115,7 +115,7 @@ _doc_status := 0
 if __doc_stat <> 3
 	// pronadji zauzeti slog ( 3 + nDoc_no )
 	select docs
-	set order to tag "2"
+	set order to tag "A"
 	go top
 	seek d_busy() + docno_str( nDoc_no )
 	Scatter()
@@ -469,7 +469,7 @@ local lRet := .f.
 nArea := SELECT()
 
 select DOCS
-set order to tag "2"
+set order to tag "A"
 go top
 seek d_busy() + docno_str( nDoc_no )
 

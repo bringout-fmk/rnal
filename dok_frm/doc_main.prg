@@ -59,10 +59,18 @@ Gather()
 
 return 1
 
-// ------------------------------------------
+
+
+// -----------------------------------------------
 // setuj box na dnu kao pomoc
-// ------------------------------------------
-function set_opc_box( nX, nLeft, cTxt1, cTxt2 )
+// nX - x kordinata max
+// nLeft - LEFT vrijednost
+// cTxt1...cTxt3 - mogucnost 3 reda teksta
+// cColor - mogucnost zadavanja boje, def: BG+/B
+// -----------------------------------------------
+function set_opc_box( nX, nLeft, ;
+			cTxt1, cTxt2, cTxt3, ;
+			cColor )
 local i
 
 if nX == nil
@@ -81,11 +89,21 @@ if cTxt2 == nil
 	cTxt2 := ""
 endif
 
+if cTxt3 == nil
+	cTxt3 := ""
+endif
+
+if cColor == nil
+	cColor := "BG+/B"
+endif
+
 cTxt1 := PADR(cTxt1, nLeft)
 cTxt2 := PADR(cTxt2, nLeft)
+cTxt3 := PADR(cTxt3, nLeft)
 
-@ m_x + nX - 2 , m_y + 2 SAY cTxt1 COLOR "BG+/B"
-@ m_x + nX - 1 , m_y + 2 SAY cTxt2 COLOR "BG+/B"
+@ m_x + nX - 2 , m_y + 2 SAY cTxt1 COLOR cColor
+@ m_x + nX - 1 , m_y + 2 SAY cTxt2 COLOR cColor
+@ m_x + nX , m_y + 2 SAY cTxt3 COLOR cColor
 
 return .t.
 

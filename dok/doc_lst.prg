@@ -2,26 +2,19 @@
 
 // variables
 static _status
-static _sort_priority
+static __sort
 
 // ------------------------------------------
 // lista dokumenata....
 //  nStatus - "1" otoreni ili "2" zatvoreni
 // ------------------------------------------
 function frm_lst_docs( nStatus )
-local nTblRet
 
 _status := nStatus
 
 o_tables( .f. )
 
-nTblRet := tbl_list()
-
-if nTblRet == 1
-	return
-elseif nTblRet == 2
-	MsgBeep("report: lista naloga...")
-endif
+tbl_list()
 
 return
 
@@ -32,17 +25,14 @@ return
 // -------------------------------------------------
 static function tbl_list()
 local cFooter
-local nLstRet
-local cSortPrior 
+local nSort := 3
+local nBoxX := 20
+local nBoxY := 77
 
-nLstRet := lst_args( @cSortPrior )
-
-_sort_priority := cSortPrior
-
-if nLstRet == 2
-	return 2
-elseif nLstRet == 0
+if lst_args( @nSort ) == 0
+	
 	return 0
+	
 endif
 
 private ImeKol
@@ -50,35 +40,47 @@ private Kol
 
 cFooter := "Pregled azuriranih naloga..."
 
-Box(, 20, 77)
+Box(, nBoxX, nBoxY)
 
-_set_box()
+// setuj box opis...
+_set_box( nBoxX, nBoxY )
 
-select docs
-
-if _sort_priority == "D"
-	set order to tag "3"
-else
-	set order to tag "1"
-endif
+// setuj sort...
+_set_sort()
 
 go top
 
 set_a_kol(@ImeKol, @Kol)
 
-ObjDbedit("lstnal", 20, 77, {|| key_handler() }, "", cFooter, , , , , 2)
+ObjDbedit("lstnal", nBoxX, nBoxY, {|| key_handler() }, "", cFooter, , , , , 2)
 
 BoxC()
 
 close all
+
 return 1
+
+
+
+// ---------------------------------------------------
+// setovanje sorta prema static varijabli __sort
+// ---------------------------------------------------
+static function _set_sort()
+local cSort
+
+cSort := ALLTRIM(STR( __sort ))
+
+select docs
+set order to tag &cSort
+
+return
 
 
 
 // ------------------------------------------
 // setovanje boxa
 // ------------------------------------------
-static function _set_box()
+static function _set_box( nBoxX, nBoxY )
 local cLine1 := ""
 local cLine2 := ""
 local nOptLen := 24
@@ -100,8 +102,8 @@ cLine2 += PADR("<K> Lista kontakata", nOptLen)
 cLine2 += cOptSep
 cLine2 += PADR("<L> Lista promjena", nOptLen)
 
-@ m_x + 19, m_y + 2 SAY cLine1
-@ m_x + 20, m_y + 2 SAY cLine2
+@ m_x + (nBoxX-1), m_y + 2 SAY cLine1
+@ m_x + nBoxX, m_y + 2 SAY cLine2
 
 return
 
@@ -109,9 +111,12 @@ return
 
 // -------------------------------------------------
 // otvori formu sa uslovima te postavi filtere
+// nSort - sort prikaza...
 // -------------------------------------------------
-static function lst_args( cSortPrior )
-local nX := 2
+static function lst_args( nSort )
+local nX := 1
+local nBoxX := 21
+local nBoxY := 70
 local dDateFrom := CToD("")
 local dDateTo := DATE()
 local dDvrDFrom := CTOD("")
@@ -120,56 +125,86 @@ local cCustomer := PADR("", 10)
 local nCustomer := VAL(STR(0, 10))
 local cContact := PADR("", 10)
 local nContact := VAL(STR(0, 10))
-local nOperater := VAL(STR(0, 6))
-local cOperater := PADR("", 6)
-local cTblList := "D"
+local nOperater := VAL(STR(0, 3))
+local cOperater := PADR("", 3)
 local cShowRejected := "N"
 local nRet := 1
 local cFilter
+// color header
+local cColor1 := "BG+/B"
+// color help
+local cHelpClr := "GR+/B"
 
-cSortPrior := "D"
+// parametri - iscitaj 
+private cSection:="L"
+private cHistory:=" "
+private aHistory:={}
+O_PARAMS
 
-Box( ,12, 70)
+RPar("d1", @dDateFrom)
+RPar("d2", @dDateTo)
+RPar("d3", @dDvrDFrom)
+RPar("d4", @dDvrDTo)
+RPar("c1", @cCustomer)
+RPar("c2", @cContact)
+RPar("o1", @nOperater)
+RPar("s1", @nSort)
+RPar("s2", @cShowRejected)
 
-nX += 1
+Box( , nBoxX, nBoxY)
 
-@ m_x + nX, m_y + 2 SAY "Narucioc (prazno-svi) " GET cCustomer VALID {|| EMPTY(cCustomer) .or. s_customers( @cCustomer, cCustomer), set_var(@nCustomer, cCustomer),  show_it( g_cust_desc(nCustomer) ) }
-
-nX += 1
-
-@ m_x + nX, m_y + 2 SAY "Kontakt (prazno-svi) " GET cContact VALID {|| EMPTY(cContact) .or. s_contacts( @cContact, nCustomer, cContact ), set_var(@nContact, cContact), show_it( g_cont_desc( nContact ) ) }
+@ m_x + nX, m_y + 1 SAY PADL("**** uslovi pregleda dokumenata", nBoxY - 2 ) COLOR cColor1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Datum naloga od " GET dDateFrom
-@ m_x + nX, col() + 2 SAY "do" GET dDateTo
+@ m_x + nX, m_y + 2 SAY PADL( "Narucioc (prazno-svi):", 25 ) GET cCustomer VALID {|| EMPTY(cCustomer) .or. s_customers( @cCustomer, cCustomer), set_var(@nCustomer, @cCustomer),  show_it( g_cust_desc(nCustomer) ) } WHEN set_opc_box(nBoxX, 60, "narucioc naloga, pretrazi sifrarnik", nil, nil, cHelpClr )
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL("Kontakt (prazno-svi):", 25) GET cContact VALID {|| EMPTY(cContact) .or. s_contacts( @cContact, nCustomer, cContact ), set_var(@nContact, @cContact), show_it( g_cont_desc( nContact ) ) } WHEN set_opc_box( nBoxX, 60, "kontakt osoba naloga, pretrazi sifrarnik", nil, nil, cHelpClr )
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL( "Datum naloga od:", 18) GET dDateFrom WHEN set_opc_box( nBoxX, 60 )
+@ m_x + nX, col() + 1 SAY "do:" GET dDateTo WHEN set_opc_box( nBoxX, 60 )
 
 if _status == 1
 	
 	nX += 1
 	
-	@ m_x + nX, m_y + 2 SAY "Datum isporuke od " GET dDvrDFrom
-	@ m_x + nX, col() + 2 SAY "do" GET dDvrDTo
+	@ m_x + nX, m_y + 2 SAY PADL( "Datum isporuke od:", 18 ) GET dDvrDFrom WHEN set_opc_box( nBoxX, 60 )
+	@ m_x + nX, col() + 1 SAY "do:" GET dDvrDTo WHEN set_opc_box( nBoxX, 60 )
 
 endif
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Operater (prazno-svi): " GET nOperater VALID {|| nOperater == 0 .or. p_users(@nOperater), show_it( getusername( nOperater ) ) }
+@ m_x + nX, m_y + 2 SAY "Operater (prazno-svi):" GET nOperater VALID {|| nOperater == 0 .or. p_users(@nOperater), show_it( getusername( nOperater ), 20 ) } WHEN set_opc_box( nBoxX, 60, "pretraga po operateru", "99 - otvori sifrarnik", nil, cHelpClr )
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY "Tabelarni pregled (D/N) " GET cTblList VALID cTblList $ "DN" PICT "@!"
+@ m_x + nX, m_y + 2 SAY "***** sort pregleda:" GET nSort VALID _val_sort( nSort ) PICT "9" WHEN set_opc_box( nBoxX, 60, "nacin sortiranja pregleda dokumenata", nil, nil, cHelpClr )
 
-nX += 2
+nX += 1
 
-@ m_x + nX, m_y + 2 SAY "Sortirati po prioritetu (D/N) " GET cSortPrior VALID cSortPrior $ "DN" PICT "@!"
+@ m_x + nX, m_y + 2 SAY " * (1) broj dokumenta" COLOR cColor1
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY " * (2) prioritet + datum dokumenta + broj dokumenta" COLOR cColor1
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY " * (3) prioritet + datum isporuke + broj dokumenta" COLOR cColor1
+
+//nX += 1
+//@ m_x + nX, m_y + 2 SAY " * (4) ..." COLOR cColor1
 
 if _status == 2
 
 	nX += 2
 
-	@ m_x + nX, m_y + 2 SAY "Prikaz i ponistenih dokumenata (D/N) " GET cShowRejected VALID cShowRejected $ "DN" PICT "@!"
+	@ m_x + nX, m_y + 2 SAY "Prikaz ponistenih dokumenata (D/N)?" GET cShowRejected VALID cShowRejected $ "DN" PICT "@!" WHEN set_opc_box( nBoxX, 60, "pored zatvorenih naloga", "prikazi i ponistene", nil, cHelpClr )
 
 endif
 
@@ -177,23 +212,54 @@ read
 
 BoxC()
 
-if cTblList == "N"
-	nRet := 2
+__sort := nSort
+
+if LastKey() == K_ESC
+	return 0
 endif
 
-ESC_RETURN 0
+// parametri - snimi
+private cSection:="L"
+private cHistory:=" "
+private aHistory:={}
+O_PARAMS
 
+WPar("d1", dDateFrom)
+WPar("d2", dDateTo)
+WPar("d3", dDvrDFrom)
+WPar("d4", dDvrDTo)
+WPar("c1", cCustomer)
+WPar("c2", cContact)
+WPar("o1", nOperater)
+WPar("s1", nSort)
+WPar("s2", cShowRejected)
+
+// generisi filter
 cFilter := gen_filter(dDateFrom, ;
 			dDateTo, ;
 			dDvrDFrom, ;
 			dDvrDTo, ;
 			nCustomer, ;
 			nContact, ;
+			nOperater, ;
 			cShowRejected )
 
+// setuj filter
 set_f_kol(cFilter)
 
 return nRet
+
+
+
+// ------------------------------------------
+// validacija unosa sorta...
+// ------------------------------------------
+static function _val_sort( nSort )
+if nSort >= 1 .and. nSort <= 3
+	return .t.
+endif
+MsgBeep("Sort je u rangu od 1 do 3 !!!")
+return .f.
 
 
 
@@ -201,7 +267,7 @@ return nRet
 // generise string filtera
 // ---------------------------------
 static function gen_filter( dDateFrom, dDateTo, dDvrDFrom, dDvrDTo, ;
-			nCustomer, nContact, cShReject )
+			nCustomer, nContact, nOper, cShReject )
 local nClosed := 1
 local cFilter := ""
 
@@ -243,6 +309,10 @@ if nContact <> 0
 	cFilter += " .and. cont_id == " + contid_str(nContact)
 endif
 
+if nOper <> 0
+	cFilter += " .and. operater_id == " + str( nOper, 3 )
+endif
+
 return cFilter
 
 
@@ -251,20 +321,9 @@ return cFilter
 // setovanje filtera prema uslovima
 // ------------------------------------------------
 static function set_f_kol(cFilter)
-select docs
 
-if _sort_priority == "D"
-
-	set order to tag "3"
-
-else
-
-	set order to tag "1"
-
-endif
-
+_set_sort()
 set filter to &cFilter
-//set relation to cust_id into customs
 go top
 
 return
@@ -279,6 +338,12 @@ local nDoc_no
 local nDoc_status
 local cDesc
 local cTmpFilter := DBFILTER()
+
+if _status == 1
+	// daj info o kasnjenju
+	_sh_dvr_warr( _chk_date( doc_dvr_date ), ;
+			_chk_time( doc_dvr_time ) )
+endif
 
 if ( _status == 2 )
 	if ( UPPER(CHR(Ch)) $ "ZP" )
@@ -564,6 +629,55 @@ next
 return
 
 
+// ----------------------------------------
+// provjeri datum isporuke...
+// ----------------------------------------
+static function _chk_date( dD_dvr_date )
+local nDays := 0
+nDays := DATE() - dD_dvr_date
+return nDays
+
+
+// ----------------------------------------
+// provjeri vrijeme isporuke...
+// ----------------------------------------
+static function _chk_time( cDvr_time )
+local nMinutes := 0
+return nMinutes
+
+
+// ------------------------------------------
+// prikazi upozorenje za istek roka
+// nDays - dana kasnjenja
+// ------------------------------------------
+static function _sh_dvr_warr( nDays, nMinutes, nX, nLen )
+local cColWarr := "W/R+"
+local cColOk := "GR+/B"
+local cColor
+local cTmp
+
+if nX == nil
+	nX := 4
+endif
+
+if nLen == nil
+	nLen := 35
+endif
+
+if nDays > 0
+	cTmp := " van roka " + ALLTRIM(STR(nDays)) + " dana"
+	cColor := cColWarr
+else
+	cTmp := " u roku"
+	cColor := cColOk
+endif
+
+@ nX, m_y + 1 SAY PADR(cTmp, nLen) COLOR cColor
+
+return
+
+
+
 // ---------------------------------------------
 // daje info o statusu naloga
 // ---------------------------------------------
@@ -573,6 +687,7 @@ if doc_status == 2
 	xRet := "(R) "
 endif
 return xRet
+
 
 
 // -----------------------------------------
@@ -600,6 +715,10 @@ local cLogType := PADR("12", 3)
 local nSrch := 0
 local nCont_id := 0
 
+select doc_log
+set filter to
+select doc_lit
+set filter to
 select doc_log
 set order to tag "2"
 go top
@@ -642,6 +761,8 @@ enddo
 
 select (nTArea)
 return nC_count
+
+
 
 // ----------------------------------------------
 // prikazuje listu kontakata u box-u
@@ -690,5 +811,7 @@ m_x := nX
 m_y := nY
 
 return .t.
+
+
 
 
