@@ -521,13 +521,28 @@ local nDoc_log_no
 local cDoc_log_type
 local cAction := "+"
 
-cDoc_log_type := "99"
+do case
+
+	case nDoc_status == 1
+		// closed
+		cDoc_log_type := "99"
+	case nDoc_status == 2
+		// rejected
+		cDoc_log_type := "97"
+	case nDoc_status == 4
+		// partialy done
+		cDoc_log_type := "98"
+
+endcase
+
 nDoc_log_no := _inc_log_no( nDoc_no )
 
 _d_log_insert( nDoc_no, nDoc_log_no, cDoc_log_type, cDesc )
 _lit_99_insert( cAction, nDoc_no, nDoc_log_no, nDoc_status )
 
 return
+
+
 
 
 // -----------------------------------
@@ -1206,7 +1221,21 @@ function _lit_99_get(nDoc_no, nDoc_log_no)
 local cRet := ""
 local nTArea := SELECT()
 
-cRet += "Zatvaranje naloga...#"
+select doc_lit
+set order to tag "1"
+go top
+seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
+
+nStat := field->int_1
+
+do case
+	case nStat == 1
+		cRet := "zatvoren nalog...#"
+	case nStat == 2
+		cRet := "ponisten nalog...#"
+	case nStat == 4
+		cRet := "djelimicno zatvoren nalog...#"
+endcase
 
 select (nTArea)
 

@@ -103,7 +103,10 @@ cTxt3 := PADR(cTxt3, nLeft)
 
 @ m_x + nX - 2 , m_y + 2 SAY cTxt1 COLOR cColor
 @ m_x + nX - 1 , m_y + 2 SAY cTxt2 COLOR cColor
-@ m_x + nX , m_y + 2 SAY cTxt3 COLOR cColor
+
+if !EMPTY( cTxt3 )
+	@ m_x + nX , m_y + 2 SAY cTxt3 COLOR cColor
+endif
 
 return .t.
 

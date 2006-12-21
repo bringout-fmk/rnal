@@ -25,6 +25,7 @@ return
 // -------------------------------------------------
 static function tbl_list()
 local cFooter
+local cHeader
 local nSort := 3
 local nBoxX := 20
 local nBoxY := 77
@@ -39,6 +40,7 @@ private ImeKol
 private Kol
 
 cFooter := "Pregled azuriranih naloga..."
+cHeader := ""
 
 Box(, nBoxX, nBoxY)
 
@@ -52,7 +54,7 @@ go top
 
 set_a_kol(@ImeKol, @Kol)
 
-ObjDbedit("lstnal", nBoxX, nBoxY, {|| key_handler() }, "", cFooter, , , , , 2)
+ObjDbedit("lstnal", nBoxX, nBoxY, {|| key_handler() }, cHeader, cFooter, , , , , 3)
 
 BoxC()
 
@@ -79,6 +81,8 @@ return
 
 // ------------------------------------------
 // setovanje boxa
+// nBoxX - box x koord.
+// nBoxY - box y koord.
 // ------------------------------------------
 static function _set_box( nBoxX, nBoxY )
 local cLine1 := ""
@@ -102,8 +106,8 @@ cLine2 += PADR("<K> Lista kontakata", nOptLen)
 cLine2 += cOptSep
 cLine2 += PADR("<L> Lista promjena", nOptLen)
 
-@ m_x + (nBoxX-1), m_y + 2 SAY cLine1
-@ m_x + nBoxX, m_y + 2 SAY cLine2
+@ m_x + (nBoxX-2), m_y + 2 SAY cLine1
+@ m_x + (nBoxX-1), m_y + 2 SAY cLine2
 
 return
 
@@ -273,7 +277,7 @@ local cFilter := ""
 
 if _status == 1
 	// samo otvoreni nalozi
-	cFilter += "doc_status == 3 .or. doc_status == 0"
+	cFilter += "doc_status == 4 .or. doc_status == 3 .or. doc_status == 0"
 else
 	// samo zatvoreni nalozi
 	cFilter += "doc_status == 1"
@@ -345,6 +349,10 @@ if _status == 1
 			_chk_time( doc_dvr_time ) )
 endif
 
+// prikazi status dokumenta na pregledu
+_sh_doc_status( doc_status )
+
+// ove opcije zabrani na statusu 2
 if ( _status == 2 )
 	if ( UPPER(CHR(Ch)) $ "ZP" )
 		return DE_CONT
@@ -557,35 +565,46 @@ MsgBeep("Dokument je zauzet#Operacije onemogucene !!!")
 return
 
 
+
 // ------------------------------------------------
 // setuj status naloga realizovan, ponisten, opis
 // ------------------------------------------------
 static function _g_doc_status(nDoc_status, cDesc)
 local cStat := "R"
 local nX := 1
+local nBoxX := 10
+local nBoxY := 60
+local cColor := "BG+/B"
 
 Beep(2)
 
-Box(, 8, 60)
+Box(, nBoxX, nBoxY)
+
 	cDesc := SPACE(150)
 	
-	@ m_x + nX, m_y + 2 SAY "Trenutni status naloga je:"
-	
 	nX += 1
 	
-	@ m_x + nX, m_y + 2 SAY "   - realizovan (R)"
-	
-	nX += 1
-	
-	@ m_x + nX, m_y + 2 SAY "   -   ponisten (X)"
-	
-	nX += 1
-	
-	@ m_x + nX, m_y + 2 SAY "postavi trenutni status na:" GET cStat VALID cStat $ "RX" PICT "@!"
+	@ m_x + nX, m_y + 2 SAY " **** Trenutni status naloga je:" COLOR cColor
 	
 	nX += 2
 	
-	@ m_x + nX, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S40"
+	@ m_x + nX, m_y + 2 SAY SPACE(3) + "(R) realizovan" COLOR cColor
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY SPACE(3) + "(D) djelimicno realizovan" COLOR cColor
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY SPACE(3) + "(X) ponisten" COLOR cColor
+	
+	nX += 2
+	
+	@ m_x + nX, m_y + 2 SAY "postavi status na -------->" GET cStat VALID cStat $ "RXD" PICT "@!"
+	
+	nX += 2
+	
+	@ m_x + nX, m_y + 2 SAY "Opis:" GET cDesc VALID !EMPTY(cDesc) PICT "@S50"
 	
 	read
 BoxC()
@@ -600,9 +619,16 @@ if cStat == "X"
 	nDoc_status := 2
 endif
 
+if cStat == "D"
+	// partialy done
+	nDoc_status := 4
+endif
+
 ESC_RETURN 0
 
 return 1
+
+
 
 
 // -------------------------------------------------------
@@ -611,7 +637,7 @@ return 1
 static function set_a_kol(aImeKol, aKol, nStatus)
 aImeKol := {}
 
-AADD(aImeKol, {"Narucioc / kontakt", {|| _reject_info( doc_status ) + PADR(g_cust_desc(cust_id), 20) + "/" + PADR(g_cont_desc(cont_id), 15) }, "cust_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Narucioc / kontakt", {|| PADR(g_cust_desc(cust_id), 20) + "/" + PADR(g_cont_desc(cont_id), 15) }, "cust_id", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Datum", {|| doc_date }, "doc_date", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Dat.isp." , {|| doc_dvr_date }, "doc_dvr_date", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.isp." , {|| doc_dvr_time }, "doc_dvr_time", {|| .t.}, {|| .t.} })
@@ -657,11 +683,11 @@ local cColor
 local cTmp
 
 if nX == nil
-	nX := 4
+	nX := 3
 endif
 
 if nLen == nil
-	nLen := 35
+	nLen := 20 
 endif
 
 if nDays > 0
@@ -677,16 +703,53 @@ endif
 return
 
 
+// ----------------------------------------------------
+// prikaz statusa dokumenta na pregledu
+// ----------------------------------------------------
+static function _sh_doc_status( doc_status, nX, nY )
+local cTmp
 
-// ---------------------------------------------
-// daje info o statusu naloga
-// ---------------------------------------------
-static function _reject_info( doc_status )
-local xRet := ""
-if doc_status == 2
-	xRet := "(R) "
+if nX == nil
+	nX := 3
 endif
-return xRet
+
+if nY == nil
+	nY := 21
+endif
+
+do case
+
+	case doc_status == 0
+		
+		cTmp := " otvoren"
+		cColor := "GR+/B"
+		
+	case doc_status == 1
+		
+		cTmp := " realizovan"
+		cColor := "GB+/B"
+		
+	case doc_status == 2
+		
+		cTmp := " ponisten"
+		cColor := "W/R+"
+		
+	case doc_status == 3
+		
+		cTmp := " zauzet"
+		cColor := "GR+/G+"
+		
+	case doc_status == 4
+		
+		cTmp := " realizovan dio"
+		cColor := "W/G+"
+		
+endcase
+
+@ nX, nY SAY PADR( cTmp , 20 ) COLOR cColor
+
+return
+
 
 
 

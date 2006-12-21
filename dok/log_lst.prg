@@ -178,9 +178,13 @@ cType := ALLTRIM(cType)
 
 do case
 	case cType == "01"
-		xRet := "otvoranje"
+		xRet := "otvoren"
 	case cType == "99"
-		xRet := "zatvaranje"
+		xRet := "realizovan"
+	case cType == "98"
+		xRet := "real.dio"
+	case cType == "97"
+		xRet := "ponisten"
 	case cType == "10"
 		xRet := "osn.podaci"
 	case cType == "11"
@@ -261,6 +265,10 @@ do case
 	case cDoc_log_type == "01"
 		cRet := _lit_01_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "99"
+		cRet := _lit_99_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "98"
+		cRet := _lit_99_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "97"
 		cRet := _lit_99_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "10"
 		cRet := _lit_10_get(nDoc_no, nDoc_log_no)
