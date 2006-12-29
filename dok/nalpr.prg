@@ -1,5 +1,6 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
+
 static LEN_IT_NO := 7
 static LEN_DESC := 70
 
@@ -128,14 +129,17 @@ do while !EOF()
 	
 	?? " "
 	
+	// sirina
 	?? show_number(field->doc_it_heigh, PIC_DIMENSION)
 
 	?? " "
 
+	// visina
 	?? show_number(field->doc_it_width, PIC_DIMENSION)
 	
 	?? " "
 
+	// kolicina
 	?? show_number(field->doc_it_qtty, PIC_QTTY)
 
 	// provjeri za novu stranicu
@@ -168,41 +172,6 @@ do while !EOF()
 		
 	endif
 
-	// napomene stavke:
-	if !EMPTY(field->doc_it_desc)
-	
-		aDoc_it_desc := SjeciStr(ALLTRIM(field->doc_it_desc), 70)
-		
-		? 
-		
-		for i:=1 to LEN(aDoc_it_desc)
-						
-			? RAZMAK
-
-			?? PADL("", LEN_IT_NO)
-
-			?? " "
-			
-			?? aDoc_it_desc[i]
-		next
-		
-	endif
-
-	// ako je shema u prilogu
-	if field->doc_it_schema == "D"
-	
-		?
-
-		? RAZMAK
-		
-		?? PADL("", LEN_IT_NO)
-		
-		?? " "
-	
-		// shema
-		?? "Napomena: (SHEMA U PRILOGU)"
-		
-	endif
 	
 	// dodatne operacije operacije....
 	
@@ -216,33 +185,106 @@ do while !EOF()
 	do while !EOF() .and. field->doc_no == t_docit->doc_no ;
 			.and. field->doc_it_no == t_docit->doc_it_no
 
+	    // uzmi element
+	    nDoc_el_no := field->doc_el_no
+
+	    ? RAZMAK
+
+	    ?? PADL("", LEN_IT_NO)
+	
+	    ?? STR( field->doc_el_no, 2 ) + ")" 
+
+	    ?? " "
+
+	    ?? PADR( field->doc_el_desc, 60 )
+	
+	    do while !EOF() .and. field->doc_no == t_docit->doc_no ;
+	    		    .and. field->doc_it_no == t_docit->doc_it_no ;
+			    .and. field->doc_el_no == nDoc_el_no
+			    
+		// operacije....
+		
 		? RAZMAK
 
 		?? PADL("", LEN_IT_NO)
 
-		?? " "
-		
-		?? "d.operacija ---> "
-
-		?? " "
+		?? SPACE(5)
 		
 		if !EMPTY(field->aop_desc) .and. ALLTRIM(field->aop_desc) <> "?????"
-			?? ALLTRIM(field->aop_desc)
-			?? ", "
+			?? "*" + SPACE(1) + ALLTRIM(field->aop_desc)
 		endif
 
 		if !EMPTY(field->aop_att_desc) .and. ALLTRIM(field->aop_att_desc) <> "?????"
-			?? ALLTRIM(field->aop_att_desc)
 			?? ", "
+			?? ALLTRIM(field->aop_att_desc)
 		endif
 		
 		if !EMPTY(field->doc_op_desc)
-			?? ALLTRIM(field->doc_op_desc)
+			
+			aPom := SjeciStr( ALLTRIM(field->doc_op_desc), 70 )
+			
+			for i:=1 to LEN( aPom )
+				
+				? RAZMAK
+				?? PADR("", LEN_IT_NO)
+				?? SPACE(5)
+				?? aPom[ i ]
+				
+			next
+			
 		endif
 		
 		select t_docop
+		
 		skip
+	   
+	   enddo
+	   
 	enddo
+
+	select t_docit
+	
+	// napomene za item:
+	// - napomene
+	// - shema u prilogu
+	
+	if !EMPTY( field->doc_it_desc ) ;
+		.or. !EMPTY( field->doc_it_shema )
+	
+		cPom := "Dod.nap.stavke: " + ;
+			ALLTRIM( field->doc_it_desc )
+		
+		if field->doc_it_schema == "D"
+		
+			cPom += " "
+			cPom += "(SHEMA U PRILOGU)"
+		endif	
+		
+		aDoc_it_desc := SjeciStr( cPom , 100 )
+		
+		// podvuci
+		
+		? RAZMAK
+
+		?? PADL( "", LEN_IT_NO )
+	
+		?? " "
+		
+		?? REPLICATE( "-", LEN_DESC )
+
+		for i:=1 to LEN(aDoc_it_desc)
+						
+			? RAZMAK
+
+			?? PADL("", LEN_IT_NO)
+
+			?? " "
+			
+			?? aDoc_it_desc[i]
+		next
+		
+	
+	endif
 
 	select t_docit
 	skip
@@ -254,68 +296,10 @@ if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 	Nstr_a4(nPage, .t.)
 endif	
 
-// dodatne operacije koje vaze za sve artikle...
-
 ? cLine
 
-select t_docit
-go top
-
-select t_docop
-set order to tag "1"
-go top
-seek docno_str( t_docit->doc_no ) + docit_str( 0 ) 
-
-if FOUND()
-	
-	?
-	
-	? RAZMAK 
-	
-	?? PADL("", LEN_IT_NO)
-
-	?? " "
-	
-	?? "DODATNE OPERACIJE ZA SVE ARTIKLE:"
-	
-	? cLine
-
-	nAopCnt := 0
-	
-	do while !EOF() .and. field->doc_it_no == 0
-	
-		? RAZMAK
-		
-		?? PADL(STR(++nAopCnt,3) + ")", LEN_IT_NO)
-		
-		?? " "
-		
-		if !EMPTY(field->aop_desc) .and. ALLTRIM(field->aop_desc) <> "?????"
-			?? ALLTRIM(field->aop_desc)
-			?? ", "
-		endif
-		
-		if !EMPTY(field->aop_att_desc) .and. ALLTRIM(field->aop_att_desc) <> "?????"
-			?? ALLTRIM(field->aop_att_desc)
-			?? ", " 
-		endif
-		
-		if !EMPTY(field->doc_op_desc)
-			?? ALLTRIM(field->doc_op_desc)
-		endif
-		
-		select t_docop
-		skip
-	enddo
-	
-endif
-
-
-? cLine
-
-?
 s_nal_izdao()
-?
+
 s_nal_footer()
 
 if lStartPrint
@@ -326,10 +310,11 @@ endif
 return
 
 
-
+// -------------------------------------------
 // stampa potpisa nalog izdao
+// -------------------------------------------
 static function s_nal_izdao()
-local cPom
+local cPom := ""
 
 // provjeri za novu stranicu
 if prow() > LEN_PAGE - DSTR_KOREKCIJA()
@@ -338,12 +323,11 @@ if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 endif	
 
 // nalog izdao
-
-cPom := "Nalog izdao: "
-cPom += REPLICATE("_", 30)
+cPom += "Nalog izdao: "
+cPom += PADC( ALLTRIM(goModul:oDataBase:cUser), 20)
 cPom += " "
 cPom += "Vrijeme: "
-cPom += REPLICATE("_", 20)
+cPom += PADR( TIME(), 5 )
 
 ? PADL(cPom, LEN_TOTAL)
 
@@ -368,26 +352,25 @@ cPayDesc := g_t_pars_opis("N06")
 // footer
 // vrsta placanja
 ? RAZMAK + "Vrsta placanja: " + cPayDesc
-?
 
 // konacan proizvod
 cPom := "Konacan proizvod:"
-? RAZMAK + SPACE(30) + PADR(cPom,  40)
+? RAZMAK + SPACE(35) + PADR(cPom,  40)
 cPom := PADR("VALIDAN", 20)
 cPom += PADR("NIJE VALIDAN", 20)
-? RAZMAK + SPACE(30) + PADR(cPom, 40)
+? RAZMAK + SPACE(35) + PADR(cPom, 40)
 cPom := PADR(REPLICATE("_", 18), 20)
 cPom += PADR(REPLICATE("_", 18), 20)
-? RAZMAK + SPACE(30) + PADR(cPom, 40)
+? RAZMAK + SPACE(35) + PADR(cPom, 40)
 
 ? 
 
 // ovjerio
 cPom := "Ovjerio poslovodja: "
-cPom += REPLICATE("_", 20)
+cPom += REPLICATE( "_", 20 )
 cPom += " "
 cPom += "Vrijeme: "
-cPom += REPLICATE("_", 10)
+cPom += REPLICATE( "_", 20 )
 
 ? RAZMAK + SPACE(30) + cPom
 
@@ -408,7 +391,7 @@ cLine := g_line()
 
 cRow1 := RAZMAK 
 cRow1 += PADC("r.br", LEN_IT_NO) 
-cRow1 += " " + PADR("artikal/naziv", LEN_DESC)
+cRow1 += " " + PADR("artikal/naziv/element/operacije/napomene", LEN_DESC)
 cRow1 += " " + PADC("sirina(mm)", LEN_DIMENSION)
 cRow1 += " " + PADC("visina(mm)", LEN_DIMENSION)
 cRow1 += " " + PADC("kolicina", LEN_QTTY)
@@ -492,6 +475,10 @@ local cCont_add_desc
 local cDoc_no
 local cRazmak := SPACE(2)
 local nLeft := 20
+local nRight := 12
+local i
+local cPom
+local aPom
 
 // get/set document data
 cDoc_no := g_t_pars_opis("N01")
@@ -525,22 +512,32 @@ B_OFF
 ?
 
 // doc_date + doc_dvr_date
-cPom := PADL("Datum naloga: ", nLeft ) + cDoc_date + PADL("Datum isporuke: ", nLeft) + cDoc_dvr_date
+cPom := PADL("Datum naloga: ", nLeft ) + PADR(cDoc_date, nRight) + PADL("Datum isporuke: ", nLeft) + cDoc_dvr_date
 p_line(cRazmak + SPACE(1) + cPom, 12, .f.)
 
 // doc_dvr_time + priority
-cPom := PADL("Vrijeme isporuke: ", nLeft) + cDoc_dvr_time + PADL("Prioritet: ", nLeft) + cPriority
+cPom := PADL("Vrijeme isporuke: ", nLeft) + PADR(cDoc_dvr_time, nRight) + PADL("Prioritet: ", nLeft) + cPriority
 p_line(cRazmak + SPACE(1) + cPom, 12, .f.)
 
 // ship_place
-cPom := PADL("Mjesto isporuke: ", nLeft) + cDoc_ship_place
-p_line(cRazmak + SPACE(1) + cPom, 12, .f.)
+if !EMPTY( cDoc_ship_place )
+
+	cPom := PADL("Mjesto isporuke: ", nLeft) + cDoc_ship_place
+	
+	aPom := SjeciStr( cPom, 100 )
+
+	for i:=1 to LEN( aPom )
+		
+		p_line(cRazmak + SPACE(1) + aPom[i], 12, .f.)
+	
+	next
+	
+endif
 
 ?
 
 // podaci narucioca
-
-cPom := "Narucioc: "
+cPom := "Podaci narucioca:"
 p_line( cRazmak + cPom, 12, .f.)
 
 // naziv, adresa, telefon
@@ -549,19 +546,35 @@ p_line( cRazmak + SPACE(1) + cPom, 12, .f. )
 
 ?
 
-cPom := "Kontakti: "
+// podaci kontakta
+cPom := "Podaci kontakta:"
 p_line( cRazmak + cPom, 12, .f.)
 
 // ime, telefon, opis
 cPom := ALLTRIM(cCont_desc) + " (" + ALLTRIM(cContadesc) + "), " + ALLTRIM("tel: " + cCont_tel) + ", " + ALLTRIM(cCont_add_desc)
-p_line( cRazmak + SPACE(1) + cPom, 12, .f. )
+aPom := SjeciStr( cPom, 100 )
 
-?
+for i:=1 to LEN( aPom )
+	
+	p_line( cRazmak + SPACE(1) + aPom[i] , 12, .f. )
 
-cPom := "Ostale napomene: " + cDoc_add_desc
-p_line( cRazmak + cPom, 12, .f.)
+next
 
-?
+
+// ostale napomene naloga...
+if !EMPTY( cDoc_add_desc )
+
+	?
+	
+	cPom := "Ostale napomene: " + ALLTRIM( cDoc_add_desc )
+	
+	aPom := SjeciStr( cPom, 100 )
+
+	for i:=1 to LEN( aPom )
+		p_line( cRazmak + aPom[i] , 12, .f.)
+	next
+
+endif
 
 return
 

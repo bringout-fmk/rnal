@@ -167,7 +167,7 @@ return 1
 // --------------------------------------------
 // vraca opis iz matrice - opis elementa
 // --------------------------------------------
-static function get_elem_desc( aElem, nVal )
+function get_elem_desc( aElem, nVal )
 local xRet := ""
 local nChoice
 

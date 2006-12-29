@@ -59,7 +59,7 @@ endif
 
 // kreiraj indexe
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
-CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_op_no,4)", PRIVPATH + "T_DOCOP")
+CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_el_no,4)+STR(doc_op_no,4)", PRIVPATH + "T_DOCOP")
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
 
 return
@@ -88,6 +88,8 @@ static function g_docop_fields(aArr)
 AADD(aArr,{ "doc_no"     , "N" ,  10 ,  0 })
 AADD(aArr,{ "doc_op_no"  , "N" ,   4 ,  0 })
 AADD(aArr,{ "doc_it_no"  , "N" ,   4 ,  0 })
+AADD(aArr,{ "doc_el_no"  , "N" ,   4 ,  0 })
+AADD(aArr,{ "doc_el_desc", "C" , 150 ,  0 })
 AADD(aArr,{ "aop_id"     , "N" ,  10 ,  0 })
 AADD(aArr,{ "aop_desc"   , "C" , 150 ,  0 })
 AADD(aArr,{ "aop_att_id" , "N" ,  10 ,  0 })
@@ -206,7 +208,9 @@ return
 
 // dodaj stavke u tabelu T_DOCOP
 function a_t_docop( nDoc_no, nDoc_op_no, nDoc_it_no, ;
-                   nAop_id, cAop_desc, nAop_att_id, cAop_att_desc , ;
+		   nDoc_el_no, cDoc_el_desc, ;	
+                   nAop_id, cAop_desc, ;
+		   nAop_att_id, cAop_att_desc , ;
 		   cDoc_op_desc)
 
 O_T_DOCOP
@@ -216,6 +220,8 @@ append blank
 replace doc_no with nDoc_no
 replace doc_op_no with nDoc_op_no
 replace doc_it_no with nDoc_it_no
+replace doc_el_no with nDoc_el_no
+replace doc_el_desc with cDoc_el_desc
 replace aop_id with nAop_id
 replace aop_desc with cAop_desc
 replace aop_att_id with nAop_att_id
