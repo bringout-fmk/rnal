@@ -172,11 +172,11 @@ do while !EOF()
 		
 	endif
 
-	
 	// dodatne operacije operacije....
 	
-	?
 	
+	nOpCnt := 0
+
 	select t_docop
 	set order to tag "1"
 	go top
@@ -187,21 +187,33 @@ do while !EOF()
 
 	    // uzmi element
 	    nDoc_el_no := field->doc_el_no
-
-	    ? RAZMAK
-
-	    ?? PADL("", LEN_IT_NO)
-	
-	    ?? STR( field->doc_el_no, 2 ) + ")" 
-
-	    ?? " "
-
-	    ?? PADR( field->doc_el_desc, 60 )
-	
+	    
 	    do while !EOF() .and. field->doc_no == t_docit->doc_no ;
 	    		    .and. field->doc_it_no == t_docit->doc_it_no ;
 			    .and. field->doc_el_no == nDoc_el_no
 			    
+		if nOpCnt == 0
+			
+			? RAZMAK
+		     	?? PADL("", LEN_IT_NO)
+		     	?? " "
+			cPom := "Br.elementa, operacije:"
+			?? cPom
+			// podvlaka
+			? RAZMAK
+			?? PADL("", LEN_IT_NO)
+			?? " "
+			?? REPLICATE("-", LEN( cPom ) )
+			? RAZMAK
+		    	?? PADL("", LEN_IT_NO)
+		    	?? STR( field->doc_el_no, 2 ) + ")" 
+	    		?? " "
+	    		?? PADR( field->doc_el_desc, 60 )
+	
+		endif
+		
+		++ nOpCnt
+		
 		// operacije....
 		
 		? RAZMAK
@@ -221,7 +233,9 @@ do while !EOF()
 		
 		if !EMPTY(field->doc_op_desc)
 			
-			aPom := SjeciStr( ALLTRIM(field->doc_op_desc), 70 )
+			cPom := "* dod.nap: "
+			cPom += ALLTRIM( field->doc_op_desc )
+			aPom := SjeciStr( cPom , 70 )
 			
 			for i:=1 to LEN( aPom )
 				
@@ -249,7 +263,7 @@ do while !EOF()
 	// - shema u prilogu
 	
 	if !EMPTY( field->doc_it_desc ) ;
-		.or. !EMPTY( field->doc_it_shema )
+		.or. !EMPTY( field->doc_it_schema )
 	
 		cPom := "Dod.nap.stavke: " + ;
 			ALLTRIM( field->doc_it_desc )
@@ -285,6 +299,8 @@ do while !EOF()
 		
 	
 	endif
+	
+	?
 
 	select t_docit
 	skip
