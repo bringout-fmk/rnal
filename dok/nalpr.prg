@@ -149,7 +149,9 @@ do while !EOF()
 		Nstr_a4(nPage, .t.)
 		
     	endif	
-	
+
+	? cLine
+
 	// ostatak naziva artikla....
 	if LEN(aArt_desc) > 1
 		
@@ -174,8 +176,7 @@ do while !EOF()
 
 	// dodatne operacije operacije....
 	
-	
-	nOpCnt := 0
+	nOpHeader := 1
 
 	select t_docop
 	set order to tag "1"
@@ -188,11 +189,14 @@ do while !EOF()
 	    // uzmi element
 	    nDoc_el_no := field->doc_el_no
 	    
+	    nElDesc := 1
+	    
 	    do while !EOF() .and. field->doc_no == t_docit->doc_no ;
 	    		    .and. field->doc_it_no == t_docit->doc_it_no ;
 			    .and. field->doc_el_no == nDoc_el_no
-			    
-		if nOpCnt == 0
+		
+		// el.op.header
+		if nOpHeader == 1
 			
 			? RAZMAK
 		     	?? PADL("", LEN_IT_NO)
@@ -204,15 +208,26 @@ do while !EOF()
 			?? PADL("", LEN_IT_NO)
 			?? " "
 			?? REPLICATE("-", LEN( cPom ) )
-			? RAZMAK
-		    	?? PADL("", LEN_IT_NO)
-		    	?? STR( field->doc_el_no, 2 ) + ")" 
-	    		?? " "
-	    		?? PADR( field->doc_el_desc, 60 )
-	
+			
+			// iskljuci ga do daljnjeg
+			nOpHeader := 0
+			
 		endif
 		
-		++ nOpCnt
+		// element...
+		if nElDesc == 1
+			
+			? RAZMAK
+		    	?? PADL("", LEN_IT_NO)
+			?? " "
+		    	?? "ELEMENT" + STR( field->doc_el_no, 2 ) + ":" 
+	    		?? " "
+	    		?? PADR( field->doc_el_desc, 60 )
+		
+			// iskljuci ga do daljnjeg
+			nElDesc := 0
+	
+		endif
 		
 		// operacije....
 		
@@ -300,7 +315,7 @@ do while !EOF()
 	
 	endif
 	
-	?
+	? cLine
 
 	select t_docit
 	skip

@@ -856,6 +856,7 @@ return
 function _g_art_elements(aElem, nArt_id)
 local nTArea := SELECT()
 local cPom := ""
+local nCnt := 0
 
 aElem := {}
 
@@ -867,11 +868,13 @@ seek elid_str( nArt_id )
 
 do while !EOF() .and. field->art_id == nArt_id
 
+	++ nCnt 
+	
 	cPom := g_e_gr_desc( field->e_gr_id )
 	cPom += " "
 	cPom += get_el_desc( field->el_id )
 
-	AADD(aElem, { field->el_id, cPom } )
+	AADD(aElem, { field->el_id, cPom, nCnt } )
 		
 	skip
 
@@ -903,4 +906,16 @@ enddo
 
 select (nTArea)
 return xRet
+
+
+// ---------------------------------------
+// vraca broj elementa artikla
+// ---------------------------------------
+function _g_elem_no( aElem, nDoc_el_no, nElem_no )
+local nTmp
+nTmp := ASCAN( aElem, {|xVal| xVal[1] == nDoc_el_no })
+nElem_no := aElem[ nTmp, 3 ]
+return
+
+
 

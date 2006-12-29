@@ -115,6 +115,7 @@ local nDoc_el_no
 local cDoc_el_desc
 local nArt_id
 local aElem
+local nElem_no
 local nAop_id
 local cAop_desc
 local nAop_att_id
@@ -138,9 +139,9 @@ seek docno_str(__doc_no)
 
 do while !EOF() .and. field->doc_no == __doc_no
 
+	nElem_no := 0
 	nDoc_it_no := field->doc_it_no
 	nDoc_op_no := field->doc_op_no
-	
 	nDoc_el_no := field->doc_it_el_no
 	
 	select (nTable2)
@@ -149,9 +150,14 @@ do while !EOF() .and. field->doc_no == __doc_no
 	seek docno_str( __doc_no ) + docit_str( nDoc_it_no )
 
 	nArt_id := field->art_id
-	
+
+	altD()
+
 	aElem := {}
 	_g_art_elements( @aElem, nArt_id )
+	
+	// vrati broj elementa artikla (1, 2, 3 ...)
+	_g_elem_no( aElem, nDoc_el_no, @nElem_no )
 	
 	cDoc_el_desc := get_elem_desc( aElem, nDoc_el_no )
 	
@@ -166,7 +172,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	cDoc_op_desc := ALLTRIM( field->doc_op_desc )
 	
 	a_t_docop( __doc_no, nDoc_op_no, nDoc_it_no, ;
-		   nDoc_el_no, cDoc_el_desc, ;
+		   nElem_no, cDoc_el_desc, ;
                    nAop_id, cAop_desc, ;
 		   nAop_att_id, cAop_att_desc, cDoc_op_desc)
 
