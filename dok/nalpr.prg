@@ -201,7 +201,7 @@ do while !EOF()
 			? RAZMAK
 		     	?? PADL("", LEN_IT_NO)
 		     	?? " "
-			cPom := "Br.elementa, operacije:"
+			cPom := "Br.elementa, dodatne operacije:"
 			?? cPom
 			// podvlaka
 			? RAZMAK

@@ -104,8 +104,7 @@ endif
 
 AADD(opc, "4. izvjestaji ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "MAIN", "DOKRPT"))
-	//AADD(opcexe, {|| m_rpt() })
-	AADD(opcexe, {|| nil})
+	AADD(opcexe, {|| m_rpt() })
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif

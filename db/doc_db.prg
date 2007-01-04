@@ -511,27 +511,27 @@ select docs
 
 if !docs->(FLOCK())
 	
-	//nTime := 80     
+	nTime := 80     
 	
 	// daj mu 10 sekundi
-      	//do while nTime > 0
+      	do while nTime > 0
         	
-	//	InkeySc(.125)
+		InkeySc(.125)
          	
-	//	nTime --
+		nTime --
          	
-	//	if docs->(FLOCK())
-        //		exit
-	//       	endif
-	//enddo
+		if docs->(FLOCK())
+        		exit
+	       	endif
+	enddo
 	
-      	//if nTime == 0 .AND. ! docs->(FLOCK())
+      	if nTime == 0 .AND. ! docs->(FLOCK())
         	
-	Beep(2)
-        MsgBeep("Nemoguce odrediti broj dokumenta!#Pokusajte ponovo...")
-        return -1
+		Beep(2)
+        	MsgBeep("Nemoguce odrediti broj dokumenta!#Pokusajte ponovo...")
+        	return -1
       	
-	//endif
+	endif
 endif
 
 select docs
