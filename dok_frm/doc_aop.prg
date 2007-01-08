@@ -164,12 +164,17 @@ ESC_RETURN 0
 
 return 1
 
+
 // --------------------------------------------
 // vraca opis iz matrice - opis elementa
 // --------------------------------------------
-function get_elem_desc( aElem, nVal )
+function get_elem_desc( aElem, nVal, nLen )
 local xRet := ""
 local nChoice
+
+if nLen == nil
+	nLen := 17
+endif
 
 nChoice := ASCAN( aElem, {|xVal| xVal[1] == nVal } )
 
@@ -177,7 +182,7 @@ if nChoice > 0
 	xRet := aElem[ nChoice, 2 ]
 endif
 
-xRet := PADR(xRet, 17) + "..."
+xRet := PADR(xRet, nLen)
 
 return xRet
 

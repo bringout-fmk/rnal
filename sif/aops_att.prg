@@ -62,6 +62,12 @@ if nAop_id > 0 .or. cAop_desc <> ""
 	set filter to
 endif
 
+cId := field->aop_att_id
+
+if LastKey() == K_ESC
+	cId := 0
+endif
+
 select (nTArea)
 
 return cRet

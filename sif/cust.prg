@@ -39,9 +39,15 @@ set_f_kol(cCustDesc)
 
 cRet := PostojiSifra(F_CUSTOMS, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
+cId := field->cust_id
+
 if !EMPTY(cCustDesc)
 	set filter to
 	go top
+endif
+
+if LastKey() == K_ESC
+	cId := 0
 endif
 
 select (nTArea)

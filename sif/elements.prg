@@ -16,6 +16,8 @@ local i
 local nX
 local nY
 local nRet := 1
+local cColMenu := "BG+/B"
+local cLineClr := "GR+/B"
 private nEl_id := 0
 private nEl_gr_id := 0
 private ImeKol
@@ -31,15 +33,19 @@ l_auto_tab := .f.
 Box(,21,77)
 
 @ m_x, m_y + 15 SAY " DEFINISANJE ELEMENATA ARTIKLA: " + artid_str(art_id) + " "
-@ m_x + 20, m_y + 1 SAY REPLICATE("Í", 77)
+@ m_x + 20, m_y + 1 SAY REPLICATE("Í", 77) COLOR cLineClr
 @ m_x + 16, m_y + 1 SAY "<c+N> nova"
 @ m_x + 17, m_y + 1 SAY "<F2> ispravka"
 @ m_x + 18, m_y + 1 SAY "<c+T> brisi"
 @ m_x + 21, m_y + 1 SAY "<TAB> - browse tabela  | <ESC> snimanje promjena "
 
+// uspravna crta
 for i:=1 to 19
-	@ m_x + i, m_y + 21 SAY "º"
+	@ m_x + i, m_y + 21 SAY "º" COLOR cLineClr
 next
+// vertikalna crta
+@ m_x + 10, m_y + 22 SAY REPLICATE("Í", 56) COLOR cLineClr
+
 
 select e_att
 go top
@@ -57,7 +63,7 @@ do while .t.
 		nX := 16
 		nY := 20
 		m_y -= 21
-		@ m_x + 1, m_y + 2 SAY "** elementi"
+		@ m_x + 1, m_y + 2 SAY "** elementi" COLOR cColMenu
 		elem_kol(@ImeKol, @Kol)
 		elem_filter( art_id )
 
@@ -66,7 +72,7 @@ do while .t.
 		nX := 10
 		nY := 56
 		m_y += 21
-		@ m_x + 1, m_y + 2 SAY "** atributi"
+		@ m_x + 1, m_y + 2 SAY "** atributi" COLOR cColMenu
 		e_att_kol(@ImeKol, @Kol)
 		e_att_filter(nEl_id)
 	
@@ -75,7 +81,7 @@ do while .t.
 		nX := 10
 		nY := 56
 		m_x += 10
-		@ m_x + 1, m_y + 2 SAY "** dod.operacije"
+		@ m_x + 1, m_y + 2 SAY "** dod.operacije" COLOR cColMenu
 		e_aops_kol(@ImeKol, @Kol)
 		e_aops_filter(nEl_id)
 	
@@ -228,8 +234,8 @@ static function elem_kol(aImeKol, aKol, nArt_id)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {PADC("elem.", 8), {|| PADL(ALLTRIM(elid_str(el_id)), 8) }, "el_id", {|| _inc_id(@wel_id, "EL_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("el.grupa", 10), {|| PADR(g_e_gr_desc( e_gr_id ), 10 ) }, "e_gr_id"})
+AADD(aImeKol, {"e", {|| " " }, "el_id", {|| _inc_id(@wel_id, "EL_ID"), .f.}, {|| .t.}})
+AADD(aImeKol, {PADC("el.grupa", 15), {|| PADR(g_e_gr_desc( e_gr_id ), 15 ) }, "e_gr_id"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -301,7 +307,6 @@ do case
 		l_auto_tab := .f.
 		return DE_REFRESH
 	
-		
 	case Ch == K_TAB
 		
 		// browse kroz tabele
@@ -449,8 +454,9 @@ return nRet
 // ----------------------------------------------
 static function elem_edit( nArt_id, lNewRec )
 local nEl_id := 0
-local nLeft := 20
+local nLeft := 25
 local nRet := DE_CONT
+local cColor := "BG+/B"
 private GetList:={}
 
 if !lNewRec .and. field->el_id == 0
@@ -481,12 +487,13 @@ endif
 Box(,4,60)
 
 	if lNewRec
-		@ m_x + 1, m_y + 2 SAY "Unos novog elementa *******"
+		@ m_x + 1, m_y + 2 SAY "Unos novog elementa *******" COLOR cColor
 	else
-		@ m_x + 1, m_y + 2 SAY "Ispravka elementa *******"
+		@ m_x + 1, m_y + 2 SAY "Ispravka elementa *******" COLOR cColor
 	endif
 	
-	@ m_x + 3, m_y + 2 SAY PADL("elem.grupa", nLeft) GET _e_gr_id VALID s_e_groups( @_e_gr_id, .t. )
+	@ m_x + 3, m_y + 2 SAY PADL("element pripada grupi->", nLeft) GET _e_gr_id VALID s_e_groups( @_e_gr_id, .t. )
+	@ m_x + 4, m_y + 2 SAY PADL("0 - otvori sifrarnik", nLeft)
 	
 	read
 BoxC()
@@ -560,8 +567,9 @@ return
 //   lNewRec - novi zapis .t. or .f.
 // ----------------------------------------------
 static function e_att_edit( nEl_id, lNewRec )
-local nLeft := 15
+local nLeft := 25
 local nEl_att_id := 0
+local cColor := "BG+/B"
 private GetList:={}
 
 if !lNewRec .and. field->el_id == 0
@@ -591,14 +599,16 @@ endif
 Box(,6,65)
 
 	if lNewRec
-		@ m_x + 1, m_y + 2 SAY "Unos novog atributa elementa *******"
+		@ m_x + 1, m_y + 2 SAY "Unos novog atributa elementa *******" COLOR cColor
 	else
-		@ m_x + 1, m_y + 2 SAY "Ispravka atributa elementa *******"
+		@ m_x + 1, m_y + 2 SAY "Ispravka atributa elementa *******" COLOR cColor
 	endif
 	
-	@ m_x + 3, m_y + 2 SAY PADL("atribut grupe", nLeft) GET _e_gr_at_id VALID {|| s_e_gr_att(@_e_gr_at_id, el_gr_id, nil, .t. ), show_it( g_gr_at_desc( _e_gr_at_id ) ) }
+	@ m_x + 3, m_y + 2 SAY PADL("izaberi atribut elementa", nLeft) GET _e_gr_at_id VALID {|| s_e_gr_att(@_e_gr_at_id, el_gr_id, nil, .t. ), show_it( g_gr_at_desc( _e_gr_at_id ) ) } WHEN lNewRec == .t.
 		
-	@ m_x + 4, m_y + 2 SAY PADL("vrijednost ->", nLeft) GET _e_gr_vl_id VALID s_e_gr_val(@_e_gr_vl_id, _e_gr_at_id, nil, .t.)
+	@ m_x + 4, m_y + 2 SAY PADL("izaberi vrijednost atributa", nLeft) GET _e_gr_vl_id VALID s_e_gr_val(@_e_gr_vl_id, _e_gr_at_id, nil, .t.)
+	
+	@ m_x + 5, m_y + 2 SAY PADL("0 - otvori sifrarnik", nLeft)
 	
 	read
 BoxC()
@@ -624,8 +634,9 @@ return 1
 //   lNewRec - novi zapis .t. or .f.
 // ----------------------------------------------
 static function e_aops_edit( nEl_id, lNewRec )
-local nLeft := 20
+local nLeft := 25
 local nEl_op_id := 0
+local cColor := "BG+/B"
 private GetList:={}
 
 if !lNewRec .and. field->el_id == 0
@@ -655,14 +666,16 @@ endif
 Box(,6,65)
 
 	if lNewRec
-		@ m_x + 1, m_y + 2 SAY "Unos dodatnih operacija elementa *******"
+		@ m_x + 1, m_y + 2 SAY "Unos dodatnih operacija elementa *******" COLOR cColor
 	else
-		@ m_x + 1, m_y + 2 SAY "Ispravka dodatnih operacija elementa *******"
+		@ m_x + 1, m_y + 2 SAY "Ispravka dodatnih operacija elementa *******" COLOR cColor
 	endif
 	
-	@ m_x + 3, m_y + 2 SAY PADL("dodatna operacija", nLeft) GET _aop_id VALID {|| s_aops(@_aop_id, nil, .t.), show_it( g_aop_desc( _aop_id ) ) }
+	@ m_x + 3, m_y + 2 SAY PADL("izaberi dodatnu operaciju", nLeft) GET _aop_id VALID {|| s_aops(@_aop_id, nil, .t.), show_it( g_aop_desc( _aop_id ) ) }
 		
-	@ m_x + 4, m_y + 2 SAY PADL("atribut operacije", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att( @_aop_att_id, _aop_id, nil, .t. ), show_it( g_aop_att_desc( _aop_att_id ) )  }
+	@ m_x + 4, m_y + 2 SAY PADL("izaberi atribut operacije", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att( @_aop_att_id, _aop_id, nil, .t. ), show_it( g_aop_att_desc( _aop_att_id ) )  }
+	
+	@ m_x + 5, m_y + 2 SAY PADL("0 - otvori sifrarnik", nLeft)
 	
 	read
 BoxC()

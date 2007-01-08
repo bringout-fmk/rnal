@@ -151,15 +151,13 @@ do while !EOF() .and. field->doc_no == __doc_no
 
 	nArt_id := field->art_id
 
-	altD()
-
 	aElem := {}
 	_g_art_elements( @aElem, nArt_id )
 	
 	// vrati broj elementa artikla (1, 2, 3 ...)
 	_g_elem_no( aElem, nDoc_el_no, @nElem_no )
 	
-	cDoc_el_desc := get_elem_desc( aElem, nDoc_el_no )
+	cDoc_el_desc := get_elem_desc( aElem, nDoc_el_no, 150 )
 	
 	select (nTable)
 	

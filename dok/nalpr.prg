@@ -1,16 +1,16 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
-static LEN_IT_NO := 7
-static LEN_DESC := 70
+static LEN_IT_NO := 4
+static LEN_DESC := 65
 
-static LEN_QTTY := 12
-static LEN_DIMENSION := 12
-static LEN_VALUE := 12
+static LEN_QTTY := 10
+static LEN_DIMENSION := 10
+static LEN_VALUE := 10
 
-static PIC_QTTY := "999999999.99"
-static PIC_VALUE := "999999999.99"
-static PIC_DIMENSION := "999999999.99"
+static PIC_QTTY := "9999999.99"
+static PIC_VALUE := "9999999.99"
+static PIC_DIMENSION := "9999999.99"
 
 static LEN_PAGE := 58
 
@@ -42,6 +42,8 @@ LEN_DIMENSION := LEN(PIC_DIMENSION)
 
 // razmak ce biti
 RAZMAK := SPACE(gDl_margina)
+// nek je razmak 1
+RAZMAK := SPACE(1)
 
 t_rpt_open()
 
@@ -93,7 +95,8 @@ select t_docit
 set order to tag "1"
 go top
 
-P_COND
+// kondenzuj font
+//P_COND
 
 // print header tabele
 s_tbl_header()
@@ -103,13 +106,32 @@ set order to tag "1"
 
 nPage := 1
 aArt_desc := {}
+nArt_id := 0
+nArt_tmp := 0
+lSh_art_desc := .f.
 
 // stampaj podatke 
 do while !EOF()
 	
+	lSh_art_desc := .f.
+	nArt_id := field->art_id
+	
+	if nArt_tmp <> nArt_id 
+		
+		lSh_art_desc := .t.
+
+	endif
+	
 	cDoc_no := docno_str( field->doc_no )
 	cDoc_it_no := docit_str( field->doc_it_no )
-	cArt_desc := ALLTRIM( field->art_desc )
+	
+	// prikazuj naziv artikla
+	if lSh_art_desc == .t.
+		cArt_desc := ALLTRIM( field->art_desc )
+	else
+		cPom := "-//-"
+		cArt_desc := PADC( cPom , 10 )
+	endif
 	
 	aArt_desc := SjeciStr( cArt_desc, LEN_DESC )	
 	
@@ -130,17 +152,17 @@ do while !EOF()
 	?? " "
 	
 	// sirina
-	?? show_number(field->doc_it_heigh, PIC_DIMENSION)
+	?? show_number(field->doc_it_heigh, nil, -10 )
 
 	?? " "
 
 	// visina
-	?? show_number(field->doc_it_width, PIC_DIMENSION)
+	?? show_number(field->doc_it_width, nil, -10 )
 	
 	?? " "
 
 	// kolicina
-	?? show_number(field->doc_it_qtty, PIC_QTTY)
+	?? show_number(field->doc_it_qtty, nil, -10 )
 
 	// provjeri za novu stranicu
 	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
@@ -149,8 +171,6 @@ do while !EOF()
 		Nstr_a4(nPage, .t.)
 		
     	endif	
-
-	? cLine
 
 	// ostatak naziva artikla....
 	if LEN(aArt_desc) > 1
@@ -174,6 +194,11 @@ do while !EOF()
 		
 	endif
 
+	? RAZMAK
+	?? PADL("", LEN_IT_NO)
+	?? " "
+	?? REPLICATE("-", LEN_DESC)
+	
 	// dodatne operacije operacije....
 	
 	nOpHeader := 1
@@ -190,6 +215,7 @@ do while !EOF()
 	    nDoc_el_no := field->doc_el_no
 	    
 	    nElDesc := 1
+	    nElCount := 0
 	    
 	    do while !EOF() .and. field->doc_no == t_docit->doc_no ;
 	    		    .and. field->doc_it_no == t_docit->doc_it_no ;
@@ -198,16 +224,16 @@ do while !EOF()
 		// el.op.header
 		if nOpHeader == 1
 			
-			? RAZMAK
-		     	?? PADL("", LEN_IT_NO)
-		     	?? " "
-			cPom := "Br.elementa, dodatne operacije:"
-			?? cPom
+			// ? RAZMAK
+		     	//?? PADL("", LEN_IT_NO)
+		     	//?? " "
+			//cPom := "Br.elementa, dodatne operacije:"
+			//?? cPom
 			// podvlaka
-			? RAZMAK
-			?? PADL("", LEN_IT_NO)
-			?? " "
-			?? REPLICATE("-", LEN( cPom ) )
+			//? RAZMAK
+			//?? PADL("", LEN_IT_NO)
+			//?? " "
+			//?? REPLICATE("-", LEN( cPom ) )
 			
 			// iskljuci ga do daljnjeg
 			nOpHeader := 0
@@ -220,9 +246,11 @@ do while !EOF()
 			? RAZMAK
 		    	?? PADL("", LEN_IT_NO)
 			?? " "
-		    	?? "ELEMENT" + STR( field->doc_el_no, 2 ) + ":" 
+		    	B_ON
+			?? "obrada na " + STR( field->doc_el_no, 2 ) + ":" 
+			B_OFF
 	    		?? " "
-	    		?? PADR( field->doc_el_desc, 60 )
+	    		?? ALLTRIM( field->doc_el_desc )
 		
 			// iskljuci ga do daljnjeg
 			nElDesc := 0
@@ -235,10 +263,10 @@ do while !EOF()
 
 		?? PADL("", LEN_IT_NO)
 
-		?? SPACE(5)
+		?? " "
 		
 		if !EMPTY(field->aop_desc) .and. ALLTRIM(field->aop_desc) <> "?????"
-			?? "*" + SPACE(1) + ALLTRIM(field->aop_desc)
+			?? PADL( STR( ++ nElCount, 3), 3) + ")" + SPACE(1) + ALLTRIM(field->aop_desc)
 		endif
 
 		if !EMPTY(field->aop_att_desc) .and. ALLTRIM(field->aop_att_desc) <> "?????"
@@ -248,7 +276,7 @@ do while !EOF()
 		
 		if !EMPTY(field->doc_op_desc)
 			
-			cPom := "* dod.nap: "
+			cPom := "- napomene: "
 			cPom += ALLTRIM( field->doc_op_desc )
 			aPom := SjeciStr( cPom , 70 )
 			
@@ -278,9 +306,9 @@ do while !EOF()
 	// - shema u prilogu
 	
 	if !EMPTY( field->doc_it_desc ) ;
-		.or. !EMPTY( field->doc_it_schema )
+		.or. ( field->doc_it_schema == "D" )
 	
-		cPom := "Dod.nap.stavke: " + ;
+		cPom := "Napomene: " + ;
 			ALLTRIM( field->doc_it_desc )
 		
 		if field->doc_it_schema == "D"
@@ -292,14 +320,10 @@ do while !EOF()
 		aDoc_it_desc := SjeciStr( cPom , 100 )
 		
 		// podvuci
-		
-		? RAZMAK
-
-		?? PADL( "", LEN_IT_NO )
-	
-		?? " "
-		
-		?? REPLICATE( "-", LEN_DESC )
+		//? RAZMAK
+		//?? PADL( "", LEN_IT_NO )
+		//?? " "
+		//?? REPLICATE( "-", LEN_DESC )
 
 		for i:=1 to LEN(aDoc_it_desc)
 						
@@ -319,6 +343,9 @@ do while !EOF()
 
 	select t_docit
 	skip
+
+	nArt_tmp := nArt_id 
+	
 enddo
 
 // provjeri za novu stranicu
@@ -327,7 +354,7 @@ if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 	Nstr_a4(nPage, .t.)
 endif	
 
-? cLine
+//? cLine
 
 s_nal_izdao()
 
@@ -425,7 +452,7 @@ cRow1 += PADC("r.br", LEN_IT_NO)
 cRow1 += " " + PADR("artikal/naziv/element/operacije/napomene", LEN_DESC)
 cRow1 += " " + PADC("sirina(mm)", LEN_DIMENSION)
 cRow1 += " " + PADC("visina(mm)", LEN_DIMENSION)
-cRow1 += " " + PADC("kolicina", LEN_QTTY)
+cRow1 += " " + PADC("kol. (kom)", LEN_QTTY)
 
 ? cRow1
 

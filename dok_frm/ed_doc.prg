@@ -139,6 +139,7 @@ static function header_footer()
 local nTArea := SELECT()
 local cHeader
 local cFooter
+local cLineClr := "BG+/B"
 
 cFooter := "<TAB> brow.tab "
 cFooter += "<c-N> nova "
@@ -163,12 +164,12 @@ cHeader += "operater: "
 cHeader += ALLTRIM( goModul:oDataBase:cUser )
 
 @ m_x, m_y + 2 SAY cHeader
-@ m_x + 6, m_y + 1 SAY REPLICATE("Í", 78)
-@ m_x + 21, m_y + 1 SAY REPLICATE("Í", 78)
+@ m_x + 6, m_y + 1 SAY REPLICATE("Í", 78) COLOR cLineClr
+@ m_x + 21, m_y + 1 SAY REPLICATE("Í", 78) COLOR cLineClr
 @ m_x + 22, m_y + 1 SAY cFooter
 
 for i:=7 to 20
-	@ m_x + i, m_y + 50 SAY "º"
+	@ m_x + i, m_y + 50 SAY "º" COLOR cLineClr
 next
 
 select (nTArea)

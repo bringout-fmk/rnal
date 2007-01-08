@@ -145,9 +145,14 @@ nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("kolicina [kom] (*):", nLeft + 3) GET _doc_it_qtty PICT "99999" VALID val_qtty(_doc_it_qtty) WHEN set_opc_box( nBoxX, 50 )
 
-nX += 2
+// ako je nova stavka obezbjedi unos operacija...
+if l_new_it
 
-@ m_x + nX, m_y + 2 SAY PADL("unesi dod.oper.stavke (D/N)? (*):", nLeft + 9) GET cGetDOper PICT "@!" VALID cGetDOper $ "DN" WHEN set_opc_box( nBoxX, 50, "unos dodatnih operacija za stavku")
+	nX += 2
+
+	@ m_x + nX, m_y + 2 SAY PADL("unesi dod.oper.stavke (D/N)? (*):", nLeft + 9) GET cGetDOper PICT "@!" VALID cGetDOper $ "DN" WHEN set_opc_box( nBoxX, 50, "unos dodatnih operacija za stavku")
+
+endif
 
 read
 

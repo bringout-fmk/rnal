@@ -43,9 +43,16 @@ if VALTYPE(cId) == "C"
 	endif
 endif
 
+set filter to
 cust_filter(nCust_id, cContDesc)
-	
+
 cRet := PostojiSifra(F_CONTACTS, 1, 10, 70, cHeader, @cId, dx, dy)
+
+cId := field->cont_id
+
+if LastKey() == K_ESC
+	cId := 0
+endif
 
 select (nTArea)
 
