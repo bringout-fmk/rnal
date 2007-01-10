@@ -70,7 +70,9 @@ if l_open_dbedit
 	cOptions += "<c-N> novi "
 	cOptions += "<c-T> brisi "
 	cOptions += "<F2> ispravi "
-	cOptions += "<F4> dupliciraj "
+	cOptions += "<F3> ispr.naziv "
+	cOptions += "<F4> dupl. "
+	cOptions += "<a+F> trazi"
 
 	Box(, nBoxX, nBoxY, .t.)
 	
@@ -190,6 +192,12 @@ do case
 		
 		return DE_CONT
 	
+	case Ch == K_F3
+
+		if art_ed_desc( field->art_id ) == 1
+			return DE_REFRESH
+		endif
+		
 	case Ch == K_F4
 
 		// ima li pravo pristupa...
@@ -253,6 +261,38 @@ do case
 		
 endcase
 return DE_CONT
+
+
+// ---------------------------------------------
+// ispravka opisa artikla
+// ---------------------------------------------
+static function art_ed_desc( nArt_id )
+local cArt_desc := PADR(field->art_desc, 250)
+local cArt_mcode := PADR(field->match_code, 10)
+local cDBFilter := DBFILTER()
+local nTRec := RECNO()
+local nRet := 0
+
+if _box_art_desc( @cArt_desc, @cArt_mcode ) == 1
+	
+	set filter to
+	go top
+	seek artid_str( nArt_id )
+	
+	Scatter()
+	
+	_art_desc := cArt_desc
+	_match_code := cArt_mcode
+	
+	Gather()
+
+	set filter to &cDBFilter
+	go (nTRec)
+	
+	nRet := 1
+endif
+
+return nRet
 
 
 // ----------------------------------------
@@ -913,8 +953,15 @@ return xRet
 // ---------------------------------------
 function _g_elem_no( aElem, nDoc_el_no, nElem_no )
 local nTmp
+
 nTmp := ASCAN( aElem, {|xVal| xVal[1] == nDoc_el_no })
-nElem_no := aElem[ nTmp, 3 ]
+
+if nTmp > LEN(aElem) .or. nTmp == 0
+	nElem_no := 0
+else
+	nElem_no := aElem[ nTmp, 3 ]
+endif
+
 return
 
 

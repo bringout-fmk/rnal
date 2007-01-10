@@ -126,10 +126,10 @@ if l_new_doc
 	_doc_date := DATE()
 	_doc_dvr_date := DATE() + 2
 	_doc_dvr_time := PADR( PADR(TIME(), 5), 8)
-	_doc_ship_place := SPACE( LEN(_doc_ship_place) )
+	_doc_ship_place := PADR("Ramaglas prodaja", LEN(_doc_ship_place) )
 	_doc_priority := 2
 	_doc_pay_id := 1
-	_doc_paid := "N"
+	_doc_paid := "D"
 	_doc_pay_desc := SPACE( LEN(_doc_pay_desc) )
 	_doc_status := 0
 	
@@ -164,7 +164,7 @@ nX += 1
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("Mjesto isporuke (*):", nLeft) GET _doc_ship_place VALID {|| must_enter( _doc_ship_place ), sh_place_pattern(@_doc_ship_place) } PICT "@S46" WHEN set_opc_box( nBoxX, 50, "mjesto gdje se roba isporucuje", "/RP - ramaglas" )
+@ m_x + nX, m_y + 2 SAY PADL("Mjesto isporuke (*):", nLeft) GET _doc_ship_place VALID {|| must_enter( _doc_ship_place ), sh_place_pattern(@_doc_ship_place) } PICT "@S46" WHEN set_opc_box( nBoxX, 50, "mjesto gdje se roba isporucuje" )
 @ m_x + nX, col() SAY ">" COLOR "I"
 
 nX += 2

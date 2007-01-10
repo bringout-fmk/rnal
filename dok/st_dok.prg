@@ -229,15 +229,25 @@ return
 // ----------------------------------------
 static function _fill_customer( nCust_id )
 local nTArea := SELECT()
+local cCust_desc := ""
+local cCust_addr := ""
+local cCust_tel := ""
+
 select customs
 set order to tag "1"
 go top
 seek custid_str(nCust_id)
 
+if FOUND()
+	cCust_desc := ALLTRIM( customs->cust_desc )
+	cCust_addr := ALLTRIM( customs->cust_addr )
+	cCust_tel := ALLTRIM( customs->cust_tel )
+endif
+
 add_tpars("P01", custid_str(nCust_id))
-add_tpars("P02", ALLTRIM( customs->cust_desc ))
-add_tpars("P03", ALLTRIM( customs->cust_addr ))
-add_tpars("P04", ALLTRIM( customs->cust_tel ))
+add_tpars("P02", cCust_desc )
+add_tpars("P03", cCust_addr )
+add_tpars("P04", cCust_tel )
 
 select (nTArea)
 return
@@ -248,16 +258,25 @@ return
 // ----------------------------------------
 static function _fill_contact( nCont_id )
 local nTArea := SELECT()
+local cCont_desc := ""
+local cCont_tel := ""
+local cCont_add_desc := ""
 
 select contacts
 set order to tag "1"
 go top
 seek contid_str(nCont_id)
 
+if FOUND()
+	cCont_desc := ALLTRIM( contacts->cont_desc )
+	cCont_tel := ALLTRIM( contacts->cont_tel )
+	cCont_add_desc := ALLTRIM( contacts->cont_add_desc )
+endif
+
 add_tpars("P10", contid_str(nCont_id))
-add_tpars("P11", ALLTRIM( contacts->cont_desc ))
-add_tpars("P12", ALLTRIM( contacts->cont_tel ))
-add_tpars("P13", ALLTRIM( contacts->cont_add_desc ))
+add_tpars("P11", cCont_desc )
+add_tpars("P12", cCont_tel )
+add_tpars("P13", cCont_add_desc )
 
 select (nTArea)
 return

@@ -43,7 +43,8 @@ local i
 local nX
 local nY
 local nRet := 1
-local cColor := "GR+/B"
+local cCol1 := "W/B"
+local cCol2 := "W+/G"
 private ImeKol
 private Kol
 
@@ -74,8 +75,13 @@ do while .t.
 		
 		m_x -= 6
 		m_y -= 50
-		
-		@ m_x + 1, m_y + 1 SAY PADR("*** osnovni podaci",20) COLOR cColor
+	
+		// prikazi naslov tabele
+		_say_tbl_desc( m_x + 1, ;
+				m_y + 1, ;
+				cCol2, ;
+				"*** osnovni podaci", ;
+				20 )
 		
 		docs_kol(@ImeKol, @Kol)
 		
@@ -86,7 +92,11 @@ do while .t.
 		
 		m_x += 6
 		
-		@ m_x + 1, m_y + 1 SAY PADR("*** stavke naloga",20) COLOR cColor
+		_say_tbl_desc( m_x + 1 , ;
+				m_y + 1, ;
+				cCol2, ;
+				"*** stavke naloga" , ;
+				20 )
 		
 		docit_kol(@ImeKol, @Kol)
 
@@ -94,11 +104,14 @@ do while .t.
 
 		nX := 15
 		nY := 28
-		
 		m_y += 50
 		
-		@ m_x + 1, m_y + 1 SAY PADR("*** dod.oper.",20) COLOR cColor
-		
+		_say_tbl_desc( m_x + 1, ;
+				m_y + 1, ;
+				cCol2, ;
+				"*** dod.oper.", ;
+				20 )
+	
 		docop_kol(@ImeKol, @Kol)
 		
 	endif
@@ -132,6 +145,29 @@ return nRet
 
 
 
+// ---------------------------------------
+// prikaz osnovni podaci
+// nX - x koord.
+// nY - y koord.
+// cTxt - tekst
+// cColSheme - kolor shema...
+// nLeft - poravnanje ulijevo nnn
+// ---------------------------------------
+function _say_tbl_desc(nX, nY, cColSheme, cTxt, nLeft)
+
+if nLeft == nil
+	nLeft := 20
+endif
+
+if cColSheme == nil
+	@ nX, nY SAY PADR( cTxt, nLeft )
+else
+	@ nX, nY SAY PADR( cTxt, nLeft ) COLOR cColSheme
+endif
+
+return
+
+
 // -----------------------------------------------
 // prikazi header i footer 
 // -----------------------------------------------
@@ -139,7 +175,7 @@ static function header_footer()
 local nTArea := SELECT()
 local cHeader
 local cFooter
-local cLineClr := "BG+/B"
+local cLineClr := "GR+/B"
 
 cFooter := "<TAB> brow.tab "
 cFooter += "<c-N> nova "
@@ -271,11 +307,17 @@ do case
 	case Ch == K_TAB
 
 		if ALIAS() == "_DOCS"
+		
+			_say_tbl_desc( m_x + 1, m_y + 1, ;
+					nil, "*** osnovni podaci", 20 )
 			
 			select _doc_it
 			nRet := DE_ABORT
 			
 		elseif ALIAS() == "_DOC_IT"
+			
+			_say_tbl_desc( m_x + 1, m_y + 1, ;
+					nil, "*** stavke naloga", 20 )
 			
 			__art_id := field->art_id
 			__item_no := field->doc_it_no
@@ -285,6 +327,9 @@ do case
 
 		elseif ALIAS() == "_DOC_OPS"
 
+			_say_tbl_desc( m_x + 1, m_y + 1, ;
+					nil, "*** dod.oper.", 20 )
+			
 			select _docs
 			nRet := DE_ABORT
 			

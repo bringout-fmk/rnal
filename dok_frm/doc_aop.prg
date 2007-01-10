@@ -128,14 +128,16 @@ if l_new_ops
 	cAopAtt := PADR("", 10)
 
 else
+	
 	cAop := PADL( STR(_aop_id, 10), 10 )
 	cAopAtt := PADL( STR(_aop_att_id, 10), 10 )
+	
 endif
 
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("r.br stavke (*):", nLeft) GET _doc_op_no WHEN {|| set_opc_box( nBoxX, 50 ), _doc_op_no == 0 }
+@ m_x + nX, m_y + 2 SAY PADL("r.br operacije (*):", nLeft) GET _doc_op_no WHEN {|| set_opc_box( nBoxX, 50 ), _doc_op_no == 0 }
 
 nX += 2
 
@@ -143,15 +145,15 @@ nX += 2
 	
 nX += 1
 	
-@ m_x + nX, m_y + 2 SAY PADL(" -> element stavke (*):", nLeft) GET _doc_it_el_no VALID {|| get_it_element( @_doc_it_el_no ), show_it( get_elem_desc( _a_elem, _doc_it_el_no ), 26 ) } WHEN set_opc_box( nBoxX, 50, "odnosi se na odredjeni element stavke", "")
+@ m_x + nX, m_y + 2 SAY PADL(" -> element stavke (*):", nLeft) GET _doc_it_el_no VALID {|| get_it_element( @_doc_it_el_no ), show_it( get_elem_desc( _a_elem, _doc_it_el_no ), 26 ) } WHEN {|| _g_art_elements( @_a_elem, _g_art_it_no( _doc_it_no) ), set_opc_box( nBoxX, 50, "odnosi se na odredjeni element stavke", "") }
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("dodatna operacija (*):", nLeft) GET cAop VALID {|| s_aops( @cAop, cAop ), set_var(@_aop_id, @cAop) , show_it( g_aop_desc( _aop_id )) } WHEN set_opc_box( nBoxX, 50, "odaberi dodatnu operaciju", "0 - otvori sifrarnik")
+@ m_x + nX, m_y + 2 SAY PADL("dodatna operacija (*):", nLeft) GET cAop VALID {|| s_aops( @cAop, cAop ), set_var(@_aop_id, @cAop) , show_it( g_aop_desc( _aop_id ), 20) } WHEN set_opc_box( nBoxX, 50, "odaberi dodatnu operaciju", "0 - otvori sifrarnik")
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("atribut dod. operacije:", nLeft) GET cAopAtt VALID {|| EMPTY(cAopAtt) .or. s_aops_att(@cAopAtt, _aop_id, cAopAtt ), set_var(@_aop_att_id, @cAopAtt), show_it(g_aop_att_desc( _aop_att_id )) } WHEN set_opc_box( nBoxX, 50, "odaberi atribut dodatne operacije", "99 - otvori sifrarnik")
+@ m_x + nX, m_y + 2 SAY PADL("atribut dod. operacije:", nLeft) GET cAopAtt VALID {|| s_aops_att(@cAopAtt, _aop_id, cAopAtt ), set_var(@_aop_att_id, @cAopAtt), show_it(g_aop_att_desc( _aop_att_id ), 20) } WHEN set_opc_box( nBoxX, 50, "odaberi atribut dodatne operacije", "99 - otvori sifrarnik")
 
 nX += 2
 
@@ -251,6 +253,29 @@ static function g_item_desc( doc_it_no )
 local xRet := ""
 xRet := "na " + ALLTRIM(STR(doc_it_no)) + " stavku naloga"
 return xRet
+
+
+// ---------------------------------------------
+// vraca artikal za stavku
+// ---------------------------------------------
+static function _g_art_it_no( nDoc_it_no )
+local nArt_id := 0
+local nTArea := SELECT()
+local nTRec := RECNO()
+
+select _doc_it
+set order to tag "1"
+seek docno_str( _doc) + docit_str( nDoc_it_no )
+
+if FOUND()
+	nArt_id  := field->art_id
+endif
+
+select (nTArea)
+go (nTRec)
+
+return nArt_id
+
 
 
 // -------------------------------------------

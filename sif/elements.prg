@@ -16,7 +16,7 @@ local i
 local nX
 local nY
 local nRet := 1
-local cColMenu := "BG+/B"
+local cCol2 := "W+/G"
 local cLineClr := "GR+/B"
 private nEl_id := 0
 private nEl_gr_id := 0
@@ -63,7 +63,13 @@ do while .t.
 		nX := 16
 		nY := 20
 		m_y -= 21
-		@ m_x + 1, m_y + 2 SAY "** elementi" COLOR cColMenu
+		
+		_say_tbl_desc( m_x + 1, ;
+				m_y + 1, ;
+				cCol2, ;
+				"** elementi", ;
+				11 )
+		
 		elem_kol(@ImeKol, @Kol)
 		elem_filter( art_id )
 
@@ -72,7 +78,13 @@ do while .t.
 		nX := 10
 		nY := 56
 		m_y += 21
-		@ m_x + 1, m_y + 2 SAY "** atributi" COLOR cColMenu
+		
+		_say_tbl_desc( m_x + 1, ;
+				m_y + 1, ;
+				cCol2, ;
+				"** atributi", ;
+				20 )
+		
 		e_att_kol(@ImeKol, @Kol)
 		e_att_filter(nEl_id)
 	
@@ -81,7 +93,13 @@ do while .t.
 		nX := 10
 		nY := 56
 		m_x += 10
-		@ m_x + 1, m_y + 2 SAY "** dod.operacije" COLOR cColMenu
+		
+		_say_tbl_desc( m_x + 1, ;
+				m_y + 1, ;
+				cCol2, ;
+				"** dod.operacije", ; 
+				20 )
+		
 		e_aops_kol(@ImeKol, @Kol)
 		e_aops_filter(nEl_id)
 	
@@ -313,6 +331,12 @@ do case
 		
 		if ALIAS() == "E_ATT"
 			
+			_say_tbl_desc( m_x + 1, ;
+				m_y + 1, ;
+				nil, ;
+				"** atributi", ;
+				20 )
+		
 			select e_aops
 			nRet := DE_ABORT
 			
@@ -325,6 +349,13 @@ do case
 				
 			else
 			
+				_say_tbl_desc( m_x + 1, ;
+					m_y + 1, ;
+					nil, ;
+					"** elementi", ;
+					11 )
+		
+			
 				nEl_id := field->el_id
 				el_gr_id := field->e_gr_id
 			
@@ -335,6 +366,12 @@ do case
 			
 		elseif ALIAS() == "E_AOPS"
 			
+			_say_tbl_desc( m_x + 1, ;
+				m_y + 1, ;
+				nil, ;
+				"** dod.operacije", ;
+				20 )
+		
 			select elements
 			nRet := DE_ABORT
 			
@@ -673,7 +710,7 @@ Box(,6,65)
 	
 	@ m_x + 3, m_y + 2 SAY PADL("izaberi dodatnu operaciju", nLeft) GET _aop_id VALID {|| s_aops(@_aop_id, nil, .t.), show_it( g_aop_desc( _aop_id ) ) }
 		
-	@ m_x + 4, m_y + 2 SAY PADL("izaberi atribut operacije", nLeft) GET _aop_att_id VALID {|| _aop_att_id == 0 .or. s_aops_att( @_aop_att_id, _aop_id, nil, .t. ), show_it( g_aop_att_desc( _aop_att_id ) )  }
+	@ m_x + 4, m_y + 2 SAY PADL("izaberi atribut operacije", nLeft) GET _aop_att_id VALID {|| s_aops_att( @_aop_att_id, _aop_id, nil, .t. ), show_it( g_aop_att_desc( _aop_att_id ) )  }
 	
 	@ m_x + 5, m_y + 2 SAY PADL("0 - otvori sifrarnik", nLeft)
 	
