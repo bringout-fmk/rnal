@@ -55,8 +55,6 @@ if cDesc <> ""
 	set filter to
 endif
 
-cId := field->aop_id
-
 if LastKey() == K_ESC
 	cId := 0
 endif
