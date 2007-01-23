@@ -141,7 +141,7 @@ nX += 2
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku (*):", nLeft) GET _doc_it_no VALID {|| _doc_it_no > 0 .and. show_it( g_item_desc( _doc_it_no ), 26 )} WHEN {|| set_opc_box( nBoxX, 50, "ova operacija ce se odnositi", "eksplicitno na unesenu stavku"), _from_article == .f. }
+@ m_x + nX, m_y + 2 SAY PADL("odnosi se na stavku (*):", nLeft) GET _doc_it_no VALID {|| _item_range( _doc_it_no ) .and. show_it( g_item_desc( _doc_it_no ), 26 )} WHEN {|| set_opc_box( nBoxX, 50, "ova operacija ce se odnositi", "eksplicitno na unesenu stavku"), _from_article == .f. }
 	
 nX += 1
 	
@@ -244,6 +244,30 @@ endif
 
 return nRet
 
+// ---------------------------------------------
+// da li je stavka u rangu stavki tabele
+// ---------------------------------------------
+static function _item_range( nItemNo )
+local lRet := .t.
+local nTArea := SELECT()
+local nDocItRec 
+
+select _doc_it
+
+nDocItRec := _doc_it->(RECCOUNT2())
+
+if nItemNo > nDocItRec .or. nItemNo <= 0
+	lRet := .f.
+endif
+
+select (nTArea)
+
+if lRet == .f.
+	MsgBeep("Nepostojeca stavka naloga !!!##Nalog sadrzi " + ;
+		ALLTRIM(STR(nDocItRec)) + " stavki.")
+endif
+
+return lRet
 
 
 // --------------------------------------------

@@ -398,6 +398,8 @@ return
 static function s_nal_footer()
 local cPom
 local cPayDesc := ""
+local cPayed := ""
+local cPayAddDesc := ""
 
 // provjeri za novu stranicu
 if prow() > LEN_PAGE - DSTR_KOREKCIJA()
@@ -406,10 +408,38 @@ if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 endif	
 
 cPayDesc := g_t_pars_opis("N06")
+cPayed := g_t_pars_opis("N10")
+cPayAddDesc := g_t_pars_opis("N11")
 
 // footer
 // vrsta placanja
 ? RAZMAK + "Vrsta placanja: " + cPayDesc
+
+// placeno D/N
+if !EMPTY(cPayed) .and. ALLTRIM(cPayed) <> "-"
+
+	cPom := "Placeno: "
+	
+	if cPayed == "D"
+		cPom += "DA"
+	else
+		cPom += "NE"
+	endif
+	
+	? RAZMAK + cPom
+	
+endif
+
+// dodatne napomene placanje
+if !EMPTY(cPayAddDesc) .and. ALLTRIM(cPayAddDesc) <> "-"
+		
+	cPom := "Napomene za placanje: "
+	cPom += cPayAddDesc
+
+	? RAZMAK + cPom
+		
+endif
+
 
 // konacan proizvod
 cPom := "Konacan proizvod:"
@@ -649,17 +679,19 @@ cLine := g_line()
 // korekcija duzine je na svako strani razlicita
 nDuzStrKorekcija := 0 
 
-P_COND
+//P_COND
+
 ? cLine
-p_line( "Prenos na sljedecu stranicu", 17, .f. )
+p_line( "Prenos na sljedecu stranicu", 12, .f. )
 ? cLine
 
 FF
 
-P_COND
+//P_COND
+
 ? cLine
 if nPage <> nil
-	p_line( "       Strana:" + str(nPage, 3), 17, .f.)
+	p_line( "       Strana:" + str(nPage, 3), 12, .f.)
 endif
 
 return

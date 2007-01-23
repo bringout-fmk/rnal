@@ -49,7 +49,11 @@ cFooter := ""
 select articles
 set relation to
 set filter to
-set order to tag "1"
+
+// desc: sort by art_id
+//set order to tag "1"
+
+set order to tag "2"
 go top
 
 if !l_open_dbedit
@@ -99,7 +103,6 @@ static function set_a_kol(aImeKol, aKol)
 aKol := {}
 aImeKol := {}
 
-altd()
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(art_id)}, "art_id", {|| _inc_id(@wart_id, "ART_ID"), .f.}, {|| .t.}})
 AADD(aImeKol, {PADC("Naziv", 60), {|| PADR(art_desc, 60)}, "art_desc"})
 
@@ -166,6 +169,8 @@ do case
 			go (nTRec)
 		endif
 		
+		set order to tag "2"
+		
 		return DE_REFRESH
 		
 	case Ch == K_F2
@@ -183,11 +188,14 @@ do case
 		if s_elements( field->art_id ) == 1
 			
 			select articles
+			set order to tag "2"
+			
 			return DE_REFRESH
 		
 		endif
 		
 		select articles
+		set order to tag "2"
 		go (nTRec)
 		
 		return DE_CONT
@@ -217,12 +225,14 @@ do case
 		if nArt_new > 0 .and. s_elements( nArt_new, .t. ) == 1
 		
 			select articles
+			set order to tag "2"
 			go (nTRec)
 		
 			return DE_REFRESH
 		endif
 		
 		select articles
+		set order to tag "2"
 		go (nTRec)
 		return DE_REFRESH
 	
@@ -256,6 +266,7 @@ do case
 		if pick_articles() == 1
 			return DE_REFRESH
 		endif
+		
 		return DE_CONT
 		
 		
@@ -633,6 +644,8 @@ do while !EOF() .and. field->art_id == nArt_id
 		__add_to_str( @cArt_desc, ";", .t. )
 	endif
 
+	altd()
+
 	// grupa_naziv, npr: staklo
 	
 	__add_to_str( @cArt_desc, ALLTRIM( g_e_gr_desc(nEl_gr_id) ))
@@ -731,7 +744,10 @@ seek artid_str( nArt_id )
 if FOUND()
 
 	if !lNew
-		if ALLTRIM(cArt_desc) <> ALLTRIM(articles->art_desc)
+		// ako su iste vrijednosti, preskoci...
+		if ALLTRIM(cArt_desc) == ALLTRIM(articles->art_desc)
+			lAppend := .f.
+		else
 			lAppend := .t.
 		endif
 	else

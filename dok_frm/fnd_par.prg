@@ -60,6 +60,10 @@ cHeader := "Uslovi za pretragu artikala"
 
 O__FND_PAR
 select _fnd_par 
+
+// ponisti posljednju pretragu
+_clear_fnd()
+
 go top
 
 Box(, nBoxX, nBoxY)
@@ -106,6 +110,27 @@ endif
 
 return 1
   
+// -------------------------------------------
+// ponistavanje posljednje pretrage
+// -------------------------------------------
+static function _clear_fnd( lAlways )
+go top
+
+if lAlways == nil
+	lAlways := .t.
+endif
+
+do while !EOF()
+	
+	if lAlways == .t. 
+		replace field->fnd_val with ""
+	endif
+	
+	skip
+	
+enddo
+
+return .t.
 
 
 // ------------------------------------------

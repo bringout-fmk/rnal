@@ -164,7 +164,7 @@ nX += 1
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("Mjesto isporuke (*):", nLeft) GET _doc_ship_place VALID {|| must_enter( _doc_ship_place ), sh_place_pattern(@_doc_ship_place) } PICT "@S46" WHEN set_opc_box( nBoxX, 50, "mjesto gdje se roba isporucuje" )
+@ m_x + nX, m_y + 2 SAY PADL("Mjesto isporuke (*):", nLeft) GET _doc_ship_place VALID {|| must_enter( _doc_ship_place ), sh_place_pattern(@_doc_ship_place) } PICT "@S46" WHEN set_opc_box( nBoxX, 50, "mjesto gdje se roba isporucuje", "/RP - rg prod. /T - tvornica nar." )
 @ m_x + nX, col() SAY ">" COLOR "I"
 
 nX += 2
@@ -238,6 +238,8 @@ local nLen := LEN(cPattern)
 do case
 	case ALLTRIM(cPattern) == "/RP"
 		cPattern := PADR("Rama-glas prodaja", nLen)
+	case ALLTRIM(cPattern) == "/T"
+		cPattern := PADR("Tvornica naruèioca", nLen)
 endcase
 
 return .t.

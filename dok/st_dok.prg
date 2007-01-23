@@ -220,6 +220,16 @@ add_tpars("N08", ALLTRIM(field->doc_desc) )
 // dokument, kontakt dodatni podaci...
 add_tpars("N09", ALLTRIM(field->cont_add_desc) )
 
+// ako je kes, dodaj i podatke o placeno D i napomene
+if field->doc_pay_id == 2
+	
+	// placeno d/n...
+	add_tpars("N10", ALLTRIM( field->doc_paid ) )
+	// placanje dodatne napomene...
+	add_tpars("N11", ALLTRIM( field->doc_pay_desc ) )
+
+endif
+
 return
 
 
