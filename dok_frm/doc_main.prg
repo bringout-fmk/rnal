@@ -239,7 +239,7 @@ do case
 	case ALLTRIM(cPattern) == "/RP"
 		cPattern := PADR("Rama-glas prodaja", nLen)
 	case ALLTRIM(cPattern) == "/T"
-		cPattern := PADR("Tvornica naruèioca", nLen)
+		cPattern := PADR("Tvornica narucioca", nLen)
 endcase
 
 return .t.

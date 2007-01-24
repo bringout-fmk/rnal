@@ -50,10 +50,14 @@ select articles
 set relation to
 set filter to
 
-// desc: sort by art_id
-//set order to tag "1"
+if l_auto_find == .t.
+	// id: sort by art_id
+	set order to tag "1"
+else
+	// desc: sort by art_desc
+	set order to tag "2"
+endif
 
-set order to tag "2"
 go top
 
 if !l_open_dbedit
