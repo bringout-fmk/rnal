@@ -498,6 +498,38 @@ do case
 		select docs
 		return DE_CONT
 	
+	// fix - procedura ispravke statusa naloga
+	case (UPPER(CHR(Ch)) == "F")
+		
+		// ima li pravo pristupa
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "FIXSTATUS")
+			
+			MsgBeep( cZabrana )
+			select docs
+			return DE_CONT
+			
+		endif
+		
+		if Pitanje(,"Resetovati status dokumenta (D/N) ?", "N") == "N"
+			return DE_CONT
+		endif
+		
+		if !SigmaSif("FIXSTAT")
+			return DE_CONT
+		endif
+		
+		nDoc_no := docs->doc_no
+		nTRec := RECNO()
+		set filter to
+		
+		set_doc_marker( nDoc_no, 0 )
+		
+		set_f_kol( cTmpFilter )
+		
+		go (nTRec)
+		
+		return DE_CONT
+
 	// lista promjena na nalogu
 	case (UPPER(CHR(Ch)) == "L")
 		

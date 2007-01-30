@@ -203,6 +203,26 @@ ESC_RETURN 0
 return 1
 
 
+// --------------------------------------------
+// provjerava da li je popunjena varijabla
+// --------------------------------------------
+function empty_var( xVar )
+local nRet := .t.
+local cVarType := VALTYPE( xVar )
+do case
+	case cVarType == "C"
+		if EMPTY( xVar )
+			lRet := .f.
+		endif
+	case cVarType == "N"
+		if xVar == 0
+			lRet := .f.
+		endif
+endcase
+
+return lRet
+
+
 // ------------------------------------------
 // set N polje iz C varijable
 // ------------------------------------------

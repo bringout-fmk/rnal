@@ -479,10 +479,16 @@ do case
 	case Ch == K_ALT_A
 		
 		nRet := DE_CONT
-		
+
 		if ALIAS() == "_DOCS" .and. RECCOUNT2() <> 0 .and. ;
 			Pitanje(,"Izvrsiti azuriranje dokumenta (D/N) ?", "D") == "D"
-
+			
+			// ima li stavki u nalogu
+			if _doc_integ() == 0
+				msgbeep("!!! Azuriranje naloga onemoguceno !!!")
+				return DE_CONT
+			endif
+			
 			// busy....
 			if field->doc_status == 3
 				_g_doc_desc( @cDesc )
@@ -499,6 +505,7 @@ do case
 			// filuj sve tabele sa novim brojem
 			fill__doc_no( nDocNoNew )
 			
+			// insertuj nalog u kumulativ
 			if doc_insert( cDesc ) == 1
 				
 				select _docs
@@ -519,7 +526,13 @@ do case
 
 		// stampa naloga
 		nTArea := SELECT()
+		select _docs
 		
+		// ima li stavki u nalogu
+		if _doc_integ( .t. ) == 0
+			return DE_CONT
+		endif
+			
 		select _docs
 		
 		// uzmi novi broj dokumenta
@@ -566,6 +579,54 @@ BoxC()
 ESC_RETURN 0
 
 return 1
+
+
+// -------------------------------------------
+// docs - integritet
+// -------------------------------------------
+static function _doc_integ( lPrint )
+local nTAREA := SELECT()
+local nRet := 1
+local cTmp := ""
+local nItems := 0
+local nCustId := 0
+local nContId := 0
+
+if lPrint == nil
+	lPrint := .f.
+endif
+
+select _docs
+
+nCustId := field->cust_id
+nContId := field->cont_id
+
+select _doc_it
+nItems := RECCOUNT2()
+
+// vrati se gdje si bio...
+select (nTAREA)
+
+if lPrint == .f. .and. ( nItems == 0 .or. nCustId == 0 .or. nContId == 0 )
+	nRet := 0
+elseif lPrint == .t. .and. ( nItems == 0 )
+	nRet := 0
+endif
+
+if nItems == 0
+	MsgBeep("Nalog mora da sadrzi najmanje 1 stavku !!!")
+endif
+
+if lPrint == .f.
+	if nCustId == 0
+		MsgBeep("Polje narucioca mora biti popunjeno !!!")
+	endif
+	if nContId == 0
+		MsgBeep("Polje kontakta mora biti popunjeno !!!")
+	endif
+endif
+
+return nRet
 
 
 

@@ -43,7 +43,7 @@ do while !EOF() .and. DTOS(field->doc_date) == DTOS( DATE() )
 	cPom += " "
 	cPom += PADR( field->doc_dvr_time , 8 )
 	cPom += " "
-	cPom += PADR( g_cust_desc( field->cust_id ) , 20)
+	cPom += show_customer( field->cust_id, field->cont_id )
 	
 	? cPom
 	
@@ -57,6 +57,25 @@ END PRINT
 
 return
 
+// ---------------------------------------------------
+// prikaz partnera / kontakta
+// ---------------------------------------------------
+static function show_customer( nCust_id, nCont_id )
+local cRet
+local cCust
+local cCont
+
+cCust := ALLTRIM( g_cust_desc( nCust_id ) )
+cCont := ALLTRIM( g_cont_desc( nCont_id ) )
+
+cRet := cCust
+
+if !EMPTY( cCont ) .and. cCont <> "?????"
+	cRet += " / " + cCont
+endif
+
+return cRet
+
 
 
 // ------------------------------------
@@ -68,13 +87,13 @@ local cText
 
 r_l_get_line(@cLine)
 
-cText := PADC("Broj naloga", 10)
+cText := PADC("Br.naloga", 10)
 cText += " "
-cText += PADC("D.Isp", 8)
+cText += PADC("Dat.isp", 8)
 cText += " "
-cText += PADC("V.Isp", 8)
+cText += PADC("Vri.isp", 8)
 cText += " "
-cText += PADC("Partner naziv", 20)
+cText += PADR("Narucioc / kontakt - naziv", 60)
 
 ? cLine
 ? cText
@@ -93,7 +112,7 @@ cLine += REPLICATE("-", 8)
 cLine += " "
 cLine += REPLICATE("-", 8)
 cLine += " "
-cLine += REPLICATE("-", 20)
+cLine += REPLICATE("-", 60)
 return
 
 
@@ -140,7 +159,7 @@ do while !EOF() .and. DTOS(field->doc_dvr_date) == DTOS( DATE() )
 	cPom += " "
 	cPom += PADR( field->doc_dvr_time , 8 )
 	cPom += " "
-	cPom += PADR( g_cust_desc(field->cust_id) , 20)
+	cPom += show_customer( field->cust_id, field->cont_id )
 	
 	? cPom
 	
@@ -201,7 +220,7 @@ do while !EOF()
 	cPom += " "
 	cPom += PADR( field->doc_dvr_time , 8 )
 	cPom += " "
-	cPom += PADR( g_cust_desc(field->cust_id) , 20)
+	cPom += show_customer( field->cust_id, field->cont_id )
 	
 	? cPom
 	
