@@ -291,7 +291,9 @@ local nRet := 0
 if _box_art_desc( @cArt_desc, @cArt_mcode ) == 1
 	
 	set filter to
+	set order to tag "1"
 	go top
+	
 	seek artid_str( nArt_id )
 	
 	Scatter()
@@ -301,6 +303,7 @@ if _box_art_desc( @cArt_desc, @cArt_mcode ) == 1
 	
 	Gather()
 
+	set order to tag "2"
 	set filter to &cDBFilter
 	go (nTRec)
 	
