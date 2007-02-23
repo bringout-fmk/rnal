@@ -124,9 +124,9 @@ endif
 AADD(opc, "------------------------------------")
 AADD(opcexe, {|| nil})
 
-AADD(opc, "9. administracija baze podataka")
+AADD(opc, "9. administracija")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "MAIN", "ADMIN"))
-	AADD(opcexe, {|| m_adm()})
+	AADD(opcexe, {|| mnu_admin()})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif

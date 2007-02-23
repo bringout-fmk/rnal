@@ -3,7 +3,7 @@ MODUL=rnal_m
 
 SRCDOSROOT=c:\\dev\\fmk\\rnal\\main\\
 
-PRGS=app.prg
+PRGS=app.prg admin.prg
 CS=
 ASMS=
 

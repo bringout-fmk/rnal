@@ -605,6 +605,58 @@ return
 
 
 
+// -------------------------------------------------
+// automatska regeneracija opisa artikla
+// -------------------------------------------------
+function auto_gen_art()
+local nBoxX := 4
+local nBoxY := 60
+local lAuto := .t.
+local lNew := .f.
+local nCnt := 0
+local nRec
+private GetList:={}
+
+select articles
+set order to tag "1"
+go top
+
+Box( , nBoxX, nBoxY )
+
+// prodji sve artikle
+do while !EOF()
+	
+	++ nCnt
+	
+	nRec := RECNO()
+	
+	nArt_id := field->art_id
+	cArt_desc := PADR( field->art_desc, 20 )
+	
+	@ m_x + 1, m_y + 2 SAY "****** Artikal: " + artid_str(nArt_id)
+	@ m_x + 3, m_y + 2 SAY "-----------------"
+	
+	@ m_x + 2, m_y + 2 SAY SPACE(nBoxY)
+	@ m_x + 2, m_y + 2 SAY "opis <--- " + PADR( field->art_desc, 40 ) + "..."
+	
+	_art_set_descr( nArt_id, lNew, lAuto )
+	
+	select articles
+	set order to tag "1"
+	go (nRec)
+	
+	@ m_x + 4, m_y + 2 SAY SPACE(nBoxY)
+	@ m_x + 4, m_y + 2 SAY "opis ---> " + PADR( field->art_desc, 40 ) + "..."
+
+	skip
+
+enddo
+
+BoxC()
+
+return nCnt
+
+
 
 // ----------------------------------------------
 // setovanje opisa artikla na osnovu tabela
@@ -612,8 +664,9 @@ return
 //
 //  nArt_id - artikal id
 //  lNew - novi artikal
+//  lAuto - auto generacija naziva
 // ----------------------------------------------
-function _art_set_descr( nArt_id, lNew )
+function _art_set_descr( nArt_id, lNew, lAuto )
 local cArt_desc := ""
 local cArt_mcode := ""
 local nEl_id
@@ -623,7 +676,11 @@ local nE_gr_att
 local nE_gr_val
 local cE_gr_val
 local cE_gr_att
-local lAppend := .f.
+local nRet := 0
+
+if lAuto == nil
+	lAuto := .f.
+endif
 
 // ukini filtere
 select elements
@@ -647,8 +704,6 @@ do while !EOF() .and. field->art_id == nArt_id
 	if nCount > 0
 		__add_to_str( @cArt_desc, ";", .t. )
 	endif
-
-	altd()
 
 	// grupa_naziv, npr: staklo
 	
@@ -690,7 +745,6 @@ do while !EOF() .and. field->art_id == nArt_id
 		
 	enddo
 	
-
 	// predji na dodatne operacije elemenata....
 	select e_aops
 	set order to tag "1"
@@ -739,6 +793,30 @@ do while !EOF() .and. field->art_id == nArt_id
 	++ nCount
 enddo
 
+if lAuto == .t.
+	// automatski generisi opsi i mc 
+	// bez kontrolnog box-a
+	nRet := _art_apnd_auto( nArt_id, cArt_desc, cArt_mcode )
+else
+	// generisi opis i match_code
+	// otvori kontrolni box
+	nRet := _art_apnd( nArt_id, cArt_desc, cArt_mcode, lNew )
+endif
+
+return nRet
+
+
+// --------------------------------------------------
+// apend match_code, desc for article w contr.box
+// 
+// nArt_id - id artikla
+// cArt_desc - artikal opis
+// cArt_mcode - artikal match_code
+// lNew - .t. - novi artikal, .f. postojeci
+// --------------------------------------------------
+static function _art_apnd( nArt_id, cArt_Desc, cArt_mcode, lNew )
+local lAppend := .f.
+
 // update art_desc..
 select articles
 set order to tag "1"
@@ -780,14 +858,71 @@ if FOUND()
 		
 	endif
 		
-	if lNew	
+	if lNew	== .t.
+		
 		// izbrisi tu stavku....
 		art_delete( nArt_id, .t. , .t. )
+		
 	endif
 	
 endif
 
 return 0
+
+
+
+// --------------------------------------------------
+// apend match_code, desc for article wo cont.box
+// 
+// nArt_id - id artikla
+// cArt_desc - artikal opis
+// cArt_mcode - artikal match_code
+// --------------------------------------------------
+static function _art_apnd_auto( nArt_id, cArt_Desc, cArt_mcode )
+local lChange := .f.
+
+// ako je vrijednost prazna - 0
+if EMPTY( cArt_desc )
+	return 0
+endif
+
+// update art_desc..
+select articles
+set order to tag "1"
+go top
+seek artid_str( nArt_id )
+
+if FOUND()
+
+	// ako su iste vrijednosti, preskoci...
+	if ALLTRIM(cArt_desc) == ALLTRIM(articles->art_desc)
+		lChange := .f.
+	else
+		lChange := .t.
+	endif
+
+endif
+
+if lChange == .t.
+
+	// zamjeni vrijednost....
+	
+	cArt_desc := PADR(cArt_desc, 250)
+	cArt_mcode := PADR(cArt_mcode, 10)
+		
+	Scatter()
+			
+	_art_desc := cArt_desc
+	_match_code := cArt_mcode
+			
+	Gather()
+		
+	return 1
+		
+endif
+		
+return 0
+
 
 
 // ------------------------------------------------
