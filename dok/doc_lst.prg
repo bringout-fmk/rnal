@@ -27,7 +27,7 @@ static function tbl_list()
 local cFooter
 local cHeader
 local nSort := 3
-local nBoxX := 20
+local nBoxX := 22
 local nBoxY := 77
 
 if lst_args( @nSort ) == 0
@@ -54,7 +54,7 @@ go top
 
 set_a_kol(@ImeKol, @Kol)
 
-ObjDbedit("lstnal", nBoxX, nBoxY, {|| key_handler() }, cHeader, cFooter, , , , , 3)
+ObjDbedit("lstnal", nBoxX, nBoxY, {|| key_handler() }, cHeader, cFooter, , , , , 4)
 
 BoxC()
 
@@ -106,8 +106,8 @@ cLine2 += PADR("<K> Lista kontakata", nOptLen)
 cLine2 += cOptSep
 cLine2 += PADR("<L> Lista promjena", nOptLen)
 
-@ m_x + (nBoxX-2), m_y + 2 SAY cLine1
-@ m_x + (nBoxX-1), m_y + 2 SAY cLine2
+@ m_x + (nBoxX-1), m_y + 2 SAY cLine1
+@ m_x + (nBoxX), m_y + 2 SAY cLine2
 
 return
 
@@ -344,13 +344,18 @@ local cDesc
 local cTmpFilter := DBFILTER()
 
 if _status == 1
+	
 	// daj info o kasnjenju
 	_sh_dvr_warr( _chk_date( doc_dvr_date ), ;
 			_chk_time( doc_dvr_time ) )
+			
 endif
 
 // prikazi status dokumenta na pregledu
 _sh_doc_status( doc_status )
+
+// prikazi u dnu ostale informacije o nalogu...
+_sh_doc_info( )
 
 // ove opcije zabrani na statusu 2
 if ( _status == 2 )
@@ -715,7 +720,7 @@ local cColor
 local cTmp
 
 if nX == nil
-	nX := 3
+	nX := 2
 endif
 
 if nLen == nil
@@ -742,7 +747,7 @@ static function _sh_doc_status( doc_status, nX, nY )
 local cTmp
 
 if nX == nil
-	nX := 3
+	nX := 2
 endif
 
 if nY == nil
@@ -783,6 +788,40 @@ endcase
 return
 
 
+// ------------------------------------------------
+// prikaz ostalih informacija o dokumentu
+// ------------------------------------------------
+static function _sh_doc_info( nX, nY )
+local cTmp
+local aTmp
+local nTxtLen := 77
+local cColor := "GR+/B"
+
+if nX == nil
+	nX := 19
+endif
+
+if nY == nil
+	nY := 1
+endif
+
+cTmp := ""
+cTmp += ALLTRIM(doc_sh_desc) 
+cTmp += ", "
+cTmp += ALLTRIM(doc_desc)
+
+aTmp := SjeciStr( cTmp, nTxtLen )
+
+@ nX + 1, nY SAY SPACE( nTxtLen ) COLOR cColor
+@ nX + 2, nY SAY SPACE( nTxtLen ) COLOR cColor
+
+for i := 1 to LEN( aTmp )
+	
+	@ nX + i, nY SAY PADR( aTmp[i] , nTxtLen ) COLOR cColor
+	
+next
+
+return
 
 
 // -----------------------------------------

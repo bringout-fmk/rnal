@@ -12,7 +12,7 @@ static _doc
 // -------------------------------------------------
 function e_doc_main_data( lNew )
 local nRecCnt := 0
-local nGetBoxX := 21
+local nGetBoxX := 22
 local nGetBoxY := 70
 private GetList:={}
 
@@ -132,6 +132,7 @@ if l_new_doc
 	_doc_paid := "D"
 	_doc_pay_desc := SPACE( LEN(_doc_pay_desc) )
 	_doc_status := 0
+	_doc_sh_desc := SPACE( LEN( _doc_sh_desc ) )
 	
 	cCustId := PADR("", 10)
 	cContId := PADR("", 10)
@@ -190,8 +191,13 @@ nX += 1
 	
 @ m_x + nX, col() + 2 SAY "dod.nap.plac:" GET _doc_pay_desc PICT "@S29" WHEN set_opc_box( nBoxX, 50, "dodatne napomene vezane za placanje" )
 @ m_x + nX, col() SAY ">" COLOR "I"
-	
-nX += 2 
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("Kratki opis (*):", nLeft) GET _doc_sh_desc VALID !EMPTY(_doc_sh_desc) PICT "@S46" WHEN set_opc_box( nBoxX, 50, "kratki opis naloga (asocijacija)", "npr: ulazna stijena, vrata ...") 
+@ m_x + nX, col() SAY ">" COLOR "I"
+
+nX += 1 
 
 @ m_x + nX, m_y + 2 SAY PADL("Dod.opis naloga:", nLeft) GET _doc_desc VALID chk_mandatory( _doc_desc, _doc_priority ) PICT "@S46" WHEN set_opc_box( nBoxX, 50, "dodatni opis naloga" )
 @ m_x + nX, col() SAY ">" COLOR "I"

@@ -239,6 +239,7 @@ AADD(aDBf,{ "doc_paid", "C", 1, 0 })
 AADD(aDBf,{ "doc_pay_desc", "C", 100, 0 })
 AADD(aDBf,{ "doc_priority", "N", 4, 0 })
 AADD(aDBf,{ "doc_desc", "C", 200, 0 })
+AADD(aDBf,{ "doc_sh_desc", "C", 100, 0 })
 AADD(aDBf,{ "doc_status", "N", 2, 0 })
 AADD(aDBf,{ "operater_id", "N", 3, 0 })
 
