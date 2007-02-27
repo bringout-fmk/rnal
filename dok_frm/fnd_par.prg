@@ -61,8 +61,10 @@ cHeader := "Uslovi za pretragu artikala"
 O__FND_PAR
 select _fnd_par 
 
-// ponisti posljednju pretragu
-_clear_fnd()
+if gFnd_reset == 1
+	// ponisti posljednju pretragu
+	_clear_fnd()
+endif
 
 go top
 

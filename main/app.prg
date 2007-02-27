@@ -191,12 +191,16 @@ public gDl_margina := 5
 public gDd_redovi := 11
 public gDg_margina := 0
 
+// ostali parametri
+public gFnd_reset := 0
+
 ::super:setTGVars()
 
 O_PARAMS
-Rpar("ff",@gFirma)
-Rpar("fn",@gNFirma)
-Rpar("p1",@gPicVrijednost)
+Rpar( "ff", @gFirma )
+Rpar( "fn", @gNFirma )
+Rpar( "p1", @gPicVrijednost )
+Rpar( "a1", @gFnd_reset )
 
 if Empty(gNFirma)
 	Beep(1)

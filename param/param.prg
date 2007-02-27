@@ -22,6 +22,7 @@ function s_params()
 read_fi_params()
 read_zf_params()
 read_doc_params()
+read_ost_params()
 
 return
 
@@ -165,6 +166,33 @@ endif
 return
 
 
+// --------------------------------------
+// parametri ostali
+// --------------------------------------
+function ed_ost_params()
+local nLeft := 50
+local nX := 1
+
+Box(, 10, 70)
+
+set cursor on
+
+@ m_x + nX, m_y+2 SAY "1. Pretraga artikla *******"
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY PADL("Resetuj vrijednosti u tabeli pretrage (0/1)", nLeft) GET gFnd_reset PICT "9"
+
+read
+
+BoxC()
+
+if lastkey()<>K_ESC
+	write_ost_params()
+endif
+
+return
+
 
 
 // --------------------------------------
@@ -253,6 +281,27 @@ close
 return
 
 
+// --------------------------------------
+// citaj parametre ostale
+// --------------------------------------
+function read_ost_params()
+
+SELECT F_KPARAMS
+
+if !used()
+	O_KPARAMS
+endif
+
+private cSection:="5"
+private cHistory:=" "
+private aHistory:={}
+
+RPar("a1", @gFnd_reset )
+
+close
+return
+
+
 // ----------------------------------
 // upisi parametre izgleda dokumenta
 // ----------------------------------
@@ -274,6 +323,24 @@ close
 
 return
 
+// ----------------------------------
+// upisi parametre ostalo
+// ----------------------------------
+function write_ost_params()
+SELECT F_KPARAMS
+
+if !used()
+	O_KPARAMS
+endif
+private cSection:="5"
+private cHistory:=" "
+private aHistory:={}
+
+WPar("a1", gFnd_reset )
+
+close
+
+return
 
 
 // --------------------------------------

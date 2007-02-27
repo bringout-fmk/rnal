@@ -21,6 +21,8 @@ AADD(opc, "2. izgled dokumenta  ")
 AADD(opcexe, {|| ed_doc_params() } )
 AADD(opc, "3. zaokruzenja, format prikaza  ")
 AADD(opcexe, {|| ed_zf_params() } )
+AADD(opc, "4. ostalo  ")
+AADD(opcexe, {|| ed_ost_params() } )
 
 Menu_SC("par")
 
