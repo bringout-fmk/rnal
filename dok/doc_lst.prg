@@ -805,16 +805,22 @@ if nY == nil
 	nY := 1
 endif
 
+// napuni string sa opisom
 cTmp := ""
 cTmp += ALLTRIM(doc_sh_desc) 
-cTmp += ", "
+if !EMPTY(cTmp)
+	cTmp += ", "
+endif
 cTmp += ALLTRIM(doc_desc)
 
+// pretvori string u matricu....
 aTmp := SjeciStr( cTmp, nTxtLen )
 
+// pocisti postojece linije
 @ nX + 1, nY SAY SPACE( nTxtLen ) COLOR cColor
 @ nX + 2, nY SAY SPACE( nTxtLen ) COLOR cColor
 
+// ispisi info
 for i := 1 to LEN( aTmp )
 	
 	@ nX + i, nY SAY PADR( aTmp[i] , nTxtLen ) COLOR cColor

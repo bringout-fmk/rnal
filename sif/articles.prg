@@ -50,13 +50,8 @@ select articles
 set relation to
 set filter to
 
-if l_auto_find == .t.
-	// id: sort by art_id
-	set order to tag "1"
-else
-	// desc: sort by art_desc
-	set order to tag "2"
-endif
+// id: sort by art_id
+set order to tag "1"
 
 go top
 
@@ -108,7 +103,8 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(art_id)}, "art_id", {|| _inc_id(@wart_id, "ART_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("Naziv", 60), {|| PADR(art_desc, 60)}, "art_desc"})
+AADD(aImeKol, {PADC("Skr. naziv", 40), {|| PADR(art_desc, 40)}, "art_desc"})
+AADD(aImeKol, {PADC("Puni naziv", 60), {|| PADR(art_full_desc, 60)}, "art_full_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -173,7 +169,6 @@ do case
 			go (nTRec)
 		endif
 		
-		set order to tag "2"
 		
 		return DE_REFRESH
 		
@@ -192,14 +187,15 @@ do case
 		if s_elements( field->art_id ) == 1
 			
 			select articles
-			set order to tag "2"
+			set order to tag "1"
+			go (nTRec)
 			
 			return DE_REFRESH
 		
 		endif
 		
 		select articles
-		set order to tag "2"
+		set order to tag "1"
 		go (nTRec)
 		
 		return DE_CONT
@@ -229,14 +225,14 @@ do case
 		if nArt_new > 0 .and. s_elements( nArt_new, .t. ) == 1
 		
 			select articles
-			set order to tag "2"
+			set order to tag "1"
 			go (nTRec)
 		
 			return DE_REFRESH
 		endif
 		
 		select articles
-		set order to tag "2"
+		set order to tag "1"
 		go (nTRec)
 		return DE_REFRESH
 	
@@ -282,13 +278,14 @@ return DE_CONT
 // ispravka opisa artikla
 // ---------------------------------------------
 static function art_ed_desc( nArt_id )
-local cArt_desc := PADR(field->art_desc, 250)
+local cArt_desc := PADR(field->art_desc, 100)
 local cArt_mcode := PADR(field->match_code, 10)
+local cArt_full_desc := PADR(field->art_full_desc, 250)
 local cDBFilter := DBFILTER()
 local nTRec := RECNO()
 local nRet := 0
 
-if _box_art_desc( @cArt_desc, @cArt_mcode ) == 1
+if _box_art_desc( @cArt_desc, @cArt_full_desc, @cArt_mcode ) == 1
 	
 	set filter to
 	set order to tag "1"
@@ -299,11 +296,12 @@ if _box_art_desc( @cArt_desc, @cArt_mcode ) == 1
 	Scatter()
 	
 	_art_desc := cArt_desc
+	_art_full_desc := cArt_full_desc
 	_match_code := cArt_mcode
 	
 	Gather()
 
-	set order to tag "2"
+	set order to tag "1"
 	set filter to &cDBFilter
 	go (nTRec)
 	
@@ -320,11 +318,11 @@ static function box_preview(nX, nY, nLen)
 local aDesc := {}
 local i
 
-aDesc := TokToNiz( articles->art_desc, ";" )
+aDesc := TokToNiz( articles->art_full_desc, ";" )
 
 @ nX, nY SAY PADR("ID: " + artid_str(articles->art_id) + SPACE(3) + "MATCH CODE: " + articles->match_code, nLen) COLOR "GR+/G" 
 
-for i:=1 to 5
+for i:=1 to 6
 	@ nX + i, nY SAY PADR("", nLen) COLOR "BG+/B"
 next
 
@@ -347,7 +345,7 @@ return STR(nId, 10)
 // -------------------------------
 // get art_desc by art_id
 // -------------------------------
-function g_art_desc(nArt_id, lEmpty)
+function g_art_desc(nArt_id, lEmpty, lFullDesc )
 local cArtDesc := "?????"
 local nTArea := SELECT()
 
@@ -359,6 +357,10 @@ if lEmpty == .t.
 	cArtDesc := ""
 endif
 
+if lFullDesc == nil
+	lFullDesc := .t.
+endif
+
 O_ARTICLES
 select articles
 set order to tag "1"
@@ -366,8 +368,14 @@ go top
 seek artid_str(nArt_id)
 
 if FOUND()
-	if !EMPTY(field->art_desc)
-		cArtDesc := ALLTRIM(field->art_desc)
+	if lFullDesc == .t.
+		if !EMPTY(field->art_full_desc)
+			cArtDesc := ALLTRIM(field->art_full_desc)
+		endif
+	else
+		if !EMPTY(field->art_desc)
+			cArtDesc := ALLTRIM(field->art_desc)
+		endif
 	endif
 endif
 
@@ -397,7 +405,7 @@ endif
 if lChkKum == .t.
 	O_DOC_IT
 	select doc_it
-	set order to tag "2"
+	set order to tag "1"
 	go top
 	
 	seek artid_str( nArt_id )
@@ -671,7 +679,10 @@ return nCnt
 // ----------------------------------------------
 function _art_set_descr( nArt_id, lNew, lAuto )
 local cArt_desc := ""
+local cArt_full_desc := ""
 local cArt_mcode := ""
+local cGroup
+local cGroupFull
 local nEl_id
 local nEl_gr_id
 local nCount := 0
@@ -705,13 +716,23 @@ do while !EOF() .and. field->art_id == nArt_id
 	nEl_gr_id := field->e_gr_id
 	
 	if nCount > 0
-		__add_to_str( @cArt_desc, ";", .t. )
+		__add_to_str( @cArt_desc, "," , .t. )
+		__add_to_str( @cArt_full_desc, ";" , .t. )
 	endif
 
 	// grupa_naziv, npr: staklo
 	
-	__add_to_str( @cArt_desc, ALLTRIM( g_e_gr_desc(nEl_gr_id) ))
+	cGroup := ALLTRIM( g_e_gr_desc(nEl_gr_id, nil, .f.) )	
+	cGroupFull := ALLTRIM( g_e_gr_desc( nEl_gr_id ) )	
+	
+	if !EMPTY(cGroup) .and. cGroup <> "?????"
+		__add_to_str( @cArt_desc, cGroup )
+	endif
 
+	if !EMPTY(cGroupFull) .and. cGroupFull <> "?????"
+		__add_to_str( @cArt_full_desc, cGroupFull )
+	endif
+	
 	// predji na atribute elemenata...
 	select e_att
 	set order to tag "1"
@@ -722,23 +743,22 @@ do while !EOF() .and. field->art_id == nArt_id
 
 		// vrijednost atributa
 		nE_gr_val := field->e_gr_vl_id
-		cE_gr_val := ALLTRIM(g_e_gr_vl_desc( nE_gr_val ))
+		cE_gr_val := ALLTRIM(g_e_gr_vl_desc( nE_gr_val, nil, .f. ))
+		cE_gr_vfull := ALLTRIM(g_e_gr_vl_desc( nE_gr_val ))
 		
 		// atributi...
 		nE_gr_att := g_gr_att_val( nE_gr_val )
 		cE_gr_att := ALLTRIM(g_gr_at_desc( nE_gr_att ))
 
+		// ide li u naziv artikla ????
 		if gr_att_in_desc( nE_gr_att )
 		
 			// dodaj u art_desc
-			
 			__add_to_str( @cArt_desc, cE_gr_val )
 			
-			// samo ako je debljina nastiklaj mm
-			if "deblj" $ cE_gr_att
-				__add_to_str( @cArt_desc, "mm" )
-			endif
-
+			// dodaj u art_full
+			__add_to_str( @cArt_full_desc, cE_gr_vfull )
+			
 			// dodaj u mcode...
 			__add_to_str( @cArt_mcode, UPPER(LEFT(cE_gr_val, 2)), .t.)
 			
@@ -758,11 +778,13 @@ do while !EOF() .and. field->art_id == nArt_id
 		
 		// dodatna operacija...
 		nAop_id := field->aop_id
-		cAop_desc := ALLTRIM(g_aop_desc( nAop_id ))
+		cAop_desc := ALLTRIM(g_aop_desc( nAop_id, nil, .f. ))
+		cAop_dfull := ALLTRIM(g_aop_desc( nAop_id ))
 		
 		// atribut...
 		nAop_att_id := field->aop_att_id
-		cAop_att_desc := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
+		cAop_att_desc := ALLTRIM( g_aop_att_desc( nAop_att_id, nil, .f. ) )
+		cAop_attfull := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
 
 		// da li operacija ide u naziv...
 		if aop_in_desc( nAop_id )
@@ -772,7 +794,11 @@ do while !EOF() .and. field->art_id == nArt_id
 				__add_to_str( @cArt_mcode, ;
 					UPPER(LEFT(cAop_desc, 1)), .t.)
 			endif
-			
+		
+			if !EMPTY(cAop_dfull) .and. cAop_dfull <> "?????"
+				__add_to_str( @cArt_full_desc, cAop_dfull )
+			endif
+		
 		endif
 		
 		// da li atribut ide u naziv...
@@ -781,6 +807,11 @@ do while !EOF() .and. field->art_id == nArt_id
 			if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
 			
 				__add_to_str( @cArt_desc, cAop_att_desc )
+			
+			endif
+			if !EMPTY(cAop_attfull) .and. cAop_attfull <> "?????"
+			
+				__add_to_str( @cArt_full_desc, cAop_attfull )
 			
 			endif
 			
@@ -799,11 +830,11 @@ enddo
 if lAuto == .t.
 	// automatski generisi opsi i mc 
 	// bez kontrolnog box-a
-	nRet := _art_apnd_auto( nArt_id, cArt_desc, cArt_mcode )
+	nRet := _art_apnd_auto( nArt_id, cArt_desc, cArt_full_desc, cArt_mcode )
 else
 	// generisi opis i match_code
 	// otvori kontrolni box
-	nRet := _art_apnd( nArt_id, cArt_desc, cArt_mcode, lNew )
+	nRet := _art_apnd( nArt_id, cArt_desc, cArt_full_desc, cArt_mcode, lNew )
 endif
 
 return nRet
@@ -817,7 +848,7 @@ return nRet
 // cArt_mcode - artikal match_code
 // lNew - .t. - novi artikal, .f. postojeci
 // --------------------------------------------------
-static function _art_apnd( nArt_id, cArt_Desc, cArt_mcode, lNew )
+static function _art_apnd( nArt_id, cArt_Desc, cArt_full_desc, cArt_mcode, lNew )
 local lAppend := .f.
 
 // update art_desc..
@@ -830,7 +861,8 @@ if FOUND()
 
 	if !lNew
 		// ako su iste vrijednosti, preskoci...
-		if ALLTRIM(cArt_desc) == ALLTRIM(articles->art_desc)
+		if ALLTRIM(cArt_desc) == ALLTRIM(articles->art_desc) ;
+			.and. ALLTRIM(cArt_full_desc) == ALLTRIM(articles->art_full_desc)
 			lAppend := .f.
 		else
 			lAppend := .t.
@@ -842,16 +874,18 @@ if FOUND()
 	if !EMPTY(cArt_desc) .and. lAppend == .t. ;
 		.and. (!lNew .or. (lNew .and. Pitanje(,"Novi artikal, snimiti promjene ?", "D") == "D"))
 
-		cArt_desc := PADR(cArt_desc, 250)
+		cArt_desc := PADR(cArt_desc, 100)
+		cArt_full_desc := PADR(cArt_full_desc, 250)
 		cArt_mcode := PADR(cArt_mcode, 10)
 		
 		// daj box za pregled korekciju
-		if _box_art_desc( @cArt_desc, @cArt_mcode ) == 1
+		if _box_art_desc( @cArt_desc, @cArt_full_desc, @cArt_mcode ) == 1
 			
 			Scatter()
 			
 			_art_desc := cArt_desc
 			_match_code := cArt_mcode
+			_art_full_desc := cArt_full_desc
 			
 			Gather()
 		
@@ -881,7 +915,7 @@ return 0
 // cArt_desc - artikal opis
 // cArt_mcode - artikal match_code
 // --------------------------------------------------
-static function _art_apnd_auto( nArt_id, cArt_Desc, cArt_mcode )
+static function _art_apnd_auto( nArt_id, cArt_Desc, cArt_full_desc, cArt_mcode )
 local lChange := .f.
 
 // ako je vrijednost prazna - 0
@@ -898,8 +932,11 @@ seek artid_str( nArt_id )
 if FOUND()
 
 	// ako su iste vrijednosti, preskoci...
-	if ALLTRIM(cArt_desc) == ALLTRIM(articles->art_desc)
+	if ALLTRIM(cArt_desc) == ALLTRIM(articles->art_desc) .and. ;
+		ALLTRIM(cArt_full_desc) == ALLTRIM(articles->art_full_desc)
+		
 		lChange := .f.
+		
 	else
 		lChange := .t.
 	endif
@@ -910,13 +947,15 @@ if lChange == .t.
 
 	// zamjeni vrijednost....
 	
-	cArt_desc := PADR(cArt_desc, 250)
+	cArt_desc := PADR(cArt_desc, 100)
+	cArt_full_desc := PADR(cArt_full_desc, 100)
 	cArt_mcode := PADR(cArt_mcode, 10)
 		
 	Scatter()
 			
 	_art_desc := cArt_desc
 	_match_code := cArt_mcode
+	_art_full_desc := cArt_full_desc
 			
 	Gather()
 		
@@ -954,16 +993,17 @@ return
 // ------------------------------------------------------
 // box za unos naziva artikla i match_code-a
 // ------------------------------------------------------
-static function _box_art_desc( cArt_desc, cArt_mcode )
+static function _box_art_desc( cArt_desc, cArt_full_desc, cArt_mcode )
 private GetList:={}
 
-Box(, 4, 70)
+Box(, 5, 70)
 	
 	@ m_x + 1, m_y + 2 SAY "*** pregled/korekcija podataka artikla"
 	
-	@ m_x + 3, m_y + 2 SAY "Naziv:" GET cArt_desc PICT "@S60" VALID !EMPTY(cArt_desc)
+	@ m_x + 3, m_y + 2 SAY "Puni naziv:" GET cArt_full_desc PICT "@S57" VALID !EMPTY(cArt_full_desc)
+	@ m_x + 4, m_y + 2 SAY "Skr. naziv:" GET cArt_desc PICT "@S57" VALID !EMPTY(cArt_desc)
 	
-	@ m_x + 4, m_y + 2 SAY "Match code:" GET cArt_mcode
+	@ m_x + 5, m_y + 2 SAY "Match code:" GET cArt_mcode
 	
 	read
 	

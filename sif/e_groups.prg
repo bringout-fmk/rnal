@@ -49,7 +49,8 @@ if _wo_id == .f.
 
 endif
 
-AADD(aImeKol, {PADC("Naziv", 40), {|| PADR(e_gr_desc, 40)}, "e_gr_desc"})
+AADD(aImeKol, {PADC("Puni naziv grupe", 30), {|| PADR(e_gr_full_desc, 30)}, "e_gr_full_desc"})
+AADD(aImeKol, {PADC("Skr. opis", 15), {|| PADR(e_gr_desc, 15)}, "e_gr_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -91,12 +92,14 @@ function e_gr_id_str(nId)
 return STR(nId, 10)
 
 
+
 // -------------------------------
 // get e_gr_desc by e_gr_id
 // -------------------------------
-function g_e_gr_desc(nE_gr_id, lEmpty)
+function g_e_gr_desc(nE_gr_id, lEmpty, lFullDesc )
 local cEGrDesc := "?????"
 local nTArea := SELECT()
+local cVal := ""
 
 if lEmpty == nil
 	lEmpty := .f.
@@ -106,6 +109,10 @@ if lEmpty == .t.
 	cEGrDesc := ""
 endif
 
+if lFullDesc == nil
+	lFullDesc := .t.
+endif
+
 O_E_GROUPS
 select e_groups
 set order to tag "1"
@@ -113,9 +120,17 @@ go top
 seek e_gr_id_str(nE_gr_id)
 
 if FOUND()
-	if !EMPTY(field->e_gr_desc)
-		cEGrDesc := ALLTRIM(field->e_gr_desc)
+
+	if lFullDesc == .t.
+		if !EMPTY(field->e_gr_full_desc)
+			cEGrDesc := ALLTRIM(field->e_gr_full_desc)
+		endif
+	else
+		if !EMPTY(field->e_gr_desc)
+			cEGrDesc := ALLTRIM(field->e_gr_desc)
+		endif
 	endif
+	
 endif
 
 select (nTArea)

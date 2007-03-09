@@ -71,7 +71,9 @@ endif
 
 AADD(aImeKol, {PADC("Grupa/atribut", 15), {|| "(" + ALLTRIM(g_egr_by_att(e_gr_at_id)) + ") / " + PADR(g_gr_at_desc(e_gr_at_id), 15)}, "e_gr_at_id", {|| set_e_gr_at(@we_gr_at_id) }, {|| s_e_gr_att( @we_gr_at_id ), show_it( g_gr_at_desc( we_gr_at_id ) ) }})
 
-AADD(aImeKol, {PADC("Vrijednost", 20), {|| PADR(e_gr_vl_desc, 20) + ".." }, "e_gr_vl_desc"})
+AADD(aImeKol, {PADC("Vrijednost", 20), {|| PADR(e_gr_vl_full, 20) + ".." }, "e_gr_vl_full"})
+
+AADD(aImeKol, {PADC("Skr. opis", 20), {|| PADR(e_gr_vl_desc, 20) + ".." }, "e_gr_vl_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -151,7 +153,7 @@ return STR(nId, 10)
 // -------------------------------
 // get e_gr_desc by e_gr_id
 // -------------------------------
-function g_e_gr_vl_desc( nE_gr_vl_id, lEmpty )
+function g_e_gr_vl_desc( nE_gr_vl_id, lEmpty, lFullDesc )
 local cEGrValDesc := "?????"
 local nTArea := SELECT()
 
@@ -163,6 +165,10 @@ if lEmpty == .t.
 	cEGrValDesc := ""
 endif
 
+if lFullDesc == nil
+	lFullDesc := .t.
+endif
+
 O_E_GR_VAL
 select e_gr_val
 set order to tag "1"
@@ -170,8 +176,14 @@ go top
 seek e_gr_vl_str(nE_gr_vl_id)
 
 if FOUND()
-	if !EMPTY(field->e_gr_vl_desc)
-		cEGrValDesc := ALLTRIM(field->e_gr_vl_desc)
+	if lFullDesc == .t.
+		if !EMPTY(field->e_gr_vl_full)
+			cEGrValDesc := ALLTRIM(field->e_gr_vl_full)
+		endif
+	else
+		if !EMPTY(field->e_gr_vl_desc)
+			cEGrValDesc := ALLTRIM(field->e_gr_vl_desc)
+		endif
 	endif
 endif
 
@@ -183,7 +195,7 @@ return cEGrValDesc
 // --------------------------------------------------
 // vraæa grupu elementa po vrijednosti atributa
 // --------------------------------------------------
-function g_egr_by_att( nE_gr_att, lEmpty )
+function g_egr_by_att( nE_gr_att, lEmpty, lFullDesc )
 local cGr := "?????"
 local nTArea := SELECT()
 local nTRec := RecNo()
@@ -202,7 +214,7 @@ go top
 seek e_gr_at_str(nE_gr_att)
 
 if FOUND()
-	cGr := ALLTRIM( g_e_gr_desc( field->e_gr_id, lEmpty ) )
+	cGr := ALLTRIM( g_e_gr_desc( field->e_gr_id, lEmpty, lFullDesc ) )
 endif
 
 select (nTArea)

@@ -113,7 +113,8 @@ if __wo_id == .f.
 endif
 
 AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| set_aop_id(@waop_id) }, {|| s_aops( @waop_id ), show_it(g_aop_desc(waop_id))  }})
-AADD(aImeKol, {PADR("Opis", 40), {|| PADR(aop_att_desc, 40)}, "aop_att_desc"})
+AADD(aImeKol, {PADR("Opis", 40), {|| PADR(aop_att_full, 40)}, "aop_att_full"})
+AADD(aImeKol, {PADR("Skr. opis", 20), {|| PADR(aop_att_desc, 20)}, "aop_att_desc"})
 AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
 
 for i:=1 to LEN(aImeKol)
@@ -181,7 +182,7 @@ return lRet
 // -------------------------------
 // get aop_desc by aop_id
 // -------------------------------
-function g_aop_att_desc( nAop_att_id, lEmpty )
+function g_aop_att_desc( nAop_att_id, lEmpty, lFullDesc )
 local cAopAttDesc := "?????"
 local nTArea := SELECT()
 
@@ -193,6 +194,10 @@ if lEmpty == .t.
 	cAopAttDesc := ""
 endif
 
+if lFullDesc == nil
+	lFullDesc := .t.
+endif
+
 O_AOPS_ATT
 select aops_att
 set order to tag "1"
@@ -200,8 +205,14 @@ go top
 seek aop_att_str(nAop_att_id)
 
 if FOUND()
-	if !EMPTY(field->aop_att_desc)
-		cAopAttDesc := ALLTRIM(field->aop_att_desc)
+	if lFullDesc == .t.
+		if !EMPTY(field->aop_att_full)
+			cAopAttDesc := ALLTRIM(field->aop_att_full)
+		endif
+	else
+		if !EMPTY(field->aop_att_desc)
+			cAopAttDesc := ALLTRIM(field->aop_att_desc)
+		endif
 	endif
 endif
 
