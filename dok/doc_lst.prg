@@ -3,6 +3,7 @@
 // variables
 static _status
 static __sort
+static __filter
 
 // ------------------------------------------
 // lista dokumenata....
@@ -248,6 +249,9 @@ cFilter := gen_filter(dDateFrom, ;
 			nOperater, ;
 			cShowRejected )
 
+
+__filter := cFilter
+
 // setuj filter
 set_f_kol(cFilter)
 
@@ -448,6 +452,32 @@ do case
 		select docs
 		return DE_CONT
 
+	// quick search......
+	case (UPPER(CHR(Ch)) == "Q")
+
+		// ima li pravo pristupa...
+		if !ImaPravoPristupa(goModul:oDataBase:cName, "DOK", "QUICKSEARCH")
+			
+			MsgBeep( cZabrana )
+
+			select docs
+			return DE_CONT
+			
+		endif
+	
+		// filter za quick search
+		cFilt := _quick_srch_( )
+		
+		if !EMPTY( cFilt )
+			cFilt := __filter + cFilt
+			select docs
+			set_f_kol( cFilt )
+			select docs
+			return DE_REFRESH
+		else
+			return DE_CONT
+		endif
+
 	// zatvaranje naloga
 	case (UPPER(CHR(Ch)) == "Z")
 		
@@ -592,6 +622,44 @@ do case
 endcase
 
 return DE_CONT
+
+// ------------------------------------------
+// box:: quick search
+// ------------------------------------------
+static function _quick_srch_()
+local GetList := {}
+local nX := 1
+local cDesc := SPACE(150)
+
+Box(, 5, 70, .t.)
+	
+	@ m_x + nX, m_y + 2 SAY "Brza pretraga naloga *******"
+	
+	nX += 2
+	
+	@ m_x + nX, m_y + 2 SAY "Unesi kratki opis naloga:" GET cDesc PICT "@S40" VALID !EMPTY( cDesc )
+	
+	@ m_x + nX, col() SAY ">" COLOR "I"
+	
+	read
+BoxC()
+
+if LastKey() == K_ESC
+	xRet := ""
+else
+	// formiram filter
+	xRet := " .and. "
+	xRet += " ( " 
+	xRet += cm2str(UPPER(ALLTRIM(cDesc))) 
+	xRet += " $ UPPER(doc_sh_desc) " 
+	xRet += " .or. " 
+	xRet += cm2str(UPPER(ALLTRIM(cDesc))) 
+	xRet += " $ UPPER(doc_desc) " 
+	xRet += " ) " 
+endif
+
+return xRet
+
 
 
 // -----------------------------------
