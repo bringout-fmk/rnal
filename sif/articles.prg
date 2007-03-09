@@ -127,8 +127,10 @@ box_preview( 17, 1, 77 )
 
 do case
 	
+	// ako je iz auto pretrage sortiraj artikle
 	case l_auto_find == .t.
-
+		
+		// odaberi artikle po filteru
 		pick_articles()
 		
 		l_auto_find := .f.
@@ -403,9 +405,10 @@ if lChkKum == nil
 endif
 
 if lChkKum == .t.
+
 	O_DOC_IT
 	select doc_it
-	set order to tag "1"
+	set order to tag "2"
 	go top
 	
 	seek artid_str( nArt_id )
@@ -840,6 +843,30 @@ endif
 return nRet
 
 
+// -----------------------------------------------------
+// provjeri da li vec postoji artikal sa istim cDesc
+// -----------------------------------------------------
+static function _chk_art_exist( nArt_id, cDesc, nId )
+local nTArea := SELECT()
+local lRet := .f.
+
+select articles
+set order to tag "2"
+go top
+seek cDesc
+
+if FOUND() .and. field->art_id <> nArt_id .and. ALLTRIM(cDesc) == ALLTRIM(field->art_desc)
+	nId := field->art_id
+	lRet := .t.
+endif
+
+set order to tag "1"
+
+select (nTArea)
+
+return lRet
+
+
 // --------------------------------------------------
 // apend match_code, desc for article w contr.box
 // 
@@ -850,6 +877,15 @@ return nRet
 // --------------------------------------------------
 static function _art_apnd( nArt_id, cArt_Desc, cArt_full_desc, cArt_mcode, lNew )
 local lAppend := .f.
+local lExist := .f.
+local nExist_id := 0
+
+// provjeri da li vec postoji ovakav artikal
+lExist := _chk_art_exist( nArt_id, cArt_desc, @nExist_id )
+
+if lExist == .t.
+	msgBeep("UPOZORENJE: vec postoji artikal sa istim opisom !!!#Artikal: " + ALLTRIM(STR( nExist_id )))
+endif
 
 // update art_desc..
 select articles

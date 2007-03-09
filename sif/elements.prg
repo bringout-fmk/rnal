@@ -57,7 +57,6 @@ m_y += 21
 
 do while .t.
 	
-	
 	if ALIAS() == "ELEMENTS"
 		
 		nX := 16
@@ -112,7 +111,7 @@ do while .t.
 	endif
 
 	if LastKey() == K_ESC
-	
+
 		// generisi naziv artikla i update-uj artikal art_id
 		select articles
 		nRet := _art_set_descr( art_id, lNew )
@@ -183,17 +182,6 @@ enddo
 
 select (nTArea)
 return nRet
-
-
-
-// ----------------------------------------------------------------
-// provjerava da li vec postoji isti artikal sa istim elementima
-// vraca .t. ili .f.
-// ----------------------------------------------------------------
-static function _art_exist()
-local lRet := .f.
-return lRet
-
 
 
 // ------------------------------------
@@ -324,7 +312,7 @@ do case
 		KEYBOARD CHR(K_TAB)
 		l_auto_tab := .f.
 		return DE_REFRESH
-	
+
 	case Ch == K_TAB
 		
 		// browse kroz tabele
