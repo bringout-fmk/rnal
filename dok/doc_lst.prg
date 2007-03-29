@@ -583,6 +583,15 @@ do case
 		
 		return DE_CONT
 
+	case UPPER(CHR(Ch)) == "E"
+
+		nDoc_no := docs->doc_no
+		
+		// export dokumenta
+		exp_document( nDoc_no, .f., .t. )
+		
+		return DE_CONT
+
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )
 		

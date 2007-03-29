@@ -4,6 +4,7 @@ liball:
 	make -C dok
 	make -C dok_gen
 	make -C dok_frm
+	make -C dok_exp
 	make -C rpt
 	make -C sif
 	make -C param
@@ -17,6 +18,7 @@ cleanall:
 	make -C dok clean
 	make -C dok_gen clean
 	make -C dok_frm clean
+	make -C dok_exp clean
 	make -C rpt clean
 	make -C sif clean
 	make -C util clean

@@ -114,7 +114,7 @@ endif
 
 AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| set_aop_id(@waop_id) }, {|| s_aops( @waop_id ), show_it(g_aop_desc(waop_id))  }})
 AADD(aImeKol, {PADR("Opis", 40), {|| PADR(aop_att_full, 40)}, "aop_att_full"})
-AADD(aImeKol, {PADR("Skr. opis", 20), {|| PADR(aop_att_desc, 20)}, "aop_att_desc"})
+AADD(aImeKol, {PADR("Skr. opis (sifra)", 20), {|| PADR(aop_att_desc, 20)}, "aop_att_desc"})
 AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
 
 for i:=1 to LEN(aImeKol)

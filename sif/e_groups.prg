@@ -50,7 +50,7 @@ if _wo_id == .f.
 endif
 
 AADD(aImeKol, {PADC("Puni naziv grupe", 30), {|| PADR(e_gr_full_desc, 30)}, "e_gr_full_desc"})
-AADD(aImeKol, {PADC("Skr. opis", 15), {|| PADR(e_gr_desc, 15)}, "e_gr_desc"})
+AADD(aImeKol, {PADC("Skr. opis (sifra)", 15), {|| PADR(e_gr_desc, 15)}, "e_gr_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)

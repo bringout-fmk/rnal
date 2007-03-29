@@ -6,12 +6,22 @@ static l_open_dbedit
 static par_count
 static _art_id
 static l_auto_find
+static l_quick_find
+static __art_sep
+// article separator
+static __mc_sep
+// match code separator
+static __qf_cond
+// quick find condition
+
+
+
 
 // ------------------------------------------------
 // otvara sifrarnik artikala
 // cId - artikal id
 // ------------------------------------------------
-function s_articles(cId, lAutoFind)
+function s_articles(cId, lAutoFind, lQuickFind )
 local nBoxX := 22
 local nBoxY := 77
 local nTArea
@@ -25,20 +35,41 @@ private Kol
 par_count := PCOUNT()
 l_open_dbedit := .t.
 
+__art_sep := "_"
+__mc_sep := "_"
+__qf_cond := SPACE(200)
+
 if lAutoFind == nil
 	lAutoFind := .f.
 endif
 
+if lQuickFind == nil
+	lQuickFind := .f.
+endif
+
 l_auto_find := lAutoFind
+l_quick_find := lQuickFind 
+
+if l_auto_find == .t.
+	l_quick_find := .f.
+endif
 
 if ( par_count > 0 )
+	
 	if lAutoFind == .f.
+		
 		l_open_dbedit := .f.
+		
 	endif
+	
 	if cId <> VAL(artid_str(0)) .and. lAutoFind == .t.
+		
 		l_open_dbedit := .f.
+		
 		lAutoFind := .f.
+		
 	endif
+	
 endif
 
 nTArea := SELECT()
@@ -70,16 +101,17 @@ if l_open_dbedit
 	
 	set_a_kol(@ImeKol, @Kol)
 
-	cOptions += "<c-N> novi "
-	cOptions += "<c-T> brisi "
-	cOptions += "<F2> ispravi "
-	cOptions += "<F3> ispr.naziv "
-	cOptions += "<F4> dupl. "
-	cOptions += "<a+F> trazi"
+	cOptions += "cN-novi "
+	cOptions += "cT-brisi "
+	cOptions += "F2-ispr. "
+	cOptions += "F3-isp.naz. "
+	cOptions += "F4-dupl. "
+	cOptions += "aF-trazi "
+	cOptions += "Q-br.traz"
 
 	Box(, nBoxX, nBoxY, .t.)
 	
-	@ m_x + nBoxX, m_y + 2 SAY cOptions
+	@ m_x + nBoxX + 1, m_y + 2 SAY cOptions
 
 	ObjDbedit(, nBoxX, nBoxY, {|| key_handler(Ch)}, cHeader, cFooter , .t.,,,,7)
 
@@ -103,7 +135,7 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(art_id)}, "art_id", {|| _inc_id(@wart_id, "ART_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("Skr. naziv", 40), {|| PADR(art_desc, 40)}, "art_desc"})
+AADD(aImeKol, {PADC("Skr. naziv (sifra)", 40), {|| PADR(art_desc, 40)}, "art_desc"})
 AADD(aImeKol, {PADC("Puni naziv", 60), {|| PADR(art_full_desc, 60)}, "art_full_desc"})
 
 for i:=1 to LEN(aImeKol)
@@ -140,6 +172,19 @@ do case
 		while !TB:stabilize()
 		end
 		
+		return DE_CONT
+
+	case l_quick_find == .t.
+
+		_quick_find()
+		
+		l_quick_find := .f.
+		
+		Tb:RefreshAll()
+
+		while !TB:stabilize()
+		end
+
 		return DE_CONT
 	
 	case Ch == K_CTRL_N
@@ -271,9 +316,230 @@ do case
 		
 		return DE_CONT
 		
+	case UPPER(CHR(Ch)) == "Q"
+
+		// quick find...
+		if _quick_find() == 1
+			return DE_REFRESH
+		endif
 		
+		return DE_CONT
+	
 endcase
 return DE_CONT
+
+
+// -----------------------------------------
+// brza pretraga artikala
+// -----------------------------------------
+static function _quick_find()
+local cFilt := ".t."
+
+// box q.find
+if _box_qfind() == 0
+	return 0
+endif
+
+// generisi q.f. filter
+if _g_qf_filt( @cFilt ) == 0
+	return 0
+endif
+
+select articles 
+set filter to 
+go top
+
+if cFilt == ".t."
+	
+	set filter to
+	go top
+	nRet := 0
+
+else
+	
+	MsgO("Vrsim selekciju artikala... sacekajte trenutak....")
+	
+	cFilt := STRTRAN( cFilt, ".t. .and.", "") 
+	
+	set filter to &cFilt
+	set order to tag "2"
+
+	go top
+	
+	MsgC()
+	nRet := 1
+
+endif
+
+return nRet
+
+
+
+// -------------------------------------------------
+// generisi filter na osnovu __qf_cond
+// -------------------------------------------------
+static function _g_qf_filt( cFilter )
+local nRet := 0
+local aTmp := {}
+local aArtTmp := {}
+local i
+local nCnt
+
+if EMPTY( __qf_cond )
+	return nRet
+endif
+
+cCond := ALLTRIM( __qf_cond )
+
+// 
+// F4*F4;F2*F4; => aTmp[1] = F4*F4
+//              => aTmp[2] = F2*F4
+
+aTmp := TokToNiz( cCond, ";" )
+
+// prodji kroz matricu aTmp
+for i := 1 to LEN( aTmp )
+
+	if ( i == 1 )
+		cFilter += " .and. "
+	else
+		cFilter += " .or. "
+	endif
+
+	if "*" $ aTmp[ i ]
+
+
+		aCountTmp := TokToNiz( cCond, "*" )
+		nCount := LEN(aCountTmp)
+		
+		
+		// "*F4"
+		
+		if LEFT( aTmp[i] , 1 ) == "*" .and. nCount == 1
+	
+			cTmp := UPPER(ALLTRIM( aTmp[ i ] ))
+	
+			cFilter += cm2str( "_" + cTmp ) 
+			cFilter += " $ "
+			cFilter += "ALLTRIM(UPPER(art_desc))"
+		
+	
+		// "F4*"
+		
+		elseif RIGHT( aTmp[i], 1 ) == "*" .and. nCount == 1
+
+			cTmp := UPPER(ALLTRIM( aTmp[ i ] ))
+			nTmp := LEN(cTmp)
+	
+			cFilter += "LEFT(ALLTRIM(UPPER(art_desc)), " + ALLTRIM(STR(nTmp))+ ")"
+			cFilter += " = "
+			cFilter += cm2str( cTmp )
+		
+
+		elseif nCount > 1
+
+			aArtTmp := TokToNiz( aTmp[i], "*" )
+			
+			for iii := 1 to LEN( aArtTmp )
+				
+				if iii == 1
+			
+					cTmp := UPPER( ALLTRIM( aArtTmp[ iii ] ))
+					nTmp := LEN(cTmp)
+	
+					cFilter += " ( "
+					cFilter += "LEFT(ALLTRIM(UPPER(art_desc)), " + ALLTRIM(STR(nTmp))+ ")"
+					cFilter += " = "
+					cFilter += cm2str( cTmp )
+			
+				elseif iii > 1
+				
+					cTmp := UPPER( ALLTRIM( aArtTmp[ iii ] ))
+					cFilter += " .and. " + cm2str("_" + cTmp)
+					cFilter += " $ "
+					cFilter += "ALLTRIM(UPPER(art_desc))"
+				
+				endif
+
+				if iii == LEN( aArtTmp )
+					cFilter += " ) "
+				endif
+			next
+		
+		else
+
+		endif
+		
+	else
+
+		// cisi unos, gleda se samo LEFT( nnn )
+		
+		cTmp := ALLTRIM( aTmp[ i ] )
+		nTmp := LEN(cTmp)
+	
+		cFilter += "LEFT(ALLTRIM(UPPER(art_desc)), " + ALLTRIM(STR(nTmp))+ ")"
+		cFilter += " = "
+		cFilter += cm2str(UPPER(cTmp))
+		
+	endif
+	
+next
+
+if cFilter == ".t."
+	nRet := 0
+else
+	nRet := 1
+endif
+
+return nRet
+
+
+// ---------------------------------------------
+// box za uslov....
+// ---------------------------------------------
+static function _box_qfind()
+local nBoxX := 6
+local nBoxY := 70
+local nX := 1
+private GetList:={}
+
+
+Box(, nBoxX, nBoxY)
+
+	@ m_x + nX, m_y + 2 SAY "===>>> Brza pretraga artikala ===>>>"
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY "uslov:" GET __qf_cond VALID _vl_cond( __qf_cond ) PICT "@S60!" 
+	
+	read
+BoxC()
+
+ESC_RETURN 0
+
+return 1
+
+
+// ----------------------------------------------
+// validacija uslova na boxu
+// ----------------------------------------------
+static function _vl_cond( cCond )
+local lRet := .t.
+
+if EMPTY(cCond)
+	lRet := .f.
+endif
+
+if lRet == .f. .and. EMPTY(cCond)
+	MsgBeep("Uslov mora biti unesen !!!")
+endif
+
+return lRet
+
+
+
+
+
 
 
 // ---------------------------------------------
@@ -695,6 +961,9 @@ local cE_gr_val
 local cE_gr_att
 local nRet := 0
 
+__art_sep := "_"
+__mc_sep := ";"
+
 if lAuto == nil
 	lAuto := .f.
 endif
@@ -719,8 +988,8 @@ do while !EOF() .and. field->art_id == nArt_id
 	nEl_gr_id := field->e_gr_id
 	
 	if nCount > 0
-		__add_to_str( @cArt_desc, "," , .t. )
-		__add_to_str( @cArt_full_desc, ";" , .t. )
+		__add_to_str( @cArt_desc, __art_sep , .t. )
+		__add_to_str( @cArt_full_desc, __mc_sep , .t. )
 	endif
 
 	// grupa_naziv, npr: staklo
@@ -729,7 +998,7 @@ do while !EOF() .and. field->art_id == nArt_id
 	cGroupFull := ALLTRIM( g_e_gr_desc( nEl_gr_id ) )	
 	
 	if !EMPTY(cGroup) .and. cGroup <> "?????"
-		__add_to_str( @cArt_desc, cGroup )
+		__add_to_str( @cArt_desc, cGroup, .t. )
 	endif
 
 	if !EMPTY(cGroupFull) .and. cGroupFull <> "?????"
@@ -757,7 +1026,7 @@ do while !EOF() .and. field->art_id == nArt_id
 		if gr_att_in_desc( nE_gr_att )
 		
 			// dodaj u art_desc
-			__add_to_str( @cArt_desc, cE_gr_val )
+			__add_to_str( @cArt_desc, cE_gr_val, .t. )
 			
 			// dodaj u art_full
 			__add_to_str( @cArt_full_desc, cE_gr_vfull )
@@ -793,7 +1062,7 @@ do while !EOF() .and. field->art_id == nArt_id
 		if aop_in_desc( nAop_id )
 			
 			if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
-				__add_to_str( @cArt_desc, cAop_desc )
+				__add_to_str( @cArt_desc, cAop_desc, .t. )
 				__add_to_str( @cArt_mcode, ;
 					UPPER(LEFT(cAop_desc, 1)), .t.)
 			endif
@@ -809,7 +1078,7 @@ do while !EOF() .and. field->art_id == nArt_id
 		
 			if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
 			
-				__add_to_str( @cArt_desc, cAop_att_desc )
+				__add_to_str( @cArt_desc, cAop_att_desc, .t. )
 			
 			endif
 			if !EMPTY(cAop_attfull) .and. cAop_attfull <> "?????"
@@ -828,6 +1097,7 @@ do while !EOF() .and. field->art_id == nArt_id
 	skip
 	
 	++ nCount
+
 enddo
 
 if lAuto == .t.

@@ -73,7 +73,7 @@ AADD(aImeKol, {PADC("Grupa/atribut", 15), {|| "(" + ALLTRIM(g_egr_by_att(e_gr_at
 
 AADD(aImeKol, {PADC("Vrijednost", 20), {|| PADR(e_gr_vl_full, 20) + ".." }, "e_gr_vl_full"})
 
-AADD(aImeKol, {PADC("Skr. opis", 20), {|| PADR(e_gr_vl_desc, 20) + ".." }, "e_gr_vl_desc"})
+AADD(aImeKol, {PADC("Skr. opis (sifra)", 20), {|| PADR(e_gr_vl_desc, 20) + ".." }, "e_gr_vl_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)

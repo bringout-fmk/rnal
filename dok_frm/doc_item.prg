@@ -123,7 +123,7 @@ nX += 2
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL (*):", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .t. ), show_it( g_art_desc( _art_id ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "0 - otvori sifrarnik i pretrazi" )
+@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL (*):", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .f., .t. ), show_it( g_art_desc( _art_id, nil, .f. ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "0 - otvori sifrarnik i pretrazi" )
 
 nX += 2
 

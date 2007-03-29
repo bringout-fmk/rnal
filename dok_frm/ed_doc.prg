@@ -248,7 +248,7 @@ aImeKol := {}
 aKol:={}
 
 AADD(aImeKol, {"R.br", {|| doc_it_no }, "doc_it_no" })
-AADD(aImeKol, {"Artikal", {|| PADR(g_art_desc( art_id ), 18) + ".." }, "art_id" })
+AADD(aImeKol, {"Artikal", {|| PADR(g_art_desc( art_id, nil, .f. ), 18) + ".." }, "art_id" })
 AADD(aImeKol, {"sirina", {|| TRANSFORM(doc_it_width, PIC_DIM()) }, "doc_it_width" })
 AADD(aImeKol, {"visina", {|| TRANSFORM(doc_it_heigh, PIC_DIM()) }, "doc_it_heigh" })
 AADD(aImeKol, {"kol.", {|| TRANSFORM(doc_it_qtty, PIC_QTTY()) }, "doc_it_qtty" })
@@ -475,7 +475,14 @@ do case
 			endif
 			
 		endif
-	
+
+	case UPPER(CHR(Ch)) == "E"
+		
+		// export dokumenta
+		exp_document( _docs->doc_no, .t., .t. )
+		
+		return DE_CONT
+
 	case Ch == K_ALT_A
 		
 		nRet := DE_CONT

@@ -57,6 +57,7 @@ static function _fill_items()
 local nTable := F_DOC_IT
 local nArt_id
 local cArt_desc
+local cArt_full_desc
 local nDoc_it_no
 local nQtty
 local nTotal
@@ -82,6 +83,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	select articles
 	hseek artid_str( nArt_id )
 
+	cArt_full_desc := ALLTRIM(articles->art_full_desc)
 	cArt_desc := ALLTRIM(articles->art_desc)
 	
 	select ( nTable )

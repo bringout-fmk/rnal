@@ -97,7 +97,7 @@ if __wo_id == .f.
 endif
 
 AADD(aImeKol, {PADC("Opis", 40), {|| PADR(aop_full_desc, 40)}, "aop_full_desc"})
-AADD(aImeKol, {PADC("Skr.opis", 20), {|| PADR(aop_desc, 20)}, "aop_desc"})
+AADD(aImeKol, {PADC("Skr.opis (sifra)", 20), {|| PADR(aop_desc, 20)}, "aop_desc"})
 AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
 
 for i:=1 to LEN(aImeKol)
