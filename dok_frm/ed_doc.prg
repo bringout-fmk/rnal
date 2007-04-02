@@ -479,7 +479,7 @@ do case
 	case UPPER(CHR(Ch)) == "E"
 		
 		// export dokumenta
-		exp_document( _docs->doc_no, .t., .t. )
+		m_export( _docs->doc_no, .t., .t. )
 		
 		return DE_CONT
 

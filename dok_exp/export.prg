@@ -7,7 +7,7 @@
 // lTemporary - priprema .t., kumulativ .f.
 // lWriteRel - upisi rel_ver prvi zapis
 // -------------------------------------------
-function exp_document( nDoc_no, lTemporary, lWriteRel )
+function exp_2_lisec( nDoc_no, lTemporary, lWriteRel )
 local cLocation
 local cFile := ""
 local nH
@@ -64,11 +64,13 @@ if cre_exp_file( nDoc_no, cLocation, @cFile, @nH ) == 0
 
 endif
 
+
 // -----------------------------------------------------
 //
 // WRITE VALUES TO TRF FILE
 //
 // -----------------------------------------------------
+
 
 // upisi <REL>
 aRel := add_rel( "" )
@@ -86,8 +88,11 @@ seek custid_str(nCustid)
 
 select (nADOCS)
 
-// uzmi i upisi osnovne elemente naloga
-aOrd := add_ord( field->doc_no , ;
+// ako su podaci ispravni
+if field->cust_id <> 0
+
+	// uzmi i upisi osnovne elemente naloga
+	aOrd := add_ord( field->doc_no , ;
 		field->cust_id , ;
 		ALLTRIM( customs->cust_desc ) , ;
 		ALLTRIM( field->doc_desc ) , ;
@@ -99,9 +104,18 @@ aOrd := add_ord( field->doc_no , ;
 		field->doc_dvr_date, ;
 		field->doc_ship_place )
 		
-// UPISI <ORD>
-write_rec( nH, aOrd, aOrdSpec )
+	// UPISI <ORD>
+	write_rec( nH, aOrd, aOrdSpec )
+	
+else
 
+	select (nTArea)
+	msgbeep("Nisu ispravni podaci narudzbe !!!!#Operacija prekinuta...")
+	
+	// izadji....
+	return
+
+endif
 
 // predji na stavke naloga
 
@@ -158,8 +172,13 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	
 	next
 	
-	// ubaci u matricu podatke
-	aPos := add_pos( field->doc_it_no, ;
+	// samo ako su dimenzije ispravne.....
+	if field->doc_it_width <> 0 .and. ;
+		field->doc_it_height <> 0 .and. ;
+		field->doc_it_qtty <> 0
+		
+		// ubaci u matricu podatke
+		aPos := add_pos( field->doc_it_no, ;
 			"", ;
 			nil, ;
 			field->doc_it_qtty, ;
@@ -171,17 +190,19 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			cFr2, ;
 			cGl3 )
 
-	// upisi <POS>
-	write_rec(nH, aPos, aPosSpec )
+		// upisi <POS>
+		write_rec( nH, aPos, aPosSpec )
 
-	// ako ima napomena...
-	if !EMPTY(field->doc_it_desc)
+		// ako ima napomena...
+		if !EMPTY( field->doc_it_desc )
 		
-		// upisi <TXT> ostale informacije
-		aTxt := add_txt( 1, ALLTRIM( field->doc_it_desc ) )
+			// upisi <TXT> ostale informacije
+			aTxt := add_txt( 1, ALLTRIM( field->doc_it_desc ) )
 
-		write_rec(nH, aTxt, aTxtSpec )
+			write_rec(nH, aTxt, aTxtSpec )
 	
+		endif
+
 	endif
 
 	select (nADOC_IT)

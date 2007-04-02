@@ -3,7 +3,7 @@ MODUL=rnal_ex
 
 SRCDOSROOT=c:\\dev\\fmk\\rnal\\dok_exp\\
 
-PRGS=export.prg exp_file.prg lisec.prg
+PRGS=export.prg exp_file.prg lisec.prg exp_fmk.prg m_exp.prg
 CS=
 ASMS=
 

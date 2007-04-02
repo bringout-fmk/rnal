@@ -590,7 +590,7 @@ do case
 		nDoc_no := docs->doc_no
 		
 		// export dokumenta
-		exp_document( nDoc_no, .f., .t. )
+		m_export( nDoc_no, .f., .t. )
 		
 		go (nRec)
 		
