@@ -8,9 +8,8 @@
 // lWriteRel - upisi rel_ver prvi zapis
 // -------------------------------------------
 function exp_document( nDoc_no, lTemporary, lWriteRel )
-local cLocation := "c:\temp\"
+local cLocation
 local cFile := ""
-local cSep := "#"
 local nH
 local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
@@ -53,9 +52,23 @@ select (nADOCS)
 go top
 seek docno_str( nDoc_no )
 
-// kreiraj fajl exporta....
-cre_exp_file( nDoc_no, cLocation, @cFile, @nH )
+// uzmi lokaciju fajla
+g_exp_location( @cLocation )
 
+// kreiraj fajl exporta....
+if cre_exp_file( nDoc_no, cLocation, @cFile, @nH ) == 0
+
+	select (nTArea)
+	msgbeep("Operacija ponistena, nista nije exportovano!")
+	return
+
+endif
+
+// -----------------------------------------------------
+//
+// WRITE VALUES TO TRF FILE
+//
+// -----------------------------------------------------
 
 // upisi <REL>
 aRel := add_rel( "" )
@@ -77,9 +90,9 @@ select (nADOCS)
 aOrd := add_ord( field->doc_no , ;
 		field->cust_id , ;
 		ALLTRIM( customs->cust_desc ) , ;
-		ALLTRIM( field->doc_desc ), ;
-		ALLTRIM( field->doc_sh_desc ), ;
-		ALLTRIM( field->cont_add_desc ), ;
+		ALLTRIM( field->doc_desc ) , ;
+		ALLTRIM( field->doc_sh_desc ) , ;
+		ALLTRIM( field->cont_add_desc ) , ;
 		nil, ;
 		nil, ;
 		field->doc_date, ;
@@ -122,7 +135,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	aArtDesc := TokToNiz( cArtDesc, "_" )
 	
 	for i := 1 to LEN( aArtDesc )
-		
+			
 		if i == 1
 			cGl1 := aArtDesc[i]
 		endif
@@ -176,11 +189,17 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	
 enddo
 
+select (nADOC_IT)
+go top
+
 close_exp_file( cFile )
 
 select (nTArea)
 
-msgbeep("Export uspjesno zavrsen ! Kreiran fajl#" + cFile )
+msgbeep("Export zavrsen ... kreiran je fajl#" + ;
+	IF( LEN(cLocation) > 20,  ;
+		PADR( cLocation, 20 ) + "..." , ;
+		cLocation ) + cFile )
 
 return
 

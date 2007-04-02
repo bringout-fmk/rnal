@@ -251,14 +251,18 @@ return aPosSpec
 
 // ----------------------------------------
 // kalkulisi dimenziju
-// n/10mm
+// n/10 mm je u GPS.opt uzima
+// dakle moram svoju dim. pomnoziti sa 10
 // ----------------------------------------
 static function calc_dim( nDim )
 local xRet := 0
+
 if nDim == 0
 	xRet := nDim
 endif
-xRet := nDim
+
+xRet := nDim * 10
+
 return xRet
 
 
@@ -415,7 +419,9 @@ for i := 1 to LEN( aRec )
 	
 	// dodaj space, ali ne na prvoj
 	if i <> 1
+	
 		cTmp += __SPACE
+		
 	endif
 	
 	xVal := aRec[ i ]
@@ -429,7 +435,7 @@ for i := 1 to LEN( aRec )
 	// karakterni tip
 	if cType == "C"
 	
-		cTmp += PADR( xVal, nLen, " " )
+		cTmp += PADR( xVal , nLen, " " )
 	
 	endif
 
@@ -441,6 +447,7 @@ for i := 1 to LEN( aRec )
 		nVal2 := 0
 		
 		for nI := 1 to LEN( aPom )
+		
 			if nI == 1
 				nVal1 := VAL( aPom[nI] )
 			endif
@@ -448,6 +455,7 @@ for i := 1 to LEN( aRec )
 			if nI == 2
 				nVal2 := VAL( aPom[nI] )
 			endif
+			
 		next
 		
 		cTrans := REPLICATE( "9", nVal1 )
@@ -484,5 +492,13 @@ write2file( nH, cTmp, .t. )
 
 return
 
+// -------------------------------------------
+// konverzija windows
+// -------------------------------------------
+static function win_txt_conv( cTxt )
+
+cTxt := STRTRAN(cTxt, "È", "¬" )
+
+return
 
 

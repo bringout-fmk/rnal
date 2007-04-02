@@ -194,13 +194,30 @@ public gDg_margina := 0
 // ostali parametri
 public gFnd_reset := 0
 
+// export parametri
+public gExpOutDir := PADR("c:\temp\", 150)
+public gExpAlwOvWrite := "N"
+
 ::super:setTGVars()
 
 O_PARAMS
+
+// sekcija "1"
+private cSection := "1"
 Rpar( "ff", @gFirma )
 Rpar( "fn", @gNFirma )
+
+// sekcija "5"
+private cSection := "5"
 Rpar( "p1", @gPicVrijednost )
 Rpar( "a1", @gFnd_reset )
+
+// sekcija "E"
+private cSection := "E"
+Rpar( "od", @gExpOutDir )
+Rpar( "ao", @gExpAlwOvWrite )
+
+private cSection := "1"
 
 if Empty(gNFirma)
 	Beep(1)

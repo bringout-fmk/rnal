@@ -22,6 +22,7 @@ function s_params()
 read_fi_params()
 read_zf_params()
 read_doc_params()
+read_ex_params()
 read_ost_params()
 
 return
@@ -135,6 +136,40 @@ if lastkey()<>K_ESC
 endif
 
 return
+
+
+
+// --------------------------------------
+// parametri exporta
+// --------------------------------------
+function ed_ex_params()
+local nX := 1
+local nLeft := 40
+
+Box(, 10, 70)
+
+set cursor on
+
+@ m_x + nX, m_y + 2 SAY PADL("****** export GPS.opt parametri", nLeft)
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("Izlazni direktorij:", 20) GET gExpOutDir PICT "@S45"
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL("Uvijek overwrite export fajla (D/N)?", 45) GET gExpAlwOvWrite PICT "@!" VALID "DN"
+
+read
+
+BoxC()
+
+if lastkey()<>K_ESC
+	write_ex_params()
+endif
+
+return
+
 
 
 // --------------------------------------
@@ -282,6 +317,29 @@ return
 
 
 // --------------------------------------
+// citaj paramtre izgleda dokumenta
+// --------------------------------------
+function read_ex_params()
+
+SELECT F_KPARAMS
+
+if !used()
+	O_KPARAMS
+endif
+
+private cSection:="E"
+private cHistory:=" "
+private aHistory:={}
+
+RPar("od", @gExpOutDir)
+RPar("ao", @gExpAlwOvWrite)
+
+close
+return
+
+
+
+// --------------------------------------
 // citaj parametre ostale
 // --------------------------------------
 function read_ost_params()
@@ -322,6 +380,30 @@ WPar("D3", gDd_redovi)
 close
 
 return
+
+
+
+// ----------------------------------
+// upisi parametre exporta
+// ----------------------------------
+function write_ex_params()
+SELECT F_KPARAMS
+
+if !used()
+	O_KPARAMS
+endif
+private cSection:="E"
+private cHistory:=" "
+private aHistory:={}
+
+WPar("od", gExpOutDir)
+WPar("ao", gExpAlwOvWrite)
+
+close
+
+return
+
+
 
 // ----------------------------------
 // upisi parametre ostalo

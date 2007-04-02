@@ -135,15 +135,15 @@ nX += 1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("sirina [mm] (*):", nLeft + 3) GET _doc_it_heigh PICT "99999.99" VALID val_heigh(_doc_it_heigh) WHEN set_opc_box( nBoxX, 50 )
+@ m_x + nX, m_y + 2 SAY PADL("sirina [mm] (*):", nLeft + 3) GET _doc_it_heigh PICT Pic_Dim() VALID val_heigh(_doc_it_heigh) WHEN set_opc_box( nBoxX, 50 )
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("visina [mm] (*):", nLeft + 3) GET _doc_it_width PICT "99999.99" VALID val_width(_doc_it_width) WHEN set_opc_box( nBoxX, 50 )
+@ m_x + nX, m_y + 2 SAY PADL("visina [mm] (*):", nLeft + 3) GET _doc_it_width PICT Pic_Dim() VALID val_width(_doc_it_width) WHEN set_opc_box( nBoxX, 50 )
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("kolicina [kom] (*):", nLeft + 3) GET _doc_it_qtty PICT "99999" VALID val_qtty(_doc_it_qtty) WHEN set_opc_box( nBoxX, 50 )
+@ m_x + nX, m_y + 2 SAY PADL("kolicina [kom] (*):", nLeft + 3) GET _doc_it_qtty PICT Pic_Qtty() VALID val_qtty(_doc_it_qtty) WHEN set_opc_box( nBoxX, 50 )
 
 // ako je nova stavka obezbjedi unos operacija...
 if l_new_it

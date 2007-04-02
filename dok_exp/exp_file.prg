@@ -2,11 +2,22 @@
 
 
 // -------------------------------------------
-// set exp.fajl
+// get exp.fajl
 // -------------------------------------------
-function set_exp_location( cLocation )
-cLocation := SPACE(200)
-return
+function g_exp_location( cLocation )
+local nRet := 1
+
+cLocation := ALLTRIM(gExpOutDir)
+
+if EMPTY( cLocation ) 
+	msgbeep( "Nije podesen export direktorij!#Parametri -> 4. parametri exporta" )
+	nRet := 0
+endif
+
+// dodaj bs ako ne postoji
+AddBS( @cLocation )
+
+return nRet
 
 
 
@@ -15,15 +26,13 @@ return
 // -------------------------------------------
 static function g_exp_file( nDoc_no, cLocat )
 local aDir
-local cFMask := "TRF"
+local cFExt := "TRF"
 local cFileName := ""
 
-AddBS(@cLocat)
-
-cFileName := "LISEC"
-cFileName += ALLTRIM(STR(nDoc_no)) 
+cFileName := "E"
+cFileName += PADL( ALLTRIM(STR(nDoc_no)), 7, "0" )
 cFileName += "." 
-cFileName += cFMask
+cFileName += cFExt
 
 return cFileName
 
@@ -36,13 +45,26 @@ function cre_exp_file( nDoc_no, cLocation, cFileName, nH )
 // daj naziv fajla
 cFileName := g_exp_file( nDoc_no , cLocation )
 
-nH := FCreate( cLocation + cFileName )
+// da li vec postoji ????
+// gExpAlwOvWrite - export file uvijek overwrite
+if gExpAlwOvWrite == "N" .and. FILE( cLocation + cFileName )
+	
+	if pitanje( , "Fajl " + cFileName + " vec postoji, pobrisati ga ?", "D" ) == "N"
+		return 0
+	endif
+	
+endif
+
+// pobrisi fajl
+FERASE( cLocation + cFileName )
+
+nH := FCREATE( cLocation + cFileName )
 
 if nH == -1
 	msgbeep("greska pri kreiranju fajla")
 endif
 
-return
+return 1
 
 
 

@@ -585,12 +585,16 @@ do case
 
 	case UPPER(CHR(Ch)) == "E"
 
+		nRec := RECNO()
+		
 		nDoc_no := docs->doc_no
 		
 		// export dokumenta
 		exp_document( nDoc_no, .f., .t. )
 		
-		return DE_CONT
+		go (nRec)
+		
+		return DE_REFRESH
 
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )
