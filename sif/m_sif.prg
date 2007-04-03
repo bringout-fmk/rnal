@@ -68,6 +68,17 @@ else
 	AADD(opcexe, {|| msgbeep( cZabrana ) })
 endif
 
+AADD(opc, "-------------------------")
+AADD(opcexe, {|| nil})
+
+AADD(opc, "10. export, relacije")
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "RELATION")
+	AADD(opcexe, {|| p_relation() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
+
 Izbor := 1
 
 Menu_SC("m_sif")

@@ -158,7 +158,19 @@ nX += 2
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("Uvijek overwrite export fajla (D/N)?", 45) GET gExpAlwOvWrite PICT "@!" VALID "DN"
+@ m_x + nX, m_y + 2 SAY PADL("Uvijek overwrite export fajla (D/N)?", 45) GET gExpAlwOvWrite PICT "@!" VALID gExpAlwOvWrite $ "DN"
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("****** export FMK parametri", nLeft)
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("FAKT direktorij kumulativa:", 20) GET gFaKumDir PICT "@S45"
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL("FAKT direktorij privatni:", 20) GET gFaPrivDir PICT "@S45"
 
 read
 
@@ -333,6 +345,8 @@ private aHistory:={}
 
 RPar("od", @gExpOutDir)
 RPar("ao", @gExpAlwOvWrite)
+RPar("pd", @gFaPrivDir)
+RPar("kd", @gFaKumDir)
 
 close
 return
@@ -398,6 +412,8 @@ private aHistory:={}
 
 WPar("od", gExpOutDir)
 WPar("ao", gExpAlwOvWrite)
+WPar("pd", gFaPrivDir)
+WPar("kd", gFaKumDir)
 
 close
 

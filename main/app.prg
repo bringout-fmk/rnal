@@ -197,6 +197,8 @@ public gFnd_reset := 0
 // export parametri
 public gExpOutDir := PADR("c:\temp\", 150)
 public gExpAlwOvWrite := "N"
+public gFaKumDir := PADR( STRTRAN( KUMPATH, "\RNAL\", "\FAKT\" ), 150 )
+public gFaPrivDir := PADR( STRTRAN( PRIVPATH, "\RNAL\", "\FAKT\" ), 150 )
 
 ::super:setTGVars()
 
@@ -216,6 +218,8 @@ Rpar( "a1", @gFnd_reset )
 private cSection := "E"
 Rpar( "od", @gExpOutDir )
 Rpar( "ao", @gExpAlwOvWrite )
+Rpar( "pd", @gFaPrivDir )
+Rpar( "kd", @gFaKumDir )
 
 private cSection := "1"
 

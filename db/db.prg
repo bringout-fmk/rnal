@@ -215,6 +215,9 @@ cre_sifk(nArea)
 // kreiranje tabele pretraga parametri
 _cre_fnd_par()
 
+// kreiraj relacije
+cre_relation()
+
 return
 
 
@@ -702,6 +705,7 @@ if (nArea==-1 .or. nArea == nArea2)
 		case (nArea2 == F_DOC_IT) .or. (nArea2 == F__DOC_IT)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", cPath + cTable, .t.)
 			CREATE_INDEX("2", "STR(art_id,10)+STR(doc_no,10)+STR(doc_it_no,4)", cPath + cTable, .t.)
+			CREATE_INDEX("3", "STR(doc_no,10)+STR(art_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_OPS) .or. (nArea2 == F__DOC_OPS)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_op_no,4)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_LOG)
