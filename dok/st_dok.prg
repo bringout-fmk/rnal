@@ -86,6 +86,10 @@ do while !EOF() .and. field->doc_no == __doc_no
 	cArt_full_desc := ALLTRIM(articles->art_full_desc)
 	cArt_desc := ALLTRIM(articles->art_desc)
 	
+	// temporary
+	cArt_desc := "(" + cArt_desc + ")"
+	cArt_desc += " " + cArt_full_desc
+
 	select ( nTable )
 	
 	nQtty := field->doc_it_qtty

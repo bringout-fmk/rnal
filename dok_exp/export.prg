@@ -25,6 +25,13 @@ local aTxt
 local aTxtSpec
 local aTx2Spec
 local aTx3Spec
+local aGl1
+local aGl2
+local aGl3
+local aGlSpec
+local aFr1
+local aFr2
+local aFrSpec
 
 // napuni matrice sa specifikacijama record-a
 aRelSpec := _get_rel()
@@ -34,6 +41,8 @@ aPo2Spec := _get_po2()
 aTxtSpec := _get_txt(1)
 aTx2Spec := _get_txt(2)
 aTx3Spec := _get_txt(3)
+aFrSpec  := _get_frx()
+aGlSpec  := _get_glx()
 
 if lTemporary == nil
 	lTemporary := .f.
@@ -134,10 +143,15 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	select (nADOC_IT)
 	
 	cGl1 := ""
+	cPosGl1 := ""
 	cGl2 := ""
+	cPosGl2 := ""
 	cGl3 := ""
+	cPosGl3 := ""
 	cFr1 := ""
+	cPosFr1 := ""
 	cFr2 := ""
+	cPosFr2 := ""
 	
 	// uzmi i razlozi artikal
 	// F4_A12_F3
@@ -152,22 +166,27 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			
 		if i == 1
 			cGl1 := aArtDesc[i]
+			cPosGl1 := ALLTRIM(STR(i))
 		endif
 		
 		if i == 2
 			cFr1 := aArtDesc[i]
+			cPosFr1 := ALLTRIM(STR(i))
 		endif
 		
 		if i == 3
 			cGl2 := aArtDesc[i]
+			cPosGl2 := ALLTRIM(STR(i))
 		endif
 		
 		if i == 4
 			cFr2 := aArtDesc[i]
+			cPosFr2 := ALLTRIM(STR(i))
 		endif
 		
 		if i == 5
 			cGl3 := aArtDesc[i]
+			cPosGl3 := ALLTRIM(STR(i))
 		endif
 	
 	next
@@ -184,15 +203,47 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			field->doc_it_qtty, ;
 			field->doc_it_width, ;
 			field->doc_it_height, ;
-			cGl1, ;
-			cFr1, ;
-			cGl2, ;
-			cFr2, ;
-			cGl3 )
+			cPosGl1, ;
+			cPosFr1, ;
+			cPosGl2, ;
+			cPosFr2, ;
+			cPosGl3 )
 
 		// upisi <POS>
 		write_rec( nH, aPos, aPosSpec )
 
+		// upisi <GLx>, <FRx>
+		if !EMPTY( cGl1 )
+		
+			aGl1 := add_glx( "1", cGl1 )
+			write_rec( nH, aGl1, aGlSpec )
+		
+		endif
+		if !EMPTY( cFr1 )
+			
+			aFr1 := add_frx( "1", cFr1 )
+			write_rec( nH, aFr1, aFrSpec )
+			
+		endif
+		if !EMPTY( cGl2 )
+			
+			aGl2 := add_glx( "2", cGl2 )
+			write_rec( nH, aGl2, aGlSpec )
+			
+		endif
+		if !EMPTY( cFr2 )
+			
+			aFr2 := add_frx( "2", cFr2 )
+			write_rec( nH, aFr2, aFrSpec )
+			
+		endif
+		if !EMPTY( cGl3 )
+
+			aGl3 := add_glx( "3", cGl3 )
+			write_rec( nH, aGl3, aGlSpec )
+		
+		endif
+		
 		// ako ima napomena...
 		if !EMPTY( field->doc_it_desc )
 		

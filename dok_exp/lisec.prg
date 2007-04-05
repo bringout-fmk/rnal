@@ -7,6 +7,8 @@ static __REL
 static __ORD
 static __POS
 static __PO2
+static __GLX
+static __FRX
 static __TXT
 static __TX2
 static __TX3
@@ -28,6 +30,8 @@ __PO2 := "<PO2>"
 __TXT := "<TXT>"
 __TX2 := "<TX2>"
 __TX3 := "<TX3>"
+__GLX := "<GLx>"
+__FRX := "<FRx>"
 __SPACE := SPACE(1)
 
 return
@@ -298,6 +302,82 @@ AADD(aPO2Spec, { __PO2,      "C",    5 } )
 AADD(aPO2Spec, { "ID_CODE",  "C",   40 } )
 
 return aPO2Spec
+
+
+
+// ---------------------------------------------
+// <GLx>
+// Glass record information
+// ---------------------------------------------
+
+// ------------------------------
+// dodaj u record <GLx>
+// -----------------------------
+function add_glx( cGlassNo, cIdCode )
+local aGLx := {}
+
+set_keywords()
+
+AADD( aGLx, STRTRAN( __GLX, "x", cGlassNo ) )
+AADD( aGLx, cIdCode )
+
+return aGLx
+
+
+// -----------------------------------------------
+// vraca specifikaciju recorda <GLx>
+// -----------------------------------------------
+function _get_glx()
+local aGLxSpec := {}
+
+set_keywords()
+
+AADD(aGLxSpec, { __GLX,      "C",    5 } )
+AADD(aGLxSpec, { "DESCRIPT", "C",   40 } )
+AADD(aGLxSpec, { "TYPE",     "N",    1 } )
+AADD(aGLxSpec, { "THICKNESS",  "N",  5 } )
+AADD(aGLxSpec, { "FACE_SIDE",  "N",  1 } )
+AADD(aGLxSpec, { "IDENT",      "C", 10 } )
+AADD(aGLxSpec, { "PATT_DIR",   "N",  1 } )
+
+return aGLxSpec
+
+
+// ---------------------------------------------
+// <FRx>
+// Frame record information
+// ---------------------------------------------
+
+// ------------------------------
+// dodaj u record <FRx>
+// -----------------------------
+function add_frx( cFrameNo, cIdCode )
+local aFrx := {}
+
+set_keywords()
+
+AADD( aFRx, STRTRAN( __FRX, "x", cFrameNo ) )
+AADD( aFRx, cIdCode )
+
+return aFRx
+
+
+// -----------------------------------------------
+// vraca specifikaciju recorda <FRx>
+// -----------------------------------------------
+function _get_frx()
+local aFRxSpec := {}
+
+set_keywords()
+
+AADD(aFRxSpec, { __FRX,      "C",    5 } )
+AADD(aFRxSpec, { "DESCRIPT", "C",   40 } )
+AADD(aFRxSpec, { "TYPE",     "N",    1 } )
+AADD(aFRxSpec, { "WIDTH",    "N",    5 } )
+AADD(aFRxSpec, { "HEIGHT",   "N",    5 } )
+AADD(aFRxSpec, { "IDENT",    "C",   10 } )
+
+return aFRxSpec
 
 
 

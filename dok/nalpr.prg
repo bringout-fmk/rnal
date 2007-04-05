@@ -84,6 +84,8 @@ nalpr_header()
 // podaci kupac i broj dokumenta itd....
 nalpr_kupac()
 
+B_ON
+
 ?
 
 cLine := g_line()
@@ -356,6 +358,8 @@ endif
 
 //? cLine
 
+B_OFF
+
 s_nal_izdao()
 
 s_nal_footer()
@@ -442,25 +446,13 @@ endif
 
 
 // konacan proizvod
-cPom := "Konacan proizvod:"
-? RAZMAK + SPACE(35) + PADR(cPom,  40)
-cPom := PADR("VALIDAN", 20)
-cPom += PADR("NIJE VALIDAN", 20)
-? RAZMAK + SPACE(35) + PADR(cPom, 40)
-cPom := PADR(REPLICATE("_", 18), 20)
-cPom += PADR(REPLICATE("_", 18), 20)
-? RAZMAK + SPACE(35) + PADR(cPom, 40)
+cPom := "Konacan proizvod: "
+cPom += "  VALIDAN  "
+cPom += "  NIJE VALIDAN  "
+cPom += " ovjerio: __________________ "
+cPom += ", vrijeme: _____________"
 
-? 
-
-// ovjerio
-cPom := "Ovjerio poslovodja: "
-cPom += REPLICATE( "_", 20 )
-cPom += " "
-cPom += "Vrijeme: "
-cPom += REPLICATE( "_", 20 )
-
-? RAZMAK + SPACE(30) + cPom
+? RAZMAK + cPom
 
 return
 
@@ -499,12 +491,19 @@ local cDLHead
 local cSLHead 
 local cINaziv
 local cRazmak := SPACE(2)
+local cDoc_no
+
+// broj dokumenta
+cDoc_no := g_t_pars_opis("N01")
 
 // naziv
-cINaziv  := ALLTRIM(gFNaziv)
+cINaziv := ALLTRIM(gFNaziv)
+cINaziv += " : "
+cINaziv += "NALOG ZA PROIZVODNJU br."
+cINaziv += cDoc_no
 
 // double line header
-cDLHead := REPLICATE("=", 60)
+cDLHead := REPLICATE("=", 70)
 
 // single line header
 cSLHead := REPLICATE("-", LEN(gFNaziv))
@@ -546,7 +545,6 @@ return cLine
 // dokument, datumi, hitnost itd..
 // ----------------------------------------------
 static function nalpr_kupac()
-local cDoc_desc := "NALOG ZA PROIZVODNJU br."
 local cDoc_date
 local cDoc_dvr_date
 local cDoc_dvr_time
@@ -562,14 +560,12 @@ local cContadesc
 local cCont_add_desc
 local cDoc_no
 local cRazmak := SPACE(2)
-local nLeft := 20
-local nRight := 12
+local nLeft := 15
+local nRight := 8
 local i
 local cPom
 local aPom
 
-// get/set document data
-cDoc_no := g_t_pars_opis("N01")
 cDoc_date := g_t_pars_opis("N02")
 cDoc_dvr_date := g_t_pars_opis("N03")
 cDoc_dvr_time := g_t_pars_opis("N04")
@@ -590,69 +586,60 @@ cCont_tel := g_t_pars_opis("P12")
 cContadesc := g_t_pars_opis("P13")
 cCont_add_desc := g_t_pars_opis("N09")
 
-
-// broj naloga
-cPom := cDoc_desc + cDoc_no
-p_line(cRazmak + cPom, 10, .t.)
-
 B_OFF
 
-?
+// doc_date + doc_dvr_date + doc_dvr_time
+cPom := "Datum naloga: "
+cPom += cDoc_date
+cPom += ", "
+cPom += "Datum isporuke: "
+cPom += cDoc_dvr_date
+cPom += ", "
+cPom += "Vrijeme isporuke: "
+cPom += cDoc_dvr_time
 
-// doc_date + doc_dvr_date
-cPom := PADL("Datum naloga: ", nLeft ) + PADR(cDoc_date, nRight) + PADL("Datum isporuke: ", nLeft) + cDoc_dvr_date
-p_line(cRazmak + SPACE(1) + cPom, 12, .f.)
+p_line(cRazmak + cPom, 12, .f.)
 
-// doc_dvr_time + priority
-cPom := PADL("Vrijeme isporuke: ", nLeft) + PADR(cDoc_dvr_time, nRight) + PADL("Prioritet: ", nLeft) + cPriority
-p_line(cRazmak + SPACE(1) + cPom, 12, .f.)
 
-// ship_place
-if !EMPTY( cDoc_ship_place )
-
-	cPom := PADL("Mjesto isporuke: ", nLeft) + cDoc_ship_place
+// priority + sh_place
+cPom := "Prioritet: "
+cPom += cPriority
+cPom += ",  "
+cPom += "Mjesto isporuke: "
+cPom += cDoc_ship_place
 	
-	aPom := SjeciStr( cPom, 100 )
+aPom := SjeciStr( cPom, 100 )
 
-	for i:=1 to LEN( aPom )
-		
-		p_line(cRazmak + SPACE(1) + aPom[i], 12, .f.)
+for i:=1 to LEN( aPom )
+
+	p_line(cRazmak + aPom[i], 12, .f.)
+
+next
 	
-	next
-	
-endif
-
-?
-
 // podaci narucioca
-cPom := "Podaci narucioca:"
+cPom := "Narucioc: "
+cPom += ALLTRIM(cCust_desc) 
+cPom += ", " 
+cPom += ALLTRIM(cCust_addr) 
+cPom += ", tel: " 
+cPom += ALLTRIM(cCust_tel)
+
 p_line( cRazmak + cPom, 12, .f.)
-
-// naziv, adresa, telefon
-cPom := ALLTRIM(cCust_desc) + ", " + ALLTRIM(cCust_addr) + ", " + ALLTRIM("tel: " + cCust_tel)
-p_line( cRazmak + SPACE(1) + cPom, 12, .f. )
-
-?
 
 // podaci kontakta
-cPom := "Podaci kontakta:"
-p_line( cRazmak + cPom, 12, .f.)
+cPom := "Kontakt: "
+cPom += " " + ALLTRIM(cCont_desc) + " (" + ALLTRIM(cContadesc) + "), " + ALLTRIM("tel: " + cCont_tel) + ", " + ALLTRIM(cCont_add_desc)
 
-// ime, telefon, opis
-cPom := ALLTRIM(cCont_desc) + " (" + ALLTRIM(cContadesc) + "), " + ALLTRIM("tel: " + cCont_tel) + ", " + ALLTRIM(cCont_add_desc)
 aPom := SjeciStr( cPom, 100 )
 
 for i:=1 to LEN( aPom )
 	
-	p_line( cRazmak + SPACE(1) + aPom[i] , 12, .f. )
+	p_line( cRazmak + aPom[i] , 12, .f. )
 
 next
 
-
 // ostale napomene naloga...
 if !EMPTY( cDoc_add_desc )
-
-	?
 	
 	cPom := "Ostale napomene: " + ALLTRIM( cDoc_add_desc )
 	
