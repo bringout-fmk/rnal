@@ -546,6 +546,7 @@ return cLine
 // ----------------------------------------------
 static function nalpr_kupac()
 local cDoc_date
+local cDoc_time
 local cDoc_dvr_date
 local cDoc_dvr_time
 local cDoc_ship_place
@@ -567,6 +568,7 @@ local cPom
 local aPom
 
 cDoc_date := g_t_pars_opis("N02")
+cDoc_time := g_t_pars_opis("N12")
 cDoc_dvr_date := g_t_pars_opis("N03")
 cDoc_dvr_time := g_t_pars_opis("N04")
 cPriority := g_t_pars_opis("N05")
@@ -588,9 +590,12 @@ cCont_add_desc := g_t_pars_opis("N09")
 
 B_OFF
 
-// doc_date + doc_dvr_date + doc_dvr_time
-cPom := "Datum naloga: "
+// doc_date + doc_time + doc_dvr_date + doc_dvr_time
+cPom := "Datum/vrijeme naloga: "
 cPom += cDoc_date
+cPom += " "
+cPom += cDoc_time
+
 cPom += ", "
 cPom += "Datum isporuke: "
 cPom += cDoc_dvr_date

@@ -236,6 +236,11 @@ if field->doc_pay_id == 2
 
 endif
 
+if fieldpos("DOC_TIME") <> 0
+	// vrijeme dokumenta
+	add_tpars("N12", ALLTRIM(field->doc_time) )
+endif
+
 return
 
 

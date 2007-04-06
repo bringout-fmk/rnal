@@ -551,6 +551,11 @@ appblank2(.f., .f.)
 _doc_status := 3
 _doc_no := nNewBrNal
 
+// vrijeme dokumenta
+if docs->(fieldpos("DOC_TIME")) <> 0
+	_doc_time := PADR( TIME(), 5 )
+endif
+
 Gather2()
 
 DBUnlock()
@@ -584,6 +589,9 @@ go top
 
 Scatter()
 _doc_no := nDoc_no
+if EMPTY(_doc_time)
+	_doc_time := PADR( TIME(), 5 )
+endif
 Gather()
 
 // _DOC_IT

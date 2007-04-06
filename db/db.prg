@@ -231,6 +231,7 @@ local aDbf
 aDbf:={}
 AADD(aDBf,{ "doc_no", "N", 10, 0 })
 AADD(aDBf,{ "doc_date", "D", 8, 0 })
+AADD(aDBf,{ "doc_time", "C", 8, 0 })
 AADD(aDBf,{ "doc_dvr_date", "D", 8, 0 })
 AADD(aDBf,{ "doc_dvr_time", "C", 8,  0 })
 AADD(aDBf,{ "doc_ship_place", "C", 200, 0 })
