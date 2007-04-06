@@ -87,6 +87,7 @@ write_rec( nH, aRel, aRelSpec )
 
 select (nADOCS)
 nCustId := field->cust_id
+nContId := field->cont_id
 
 // nadji naziv narucioca
 select customs
@@ -94,6 +95,12 @@ set filter to
 set order to tag "1"
 go top
 seek custid_str(nCustid)
+
+select contacts
+set filter to
+set order to tag "1"
+go top
+seek contid_str(nContId)
 
 select (nADOCS)
 
@@ -103,11 +110,11 @@ if field->cust_id <> 0
 	// uzmi i upisi osnovne elemente naloga
 	aOrd := add_ord( field->doc_no , ;
 		field->cust_id , ;
-		ALLTRIM( customs->cust_desc ) , ;
+		ALLTRIM( customs->cust_desc ) + " " + ALLTRIM(customs->cust_addr) + " " + ALLTRIM(customs->cust_tel) , ;
 		ALLTRIM( field->doc_desc ) , ;
 		ALLTRIM( field->doc_sh_desc ) , ;
 		ALLTRIM( field->cont_add_desc ) , ;
-		nil, ;
+		ALLTRIM( contacts->cont_desc) + " " + ALLTRIM(contacts->cont_tel) , ;
 		nil, ;
 		field->doc_date, ;
 		field->doc_dvr_date, ;

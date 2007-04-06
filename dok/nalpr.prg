@@ -595,12 +595,10 @@ cPom := "Datum/vrijeme naloga: "
 cPom += cDoc_date
 cPom += " "
 cPom += cDoc_time
-
-cPom += ", "
-cPom += "Datum isporuke: "
+cPom += ",  "
+cPom += "Datum/vrijeme isporuke: "
 cPom += cDoc_dvr_date
-cPom += ", "
-cPom += "Vrijeme isporuke: "
+cPom += " "
 cPom += cDoc_dvr_time
 
 p_line(cRazmak + cPom, 12, .f.)
