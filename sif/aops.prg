@@ -98,6 +98,7 @@ endif
 
 AADD(aImeKol, {PADC("Opis", 40), {|| PADR(aop_full_desc, 40)}, "aop_full_desc"})
 AADD(aImeKol, {PADC("Skr.opis (sifra)", 20), {|| PADR(aop_desc, 20)}, "aop_desc"})
+AADD(aImeKol, {PADC("Joker", 20), {|| PADR(aop_joker, 20)}, "aop_joker"})
 AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
 
 for i:=1 to LEN(aImeKol)
@@ -203,6 +204,30 @@ endif
 select (nTArea)
 
 return cAopDesc
+
+
+// -------------------------------
+// get aop_joker by aop_id
+// -------------------------------
+function g_aop_joker( nAop_id )
+local cAopJoker := ""
+local nTArea := SELECT()
+
+O_AOPS
+select aops
+set order to tag "1"
+go top
+seek aopid_str(nAop_id)
+
+if FOUND()
+	if !EMPTY(field->aop_joker)
+		cAopJoker := ALLTRIM(field->aop_joker)
+	endif
+endif
+
+select (nTArea)
+
+return cAopJoker
 
 
 

@@ -938,6 +938,27 @@ return nCnt
 
 
 
+
+// -----------------------------------------
+// filuje matricu aAttr
+//
+// vars:
+// aArr - matrica, proslijedjuje se po ref.
+// nElNo - broj elementa artikla
+// cGrValCode - kod vrijednosti grupe
+// cGrVal - vrijednost grupe (puni opis)
+// cAttJoker - joker atributa 
+// cAttValCode - kod vrijednosti atributa
+// cAttVal - vrijednost atributa (puni opis)
+// -----------------------------------------
+static function _f_a_attr( aArr, nElNo, cGrValCode, cGrVal, ;
+			cAttJoker, cAttValCode, cAttVal )
+
+AADD( aArr, { nElNo, cGrValCode, cGrVal, cAttJoker, cAttValCode, cAttVal })
+
+return
+
+
 // ----------------------------------------------
 // setovanje opisa artikla na osnovu tabela
 //   ELEMENTS, E_AOPS, E_ATT
@@ -947,21 +968,49 @@ return nCnt
 //  lAuto - auto generacija naziva
 // ----------------------------------------------
 function _art_set_descr( nArt_id, lNew, lAuto )
+// artikal kod
+local cArt_code := ""
+// artikal puni naziv
 local cArt_desc := ""
-local cArt_full_desc := ""
+// artikal match kod
 local cArt_mcode := ""
-local cGroup
-local cGroupFull
+// element id
 local nEl_id
+// grupa id iz elementa
 local nEl_gr_id
-local nCount := 0
+// grupa kod
+local cGr_code
+// grupa puni naziv
+local cGr_desc
+// atribut grupe ID
 local nE_gr_att 
+// vrijednost atributa ID
 local nE_gr_val
-local cE_gr_val
-local cE_gr_att
-local nRet := 0
+// vrijednost atributa opis
+local cAttValCode
+// vrijednost atributa grupe opis
+local cAttVal
+// joker atributa, operacije
+local cAttJoker
+local cAopJoker
+local cAop
+local cAopCode
+local cAopAtt
+local cAopAttCode
 
+// matrica sa atributima
+local aAttr := {}
+
+// ostale pomocne varijable
+local nRet := 0
+local nCount := 0
+local nElCount := 0
+
+// setovanje statickih varijabli
+
+// article code separator
 __art_sep := "_"
+// puni naziv separator
 __mc_sep := ";"
 
 if lAuto == nil
@@ -975,6 +1024,10 @@ select e_att
 set filter to
 select e_aops
 set filter to
+select aops
+set filter to
+select aops_att
+set filter to
 
 // elementi...
 select elements
@@ -984,28 +1037,20 @@ seek artid_str( nArt_id )
 
 do while !EOF() .and. field->art_id == nArt_id
 	
+	// brojac elementa, 1, 2, 3
+	++ nElCount
+	
+	// ID element
 	nEl_id := field->el_id
+	// ID grupa na osnovu elementa
 	nEl_gr_id := field->e_gr_id
 	
-	if nCount > 0
-		__add_to_str( @cArt_desc, __art_sep , .t. )
-		__add_to_str( @cArt_full_desc, __mc_sep , .t. )
-	endif
-
-	// grupa_naziv, npr: staklo
+	// grupa kod
+	cGr_code := ALLTRIM( g_e_gr_desc(nEl_gr_id, nil, .f.) )	
+	// grupa puni opis
+	cGr_desc := ALLTRIM( g_e_gr_desc( nEl_gr_id ) )	
 	
-	cGroup := ALLTRIM( g_e_gr_desc(nEl_gr_id, nil, .f.) )	
-	cGroupFull := ALLTRIM( g_e_gr_desc( nEl_gr_id ) )	
-	
-	if !EMPTY(cGroup) .and. cGroup <> "?????"
-		__add_to_str( @cArt_desc, cGroup, .t. )
-	endif
-
-	if !EMPTY(cGroupFull) .and. cGroupFull <> "?????"
-		__add_to_str( @cArt_full_desc, cGroupFull )
-	endif
-	
-	// predji na atribute elemenata...
+	// .... predji na atribute elemenata .....
 	select e_att
 	set order to tag "1"
 	go top
@@ -1013,29 +1058,25 @@ do while !EOF() .and. field->art_id == nArt_id
 
 	do while !EOF() .and. field->el_id == nEl_id
 
+		
 		// vrijednost atributa
 		nE_gr_val := field->e_gr_vl_id
-		cE_gr_val := ALLTRIM(g_e_gr_vl_desc( nE_gr_val, nil, .f. ))
-		cE_gr_vfull := ALLTRIM(g_e_gr_vl_desc( nE_gr_val ))
+		cAttValCode := ALLTRIM(g_e_gr_vl_desc( nE_gr_val, nil, .f. ))
+		cAttVal := ALLTRIM(g_e_gr_vl_desc( nE_gr_val ))
 		
-		// atributi...
-		nE_gr_att := g_gr_att_val( nE_gr_val )
-		cE_gr_att := ALLTRIM(g_gr_at_desc( nE_gr_att ))
+		// koji je ovo atribut ?????
+		nE_gr_att := g_gr_att_val( nE_gr_val)
 
-		// ide li u naziv artikla ????
-		if gr_att_in_desc( nE_gr_att )
+		// daj njegov opis 
+		cAtt_desc := ALLTRIM(g_gr_at_desc( nE_gr_att ))
 		
-			// dodaj u art_desc
-			__add_to_str( @cArt_desc, cE_gr_val, .t. )
-			
-			// dodaj u art_full
-			__add_to_str( @cArt_full_desc, cE_gr_vfull )
-			
-			// dodaj u mcode...
-			__add_to_str( @cArt_mcode, UPPER(LEFT(cE_gr_val, 2)), .t.)
-			
-		endif
+		// joker ovog atributa je ???
+		cAttJoker := g_gr_att_joker( nE_gr_att )
 		
+	
+		_f_a_attr( @aAttr, nElCount, cGr_code, cGr_desc, ;
+			cAttJoker, cAttValCode, cAttVal )
+	
 		skip
 		
 	enddo
@@ -1048,46 +1089,23 @@ do while !EOF() .and. field->art_id == nArt_id
 
 	do while !EOF() .and. field->el_id == nEl_id
 		
-		// dodatna operacija...
+		// dodatna operacija ID ...
 		nAop_id := field->aop_id
-		cAop_desc := ALLTRIM(g_aop_desc( nAop_id, nil, .f. ))
-		cAop_dfull := ALLTRIM(g_aop_desc( nAop_id ))
+		
+		cAopCode := ALLTRIM(g_aop_desc( nAop_id, nil, .f. ))
+		cAop := ALLTRIM(g_aop_desc( nAop_id ))
+		
+		// koji je djoker ????
+		cAopJoker := ALLTRIM( g_aop_joker( nAop_id ) )
 		
 		// atribut...
 		nAop_att_id := field->aop_att_id
-		cAop_att_desc := ALLTRIM( g_aop_att_desc( nAop_att_id, nil, .f. ) )
-		cAop_attfull := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
+		cAopAttCode := ALLTRIM( g_aop_att_desc( nAop_att_id, nil, .f. ) )
+		cAopAtt := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
 
-		// da li operacija ide u naziv...
-		if aop_in_desc( nAop_id )
-			
-			if !EMPTY(cAop_desc) .and. cAop_desc <> "?????"
-				__add_to_str( @cArt_desc, cAop_desc, .t. )
-				__add_to_str( @cArt_mcode, ;
-					UPPER(LEFT(cAop_desc, 1)), .t.)
-			endif
-		
-			if !EMPTY(cAop_dfull) .and. cAop_dfull <> "?????"
-				__add_to_str( @cArt_full_desc, cAop_dfull )
-			endif
-		
-		endif
-		
-		// da li atribut ide u naziv...
-		if aop_att_in_desc( nAop_att_id )
-		
-			if !EMPTY(cAop_att_desc) .and. cAop_att_desc <> "?????"
-			
-				__add_to_str( @cArt_desc, cAop_att_desc, .t. )
-			
-			endif
-			if !EMPTY(cAop_attfull) .and. cAop_attfull <> "?????"
-			
-				__add_to_str( @cArt_full_desc, cAop_attfull )
-			
-			endif
-			
-		endif
+		_f_a_attr( @aAttr, nElCount, cGr_code, cGr_desc, ;
+				cAopJoker, cAopCode + cAopAttCode, ;
+				cAop + " " + cAopAtt )
 		
 		skip
 	enddo
@@ -1100,17 +1118,105 @@ do while !EOF() .and. field->art_id == nArt_id
 
 enddo
 
+// sada izvuci nazive iz matrice
+
+_aset_descr( aAttr, @cArt_code, @cArt_desc, @cArt_mcode )
+
+// apenduj na artikal
+
 if lAuto == .t.
 	// automatski generisi opsi i mc 
 	// bez kontrolnog box-a
-	nRet := _art_apnd_auto( nArt_id, cArt_desc, cArt_full_desc, cArt_mcode )
+	nRet := _art_apnd_auto( nArt_id, cArt_code, cArt_desc, cArt_mcode )
 else
 	// generisi opis i match_code
 	// otvori kontrolni box
-	nRet := _art_apnd( nArt_id, cArt_desc, cArt_full_desc, cArt_mcode, lNew )
+	nRet := _art_apnd( nArt_id, cArt_code, cArt_desc, cArt_mcode, lNew )
 endif
 
 return nRet
+
+
+
+// ---------------------------------------------------------
+// setovanje naziva iz matrice aAttr prema pravilu
+// aArr - matrica sa podacima artikla
+// cArt_code - sifra artikla
+// cArt_desc - opis artikla
+// cArt_mcode - match code artikla
+// ---------------------------------------------------------
+static function _aset_descr( aArr, cArt_code, cArt_desc, cArt_mcode )
+local nTotElem := aArr[ LEN(aArr), 1 ]
+local cElemCode 
+local i
+local cTmp
+local nTmp
+
+for i := 1 to nTotElem
+
+	// iscitaj code elementa
+	nTmp := ASCAN( aArr, {| xVar | xVar[1] == i })
+	cElemCode := aArr[ nTmp, 2 ]
+
+	// uzmi pravilo <GL_TICK>#<GL_TYPE>.....
+	cRule := _get_rule( cElemCode )
+	// pa ga u matricu ......
+	aRule := TokToNiz( cRule, "#" )
+	
+	for nRule := 1 to LEN( aRule )
+	
+		// <GL_TICK>
+		cRuleDef := ALLTRIM( aRule[ nRule ] )
+
+		nSeek := ASCAN(aArr, {| xVal | ;
+			xVal[1] == i .and. xVal[4] == cRuleDef })
+		
+		if nSeek > 0
+			
+			cArt_code += ALLTRIM( aArr[ nSeek, 5 ] )
+
+			// dodaj space..... na opis puni
+			if !EMPTY(cArt_desc)
+				cArt_desc += " "
+			endif
+				
+			cArt_desc += ALLTRIM( aArr[ nSeek, 6 ] )
+			
+			cArt_mcode += ALLTRIM( ;
+				PADR( UPPER(ALLTRIM(aArr[nSeek, 6])), 2) )
+				
+		endif
+	
+	next
+	
+	if i <> nTotElem
+		cArt_code += "_"
+		cArt_desc += ";"
+	endif
+
+next
+
+return
+
+
+// -------------------------------------------------
+// vraca pravilo za pojedinu grupu....
+// -------------------------------------------------
+static function _get_rule( cCode )
+local cRule := ""
+
+do case
+	case cCode == "G"
+		cRule := "<GL_TICK>#<GL_TYPE>"
+	case cCode == "F"
+		cRule := "<FR_TYPE>#<FR_TICK>#<FR_GAS>"
+	case cCode == "L"
+		// cRule := 	
+endcase
+
+return cRule
+
+
 
 
 // -----------------------------------------------------

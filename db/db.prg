@@ -435,6 +435,7 @@ AADD(aDBf,{ "e_gr_id", "N", 10, 0 })
 AADD(aDBf,{ "e_gr_at_desc", "C", 100, 0 })
 AADD(aDBf,{ "e_gr_at_required", "C", 1, 0 })
 AADD(aDBf,{ "in_art_desc", "C", 1, 0 })
+AADD(aDBf,{ "e_gr_at_joker", "C", 20, 0 })
 AADD(aDBf,{ "match_code", "C", 10, 0 })
 
 return aDbf
@@ -470,6 +471,7 @@ AADD(aDBf,{ "aop_id", "N", 10, 0 })
 AADD(aDBf,{ "aop_desc", "C", 100, 0 })
 AADD(aDBf,{ "aop_full_desc", "C", 100, 0 })
 AADD(aDBf,{ "in_art_desc", "C", 1, 0 })
+AADD(aDBf,{ "aop_joker", "C", 20, 0 })
 AADD(aDBf,{ "match_code", "C", 10, 0 })
 
 return aDbf
