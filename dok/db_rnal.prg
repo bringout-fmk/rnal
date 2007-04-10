@@ -79,6 +79,10 @@ AADD(aArr,{ "doc_it_width" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_schema" , "C" ,   1 ,  0 })
 AADD(aArr,{ "doc_it_desc" , "C" , 150 ,  0 })
 AADD(aArr,{ "doc_it_total" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_zwidth" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_zheight" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_neto" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_bruto" , "N" ,  15 ,  5 })
 
 return
 
@@ -187,7 +191,7 @@ return xRet
 function a_t_docit( nDoc_no, nDoc_it_no, nArt_id, cArt_desc, ;
 		    cDoc_it_schema, cDoc_it_desc, ;
 		    nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, ;
-		    nDoc_it_total )
+		    nDoc_it_total, nGNHeigh, nGNWidth, nNeto, nBruto )
 
 O_T_DOCIT
 select t_docit
@@ -202,6 +206,13 @@ replace doc_it_width with nDoc_it_width
 replace doc_it_total with nDoc_it_total
 replace doc_it_schema with cDoc_it_schema
 replace doc_it_desc with cDoc_it_desc
+
+if nGNHeigh <> nil
+	replace doc_it_zheight with nGNHeigh
+	replace doc_it_zwidth with nGNWidth
+	replace doc_it_neto with nNeto
+	replace doc_it_bruto with nBruto
+endif
 
 return
 

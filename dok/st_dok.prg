@@ -38,12 +38,33 @@ return DE_REFRESH
 
 
 // -------------------------------------
-// stampa otpremnice, filovanje prn tabela
+// stampa obracunskog lista
+// filovanje prn tabela
 // -------------------------------------
-function st_otpremnica( lTemporary, nDoc_no )
+function st_obr_list( lTemporary, nDoc_no )
+local lGN := .t.
 
 __temp := lTemporary
 __doc_no := nDoc_no
+
+// kreiraj print tabele
+t_rpt_create()
+// otvori tabele
+t_rpt_open()
+
+o_tables( __temp )
+
+// osnovni podaci naloga
+_fill_main()
+// stavke naloga
+_fill_items( lGN )
+
+// printaj obracunski list
+obrl_print( .t. )
+
+close all
+
+o_tables( __temp )
 
 return DE_REFRESH
 
@@ -53,7 +74,7 @@ return DE_REFRESH
 // ----------------------------------
 // filuj tabele za stampu
 // ----------------------------------
-static function _fill_items()
+static function _fill_items( lZpoGN )
 local nTable := F_DOC_IT
 local nArt_id
 local cArt_desc
@@ -63,6 +84,14 @@ local nQtty
 local nTotal
 local nHeigh
 local nWidth
+local nZWidth := 0
+local nZHeigh := 0
+local nNeto := 0
+local nBruto := 0
+
+if lZpoGN == nil
+	lZPoGN := .f.
+endif
 
 if ( __temp == .t. )
 	nTable := F__DOC_IT
@@ -93,14 +122,44 @@ do while !EOF() .and. field->doc_no == __doc_no
 	select ( nTable )
 	
 	nQtty := field->doc_it_qtty
+	
 	nHeigh := field->doc_it_heigh
 	nWidth := field->doc_it_width
+	nTotal := ROUND( c_ukvadrat(nQtty, nHeigh, nWidth), 2)
+
+	if lZpoGN == .t.
+		// ako je po GN onda pretvori u cm
+		nHeigh := mm_2_cm( field->doc_it_heigh )
+		nWidth := mm_2_cm( field->doc_it_width )
+	endif
+	
 	cDoc_it_schema := field->doc_it_schema
 	cDoc_it_desc := field->doc_it_desc
-	nTotal := nQtty * (nHeigh * nWidth)
-
+	
+	
+	if lZpoGN == .t.
+	
+		aZpoGN := {}
+		// zaokruzi vrijednosti....
+		_art_set_descr( nArt_id, nil, nil, @aZpoGN, lZpoGN )
+		
+		nZHeigh := obrl_zaok( nHeigh, aZpoGN )
+		
+		nZWidth := obrl_zaok( nWidth, aZpoGN )
+		
+		// ako se zaokruzuje onda total ide po zaokr.vrijednostima
+		nTotal := ROUND( c_ukvadrat(nQtty, nZHeigh*10, nZWidth*10), 2)
+		
+		// izracunaj neto
+		nNeto := ROUND( obrl_neto( nTotal, aZpoGN ), 2)
+		
+		nBruto := 0
+		
+	endif
+	
 	a_t_docit( __doc_no, nDoc_it_no, nArt_id, cArt_desc , cDoc_it_schema, ;
-                  cDoc_it_desc, nQtty, nHeigh, nWidth, nTotal )
+                  cDoc_it_desc, nQtty, nHeigh, nWidth, nTotal, ;
+		  nZHeigh, nZWidth, nNeto, nBruto )
 	
 	select ( nTable )
 	skip

@@ -967,7 +967,7 @@ return
 //  lNew - novi artikal
 //  lAuto - auto generacija naziva
 // ----------------------------------------------
-function _art_set_descr( nArt_id, lNew, lAuto )
+function _art_set_descr( nArt_id, lNew, lAuto, aAttr, lOnlyArr )
 // artikal kod
 local cArt_code := ""
 // artikal puni naziv
@@ -998,13 +998,19 @@ local cAopCode
 local cAopAtt
 local cAopAttCode
 
-// matrica sa atributima
-local aAttr := {}
-
 // ostale pomocne varijable
 local nRet := 0
 local nCount := 0
 local nElCount := 0
+
+if lOnlyArr == nil
+	lOnlyArr := .f.
+endif
+
+// matrica sa atributima
+if aAttr == nil
+	aAttr := {}
+endif
 
 // setovanje statickih varijabli
 
@@ -1118,20 +1124,24 @@ do while !EOF() .and. field->art_id == nArt_id
 
 enddo
 
-// sada izvuci nazive iz matrice
+if lOnlyArr == .f.
 
-_aset_descr( aAttr, @cArt_code, @cArt_desc, @cArt_mcode )
+	// sada izvuci nazive iz matrice
 
-// apenduj na artikal
+	_aset_descr( aAttr, @cArt_code, @cArt_desc, @cArt_mcode )
 
-if lAuto == .t.
-	// automatski generisi opsi i mc 
-	// bez kontrolnog box-a
-	nRet := _art_apnd_auto( nArt_id, cArt_code, cArt_desc, cArt_mcode )
-else
-	// generisi opis i match_code
-	// otvori kontrolni box
-	nRet := _art_apnd( nArt_id, cArt_code, cArt_desc, cArt_mcode, lNew )
+	// apenduj na artikal
+
+	if lAuto == .t.
+		// automatski generisi opsi i mc 
+		// bez kontrolnog box-a
+		nRet := _art_apnd_auto( nArt_id, cArt_code, cArt_desc, cArt_mcode )
+	else
+		// generisi opis i match_code
+		// otvori kontrolni box
+		nRet := _art_apnd( nArt_id, cArt_code, cArt_desc, cArt_mcode, lNew )
+	endif
+
 endif
 
 return nRet

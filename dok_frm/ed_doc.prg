@@ -562,7 +562,41 @@ do case
 		go top
 
 		nRet := DE_CONT
-	
+
+	case Ch == K_CTRL_O
+
+		// obracunski list......
+		nTArea := SELECT()
+		select _docs
+		
+		// ima li stavki u nalogu
+		if _doc_integ( .t. ) == 0
+			return DE_CONT
+		endif
+			
+		select _docs
+		
+		// uzmi novi broj dokumenta
+		nDocNoNew := _new_doc_no()
+
+		// ako je baza zauzeta
+		if nDocNoNew == -1
+			return DE_CONT
+		endif
+
+		// filuj sve tabele sa novim brojem
+		fill__doc_no( nDocNoNew )
+		
+		select _docs
+		go top
+		
+		st_obr_list( .t. , _docs->doc_no )
+		
+		select (nTArea)
+		go top
+
+		nRet := DE_CONT
+
 endcase
 
 m_x := nX

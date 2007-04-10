@@ -1,15 +1,137 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
-/*
- * ----------------------------------------------------------------
- *                                     Copyright Sigma-com software 
- * ----------------------------------------------------------------
- */
 
 static BEZ_ZAOKR := 99
 static GN_ZAOKR := 1
 static PROF_ZAOKR := 2
 static S3M_ZAOKR := 3
+
+
+// ----------------------------------------
+// obracunski list zaokruzenje
+// ----------------------------------------
+function obrl_zaok( nVal, aArr )
+local nElCount 
+local i
+local nTickness
+local nSeek
+local nZaok := 1
+local xZaok := 0
+
+// uzmi broj elemenata stakla
+nElCount := aArr[ LEN(aArr), 1 ]
+
+if nElCount == 1
+	
+	// debljina stakla 1
+	nTickness := g_gl_tickness( aArr, 1 )
+
+	// uzmi tip stakla
+	cType := g_gl_type( aArr, 1 )
+
+	if nTickness <= 3
+
+		nZaok := 3
+	
+	endif
+	
+	if cType == "PR" 
+	
+		nZaok := 2
+	
+	endif
+
+	// zaokruzi
+	xZaok := dim_zaokruzi( nVal, nTickness, nZaok )
+	
+
+elseif nElCount > 1
+	
+	// ako je vise stavki....
+	xZaok := dim_zaokruzi( nVal, 4, nZaok )
+	
+endif
+
+return xZaok
+
+
+
+// ----------------------------------------
+// obracunski list neto
+// ----------------------------------------
+function obrl_neto( nM2, aArr )
+local nElCount 
+local i
+local nTickness
+local nSeek
+local xNeto
+
+// uzmi broj elemenata stakla
+nElCount := aArr[ LEN(aArr), 1 ]
+
+altd()
+
+if nElCount == 1
+	
+	nTickness := g_gl_tickness( aArr, 1 )
+
+	// neto za jednu stavku je....
+	xNeto := 2.5 * nTickness * nM2 
+	
+
+elseif nElCount > 1
+
+	nTickness := g_gl_tickness( aArr )
+	
+	// ako je vise stavki.... dodaj jos 3%
+	xNeto := ( 2.5 * nTickness * nM2 ) * ( 1 + (3 / 100) )
+	
+endif
+
+return xNeto
+
+
+
+// ---------------------------------------------
+// vraca tip stakla
+// ---------------------------------------------
+function g_gl_type( aArr, nGlass )
+local nSeek 
+local cType := ""
+
+if nGlass == nil
+	nGlass := 0
+endif
+
+nSeek := ASCAN( aArr, {|xVal| IF(nGlass>0,xVal[1] == nGlass, .t.) .and. ;
+		xVal[2] == "G" .and. ;
+		xVal[4] == "<G_TYPE>"} )
+
+cType := aArr[ nSeek, 5 ]
+
+return cType
+
+
+// ------------------------------------------
+// vraca debljinu stakla
+// ------------------------------------------
+function g_gl_tickness( aArr, nGlass )
+local xRet := 0
+local i
+
+if nGlass == nil
+	nGlass := 0
+endif
+
+for i:=1 to LEN( aArr )
+
+	if aArr[i, 2] == "G" .and. aArr[i, 4] == "<G_TICK>" .and. IF(nGlass > 0, aArr[i, 1] == nGlass , .t.)
+		xRet += VAL( aArr[ i, 5 ] )
+	endif
+	
+next
+
+return xRet
 
 
 
@@ -104,7 +226,7 @@ return nRet
 function arr_gn()
 local aGN:={}
 
-for i:=210 to 2400 step 30
+for i:=21 to 240 step 3
 	AADD(aGN, {i})
 next
 

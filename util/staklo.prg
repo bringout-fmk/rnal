@@ -13,29 +13,17 @@ return xRet
 
 
 
-// -------------------------------------
-// kalkulise netto stakla
-// nDebljina - debljina stakla
-// nU_m2 - ukupno kvadratnih metara
-// cRobaVrsta - vrsta robe
-// -------------------------------------
-function c_netto(nDebljina, nU_m2, cRobaVrsta, nNetoKoef, nNetoProc)
-local xRet
-
-xRet := nNetoKoef * nDebljina * nU_m2
-
-if ALLTRIM(cRobaVrsta) == "IZO"
-	xRet := xRet * (1 + (nNetoProc / 100))
-endif
-
-return xRet
-
-
 // ------------------------------------------
 // pretvara iznos u cent. u milimetr.
 // ------------------------------------------
 function cm_2_mm(nVal)
-return nVal * 100
+return nVal * 10
+
+// ------------------------------------------
+// pretvara iznos iz mm u cm
+// ------------------------------------------
+function mm_2_cm(nVal)
+return nVal / 10
 
 
 

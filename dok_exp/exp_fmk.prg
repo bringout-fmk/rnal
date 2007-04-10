@@ -75,6 +75,11 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	cArt_desc := g_art_desc( nArt_id )
 
+	aZpoGN := {}
+	
+	// zaokruzi vrijednosti....
+	_art_set_descr( nArt_id, nil, nil, @aZpoGN, .t. )
+	
 	select (nADOC_IT)
 
 	if EMPTY(cIdRoba)
@@ -105,11 +110,20 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		// sirina u mm
 		nWidt := field->doc_it_width
 		
+		nHeig := mm_2_cm( nHeig )
+		nWidt := mm_2_cm( nWidt )
+		
 		// da li treba prvo pretvoriti u cm
 		// pa zaokruziti po GN-u ?????
 		
+		nZHeig := 0
+		nZWidt := 0
+	
+		nZHeig := obrl_zaok( nHeig, aZpoGN )
+		nZWidt := obrl_zaok( nWidt, aZpoGN )
+		
 		// izracunaj kvadrate
-		nM2 += c_ukvadrat( nQty, nHeig, nWidt ) 
+		nM2 += c_ukvadrat( nQty, nZHeig*10, nZWidt*10 ) 
 		
 		skip
 		
@@ -160,7 +174,6 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	gather()
 
 	select (nADOC_IT)
-	skip
 	
 enddo
 
