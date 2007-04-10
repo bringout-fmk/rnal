@@ -123,7 +123,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		nZWidt := obrl_zaok( nWidt, aZpoGN )
 		
 		// izracunaj kvadrate
-		nM2 += c_ukvadrat( nQty, nZHeig*10, nZWidt*10 ) 
+		nM2 += ROUND( c_ukvadrat( nQty, nZHeig*10, nZWidt*10 ) , 2)
 		
 		skip
 		
