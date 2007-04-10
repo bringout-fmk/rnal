@@ -393,6 +393,30 @@ do case
 		select docs
 		return DE_CONT
 	
+	// stampa naloga
+	case (Ch == K_CTRL_O)
+		
+		if Pitanje(, "Stampati obracunski list (D/N) ?", "D") == "D"
+			
+			nDoc_no := docs->doc_no
+			nTRec := RecNo()
+			
+			set filter to
+			
+			st_obr_list( .f., nDoc_no )
+			
+			select docs
+			
+			set_f_kol( cTmpFilter )
+			
+			go (nTRec)
+			
+			return DE_REFRESH
+		endif
+		
+		select docs
+		return DE_CONT
+	
 	// pregled kontakata.... naloga
 	case ( UPPER(CHR(Ch)) == "K" )
 		
