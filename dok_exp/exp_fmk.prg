@@ -72,8 +72,12 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	nArt_id := field->art_id
 	cIdRoba := g_rel_val("1", "ARTICLES", "ROBA", ALLTRIM(STR(nArt_id)) )
-
+	
+	// uzmi cijenu robe iz sifrarnika robe
+	nPrice := g_art_price( cIdRoba )
+	
 	cArt_desc := g_art_desc( nArt_id )
+	
 
 	aZpoGN := {}
 	
@@ -83,6 +87,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	select (nADOC_IT)
 
 	if EMPTY(cIdRoba)
+		
 		if fnd_roba( @cIdRoba, nArt_id, cArt_desc ) == 1
 		
 			add_to_relation( "ARTICLES", "ROBA", ;
@@ -110,10 +115,6 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		// sirina u mm
 		nWidt := field->doc_it_width
 		
-		nHeig := mm_2_cm( nHeig )
-		nWidt := mm_2_cm( nWidt )
-		
-		// da li treba prvo pretvoriti u cm
 		// pa zaokruziti po GN-u ?????
 		
 		nZHeig := 0
@@ -123,7 +124,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		nZWidt := obrl_zaok( nWidt, aZpoGN )
 		
 		// izracunaj kvadrate
-		nM2 += ROUND( c_ukvadrat( nQty, nZHeig*10, nZWidt*10 ) , 2)
+		nM2 += ROUND( c_ukvadrat( nQty, nZHeig, nZWidt ) , 2)
 		
 		skip
 		
@@ -143,6 +144,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	_idtipdok := cIdVd
 	_datdok := dDatDok
 	_idroba := cIdRoba
+	_cijena := nPrice
 	_kolicina := nM2
 	_dindem := "KM "
 	_zaokr := 2

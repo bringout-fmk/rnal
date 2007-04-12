@@ -122,20 +122,14 @@ do while !EOF() .and. field->doc_no == __doc_no
 	select ( nTable )
 	
 	nQtty := field->doc_it_qtty
-	
 	nHeigh := field->doc_it_heigh
 	nWidth := field->doc_it_width
+	
+	// ukupno mm -> m2
 	nTotal := ROUND( c_ukvadrat(nQtty, nHeigh, nWidth), 2)
 
-	if lZpoGN == .t.
-		// ako je po GN onda pretvori u cm
-		nHeigh := mm_2_cm( field->doc_it_heigh )
-		nWidth := mm_2_cm( field->doc_it_width )
-	endif
-	
 	cDoc_it_schema := field->doc_it_schema
 	cDoc_it_desc := field->doc_it_desc
-	
 	
 	if lZpoGN == .t.
 	
@@ -148,7 +142,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 		nZWidth := obrl_zaok( nWidth, aZpoGN )
 		
 		// ako se zaokruzuje onda total ide po zaokr.vrijednostima
-		nTotal := ROUND( c_ukvadrat(nQtty, nZHeigh*10, nZWidth*10), 2)
+		nTotal := ROUND( c_ukvadrat( nQtty, nZHeigh, nZWidth ), 2)
 		
 		// izracunaj neto
 		nNeto := ROUND( obrl_neto( nTotal, aZpoGN ), 2)

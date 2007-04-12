@@ -69,8 +69,6 @@ local xNeto
 // uzmi broj elemenata stakla
 nElCount := aArr[ LEN(aArr), 1 ]
 
-altd()
-
 if nElCount == 1
 	
 	nTickness := g_gl_tickness( aArr, 1 )
@@ -226,7 +224,7 @@ return nRet
 function arr_gn()
 local aGN:={}
 
-for i:=21 to 240 step 3
+for i:=210 to 2400 step 30
 	AADD(aGN, {i})
 next
 
