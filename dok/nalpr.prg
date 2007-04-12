@@ -154,12 +154,12 @@ do while !EOF()
 	?? " "
 	
 	// sirina
-	?? show_number(field->doc_it_heigh, nil, -10 )
+	?? show_number(field->doc_it_width, nil, -10 )
 
 	?? " "
 
 	// visina
-	?? show_number(field->doc_it_width, nil, -10 )
+	?? show_number(field->doc_it_heigh, nil, -10 )
 	
 	?? " "
 

@@ -36,27 +36,59 @@ set order to tag "1"
 seek docno_str( nDoc_no )
 
 nCust_id := field->cust_id
+nCont_id := field->cont_id
+
 cCust_desc := g_cust_desc( nCust_id )
+cCont_desc := g_cont_desc( nCont_id )
 
 select (nADOCS)
 
 dDatDok := field->doc_date
 
-cPartn := PADR( g_rel_val("1", "CUSTOMS", "PARTN", ALLTRIM(STR(nCust_id)) ), 6 )
+if nCust_id == 1
+	// ako je NN kupac u RNAL, dodaj ovo kao contacts....
+	cPartn := PADR( g_rel_val("1", "CONTACTS", "PARTN", ALLTRIM(STR(nCont_id)) ), 6 )
+else
+	// dodaj kao customs
+	cPartn := PADR( g_rel_val("1", "CUSTOMS", "PARTN", ALLTRIM(STR(nCust_id)) ), 6 )
+endif
 
 // ako je partner prazno
 if EMPTY( cPartn )
 
-	// probaj naci partnera iz PARTN
-	if fnd_partn( @cPartn, nCust_id, cCust_desc ) == 1 
-		add_to_relation( "CUSTOMS", "PARTN", ;
-			ALLTRIM(STR(nCust_id)) , cPartn )
+	if nCust_id == 1
+		
+		// ako je NN kupac, presvicaj se na CONTACTS
+		
+		// probaj naci partnera iz PARTN
+		if fnd_partn( @cPartn, nCont_id, cCont_desc ) == 1 
+		
+			add_to_relation( "CONTACTS", "PARTN", ;
+				ALLTRIM(STR(nCont_id)) , cPartn )
+			
+		else
+		
+			select (nTArea)
+			msgbeep("Operacija prekinuta !!!")
+			return
+		
+		endif
+
 	else
-		select (nTArea)
-		msgbeep("Operacija prekinuta !!!")
-		return
+		// probaj naci partnera iz PARTN
+		if fnd_partn( @cPartn, nCust_id, cCust_desc ) == 1 
+		
+			add_to_relation( "CUSTOMS", "PARTN", ;
+				ALLTRIM(STR(nCust_id)) , cPartn )
+			
+		else
+		
+			select (nTArea)
+			msgbeep("Operacija prekinuta !!!")
+			return
+		
+		endif
 	endif
-	
 endif
 
 cIdVd := "12"
@@ -191,7 +223,7 @@ return
 // ----------------------------------------------------
 // pronadji partnera u PARTN
 // ----------------------------------------------------
-static function fnd_partn( xPartn, nCustId, cDesc )
+static function fnd_partn( xPartn, nCustId, cDesc  )
 local nTArea := SELECT()
 private GetList:={}
 
