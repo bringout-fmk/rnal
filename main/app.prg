@@ -23,6 +23,7 @@ CREATE CLASS TRNalMod INHERIT TAppMod
 	method dummy
 	method setGVars
 	method mMenu
+	method mStartUp
 	method mMenuStandard
 	method sRegg
 	method initdb
@@ -66,11 +67,24 @@ close all
 
 s_params()
 
+::mStartUp()
 ::mMenuStandard()
 
 ::quit()
 
 return nil
+
+
+
+method mStartUp()
+
+if is_fmkrules()
+	// generisi standarne rnal rules
+	gen_rnal_rules()
+endif
+
+return nil
+
 
 
 method mMenuStandard()
@@ -200,6 +214,11 @@ public gExpAlwOvWrite := "N"
 public gFaKumDir := PADR( STRTRAN( KUMPATH, "\RNAL\", "\FAKT\" ), 150 )
 public gFaPrivDir := PADR( STRTRAN( PRIVPATH, "\RNAL\", "\FAKT\" ), 150 )
 
+// default joker glass type
+public gDefGlType
+// default joker glass tick
+public gDefGlTick
+
 ::super:setTGVars()
 
 O_PARAMS
@@ -245,6 +264,10 @@ gTema:="OSN_MENI"
 gGlBaza:="DOCS.DBF"
 
 public cZabrana:="Opcija nedostupna za ovaj nivo !!!"
+
+// rules block i cols
+public aRuleSpec := g_rule_cols()
+public bRuleBlock := g_rule_block()
 
 return
 

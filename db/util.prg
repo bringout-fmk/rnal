@@ -21,6 +21,11 @@ endif
 // otvori sifrarnike
 o_sif_tables()
 
+select F_FMKRULES
+if !used()
+	O_FMKRULES
+endif
+
 select F_DOCS
 if !used()
 	O_DOCS

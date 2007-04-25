@@ -103,7 +103,7 @@ endif
 
 nSeek := ASCAN( aArr, {|xVal| IF(nGlass>0,xVal[1] == nGlass, .t.) .and. ;
 		xVal[2] == "G" .and. ;
-		xVal[4] == "<G_TYPE>"} )
+		xVal[4] == ALLTRIM(gDefGlType) } )
 
 cType := aArr[ nSeek, 5 ]
 
@@ -123,7 +123,7 @@ endif
 
 for i:=1 to LEN( aArr )
 
-	if aArr[i, 2] == "G" .and. aArr[i, 4] == "<G_TICK>" .and. IF(nGlass > 0, aArr[i, 1] == nGlass , .t.)
+	if aArr[i, 2] == "G" .and. aArr[i, 4] == ALLTRIM(gDefGlTick) .and. IF(nGlass > 0, aArr[i, 1] == nGlass , .t.)
 		xRet += VAL( aArr[ i, 5 ] )
 	endif
 	

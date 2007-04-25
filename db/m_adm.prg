@@ -13,6 +13,11 @@ AADD(opcexe, {|| goModul:oDatabase:install()})
 AADD(opc, "2. security")
 AADD(opcexe, {|| MnuSecMain()})
 
+if is_fmkrules()
+	AADD(opc, "3. FMK rules")
+	AADD(opcexe, {|| p_fmkrules( , , , aRuleSpec, bRuleBlock ) })
+endif
+
 Menu_SC("adm")
 
 return

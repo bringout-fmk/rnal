@@ -135,8 +135,7 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(art_id)}, "art_id", {|| _inc_id(@wart_id, "ART_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, {PADC("Skr. naziv (sifra)", 40), {|| PADR(art_desc, 40)}, "art_desc"})
-AADD(aImeKol, {PADC("Puni naziv", 60), {|| PADR(art_full_desc, 60)}, "art_full_desc"})
+AADD(aImeKol, { "sifra :: puni naziv", {|| ALLTRIM(art_desc) + " :: " + art_full_desc }, "art_desc" })
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -1215,14 +1214,12 @@ return
 static function _get_rule( cCode )
 local cRule := ""
 
-do case
-	case cCode == "G"
-		cRule := "<GL_TICK>#<GL_TYPE>"
-	case cCode == "F"
-		cRule := "<FR_TYPE>#<FR_TICK>#<FR_GAS>"
-	case cCode == "L"
-		// cRule := 	
-endcase
+// uzmi pravilo iz tabele pravila za "kod" elementa
+cRule := r_elem_code( cCode )
+
+if EMPTY(cRule)
+	msgbeep("Pravilo za formiranje naziva elementa ne postoji !!!")
+endif
 
 return cRule
 

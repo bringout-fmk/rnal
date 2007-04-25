@@ -19,14 +19,6 @@ Menu_SC("administracija")
 return
 
 
-// -----------------------------------------
-// rnal, specificna administracija
-// -----------------------------------------
-function rn_admin()
-
-return
-
-
 
 // --------------------------------------------
 // automatska generacija naziva artikala

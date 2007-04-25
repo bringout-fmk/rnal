@@ -43,7 +43,7 @@ Box(, 15, 70)
 
 set cursor on
 
-@ m_x + nX, m_y+2 SAY "1. Prikaz ***"
+@ m_x + nX, m_y+2 SAY "1. Prikazi ***"
 nX ++
 
 @ m_x + nX, m_y+2 SAY PADL(" kolicina ", 30)   GET gPIC_QTTY
@@ -53,6 +53,16 @@ nX ++
 nX ++
 
 @ m_x + nX, m_y+2 SAY PADL(" iznos ", 30)   GET gPIC_VAL
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY "2. Ostalo ***"
+
+nX ++
+@ m_x + nX, m_y+2 SAY " joker za debljina stakla:" GET gDefGlTick
+
+nX ++
+@ m_x + nX, m_y+2 SAY "      joker za tip stakla:" GET gDefGlType
 
 read
 
@@ -449,6 +459,8 @@ function read_zf_params()
 gPIC_VAL := "9999.99"
 gPIC_DIM := "9999.99"
 gPIC_QTTY := "99999"
+gDefGlType := PADR("<GL_TYPE>", 30)
+gDefGlTick := PADR("<GL_TICK>", 30)
 
 SELECT F_KPARAMS
 
@@ -463,6 +475,8 @@ private aHistory:={}
 RPar("P1", @gPIC_VAL)
 RPar("P2", @gPIC_DIM)
 RPar("P3", @gPIC_QTTY)
+RPar("P7", @gDefGlType)
+RPar("P8", @gDefGlTick)
 
 close
 return
@@ -484,6 +498,8 @@ private aHistory:={}
 WPar("P1", gPIC_VAL)
 WPar("P2", gPIC_DIM)
 WPar("P3", gPIC_QTTY)
+WPar("P7", gDefGlType)
+WPar("P8", gDefGlTick)
 
 close
 

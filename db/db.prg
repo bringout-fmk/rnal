@@ -6,7 +6,7 @@ local oObj
 
 oObj:=TDBRNal():new()
 oObj:self:=oObj
-oObj:cName:="DOCS"
+oObj:cName:="RNAL"
 oObj:lAdmin:=.f.
 return oObj
 
@@ -217,6 +217,11 @@ _cre_fnd_par()
 
 // kreiraj relacije
 cre_relation()
+
+// kreiraj pravila : RULES
+cre_fmkrules()
+// kreiraj pravila : RULES cdx files
+c_rule_cdx()
 
 return
 
