@@ -68,6 +68,9 @@ if EMPTY( cPartn )
 			
 		else
 		
+			select (245)
+			use
+			
 			select (nTArea)
 			msgbeep("Operacija prekinuta !!!")
 			return
@@ -83,6 +86,9 @@ if EMPTY( cPartn )
 			
 		else
 		
+			select (245)
+			use
+			
 			select (nTArea)
 			msgbeep("Operacija prekinuta !!!")
 			return
@@ -128,6 +134,9 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		
 		else
 			msgbeep("Neki artikli nemaju definisani u tabeli relacija#Prekidam operaciju !")	
+			select (245)
+			use
+			
 			select (nTArea)
 			return
 		endif
@@ -192,7 +201,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	// ptt i mjesto
 	a_to_txt( _g_pfmk_place( cPartn ) , .t. )
 	// broj otpremnice
-	a_to_txt( cBrDok , .t. )
+	a_to_txt( "" , .t. )
 	// datum  otpremnice
 	a_to_txt( DTOC( dDatDok ) , .t. )
 	
@@ -232,9 +241,12 @@ O_PARTN
 xPartn := SPACE(6)
 
 Box(, 5, 70)
-	@ m_x + 1, m_y + 2 SAY "Partner " + ALLTRIM(STR(nCustId)) + "-" + PADR(cDesc, 50) + ".."
-	@ m_x + 2, m_y + 2 SAY "nije definisan, pokusajte naci partnera"
-	@ m_x + 4, m_y + 2 SAY "sifra =" GET xPartn VALID p_firma( @xPartn )
+	@ m_x + 1, m_y + 2 SAY "Narucioc: " 
+	@ m_x + 1, col() + 1 SAY ALLTRIM(STR(nCustId)) COLOR "I"
+	@ m_x + 1, col() + 1 SAY " -> " 
+	@ m_x + 1, col() + 1 SAY PADR(cDesc, 50) + ".." COLOR "I"
+	@ m_x + 2, m_y + 2 SAY "nije definisan u relacijama, pronadjite njegov par !!!!"
+	@ m_x + 4, m_y + 2 SAY "sifra u FMK =" GET xPartn VALID p_firma( @xPartn )
 	read
 BoxC()
 
@@ -258,9 +270,12 @@ O_SIFV
 xRoba := SPACE(10)
 
 Box(, 5, 70)
-	@ m_x + 1, m_y + 2 SAY "Artikal " + ALLTRIM(STR(nArtId)) + "-" + PADR(cDesc, 50) + ".."
-	@ m_x + 2, m_y + 2 SAY "nije definisan, pokusajte naci artikal"
-	@ m_x + 4, m_y + 2 SAY "sifra =" GET xRoba VALID p_roba( @xRoba )
+	@ m_x + 1, m_y + 2 SAY "Artikal:" 
+	@ m_x + 1, col() + 1 SAY ALLTRIM(STR(nArtId)) COLOR "I"
+	@ m_x + 1, col() + 1 SAY " -> " 
+	@ m_x + 1, col() + 1 SAY PADR(cDesc, 50) + ".." COLOR "I"
+	@ m_x + 2, m_y + 2 SAY "nije definisan u tabeli relacija, pronadjite njegov par !!!"
+	@ m_x + 4, m_y + 2 SAY "sifra u FMK =" GET xRoba VALID p_roba( @xRoba )
 	read
 BoxC()
 

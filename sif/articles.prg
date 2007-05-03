@@ -13,7 +13,8 @@ static __mc_sep
 // match code separator
 static __qf_cond
 // quick find condition
-
+static __aop_sep
+// addops separator
 
 
 
@@ -36,6 +37,7 @@ par_count := PCOUNT()
 l_open_dbedit := .t.
 
 __art_sep := "_"
+__aop_sep := "-"
 __mc_sep := "_"
 __qf_cond := SPACE(200)
 
@@ -1017,6 +1019,8 @@ endif
 __art_sep := "_"
 // puni naziv separator
 __mc_sep := ";"
+// add ops separator
+__aop_sep := "-"
 
 if lAuto == nil
 	lAuto := .f.
@@ -1160,6 +1164,8 @@ local cElemCode
 local i
 local cTmp
 local nTmp
+local lInsLExtChar := .f.
+local cLExtraChar := ""
 
 for i := 1 to nTotElem
 
@@ -1177,11 +1183,25 @@ for i := 1 to nTotElem
 		// <GL_TICK>
 		cRuleDef := ALLTRIM( aRule[ nRule ] )
 
+		if LEFT( cRuleDef, 1 ) <> "<"
+		
+			cLExtraChar := LEFT( cRuleDef, 1 )
+			cRuleDef := STRTRAN( cRuleDef, cLExtraChar, "" )
+			
+			lInsLExtChar := .t.
+			
+		endif
+
 		nSeek := ASCAN(aArr, {| xVal | ;
 			xVal[1] == i .and. xVal[4] == cRuleDef })
 		
 		if nSeek > 0
-			
+		
+			if lInsLExtChar == .t.
+				cArt_code += cLExtraChar
+				lInsLExtChar := .f.
+			endif
+	
 			cArt_code += ALLTRIM( aArr[ nSeek, 5 ] )
 
 			// dodaj space..... na opis puni
