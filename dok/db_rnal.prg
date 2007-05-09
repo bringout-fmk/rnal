@@ -59,6 +59,7 @@ endif
 
 // kreiraj indexe
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
+CREATE_INDEX("2", "STR(doc_no,10)+STR(doc_gr_no,2)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_el_no,4)+STR(doc_op_no,4)", PRIVPATH + "T_DOCOP")
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
 
@@ -69,6 +70,7 @@ return
 // -----------------------------------------------
 static function g_docit_fields(aArr)
 
+AADD(aArr,{ "doc_gr_no"  , "N" ,   2 ,  0 })
 AADD(aArr,{ "doc_no"     , "N" ,  10 ,  0 })
 AADD(aArr,{ "doc_it_no"  , "N" ,   4 ,  0 })
 AADD(aArr,{ "art_id"     , "N" ,  10 ,  0 })
@@ -188,7 +190,7 @@ return xRet
 
 
 // dodaj stavke u tabelu T_RNST
-function a_t_docit( nDoc_no, nDoc_it_no, nArt_id, cArt_desc, ;
+function a_t_docit( nDoc_no, nDoc_gr_no, nDoc_it_no, nArt_id, cArt_desc, ;
 		    cDoc_it_schema, cDoc_it_desc, ;
 		    nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, ;
 		    nDoc_it_total, nGNHeigh, nGNWidth, nNeto, nBruto )
@@ -196,6 +198,7 @@ function a_t_docit( nDoc_no, nDoc_it_no, nArt_id, cArt_desc, ;
 O_T_DOCIT
 select t_docit
 append blank
+replace doc_gr_no with nDoc_gr_no
 replace doc_no with nDoc_no
 replace doc_it_no with nDoc_it_no
 replace art_id with nArt_id

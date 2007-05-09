@@ -30,6 +30,9 @@ static nDuzStrKorekcija := 0
 // lStartPrint - pozovi funkcije stampe START PRINT
 // -----------------------------------------------------
 function nalpr_print( lStartPrint )
+local aGroups := {}
+local nCnt := 0
+local i
 
 // ako je nil onda je uvijek .t.
 if ( lStartPrint == nil )
@@ -48,10 +51,44 @@ RAZMAK := SPACE(1)
 t_rpt_open()
 
 select t_docit
+set order to tag "2"
 go top
+nDoc_no := field->doc_no
 
-// stampaj nalog
-p_a4_nalpr( lStartPrint )
+altd()
+
+// izvuci sve grupe....
+do while !EOF() .and. field->doc_no == nDoc_no
+	
+	// grupa dokumenta
+	nDoc_gr := field->doc_gr_no
+	
+	do while !EOF() .and. field->doc_no == nDoc_no .and. ;
+			field->doc_gr_no == nDoc_gr
+		
+		skip		
+	enddo
+	
+	++ nCnt
+	
+	AADD(aGroups, { nDoc_gr, nCnt })
+	
+enddo
+
+if !StartPrint(nil, nil)
+	close all
+	return
+endif
+
+for i:=1 to LEN( aGroups )
+	
+	// stampaj nalog za grupu....
+	p_a4_nalpr( .f. , aGroups[i, 1], aGroups[i, 2], LEN(aGroups) )
+	
+	FF
+next
+
+EndPrint()
 
 return
 
@@ -59,9 +96,10 @@ return
 // -----------------------------------
 // stampa naloga za proizvodnju
 // -----------------------------------
-function p_a4_nalpr(lStartPrint)
+function p_a4_nalpr(lStartPrint, nDoc_gr, nGr_cnt, nGr_total )
 local lShow_zagl
 local i
+local nDocRbr := 0
 
 nDuzStrKorekcija := 0
 lPrintedTotal := .f.
@@ -75,11 +113,10 @@ if lStartPrint
 
 endif
 
-
 nTTotal := VAL(g_t_pars_opis("N10"))
 
 // zaglavlje naloga za proizvodnju
-nalpr_header()
+nalpr_header( nGr_cnt, nGr_total )
 
 // podaci kupac i broj dokumenta itd....
 nalpr_kupac()
@@ -100,11 +137,17 @@ go top
 // kondenzuj font
 //P_COND
 
+// stampaj grupu artikala naloga
+s_art_group(nDoc_gr)
+
 // print header tabele
 s_tbl_header()
 
 select t_docit
-set order to tag "1"
+set order to tag "2"
+nDoc_no := field->doc_no
+
+seek docno_str( nDoc_no ) + STR(nDoc_gr, 2)
 
 nPage := 1
 aArt_desc := {}
@@ -113,7 +156,7 @@ nArt_tmp := 0
 lSh_art_desc := .f.
 
 // stampaj podatke 
-do while !EOF()
+do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	
 	lSh_art_desc := .f.
 	nArt_id := field->art_id
@@ -144,7 +187,7 @@ do while !EOF()
 	? RAZMAK
 	
 	// r.br
-	?? PADL(ALLTRIM(cDoc_it_no) + ")", LEN_IT_NO)
+	?? PADL(ALLTRIM( STR( ++nDocRbr) ) + ")", LEN_IT_NO)
 	
 	?? " "
 	
@@ -372,6 +415,15 @@ endif
 return
 
 
+// ----------------------------------------
+// stampanje grupe artikala naloga
+// ----------------------------------------
+static function s_art_group( nGr )
+? RAZMAK + "grupa artikala: (" + ALLTRIM(STR(nGr)) + ") - " + get_art_docgr( nGr )
+return
+
+
+
 // -------------------------------------------
 // stampa potpisa nalog izdao
 // -------------------------------------------
@@ -486,7 +538,7 @@ return
 // -----------------------------------------
 // funkcija za ispis headera
 // -----------------------------------------
-function nalpr_header()
+function nalpr_header( nDocGr, nDocGrTot )
 local cDLHead 
 local cSLHead 
 local cINaziv
@@ -501,6 +553,12 @@ cINaziv := ALLTRIM(gFNaziv)
 cINaziv += " : "
 cINaziv += "NALOG ZA PROIZVODNJU br."
 cINaziv += cDoc_no
+cINaziv += " "
+cINaziv += "(" 
+cINaziv += ALLTRIM(STR(nDocGr)) 
+cINaziv += "/" 
+cINaziv += ALLTRIM(STR(nDocGrTot)) 
+cINaziv += ")"
 
 // double line header
 cDLHead := REPLICATE("=", 70)
