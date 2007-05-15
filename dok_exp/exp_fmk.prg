@@ -1,20 +1,229 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+// ---------------------------------------------
+// export grupe naloga u FMK otpremnicu
+// ---------------------------------------------
+function m_gr_expfmk()
+local nCustomer
+local dDateFrom
+local dDateTo
+local cTBFilt := ""
+
+private GetList := {}
+
+private ImeKol
+private Kol
+
+private _exp_dfrom
+private _exp_dto
+private _exp_customer
+
+o_tables( .f. )
+
+// setuj uslove generacije
+if _g_vars( @nCustomer, @dDateFrom, @dDateTo ) == .f.
+	return
+endif
+
+
+Box(, 20, 74 )
+
+_exp_dto := dDateTo
+_exp_dfrom := dDateFrom
+_exp_customer := nCustomer
+
+select docs
+set order to tag "1"
+
+// setovanje kolona browse-a
+set_a_cols( @ImeKol, @Kol )
+
+// setuj filter....
+set_t_filter()
+
+ObjDbedit("expnal", 20, 73, {|| _key_hand( ) }, "", "", , , , , 2)
+
+BoxC()
+
+if LastKey() == K_ESC
+
+	if Pitanje(, "Formirati otpremnicu na osnovu markiranih naloga?", "N" ) == "N"
+		return
+	endif
+
+	go top
+	
+	do while !EOF() .and. doc_in_fmk == 1
+		
+		// prebaci u FAKT
+
+		exp_2_fmk( doc_no, .f. , .f.  )		
+		
+		select docs
+		
+		skip
+		
+	enddo
+
+endif
+
+
+return
+
+
+
+// ----------------------------------------------
+// key handler
+// ----------------------------------------------
+static function _key_hand(  )
+
+altd()
+
+do case
+	// markiranje stavke....
+	case Ch == ASC(" ") .or. Ch==K_ENTER
+		
+		beep(1)
+		
+		if doc_in_fmk == 0
+			
+			replace doc_in_fmk with 1
+			
+		else
+			
+			replace doc_in_fmk with 0
+			
+		endif
+		
+		return DE_REFRESH
+		
+endcase
+
+return DE_CONT
+
+
+
+
+// ------------------------------------------
+// setovanje filtera
+// ------------------------------------------
+static function set_t_filter()
+local cFilter := ""
+
+// doc_in_fmk = 0 - nije prenesen
+// doc_in_fmk = 1 - prenesen je
+
+cFilter += "( doc_date >= " + cm2str( _exp_dfrom )
+cFilter += " .and. "
+cFilter += "doc_date <= " + cm2str( _exp_dto  )
+cFilter += " ) .and. "
+cFilter += "cust_id == _exp_customer "
+cFilter += " .and. "
+cFilter += "doc_in_fmk == 0 "
+
+if !EMPTY( cFilter )
+	select docs
+	set filter to &cFilter
+	go top
+else
+	select docs
+	set filter to
+	go top
+endif
+
+return
+
+
+// -----------------------------------------------------
+// setovanje kolone pregleda dokumenata za prenos
+// -----------------------------------------------------
+static function set_a_cols( aImeKol, aKol )
+local i
+
+aImeKol := {}
+aKol := {}
+
+AADD( aImeKol, { "Br.nal", {|| doc_no }, "doc_no" })
+AADD( aImeKol, { "Dat.nal", {|| doc_date }, "doc_date" })
+AADD( aImeKol, { "Opis naloga", {|| PADR( doc_sh_desc, 40) }, "doc_sh_desc" })
+AADD( aImeKol, { "Marker", {|| _s_mark( doc_in_fmk ) }, "doc_in_fmk" })
+
+for i:=1 to LEN( aImeKol )
+	AADD( aKol, i )
+next
+
+return
+
+
+// -------------------------------------------
+// prikaz markera.... na browse-u
+// -------------------------------------------
+static function _s_mark( nMark )
+local xRet := " "
+
+if nMark == 0
+	xRet := " "
+else
+	xRet := "*"
+endif
+
+return xRet
+
+// ---------------------------------------------
+// uslovi za generaciju
+// ---------------------------------------------
+static function _g_vars( nCustomer, dDateFrom, dDateTo )
+local nX := 1
+
+nCustomer := 0
+cCustomer := SPACE(10)
+dDateFrom := DATE()-31
+dDateTo := DATE()
+
+Box(, 10, 70 )
+	
+	@ m_x + nX, m_y + 2 SAY "Narucioc:" GET cCustomer VALID {|| s_customers( @cCustomer, cCustomer), set_var(@nCustomer, @cCustomer),  show_it( g_cust_desc(nCustomer) ) }
+
+	nX += 1
+
+	@ m_x + nX, m_y + 2 SAY "obuhvatiti naloge iz perioda...."
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY "od:" GET dDateFrom
+	@ m_x + nX, col() + 1 SAY "do:" GET dDateTo
+	
+	read
+BoxC()
+
+if LastKey() == K_ESC
+	return .f.
+endif
+
+return .t.
+
+
+
+
 // ------------------------------------------
 // export u FMK
 // ------------------------------------------
-function exp_2_fmk( nDoc_no, lTemp )
+function exp_2_fmk( nDoc_no, lTemp, lOneByOne )
 local nTArea := SELECT()
 local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
 local nCust_id
 
+if lOneByOne == nil
+	lOneByOne := .t.
+endif
+
 // select pripreme fakt
 select (245)
 use ( ALLTRIM(gFaPrivDir) + "PRIPR" ) alias X_TBL
 
-if RECCOUNT2() > 0
+if lOneByOne == .t. .and. RECCOUNT2() > 0
 	
 	msgbeep("priprema fakt nije prazna !")
 	select (nTArea)
@@ -173,8 +382,16 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	
 	
 	select X_TBL
-	append blank
+	
+	go bootom
+	skip -1
 
+	if !EMPTY( x_tbl->rbr )
+		nRbr := VAL( x_tbl->rbr )
+	endif
+	
+	append blank
+	
 	scatter()
 
 	_txt := ""
@@ -223,7 +440,9 @@ enddo
 select (245)
 use
 
-msgbeep("export dokumenta zavrsen !")
+if lOneByOne == .t.
+	msgbeep("export dokumenta zavrsen !")
+endif
 
 select (nTArea)
 return
