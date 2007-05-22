@@ -110,6 +110,21 @@ do while .t.
 		m_x -= 10
 	endif
 
+	// uzmi matricu artikla......
+	// te provjeri pravilo......
+	
+	// pomocna matrica...
+	aTmp := {}
+	nTmpArea := SELECT()
+
+	// uzmi podatke u matricu....
+	_art_set_descr( art_id , lNew, .f., @aTmp, .t. )
+	
+	// provjeri pravilo....
+	rule_articles( aTmp )
+	
+	select ( nTmpArea )
+	
 	if LastKey() == K_ESC
 
 		// generisi naziv artikla i update-uj artikal art_id

@@ -8,7 +8,9 @@ function m_gr_expfmk()
 local nCustomer
 local dDateFrom
 local dDateTo
+local cGens
 local cTBFilt := ""
+local lFilterAll := .f.
 
 private GetList := {}
 
@@ -22,12 +24,17 @@ private _exp_customer
 o_tables( .f. )
 
 // setuj uslove generacije
-if _g_vars( @nCustomer, @dDateFrom, @dDateTo ) == .f.
+if _g_vars( @nCustomer, @dDateFrom, @dDateTo, @cGens ) == .f.
 	return
 endif
 
+if cGens == "D"
+	lFilterAll := .t.
+endif
 
-Box(, 20, 74 )
+Box(, 18, 77 )
+
+@ m_x + 17, m_y + 2 SAY "<SPACE> markiraj za generisanje"
 
 _exp_dto := dDateTo
 _exp_dfrom := dDateFrom
@@ -40,9 +47,9 @@ set order to tag "1"
 set_a_cols( @ImeKol, @Kol )
 
 // setuj filter....
-set_t_filter()
+set_t_filter( lFilterAll )
 
-ObjDbedit("expnal", 20, 73, {|| _key_hand( ) }, "", "", , , , , 2)
+ObjDbedit("expnal", 18, 77, {|| _key_hand( ) }, "", "", , , , , 2)
 
 BoxC()
 
@@ -54,7 +61,7 @@ if LastKey() == K_ESC
 
 	go top
 	
-	do while !EOF() .and. doc_in_fmk == 1
+	do while !EOF() .and. doc_in_fmk == 9
 		
 		// prebaci u FAKT
 
@@ -78,17 +85,15 @@ return
 // ----------------------------------------------
 static function _key_hand(  )
 
-altd()
-
 do case
 	// markiranje stavke....
 	case Ch == ASC(" ") .or. Ch==K_ENTER
 		
 		beep(1)
 		
-		if doc_in_fmk == 0
+		if doc_in_fmk == 0 .or. doc_in_fmk == 1
 			
-			replace doc_in_fmk with 1
+			replace doc_in_fmk with 9
 			
 		else
 			
@@ -108,19 +113,27 @@ return DE_CONT
 // ------------------------------------------
 // setovanje filtera
 // ------------------------------------------
-static function set_t_filter()
+static function set_t_filter( lAllDocs )
 local cFilter := ""
+
+if lAllDocs == nil
+	lAllDocs := .f.
+endif
 
 // doc_in_fmk = 0 - nije prenesen
 // doc_in_fmk = 1 - prenesen je
+// doc_in_fmk = 9 - marker / treba prenjeti
 
 cFilter += "( doc_date >= " + cm2str( _exp_dfrom )
 cFilter += " .and. "
 cFilter += "doc_date <= " + cm2str( _exp_dto  )
 cFilter += " ) .and. "
 cFilter += "cust_id == _exp_customer "
-cFilter += " .and. "
-cFilter += "doc_in_fmk == 0 "
+
+if lAllDocs == .f.
+	cFilter += " .and. "
+	cFilter += "doc_in_fmk <> 1 "
+endif
 
 if !EMPTY( cFilter )
 	select docs
@@ -146,7 +159,7 @@ aKol := {}
 
 AADD( aImeKol, { "Br.nal", {|| doc_no }, "doc_no" })
 AADD( aImeKol, { "Dat.nal", {|| doc_date }, "doc_date" })
-AADD( aImeKol, { "Opis naloga", {|| PADR( doc_sh_desc, 40) }, "doc_sh_desc" })
+AADD( aImeKol, { "kontakt / opis naloga", {|| PADR(g_cont_desc( cont_id ), 10) + "/" + PADR( doc_sh_desc, 15) + "/" + PADR( doc_desc, 15 ) + ".." }, "doc_sh_desc" })
 AADD( aImeKol, { "Marker", {|| _s_mark( doc_in_fmk ) }, "doc_in_fmk" })
 
 for i:=1 to LEN( aImeKol )
@@ -164,6 +177,8 @@ local xRet := " "
 
 if nMark == 0
 	xRet := " "
+elseif nMark == 1
+	xRet := "prenesen"
 else
 	xRet := "*"
 endif
@@ -173,19 +188,20 @@ return xRet
 // ---------------------------------------------
 // uslovi za generaciju
 // ---------------------------------------------
-static function _g_vars( nCustomer, dDateFrom, dDateTo )
+static function _g_vars( nCustomer, dDateFrom, dDateTo, cGens )
 local nX := 1
 
 nCustomer := 0
 cCustomer := SPACE(10)
 dDateFrom := DATE()-31
 dDateTo := DATE()
+cGens := "N"
 
 Box(, 10, 70 )
 	
 	@ m_x + nX, m_y + 2 SAY "Narucioc:" GET cCustomer VALID {|| s_customers( @cCustomer, cCustomer), set_var(@nCustomer, @cCustomer),  show_it( g_cust_desc(nCustomer) ) }
 
-	nX += 1
+	nX += 2
 
 	@ m_x + nX, m_y + 2 SAY "obuhvatiti naloge iz perioda...."
 	
@@ -193,6 +209,10 @@ Box(, 10, 70 )
 	
 	@ m_x + nX, m_y + 2 SAY "od:" GET dDateFrom
 	@ m_x + nX, col() + 1 SAY "do:" GET dDateTo
+	
+	nX += 2
+	
+	@ m_x + nX, m_y + 2 SAY "Uzeti u obzir vec prenesene dokumente ?" GET cGens VALID cGens $ "DN" PICT "@!"
 	
 	read
 BoxC()
@@ -380,10 +400,9 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		
 	enddo
 	
-	
 	select X_TBL
 	
-	go bootom
+	go bottom
 	skip -1
 
 	if !EMPTY( x_tbl->rbr )
@@ -436,6 +455,13 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	select (nADOC_IT)
 	
 enddo
+
+// ---------------------------------------
+// setuj da je prenesen u fmk
+// ---------------------------------------
+select (nADocs)
+seek docno_str(nDoc_no)
+replace doc_in_fmk with 1
 
 select (245)
 use
