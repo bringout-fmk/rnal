@@ -457,12 +457,15 @@ local nElNo
 local nGlass
 local nFrame
 
+local cGlCode := ALLTRIM( gGlassJoker )
+local cFrCode := ALLTRIM( gFrameJoker )
+
 nElNo := aArticle[ LEN(aArticle), 1 ]
 
 if nElNo > 1
 
-	nGlass := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == "G" })
-	nFrame := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == "F" })
+	nGlass := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == cGlCode })
+	nFrame := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == cFrCode })
 	
 	if nGlass <> 0 .and. nFrame <> 0
 		lRet := .t.
@@ -480,8 +483,11 @@ function is_lami( aArticle )
 local lRet := .f.
 local nLAMI
 
-nLAMI := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == "G" .and. ;
-		ALLTRIM(xVar[5]) == "LA" } )
+local cGlCode := ALLTRIM( gGlassJoker )
+local cLamiCode := ALLTRIM( gGlLamiJoker )
+
+nLAMI := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == cGlCode .and. ;
+		ALLTRIM(xVar[5]) == cLamiCode } )
 
 if nLAMI <> 0
 	lRet := .t.
@@ -496,7 +502,7 @@ return lRet
 // ---------------------------------------------
 function is_kaljeno( aArticle, nDocit_no )
 local lRet := .f.
-local cSrcJok := "<AOP_K>"
+local cSrcJok := ALLTRIM( gAopKaljenje )
 
 // provjeri obradu iz matrice
 lRet := ck_obr( aArticle, cSrcJok )
@@ -514,7 +520,7 @@ return lRet
 // ---------------------------------------------
 function is_bruseno( aArticle, nDocit_no )
 local lRet := .f.
-local cSrcJok := "<AOP_B>"
+local cSrcJok := ALLTRIM( gAopBrusenje )
 
 // provjeri obradu iz matrice
 lRet := ck_obr( aArticle, cSrcJok )

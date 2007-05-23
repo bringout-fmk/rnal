@@ -225,6 +225,18 @@ public gFaPrivDir := PADR( STRTRAN( PRIVPATH, "\RNAL\", "\FAKT\" ), 150 )
 public gDefGlType
 // default joker glass tick
 public gDefGlTick
+// default joker glass
+public gGlassJoker
+// default frame joker
+public gFrameJoker
+// joker glass LAMI
+public gGlLamiJoker
+
+// joker brusenje
+public gAopBrusenje
+// joker kaljenje
+public gAopKaljenje
+
 
 ::super:setTGVars()
 

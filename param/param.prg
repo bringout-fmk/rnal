@@ -24,6 +24,7 @@ read_zf_params()
 read_doc_params()
 read_ex_params()
 read_ost_params()
+read_elat_params()
 
 return
 
@@ -54,15 +55,6 @@ nX ++
 
 @ m_x + nX, m_y+2 SAY PADL(" iznos ", 30)   GET gPIC_VAL
 
-nX += 2
-
-@ m_x + nX, m_y+2 SAY "2. Ostalo ***"
-
-nX ++
-@ m_x + nX, m_y+2 SAY " joker za debljina stakla:" GET gDefGlTick
-
-nX ++
-@ m_x + nX, m_y+2 SAY "      joker za tip stakla:" GET gDefGlType
 
 read
 
@@ -223,6 +215,69 @@ endif
 return
 
 
+
+// --------------------------------------
+// parametri elementi atributi
+// --------------------------------------
+function ed_elat_params()
+
+nX:=1
+
+Box(, 18, 70)
+
+set cursor on
+
+@ m_x + nX, m_y+2 SAY "***** Parametri atributa i elemenata"
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY "oznaka (staklo)         :" GET gGlassJoker VALID !EMPTY(gGlassJoker)
+
+nX ++
+
+@ m_x + nX, m_y+2 SAY "oznaka (distancer)      :" GET gFrameJoker VALID !EMPTY(gFrameJoker)
+
+nX ++
+
+@ m_x + nX, m_y+2 SAY "oznaka (debljina stakla):" GET gDefGlTick VALID !EMPTY(gDefGlTick)
+
+nX ++
+
+@ m_x + nX, m_y+2 SAY "oznaka (tip stakla)     :" GET gDefGlType VALID !EMPTY(gDefGlType)
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY "***** Specificni parametri operacija"
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY "oznaka (brusenje)     :" GET gAopBrusenje VALID !EMPTY(gAopBrusenje)
+
+nX ++
+
+@ m_x + nX, m_y+2 SAY "oznaka (kaljenje)     :" GET gAopKaljenje VALID !EMPTY(gAopKaljenje)
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY "***** Specificni parametri za pojedinu vrstu stakla"
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY "oznaka stakla / LAMI:" GET gGlLamiJoker VALID !EMPTY(gGlLamiJoker)
+
+read
+
+BoxC()
+
+if lastkey()<>K_ESC
+	write_elat_params()
+endif
+
+return
+
+
+
+
 // --------------------------------------
 // parametri ostali
 // --------------------------------------
@@ -339,6 +394,48 @@ return
 
 
 // --------------------------------------
+// citaj paramtre elemenata i atributa
+// --------------------------------------
+function read_elat_params()
+
+gDefGlType := PADR("<GL_TYPE>", 30)
+gDefGlTick := PADR("<GL_TICK>", 30)
+
+gGlassJoker := PADR( "G" , 20 )
+gFrameJoker := PADR( "F" , 20 )
+
+gGlLamiJoker := PADR( "LA", 20 )
+
+gAopKaljenje := PADR( "<A_KA>", 20 )
+gAopBrusenje := PADR( "<A_BR>", 20 )
+
+SELECT F_KPARAMS
+
+if !used()
+	O_KPARAMS
+endif
+
+private cSection:="7"
+private cHistory:=" "
+private aHistory:={}
+
+RPar("e1", @gGlassJoker)
+RPar("e2", @gFrameJoker)
+
+RPar("g1", @gGlLamiJoker)
+
+RPar("a1", @gAopKaljenje)
+RPar("a2", @gAopBrusenje)
+
+RPar("P7", @gDefGlType)
+RPar("P8", @gDefGlTick)
+
+
+close
+return
+
+
+// --------------------------------------
 // citaj paramtre izgleda dokumenta
 // --------------------------------------
 function read_ex_params()
@@ -406,6 +503,35 @@ close
 return
 
 
+// ---------------------------------------
+// upisi parametre elemenata i atributa
+// ---------------------------------------
+function write_elat_params()
+SELECT F_KPARAMS
+
+if !used()
+	O_KPARAMS
+endif
+private cSection:="7"
+private cHistory:=" "
+private aHistory:={}
+
+WPar("e1", gGlassJoker)
+WPar("e2", gFrameJoker)
+
+WPar("g1", gGlLamiJoker)
+
+WPar("a1", gAopKaljenje)
+WPar("a2", gAopBrusenje)
+
+WPar("P7", gDefGlType)
+WPar("P8", gDefGlTick)
+
+close
+
+return
+
+
 
 // ----------------------------------
 // upisi parametre exporta
@@ -459,8 +585,6 @@ function read_zf_params()
 gPIC_VAL := "9999.99"
 gPIC_DIM := "9999.99"
 gPIC_QTTY := "99999"
-gDefGlType := PADR("<GL_TYPE>", 30)
-gDefGlTick := PADR("<GL_TICK>", 30)
 
 SELECT F_KPARAMS
 
@@ -475,8 +599,6 @@ private aHistory:={}
 RPar("P1", @gPIC_VAL)
 RPar("P2", @gPIC_DIM)
 RPar("P3", @gPIC_QTTY)
-RPar("P7", @gDefGlType)
-RPar("P8", @gDefGlTick)
 
 close
 return
@@ -498,8 +620,6 @@ private aHistory:={}
 WPar("P1", gPIC_VAL)
 WPar("P2", gPIC_DIM)
 WPar("P3", gPIC_QTTY)
-WPar("P7", gDefGlType)
-WPar("P8", gDefGlTick)
 
 close
 
