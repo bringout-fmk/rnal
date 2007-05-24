@@ -237,6 +237,17 @@ return aGN
 static function seek_gn(aGN, nVal)
 local nRet
 local nPom
+
+// gornji limit
+if nVal > 2400 
+	return 2400
+endif
+
+// donji limit
+if nVal < 210
+	return 210
+endif
+
 for i:=1 to LEN(aGN)
 	nPom := aGN[i, 1]
 	if nPom > nVal
@@ -244,6 +255,7 @@ for i:=1 to LEN(aGN)
 		exit
 	endif
 next
+
 return nRet
 
 

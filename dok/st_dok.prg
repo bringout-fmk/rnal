@@ -152,7 +152,10 @@ do while !EOF() .and. field->doc_no == __doc_no
 	cDoc_it_desc := field->doc_it_desc
 	
 	if lZpoGN == .t.
-	
+
+
+		altd()
+		
 		aZpoGN := {}
 		// zaokruzi vrijednosti....
 		_art_set_descr( nArt_id, nil, nil, @aZpoGN, lZpoGN )
