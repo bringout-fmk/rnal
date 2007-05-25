@@ -105,6 +105,8 @@ return
 static function gr_att_filter(nE_gr_at_id, cE_gr_vl_desc)
 local cFilter := ""
 
+altd()
+
 if nE_gr_at_id > 0
 	cFilter += "e_gr_at_id == " + e_gr_at_str(nE_gr_at_id)
 endif
@@ -115,10 +117,11 @@ if !EMPTY( cE_gr_vl_desc )
 		cFilter += " .and. "
 	endif
 
-	cFilter += "UPPER(e_gr_vl_de) = " + cm2str( UPPER(ALLTRIM(cE_gr_vl_desc)) )
+	cFilter += "UPPER(e_gr_vl_fu) = " + cm2str( UPPER(ALLTRIM(cE_gr_vl_desc)) )
 endif
 
 if !EMPTY(cFilter)
+	set filter to
 	set filter to &cFilter
 	go top
 endif
