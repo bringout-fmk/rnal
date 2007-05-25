@@ -413,12 +413,11 @@ for i := 1 to LEN( aTmp )
 		aCountTmp := TokToNiz( cCond, "*" )
 		nCount := LEN(aCountTmp)
 		
-		
 		// "*F4"
 		
 		if LEFT( aTmp[i] , 1 ) == "*" .and. nCount == 1
 	
-			cTmp := UPPER(ALLTRIM( aTmp[ i ] ))
+			cTmp := UPPER(ALLTRIM( aCountTmp[ 1 ] ))
 	
 			cFilter += cm2str( "_" + cTmp ) 
 			cFilter += " $ "
@@ -429,7 +428,7 @@ for i := 1 to LEN( aTmp )
 		
 		elseif RIGHT( aTmp[i], 1 ) == "*" .and. nCount == 1
 
-			cTmp := UPPER(ALLTRIM( aTmp[ i ] ))
+			cTmp := UPPER(ALLTRIM( aCountTmp[ i ] ))
 			nTmp := LEN(cTmp)
 	
 			cFilter += "LEFT(ALLTRIM(UPPER(art_desc)), " + ALLTRIM(STR(nTmp))+ ")"
