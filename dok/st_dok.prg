@@ -95,7 +95,7 @@ if lZpoGN == nil
 	lZPoGN := .f.
 endif
 
-if Pitanje(,"Razdijeliti nalog po grupama ?", "D" ) == "N"
+if !lZpoGN .and. Pitanje(,"Razdijeliti nalog po grupama ?", "D" ) == "N"
 	lGroups := .f.
 endif
 
