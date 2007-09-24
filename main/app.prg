@@ -214,6 +214,9 @@ public gDg_margina := 0
 
 // ostali parametri
 public gFnd_reset := 0
+public gMaxHeigh := 1000
+public gMaxWidth := 1000
+
 
 // export parametri
 public gExpOutDir := PADR("c:\temp\", 150)

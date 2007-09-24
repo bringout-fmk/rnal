@@ -351,6 +351,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	// - shema u prilogu
 	
 	if !EMPTY( field->doc_it_desc ) ;
+		.or. field->doc_it_altt <> 0 ;
 		.or. ( field->doc_it_schema == "D" )
 	
 		cPom := "Napomene: " + ;
@@ -361,6 +362,10 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			cPom += " "
 			cPom += "(SHEMA U PRILOGU)"
 		endif	
+
+		if field->doc_it_altt <> 0
+			cPom += "Nadmorska visina = " + ALLTRIM(STR(field->doc_it_altt, 12, 2)) + " m"
+		endif
 		
 		aDoc_it_desc := SjeciStr( cPom , 100 )
 		
@@ -381,7 +386,6 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			?? aDoc_it_desc[i]
 		next
 		
-	
 	endif
 	
 	? cLine

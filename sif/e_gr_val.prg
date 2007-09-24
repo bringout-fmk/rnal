@@ -10,6 +10,7 @@ static __wo_id
 function s_e_gr_val(cId, nE_gr_at_id, cE_gr_vl_desc, lwo_ID, dx, dy)
 local nTArea
 local cHeader
+local nCdx := 1
 private ImeKol
 private Kol
 private GetList:={}
@@ -38,6 +39,8 @@ set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
 gr_att_filter(nE_gr_at_id, cE_gr_vl_desc)
+
+go top
 
 private gTBDir := "N"
 
@@ -71,9 +74,9 @@ endif
 
 AADD(aImeKol, {PADC("Grupa/atribut", 15), {|| "(" + ALLTRIM(g_egr_by_att(e_gr_at_id)) + ") / " + PADR(g_gr_at_desc(e_gr_at_id), 15)}, "e_gr_at_id", {|| set_e_gr_at(@we_gr_at_id) }, {|| s_e_gr_att( @we_gr_at_id ), show_it( g_gr_at_desc( we_gr_at_id ) ) }})
 
-AADD(aImeKol, {PADC("Vrijednost", 20), {|| PADR(e_gr_vl_full, 20) + ".." }, "e_gr_vl_full"})
+AADD(aImeKol, {PADC("Vrijednost", 20), {|| PADR(e_gr_vl_full, 28) + ".." }, "e_gr_vl_full"})
 
-AADD(aImeKol, {PADC("Skr. opis (sifra)", 20), {|| PADR(e_gr_vl_desc, 20) + ".." }, "e_gr_vl_desc"})
+AADD(aImeKol, {PADC("Skr. opis (sifra)", 20), {|| PADR(e_gr_vl_desc, 10) }, "e_gr_vl_desc"})
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -104,8 +107,6 @@ return
 // ------------------------------------------------------
 static function gr_att_filter(nE_gr_at_id, cE_gr_vl_desc)
 local cFilter := ""
-
-altd()
 
 if nE_gr_at_id > 0
 	cFilter += "e_gr_at_id == " + e_gr_at_str(nE_gr_at_id)

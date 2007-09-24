@@ -271,6 +271,7 @@ AADD(aDBf,{ "art_id", "N", 10, 0 })
 AADD(aDBf,{ "doc_it_width", "N", 15,  5 })
 AADD(aDBf,{ "doc_it_heihg", "N", 15,  5 })
 AADD(aDBf,{ "doc_it_qtty",  "N", 15,  5 })
+AADD(aDBf,{ "doc_it_altt",  "N", 15,  5 })
 AADD(aDBf,{ "doc_it_schema",  "C", 1,  0 })
 AADD(aDBf,{ "doc_it_desc",  "C", 150,  0 })
 

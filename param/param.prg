@@ -295,6 +295,19 @@ nX += 2
 
 @ m_x + nX, m_y+2 SAY PADL("Resetuj vrijednosti u tabeli pretrage (0/1)", nLeft) GET gFnd_reset PICT "9"
 
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY "2. Limiti unosa *******"
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY PADL("maksimalna sirina (mm)", nLeft - 10) GET gMaxWidth PICT "99999.99"
+
+nX += 1
+
+@ m_x + nX, m_y+2 SAY PADL("maksimalna visina (mm)", nLeft - 10) GET gMaxHeigh PICT "99999.99"
+
 read
 
 BoxC()
@@ -477,6 +490,9 @@ private aHistory:={}
 
 RPar("a1", @gFnd_reset )
 
+RPar("a3", @gMaxWidth )
+RPar("a4", @gMaxHeigh )
+
 close
 return
 
@@ -572,6 +588,9 @@ private aHistory:={}
 
 WPar("a1", gFnd_reset )
 
+WPar("a3", gMaxWidth )
+WPar("a4", gMaxHeigh )
+
 close
 
 return
@@ -624,6 +643,17 @@ WPar("P3", gPIC_QTTY)
 close
 
 return
+
+
+
+// maximalna dimenzija
+function max_heigh()
+return gMaxHeigh
+
+// maximalna dimenzija
+function max_width()
+return gMaxWidth
+
 
 
 // -------------------------------

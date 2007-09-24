@@ -144,6 +144,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nQtty := field->doc_it_qtty
 	nHeigh := field->doc_it_heigh
 	nWidth := field->doc_it_width
+	nDocit_altt := field->doc_it_altt
 	
 	// ukupno mm -> m2
 	nTotal := ROUND( c_ukvadrat(nQtty, nHeigh, nWidth), 2)
@@ -175,7 +176,8 @@ do while !EOF() .and. field->doc_no == __doc_no
 	endif
 	
 	a_t_docit( __doc_no, nDoc_gr_no, nDoc_it_no, nArt_id, cArt_desc , ;
-		  cDoc_it_schema, cDoc_it_desc, nQtty, nHeigh, nWidth, nTotal, ;
+		  cDoc_it_schema, cDoc_it_desc, nQtty, nHeigh, nWidth, ;
+		  nDocit_altt, nTotal, ;
 		  nZHeigh, nZWidth, nNeto, nBruto )
 	
 	select ( nTable )

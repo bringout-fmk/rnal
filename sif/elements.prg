@@ -18,6 +18,7 @@ local nY
 local nRet := 1
 local cCol2 := "W+/G"
 local cLineClr := "GR+/B"
+local lRuleRet := .t.
 private nEl_id := 0
 private nEl_gr_id := 0
 private ImeKol
@@ -103,13 +104,11 @@ do while .t.
 		e_aops_filter(nEl_id)
 	
 	endif
-	
+
+
 	ObjDbedit("elem", nX, nY, {|Ch| elem_hand(Ch)}, "", "",,,,,1)
 
-	if ALIAS() == "ELEMENTS"
-		m_x -= 10
-	endif
-
+	
 	// uzmi matricu artikla......
 	// te provjeri pravilo......
 	
@@ -119,13 +118,31 @@ do while .t.
 
 	// uzmi podatke u matricu....
 	_art_set_descr( art_id , lNew, .f., @aTmp, .t. )
-	
+
+	select (nTmpArea)
+
+
 	// provjeri pravilo....
-	rule_articles( aTmp )
+	// Samo na <> ESC, problem sa TBrowse...
+	if LastKey() <> K_ESC
+		
+		nTmpX := m_x
 	
-	select ( nTmpArea )
+		lRuleRet := rule_articles( aTmp )
 	
-	if LastKey() == K_ESC
+		m_x := nTmpX
+	
+		select ( nTmpArea )
+		
+	endif
+	
+	// pomjeri koordinatu
+	if ALIAS() == "ELEMENTS"
+		m_x -= 10
+	endif
+
+	
+	if LastKey() == K_ESC 
 
 		// generisi naziv artikla i update-uj artikal art_id
 		select articles
@@ -133,7 +150,7 @@ do while .t.
 		select articles
 		
 		exit
-		
+	
 	endif
 
 enddo
@@ -610,6 +627,7 @@ static function e_att_edit( nEl_id, lNewRec )
 local nLeft := 25
 local nEl_att_id := 0
 local cColor := "BG+/B"
+local cElGrVal := SPACE(10)
 private GetList:={}
 
 if !lNewRec .and. field->el_id == 0
@@ -643,11 +661,16 @@ Box(,6,65)
 	else
 		@ m_x + 1, m_y + 2 SAY "Ispravka atributa elementa *******" COLOR cColor
 	endif
-	
+
+	altd()
+
 	@ m_x + 3, m_y + 2 SAY PADL("izaberi atribut elementa", nLeft) GET _e_gr_at_id VALID {|| s_e_gr_att(@_e_gr_at_id, el_gr_id, nil, .t. ), show_it( g_gr_at_desc( _e_gr_at_id ) ) } WHEN lNewRec == .t.
 		
-	@ m_x + 4, m_y + 2 SAY PADL("izaberi vrijednost atributa", nLeft) GET _e_gr_vl_id VALID s_e_gr_val(@_e_gr_vl_id, _e_gr_at_id, nil, .t.)
-	
+	//@ m_x + 4, m_y + 2 SAY PADL("izaberi vrijednost atributa", nLeft) GET _e_gr_vl_id VALID s_e_gr_val(@_e_gr_vl_id, _e_gr_at_id, nil, .t.  )
+
+	@ m_x + 4, m_y + 2 SAY PADL("izaberi vrijednost atributa", nLeft) GET cElGrVal VALID {|| s_e_gr_val(@cElGrVal, _e_gr_at_id, cElGrVal, .t.  ), set_var(@_e_gr_vl_id, @cElGrVal) }
+
+
 	@ m_x + 5, m_y + 2 SAY PADL("0 - otvori sifrarnik", nLeft)
 	
 	read

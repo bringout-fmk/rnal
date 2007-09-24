@@ -102,7 +102,9 @@ return nRet
 // -------------------------------------------------
 static function _e_box_item( nBoxX, nBoxY, cGetDOper )
 local nX := 1
-local nLeft := 20
+local aArtArr := {}
+local nTmpArea
+local nLeft := 21
 
 cGetDOper := "N"
 
@@ -123,7 +125,9 @@ nX += 2
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL (*):", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .f., .t. ), show_it( g_art_desc( _art_id, nil, .f. ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "0 - otvori sifrarnik i pretrazi" )
+@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL (*):", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .f., .t. ), _set_arr(_art_id, @aArtArr) ,show_it( g_art_desc( _art_id, nil, .f. ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "0 - otvori sifrarnik i pretrazi" )
+
+read
 
 nX += 2
 
@@ -135,22 +139,32 @@ nX += 1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("sirina [mm] (*):", nLeft + 3) GET _doc_it_width PICT Pic_Dim() VALID val_width(_doc_it_width) WHEN set_opc_box( nBoxX, 50 )
+@ m_x + nX, m_y + 2 SAY PADL("sirina [mm] (*):", nLeft + 3) GET _doc_it_width PICT Pic_Dim() VALID val_width(_doc_it_width) .and. rule_items("DOC_IT_WIDTH", _doc_it_width, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("visina [mm] (*):", nLeft + 3) GET _doc_it_heigh PICT Pic_Dim() VALID val_heigh(_doc_it_heigh) WHEN set_opc_box( nBoxX, 50 )
+@ m_x + nX, m_y + 2 SAY PADL("visina [mm] (*):", nLeft + 3) GET _doc_it_heigh PICT Pic_Dim() VALID val_heigh(_doc_it_heigh) .and. rule_items("DOC_IT_HEIGH", _doc_it_heigh, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("kolicina [kom] (*):", nLeft + 3) GET _doc_it_qtty PICT Pic_Qtty() VALID val_qtty(_doc_it_qtty) WHEN set_opc_box( nBoxX, 50 )
+@ m_x + nX, m_y + 2 SAY PADL("kolicina [kom] (*):", nLeft + 3) GET _doc_it_qtty PICT Pic_Qtty() VALID val_qtty(_doc_it_qtty) .and. rule_items("DOC_IT_QTTY", _doc_it_qtty, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
+
+
+nX += 1
+
+if rule_items("DOC_IT_ALTT", _doc_it_altt, aArtArr ) <> .t.
+
+
+	@ m_x + nX, m_y + 2 SAY PADL("nadm. visina [m] (*):", nLeft + 3) GET _doc_it_altt PICT "999999" VALID val_altt(_doc_it_altt) WHEN set_opc_box( nBoxX, 50 )
+
+endif
 
 // ako je nova stavka obezbjedi unos operacija...
 if l_new_it
 
 	nX += 2
 
-	@ m_x + nX, m_y + 2 SAY PADL("unesi dod.oper.stavke (D/N)? (*):", nLeft + 9) GET cGetDOper PICT "@!" VALID cGetDOper $ "DN" WHEN set_opc_box( nBoxX, 50, "unos dodatnih operacija za stavku")
+	@ m_x + nX, m_y + 2 SAY PADL("unesi dod.oper.stavke (D/N)? (*):", nLeft + 15) GET cGetDOper PICT "@!" VALID cGetDOper $ "DN" WHEN set_opc_box( nBoxX, 50, "unos dodatnih operacija za stavku")
 
 endif
 
@@ -159,6 +173,19 @@ read
 ESC_RETURN 0
 
 return 1
+
+
+// ------------------------------------
+// setuj matricu sa artiklom
+// ------------------------------------
+static function _set_arr( nArt_id, aArr )
+local nTArea := SELECT()
+
+_art_set_descr( nArt_id, .f., .f., @aArr, .t.)
+
+select (nTArea)
+
+return .t.
 
 
 
@@ -200,16 +227,29 @@ val_msg(lRet, "Kolicina mora biti <> 0 !")
 return lRet
 
 
+// -------------------------------------
+// validacija nadmorske visine
+// -------------------------------------
+static function val_altt( nVal )
+local lRet := .f.
+if nVal <> 0
+	lRet := .t.
+endif
+
+val_msg(lRet, "Nadmorska visina mora biti <> 0 !")
+
+return lRet
+
 
 // ----------------------------------
 // validacija visine
 // ----------------------------------
 static function val_width( nVal )
 local lRet := .f.
-if nVal >= 0
+if nVal >= 0 .and. nVal <= max_width()
 	lRet := .t.
 endif
-val_msg(lRet, "Dimenzija mora biti >= 0 !")
+val_msg(lRet, "!! Dozvoljeni opseg 0 - " + ALLTRIM(STR(max_width())) + " mm" )
 return lRet
 
 
@@ -219,10 +259,10 @@ return lRet
 // ----------------------------------
 static function val_heigh( nVal )
 local lRet := .f.
-if nVal >= 0
+if nVal >= 0 .and. nVal <= max_heigh()
 	lRet := .t.
 endif
-val_msg(lRet, "Dimenzija mora biti >= 0 !")
+val_msg(lRet, "!! Dozvoljeni opseg 0 - " + ALLTRIM(STR(max_heigh())) + " mm" )
 return lRet
 
 
