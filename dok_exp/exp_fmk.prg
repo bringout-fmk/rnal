@@ -239,6 +239,12 @@ if lOneByOne == nil
 	lOneByOne := .t.
 endif
 
+if !FILE(ALLTRIM(gFaPrivDir) + "PRIPR.DBF")
+	msgbeep("Nije podesena lokacija FAKT ???")
+	select (nTarea)
+	return
+endif
+
 // select pripreme fakt
 select (245)
 use ( ALLTRIM(gFaPrivDir) + "PRIPR" ) alias X_TBL

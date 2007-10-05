@@ -137,7 +137,7 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(art_id)}, "art_id", {|| _inc_id(@wart_id, "ART_ID"), .f.}, {|| .t.}})
-AADD(aImeKol, { "sifra :: puni naziv", {|| ALLTRIM(art_desc) + " :: " + art_full_desc }, "art_desc" })
+AADD(aImeKol, { "sifra :: puni naziv", {|| ALLTRIM(art_desc) + " :: " + UPPER(art_full_desc) }, "art_desc" })
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)

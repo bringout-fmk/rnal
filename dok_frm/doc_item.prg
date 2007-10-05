@@ -112,6 +112,7 @@ if l_new_it
 	
 	_doc_no := _doc
 	_doc_it_no := inc_docit( _doc )
+	_doc_it_altt := 0
 	
 	if _doc_it_schema == " "
 		_doc_it_schema := "N"
