@@ -216,7 +216,8 @@ public gDg_margina := 0
 public gFnd_reset := 0
 public gMaxHeigh := 1000
 public gMaxWidth := 1000
-
+public gDefNVM := 560
+public gDefCity := "Sarajevo"
 
 // export parametri
 public gExpOutDir := PADR("c:\temp\", 150)
@@ -254,6 +255,7 @@ Rpar( "fn", @gNFirma )
 private cSection := "5"
 Rpar( "p1", @gPicVrijednost )
 Rpar( "a1", @gFnd_reset )
+Rpar( "a5", @gDefNVM )
 
 // sekcija "E"
 private cSection := "E"

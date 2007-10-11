@@ -363,8 +363,16 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			cPom += "(SHEMA U PRILOGU)"
 		endif	
 
+		// nadmorska visina
 		if field->doc_it_altt <> 0
-			cPom += "Nadmorska visina = " + ALLTRIM(STR(field->doc_it_altt, 12, 2)) + " m"
+			
+			if !EMPTY( field->doc_acity )
+				cPom += "Montaza: "
+				cPom += ALLTRIM(field->doc_acity)
+			endif
+			
+			cPom += ", "
+			cPom += "nadmorska visina = " + ALLTRIM(STR(field->doc_it_altt, 12, 2)) + " m"
 		endif
 		
 		aDoc_it_desc := SjeciStr( cPom , 100 )

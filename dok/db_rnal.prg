@@ -79,6 +79,7 @@ AADD(aArr,{ "doc_it_qtty", "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_heigh" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_width" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_altt" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_acity" , "C" ,  50 ,  0 })
 AADD(aArr,{ "doc_it_schema" , "C" ,   1 ,  0 })
 AADD(aArr,{ "doc_it_desc" , "C" , 150 ,  0 })
 AADD(aArr,{ "doc_it_total" , "N" ,  15 ,  5 })
@@ -194,6 +195,7 @@ return xRet
 function a_t_docit( nDoc_no, nDoc_gr_no, nDoc_it_no, nArt_id, cArt_desc, ;
 		    cDoc_it_schema, cDoc_it_desc, ;
 		    nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, nDoc_it_altt, ;
+		    cDoc_it_city, ;
 		    nDoc_it_total, nGNHeigh, nGNWidth, nNeto, nBruto )
 
 O_T_DOCIT
@@ -208,6 +210,7 @@ replace doc_it_qtty with nDoc_it_qtty
 replace doc_it_heigh with nDoc_it_heigh
 replace doc_it_width with nDoc_it_width
 replace doc_it_altt with nDoc_it_altt
+replace doc_acity with cDoc_it_city
 replace doc_it_total with nDoc_it_total
 replace doc_it_schema with cDoc_it_schema
 replace doc_it_desc with cDoc_it_desc

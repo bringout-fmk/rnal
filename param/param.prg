@@ -285,7 +285,7 @@ function ed_ost_params()
 local nLeft := 50
 local nX := 1
 
-Box(, 10, 70)
+Box(, 15, 70)
 
 set cursor on
 
@@ -307,6 +307,15 @@ nX += 2
 nX += 1
 
 @ m_x + nX, m_y+2 SAY PADL("maksimalna visina (mm)", nLeft - 10) GET gMaxHeigh PICT "99999.99"
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY "3. Default vrijednosti ********"
+
+nX += 2
+
+@ m_x + nX, m_y+2 SAY PADL("Nadmorska visina (nv.m)", nLeft - 10) GET gDefNVM PICT "99999.99"
+
 
 read
 
@@ -493,6 +502,8 @@ RPar("a1", @gFnd_reset )
 RPar("a3", @gMaxWidth )
 RPar("a4", @gMaxHeigh )
 
+RPar("a5", @gDefNVM)
+
 close
 return
 
@@ -590,6 +601,8 @@ WPar("a1", gFnd_reset )
 
 WPar("a3", gMaxWidth )
 WPar("a4", gMaxHeigh )
+
+WPar("a5", gDefNVM )
 
 close
 

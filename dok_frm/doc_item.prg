@@ -113,7 +113,14 @@ if l_new_it
 	_doc_no := _doc
 	_doc_it_no := inc_docit( _doc )
 	_doc_it_altt := 0
-	
+	_doc_acity := SPACE( LEN(_doc_acity) )
+
+	// ako je nova stavka i vrijednost je 0, uzmi default...
+	if _doc_it_altt == 0
+		_doc_it_altt := gDefNVM
+		_doc_acity := PADR( gDefCity, 50 )
+	endif
+
 	if _doc_it_schema == " "
 		_doc_it_schema := "N"
 	endif
@@ -156,8 +163,16 @@ nX += 1
 if rule_items("DOC_IT_ALTT", _doc_it_altt, aArtArr ) <> .t.
 
 
-	@ m_x + nX, m_y + 2 SAY PADL("nadm. visina [m] (*):", nLeft + 3) GET _doc_it_altt PICT "999999" VALID val_altt(_doc_it_altt) WHEN set_opc_box( nBoxX, 50 )
+	@ m_x + nX, m_y + 2 SAY PADL("nadm. visina [m] (*):", nLeft + 3) GET _doc_it_altt PICT "999999" VALID val_altt(_doc_it_altt) WHEN set_opc_box( nBoxX, 50, "Nadmorska visina izrazena u metrima" )
 
+	@ m_x + nX, col() + 2 SAY "grad:" GET _doc_acity VALID !EMPTY(_doc_acity) PICT "@S20" WHEN set_opc_box(nBoxX, 50, "Grad u kojem se montira proizvod")
+
+
+else
+	
+	// pobrisi screen na lokaciji nadmorske visine
+	@ m_x + nX, m_y + 2 SAY SPACE(70)
+	
 endif
 
 // ako je nova stavka obezbjedi unos operacija...

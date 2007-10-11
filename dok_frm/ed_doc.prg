@@ -360,17 +360,22 @@ do case
 				select _doc_it
 				return DE_CONT
 			endif
+		
+			_doc := field->doc_no
 			
 			select _doc_it
+			set order to tag "1"
 			
 			if e_doc_item( _doc, .t. ) <> 0
 			
 				select _doc_it
+				set order to tag "1"
 				nRet := DE_REFRESH
 
 			endif
 			
 			select _doc_it
+			set order to tag "1"
 	
 		elseif ALIAS() == "_DOC_OPS"
 

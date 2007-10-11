@@ -681,8 +681,10 @@ if lChkKum == .t.
 	
 	if FOUND()
 		
-		MsgBeep("Artikal vec postoji u dokumentima!#Brisanje onemoguceno")
+		MsgBeep("Uoceno je da se artikal koristi u nalogu br: " + ALLTRIM(STR(doc_it->doc_no))+ " #!!! BRISANJE ONEMOGUCENO !!!")
+		
 		select articles
+		
 		return 0	
 		
 	endif

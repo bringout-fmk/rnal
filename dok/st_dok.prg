@@ -144,7 +144,17 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nQtty := field->doc_it_qtty
 	nHeigh := field->doc_it_heigh
 	nWidth := field->doc_it_width
-	nDocit_altt := field->doc_it_altt
+	
+	// nadmorska visina
+	// samo ako je razlicita vrijednost od default-ne
+	if (field->doc_it_altt <> gDefNVM) .or. ;
+		( field->doc_acity <> ALLTRIM(gDefCity) )
+		nDocit_altt := field->doc_it_altt
+		cDocit_city := field->doc_acity
+	else
+		nDocit_altt := 0
+		cDocit_city := ""
+	endif
 	
 	// ukupno mm -> m2
 	nTotal := ROUND( c_ukvadrat(nQtty, nHeigh, nWidth), 2)
@@ -177,7 +187,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	
 	a_t_docit( __doc_no, nDoc_gr_no, nDoc_it_no, nArt_id, cArt_desc , ;
 		  cDoc_it_schema, cDoc_it_desc, nQtty, nHeigh, nWidth, ;
-		  nDocit_altt, nTotal, ;
+		  nDocit_altt, cDocit_city, nTotal, ;
 		  nZHeigh, nZWidth, nNeto, nBruto )
 	
 	select ( nTable )
