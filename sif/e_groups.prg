@@ -142,4 +142,30 @@ endif
 return cEGrDesc
 
 
+// ----------------------------------------------
+// vraca grupu, trazeci po e_gr_desc
+// ----------------------------------------------
+function g_gr_by_type( cType )
+local nTArea := SELECT()
+local nGroup := 0
+
+O_E_GROUPS
+select e_groups
+set order to tag "2"
+
+go top
+
+seek PADR(cType, 20)
+
+if FOUND() .and. ALLTRIM( field->e_gr_desc ) == cType
+	
+	nGroup := field->e_gr_id
+	
+endif
+
+set order to tag "1"
+select (nTArea)
+
+return nGroup
+
 

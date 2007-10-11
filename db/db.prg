@@ -738,6 +738,7 @@ if (nArea==-1 .or. nArea == nArea2)
 		  	CREATE_INDEX("2", "STR(el_att_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_E_GROUPS)
 		  	CREATE_INDEX("1", "STR(e_gr_id,10)", cPath + cTable, .t.)
+		  	CREATE_INDEX("2", "PADR(e_gr_desc,20)", cPath + cTable, .t.)
 		
 		case (nArea2 == F_CUSTOMS)
 			CREATE_INDEX("1", "STR(cust_id,10)", cPath + cTable, .t.)

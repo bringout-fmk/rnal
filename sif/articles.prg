@@ -152,6 +152,7 @@ return
 static function key_handler()
 local nArt_id := 0
 local cArt_desc := ""
+local nArt_type := 0
 local nTRec := RecNO()
 local nRet
 
@@ -208,8 +209,11 @@ do case
 		if _set_sif_id(@nArt_id, "ART_ID") == 0
 			return DE_CONT
 		endif
-			
-		if s_elements( nArt_id, .t. ) == 1
+		
+		// prvo mi reci koji artikal zelis praviti...
+		nArt_type := _g_art_type()
+		
+		if s_elements( nArt_id, .t., nArt_Type ) == 1
 			select articles
 			go bottom
 		else
@@ -328,6 +332,49 @@ do case
 	
 endcase
 return DE_CONT
+
+
+
+// ---------------------------------------------
+// vraca tip artikla koji zelimo praviti
+// ---------------------------------------------
+static function _g_art_type()
+local nX := 1
+// tip artikla - default je 4 - ostalo
+local nType := 0
+private GetList := {}
+
+Box(, 10, 50)
+	
+	@ m_x + nX, m_y + 2 SAY "Odabir vrste artikla"
+	
+	nX += 2
+	
+	@ m_x + nX, m_y + 2 SAY "   (1) jednostruko staklo"
+	
+	++nX
+	
+	@ m_x + nX, m_y + 2 SAY "   (2) dvostruko staklo"
+	
+	++nX
+	
+	@ m_x + nX, m_y + 2 SAY "   (3) trostruko/visestruko staklo"
+	
+	nX += 2
+	
+	@ m_x + nX, m_y + 2 SAY "   (0) ostalo"
+	
+	nX += 2
+	
+	@ m_x + nX, m_y + 2 SAY "  odaberite selekciju:" GET nType VALID nType >= 0 .and. nType <= 3 PICT "9"
+	
+	read
+	
+BoxC()
+
+
+return nType
+
 
 
 // -----------------------------------------
@@ -1160,13 +1207,17 @@ return nRet
 // cArt_mcode - match code artikla
 // ---------------------------------------------------------
 static function _aset_descr( aArr, cArt_code, cArt_desc, cArt_mcode )
-local nTotElem := aArr[ LEN(aArr), 1 ]
+local nTotElem := 0
 local cElemCode 
 local i
 local cTmp
 local nTmp
 local lInsLExtChar := .f.
 local cLExtraChar := ""
+
+if LEN(aArr) > 0
+	nTotElem := aArr[ LEN(aArr), 1 ]
+endif
 
 for i := 1 to nTotElem
 

@@ -9,9 +9,10 @@ static l_auto_tab
 // ----------------------------------------------
 // otvara formu za definisanje elemenata
 // input: nArt_id - id artikla
+// input: nArtType - tip artikla (jednostruko, visestruko...)
 // output: art_desc update u articles
 // ----------------------------------------------
-function s_elements( nArt_id, lNew )
+function s_elements( nArt_id, lNew, nArtType )
 local i
 local nX
 local nY
@@ -28,8 +29,19 @@ if lNew == nil
 	lNew := .f.
 endif
 
+// ako ga nema definisanog ili ako je OSTALO onda je 0 - sve ide po starom
+if nArtType == nil
+	nArtType := 0
+endif
+
 art_id := nArt_id
 l_auto_tab := .f.
+
+if nArtType <> 0
+	// automatski generisi shemu elemenata
+	auto_el_gen( nArt_id, nArtType )
+endif
+
 
 Box(,21,77)
 
@@ -158,6 +170,72 @@ enddo
 BoxC()
 
 return nRet
+
+
+
+// ------------------------------------------------
+// automatska shema elemenata prema tip artikla
+// ------------------------------------------------
+static function auto_el_gen( nArt_id, nArtType )
+local nTArea := SELECT()
+local cSchema
+local aSchema
+local cSep := "#"
+
+// iz pravila mi izvuci shemu za kreiranje artikla po tipu
+// shema je: G#F#G - za dvostruko
+//           G - za jednostruko
+//           G#F#G#F#G - trostruko itd... itd...
+//
+
+cSchema := _get_el_schema( nArtType )
+
+// aschema[1] = G
+// aschema[2] = F
+// aschema[3] = G
+// ......
+
+aSchema := TokToNiz( cSchema, cSep )
+
+
+for i := 1 to LEN(aSchema)
+
+	// dodaj element...
+	// tipa = aSchema[i] = G ili F ili ????
+	select elements
+	elem_edit( nArt_id, .t., ALLTRIM( aSchema[i] ) )
+	
+next
+
+
+select (nTArea)
+return
+
+
+
+// -----------------------------------------------------
+// vraca schemu za pojedini tip aritkla
+// -----------------------------------------------------
+static function _get_el_schema( nArtType )
+local cSchema := ""
+
+do case
+	// jednostruko staklo
+	case nArtType == 1
+		cSchema := "G"
+		
+	// dvostruko staklo
+	case nArtType == 2
+		cSchema := "G#F#G"
+		
+	// visestruko staklo
+	case nArtType == 3
+		cSchema := "G#F#G#F#G"
+		
+endcase
+
+return cSchema
+
 
 
 
@@ -508,13 +586,19 @@ return nRet
 // ispravka elementa, unos novog elementa
 //   nArt_id - artikal id
 //   lNewRec - novi zapis .t. or .f.
+//   cType - tip elementa, ako postoji automatski 
+//           ga dodaje
 // ----------------------------------------------
-static function elem_edit( nArt_id, lNewRec )
+static function elem_edit( nArt_id, lNewRec, cType )
 local nEl_id := 0
 local nLeft := 25
 local nRet := DE_CONT
 local cColor := "BG+/B"
 private GetList:={}
+
+if cType == nil
+	cType := ""
+endif
 
 if !lNewRec .and. field->el_id == 0
 
@@ -524,8 +608,6 @@ if !lNewRec .and. field->el_id == 0
 endif
 
 if lNewRec
-	
-	altd()
 	
 	if _set_sif_id(@nEl_id, "EL_ID") == 0
 		return 0
@@ -541,7 +623,9 @@ if lNewRec
 	_e_gr_id := 0
 endif
 
-Box(,4,60)
+if EMPTY( cType )
+    
+    Box(,4,60)
 
 	if lNewRec
 		@ m_x + 1, m_y + 2 SAY "Unos novog elementa *******" COLOR cColor
@@ -553,15 +637,25 @@ Box(,4,60)
 	@ m_x + 4, m_y + 2 SAY PADL("0 - otvori sifrarnik", nLeft)
 	
 	read
-BoxC()
+    
+    BoxC()
 
-if LastKey() == K_ESC .and. lNewRec
+endif
+
+if EMPTY(cType) .and. LastKey() == K_ESC .and. lNewRec
 
 	Gather()
 	delete
 	
 	return 0
 	
+endif
+
+if !EMPTY(cType)
+
+	// upenduj tip elementa
+	_e_gr_id := g_gr_by_type( cType )
+
 endif
 
 Gather()
