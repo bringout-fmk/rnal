@@ -373,6 +373,7 @@ local aDbf
 
 aDbf:={}
 AADD(aDBf,{ "el_id", "N", 10, 0 })
+AADD(aDBf,{ "el_no", "N", 4, 0 })
 AADD(aDBf,{ "art_id", "N", 10, 0 })
 AADD(aDBf,{ "e_gr_id", "N", 10, 0 })
 
@@ -728,7 +729,7 @@ if (nArea==-1 .or. nArea == nArea2)
 			CREATE_INDEX("1", "STR(art_id,10)", cPath + cTable, .t.)
 			CREATE_INDEX("2", "PADR(art_desc,100)", cPath + cTable, .t.)
 		case (nArea2 == F_ELEMENTS)
-			CREATE_INDEX("1", "STR(art_id,10)+STR(el_id,10)", cPath + cTable, .t.)
+			CREATE_INDEX("1", "STR(art_id,10)+STR(el_no,4)+STR(el_id,10)", cPath + cTable, .t.)
 			CREATE_INDEX("2", "STR(el_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_E_AOPS)
 			CREATE_INDEX("1", "STR(el_id,10)+STR(el_op_id,10)", cPath + cTable, .t.)

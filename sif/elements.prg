@@ -5,6 +5,7 @@
 static art_id
 static el_gr_id
 static l_auto_tab
+static __el_schema
 
 // ----------------------------------------------
 // otvara formu za definisanje elemenata
@@ -19,6 +20,7 @@ local nY
 local nRet := 1
 local cCol2 := "W+/G"
 local cLineClr := "GR+/B"
+local cSchClr := "R+/W"
 local lRuleRet := .t.
 private nEl_id := 0
 private nEl_gr_id := 0
@@ -37,9 +39,11 @@ endif
 art_id := nArt_id
 l_auto_tab := .f.
 
+__el_schema := "----"
+
 if nArtType <> 0
 	// automatski generisi shemu elemenata
-	auto_el_gen( nArt_id, nArtType )
+	__el_schema := auto_el_gen( nArt_id, nArtType )
 endif
 
 
@@ -50,7 +54,15 @@ Box(,21,77)
 @ m_x + 16, m_y + 1 SAY "<c+N> nova"
 @ m_x + 17, m_y + 1 SAY "<F2> ispravka"
 @ m_x + 18, m_y + 1 SAY "<c+T> brisi"
-@ m_x + 21, m_y + 1 SAY "<TAB> - browse tabela  | <ESC> snimanje promjena "
+@ m_x + 21, m_y + 1 SAY "<TAB>-brow.tabela | <ESC> snimi "
+
+// na dnu dodaj i schemu da se zna sta se pravi...
+
+@ m_x + 21, col() + 2 SAY "|"
+@ m_x + 21, col() + 1 SAY "shema: "
+@ m_x + 21, col() + 1 SAY PADR( STRTRAN( __el_schema, "#", "-" ), 25 ) ;
+			COLOR cSchClr
+
 
 // uspravna crta
 for i:=1 to 19
@@ -203,23 +215,47 @@ for i := 1 to LEN(aSchema)
 	// dodaj element...
 	// tipa = aSchema[i] = G ili F ili ????
 	select elements
-	elem_edit( nArt_id, .t., ALLTRIM( aSchema[i] ) )
+	
+	elem_edit( nArt_id, .t., ALLTRIM( aSchema[i] ), i )
 	
 next
 
-
 select (nTArea)
-return
+
+return cSchema
 
 
 
 // -----------------------------------------------------
 // vraca schemu za pojedini tip aritkla
+// povezi se sa pravilima....
 // -----------------------------------------------------
 static function _get_el_schema( nArtType )
 local cSchema := ""
+local aTmp 
 
-do case
+altd()
+
+// uzmi u matricu pravila....
+aTmp := r_el_schema( nArtType )
+
+// ima pravila ?
+if LEN( aTmp ) > 0
+
+	// sad za sada uzmi prvo pravilo !
+	//
+	// aTmp[1,1] = "G#F#G"    pravilo 1
+	// aTmp[1,2] = "G#F#G#G"  pravilo 2
+	// .... itd...
+	// moze biti vise pravila za jedan tip
+	
+	cSchema := aTmp[1, 1]
+
+else
+
+     // default pravila...
+     do case
+	
 	// jednostruko staklo
 	case nArtType == 1
 		cSchema := "G"
@@ -232,7 +268,11 @@ do case
 	case nArtType == 3
 		cSchema := "G#F#G#F#G"
 		
-endcase
+     endcase
+
+     msgbeep("Pravilo za ovaj tip ne postoji, koristim default#" + STRTRAN(cSchema, "#", "-" ))
+
+endif
 
 return cSchema
 
@@ -350,7 +390,7 @@ static function elem_kol(aImeKol, aKol, nArt_id)
 aKol := {}
 aImeKol := {}
 
-AADD(aImeKol, {"e", {|| " " }, "el_id", {|| _inc_id(@wel_id, "EL_ID"), .f.}, {|| .t.}})
+AADD(aImeKol, {"rb", {|| el_no }, "el_no", {|| _inc_id(@wel_id, "EL_ID"), .f.}, {|| .t.}})
 AADD(aImeKol, {PADC("el.grupa", 15), {|| PADR(g_e_gr_desc( e_gr_id ), 15 ) }, "e_gr_id"})
 
 for i:=1 to LEN(aImeKol)
@@ -358,6 +398,45 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
+
+
+// -----------------------------------------------
+// uvecaj el_no, za elemente artikla
+// -----------------------------------------------
+static function _inc_el_no( wel_no, nArt_id )
+local nTRec
+local cTBFilter := DBFILTER()
+
+set filter to
+set order to tag "1"
+	
+wel_no := _last_elno( nArt_id ) + 1
+	
+set filter to &cTBFilter
+set order to tag "1"
+
+return .t.
+
+
+// -------------------------------------------
+// vraca posljednji zapis za artikal
+// -------------------------------------------
+static function _last_elno( nArtId )
+local nLast_rec := 0
+
+go top
+seek artid_str( nArtId ) + STR(9999, 4)
+
+skip -1
+
+if field->art_id <> nArtId
+	nLast_rec := 0	
+else
+	nLast_rec := field->el_no
+endif
+
+return nLast_rec
+
 
 // -----------------------------------------
 // kolone tabele "e_att"
@@ -529,12 +608,22 @@ do case
 
 		if ALIAS() == "ELEMENTS"
 			
-			//nRet := elem_edit( art_id , .f. )
-			//set filter to &cTBFilter
-			//go top
+			if Ch == K_ENTER	
 			
-			Msgbeep("Opcija onemogucena##Koristiti c-N ili c-T")
-			nRet := DE_CONT
+				Msgbeep("Opcija onemogucena##Koristiti F2")
+				nRet := DE_CONT
+				
+			else
+				// ispravka rednog broja elementa...
+				
+				nRet := DE_REFRESH
+				
+				e_no_edit()
+				
+				set filter to &cTbFilter
+				go top
+				
+			endif
 			
 		elseif ALIAS() == "E_ATT"
 			
@@ -588,10 +677,11 @@ return nRet
 //   lNewRec - novi zapis .t. or .f.
 //   cType - tip elementa, ako postoji automatski 
 //           ga dodaje
+//   nEl_no - brojac elementa
 // ----------------------------------------------
-static function elem_edit( nArt_id, lNewRec, cType )
+static function elem_edit( nArt_id, lNewRec, cType, nEl_no )
 local nEl_id := 0
-local nLeft := 25
+local nLeft := 30
 local nRet := DE_CONT
 local cColor := "BG+/B"
 private GetList:={}
@@ -620,12 +710,29 @@ Scatter()
 if lNewRec
 
 	_art_id := nArt_id
+
+	if EMPTY( cType )
+	
+		// uvecaj redni broj elementa... klasicni brojac
+		// brojac iz baze
+		_inc_el_no( @_el_no, nArt_id )
+		
+	else
+		
+		// auto kreiranje zna za brojac
+		// necemo koristiti iz baze, da ne opterecujemo rad
+		// radi filtera
+		
+		_el_no := nEl_no
+		
+	endif
+	
 	_e_gr_id := 0
 endif
 
 if EMPTY( cType )
     
-    Box(,4,60)
+    Box(, 7, 60)
 
 	if lNewRec
 		@ m_x + 1, m_y + 2 SAY "Unos novog elementa *******" COLOR cColor
@@ -633,8 +740,11 @@ if EMPTY( cType )
 		@ m_x + 1, m_y + 2 SAY "Ispravka elementa *******" COLOR cColor
 	endif
 	
-	@ m_x + 3, m_y + 2 SAY PADL("element pripada grupi->", nLeft) GET _e_gr_id VALID s_e_groups( @_e_gr_id, .t. )
-	@ m_x + 4, m_y + 2 SAY PADL("0 - otvori sifrarnik", nLeft)
+	@ m_x + 3, m_y + 2 SAY PADL("pozicija (rbr) elementa:", nLeft) GET _el_no VALID _el_no > 0
+	
+	@ m_x + 5, m_y + 2 SAY PADL("element pripada grupi:", nLeft) GET _e_gr_id VALID s_e_groups( @_e_gr_id, .t. )
+	
+	@ m_x + 6, m_y + 2 SAY PADL("(0 - otvori sifrarnik)", nLeft)
 	
 	read
     
@@ -667,6 +777,30 @@ if lNewRec
 endif
 
 return 1
+
+
+// ---------------------------------------------
+// ispravka rednog broja elementa
+// ---------------------------------------------
+static function e_no_edit()
+
+Scatter()
+
+Box(,1,40)
+
+	@ m_x + 1, m_y + 2 SAY "postavi na:" GET _el_no VALID _el_no > 0 PICT "99"	
+	read
+    
+BoxC()
+
+
+if LastKey() <> K_ESC
+	Gather()
+endif
+
+
+return 1
+
 
 
 

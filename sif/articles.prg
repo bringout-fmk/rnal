@@ -1535,7 +1535,7 @@ endif
 select elements
 set order to tag "1"
 go top
-seek elid_str( nArt_id )
+seek artid_str( nArt_id )
 
 do while !EOF() .and. field->art_id == nArt_id
 
