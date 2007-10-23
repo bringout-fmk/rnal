@@ -153,6 +153,7 @@ static function key_handler()
 local nArt_id := 0
 local cArt_desc := ""
 local nArt_type := 0
+local cSchema := SPACE(20)
 local nTRec := RecNO()
 local nRet
 
@@ -211,9 +212,9 @@ do case
 		endif
 		
 		// prvo mi reci koji artikal zelis praviti...
-		nArt_type := _g_art_type()
+		_g_art_type( @nArt_type, @cSchema )
 		
-		if s_elements( nArt_id, .t., nArt_Type ) == 1
+		if s_elements( nArt_id, .t., nArt_Type, cSchema ) == 1
 			select articles
 			go bottom
 		else
@@ -338,11 +339,12 @@ return DE_CONT
 // ---------------------------------------------
 // vraca tip artikla koji zelimo praviti
 // ---------------------------------------------
-static function _g_art_type()
+static function _g_art_type( nType, cSchema )
 local nX := 1
-// tip artikla - default je 4 - ostalo
-local nType := 0
 private GetList := {}
+
+cSchema := SPACE(20)
+nType := 0
 
 Box(, 10, 50)
 	
@@ -366,15 +368,73 @@ Box(, 10, 50)
 	
 	nX += 2
 	
-	@ m_x + nX, m_y + 2 SAY "  odaberite selekciju:" GET nType VALID nType >= 0 .and. nType <= 3 PICT "9"
+	@ m_x + nX, m_y + 2 SAY " selekcija:" GET nType VALID nType >= 0 .and. nType <= 3 PICT "9"
+	
+	read
+
+	if nType <> 0
+		@ m_x + nX, m_y + 18 SAY "shema:" GET cSchema VALID __g_sch( @cSchema , nType )
+	endif
 	
 	read
 	
 BoxC()
 
 
-return nType
+return
 
+
+// ---------------------------------------
+// odabir shema
+// ---------------------------------------
+static function __g_sch( cSchema, nType )
+local aSch 
+local i
+local nSelect := 0
+
+private opc := {}
+private opcexe := {}
+private izbor := 1
+
+aSch := r_el_schema( nType )
+
+if LEN(aSch) == 0
+	
+	msgbeep("ne postoje definisane sheme, koristim default")
+	
+	if nType == 1
+		
+		cSchema := "G"
+	
+	elseif nType == 2
+		
+		cSchema := "G-F-G"
+		
+	elseif nType == 3
+	
+		cSchema := "G-F-G-F-G"
+	
+	endif
+	
+	return .t.
+	
+endif
+
+
+for i := 1 to LEN( aSch )
+
+	cPom := PADR( aSch[i, 1], 30 )
+	
+	AADD( opc, cPom )
+	AADD( opcexe, {|| nSelect := izbor, izbor := 0 })
+
+next
+
+Menu_SC("schema")
+
+cSchema := ALLTRIM( aSch[ nSelect, 1 ] )
+
+return .t.
 
 
 // -----------------------------------------
@@ -449,13 +509,17 @@ aTmp := TokToNiz( cCond, ";" )
 for i := 1 to LEN( aTmp )
 
 	if ( i == 1 )
+	
 		cFilter += " .and. "
+	
 	else
+	
 		cFilter += " .or. "
+	
 	endif
 
+	
 	if "*" $ aTmp[ i ]
-
 
 		aCountTmp := TokToNiz( cCond, "*" )
 		nCount := LEN(aCountTmp)

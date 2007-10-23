@@ -192,10 +192,14 @@ return STR(nId, 4)
 // nId - id sifrarnika
 // cIdField - naziv id polja....
 // -------------------------------------------
-function _set_sif_id(nId, cIdField)
+function _set_sif_id(nId, cIdField, lAuto )
 local nTArea := SELECT()
 local nTime
 local cIndex
+
+if lAuto == nil
+	lAuto := .f.
+endif
 
 if !(FLOCK())
 	
@@ -227,7 +231,7 @@ else
 	cIndex := "2"
 endif
 
-_inc_id(@nId, cIdField, cIndex)
+_inc_id(@nId, cIdField, cIndex, lAuto )
 
 Scatter()
 

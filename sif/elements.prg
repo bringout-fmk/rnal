@@ -11,16 +11,17 @@ static __el_schema
 // otvara formu za definisanje elemenata
 // input: nArt_id - id artikla
 // input: nArtType - tip artikla (jednostruko, visestruko...)
+// input: cSchema - shema artikla
 // output: art_desc update u articles
 // ----------------------------------------------
-function s_elements( nArt_id, lNew, nArtType )
+function s_elements( nArt_id, lNew, nArtType, cSchema )
 local i
 local nX
 local nY
 local nRet := 1
 local cCol2 := "W+/G"
 local cLineClr := "GR+/B"
-local cSchClr := "R+/W"
+local cSchClr := "GR+/B"
 local lRuleRet := .t.
 private nEl_id := 0
 private nEl_gr_id := 0
@@ -42,8 +43,12 @@ l_auto_tab := .f.
 __el_schema := "----"
 
 if nArtType <> 0
-	// automatski generisi shemu elemenata
-	__el_schema := auto_el_gen( nArt_id, nArtType )
+	
+	__el_schema := cSchema 
+	
+	// dodaj atribute automatski prema shemi
+	auto_el_gen( nArt_id, nArtType, cSchema )
+	
 endif
 
 
@@ -60,7 +65,7 @@ Box(,21,77)
 
 @ m_x + 21, col() + 2 SAY "|"
 @ m_x + 21, col() + 1 SAY "shema: "
-@ m_x + 21, col() + 1 SAY PADR( STRTRAN( __el_schema, "#", "-" ), 25 ) ;
+@ m_x + 21, col() + 1 SAY PADR( g_a_piccode( __el_schema ), 25 ) ;
 			COLOR cSchClr
 
 
@@ -188,19 +193,10 @@ return nRet
 // ------------------------------------------------
 // automatska shema elemenata prema tip artikla
 // ------------------------------------------------
-static function auto_el_gen( nArt_id, nArtType )
+static function auto_el_gen( nArt_id, nArtType, cSchema )
 local nTArea := SELECT()
-local cSchema
 local aSchema
-local cSep := "#"
-
-// iz pravila mi izvuci shemu za kreiranje artikla po tipu
-// shema je: G#F#G - za dvostruko
-//           G - za jednostruko
-//           G#F#G#F#G - trostruko itd... itd...
-//
-
-cSchema := _get_el_schema( nArtType )
+local cSep := "-"
 
 // aschema[1] = G
 // aschema[2] = F
@@ -223,59 +219,6 @@ next
 select (nTArea)
 
 return cSchema
-
-
-
-// -----------------------------------------------------
-// vraca schemu za pojedini tip aritkla
-// povezi se sa pravilima....
-// -----------------------------------------------------
-static function _get_el_schema( nArtType )
-local cSchema := ""
-local aTmp 
-
-altd()
-
-// uzmi u matricu pravila....
-aTmp := r_el_schema( nArtType )
-
-// ima pravila ?
-if LEN( aTmp ) > 0
-
-	// sad za sada uzmi prvo pravilo !
-	//
-	// aTmp[1,1] = "G#F#G"    pravilo 1
-	// aTmp[1,2] = "G#F#G#G"  pravilo 2
-	// .... itd...
-	// moze biti vise pravila za jedan tip
-	
-	cSchema := aTmp[1, 1]
-
-else
-
-     // default pravila...
-     do case
-	
-	// jednostruko staklo
-	case nArtType == 1
-		cSchema := "G"
-		
-	// dvostruko staklo
-	case nArtType == 2
-		cSchema := "G#F#G"
-		
-	// visestruko staklo
-	case nArtType == 3
-		cSchema := "G#F#G#F#G"
-		
-     endcase
-
-     msgbeep("Pravilo za ovaj tip ne postoji, koristim default#" + STRTRAN(cSchema, "#", "-" ))
-
-endif
-
-return cSchema
-
 
 
 
@@ -682,8 +625,10 @@ return nRet
 static function elem_edit( nArt_id, lNewRec, cType, nEl_no )
 local nEl_id := 0
 local nLeft := 30
+local lAuto := .f.
 local nRet := DE_CONT
 local cColor := "BG+/B"
+local lCoat := .f.
 private GetList:={}
 
 if cType == nil
@@ -699,7 +644,11 @@ endif
 
 if lNewRec
 	
-	if _set_sif_id(@nEl_id, "EL_ID") == 0
+	if !EMPTY(cType)
+		lAuto := .t.
+	endif
+	
+	if _set_sif_id( @nEl_id, "EL_ID", lAuto ) == 0
 		return 0
 	endif
 
@@ -763,6 +712,18 @@ endif
 
 if !EMPTY(cType)
 
+	// coating postoji... obrati na to paznju
+	if "*" $ cType
+	
+		lCoat := .t.
+	
+	endif
+
+	altd()
+
+	// ukloni "*" ako postoji...
+	cType := STRTRAN( cType, "*", "" )
+	
 	// upenduj tip elementa
 	_e_gr_id := g_gr_by_type( cType )
 
@@ -1029,6 +990,7 @@ endif
 delete
 
 return DE_REFRESH
+
 
 
 

@@ -133,13 +133,11 @@ nX += 2
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL (*):", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .f., .t. ), _set_arr(_art_id, @aArtArr) ,show_it( g_art_desc( _art_id, nil, .f. ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "0 - otvori sifrarnik i pretrazi" )
-
-read
+@ m_x + nX, m_y + 2 SAY PADL("ARTIKAL (*):", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .f., .t. ), show_it( g_art_desc( _art_id, nil, .f. ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "0 - otvori sifrarnik i pretrazi" )
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("shema u prilogu (D/N)? (*):", nLeft + 9) GET _doc_it_schema PICT "@!" VALID _doc_it_schema $ "DN" WHEN set_opc_box( nBoxX, 50, "da li postoji dodatna shema kao prilog")
+@ m_x + nX, m_y + 2 SAY PADL("shema u prilogu (D/N)? (*):", nLeft + 9) GET _doc_it_schema PICT "@!" VALID _doc_it_schema $ "DN" WHEN {|| _set_arr( _art_id, @aArtArr), set_opc_box( nBoxX, 50, "da li postoji dodatna shema kao prilog") }
 
 nX += 1
 
@@ -160,7 +158,9 @@ nX += 1
 
 nX += 1
 
-if rule_items("DOC_IT_ALTT", _doc_it_altt, aArtArr ) <> .t.
+read
+
+if rule_items( "DOC_IT_ALTT", _doc_it_altt, aArtArr ) <> .t.
 
 
 	@ m_x + nX, m_y + 2 SAY PADL("nadm. visina [m] (*):", nLeft + 3) GET _doc_it_altt PICT "999999" VALID val_altt(_doc_it_altt) WHEN set_opc_box( nBoxX, 50, "Nadmorska visina izrazena u metrima" )
