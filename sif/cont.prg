@@ -7,9 +7,10 @@ static __cust_id
 // -------------------------------------
 // otvara tabelu kontakata
 // -------------------------------------
-function s_contacts(cId, nCust_id, cContDesc, dx, dy)
+function s_contacts( cId, nCust_id, cContDesc, dx, dy )
 local nTArea
 local cHeader
+local cTag := "4"
 private ImeKol
 private Kol
 
@@ -28,7 +29,18 @@ nTArea := SELECT()
 cHeader := "Kontakti /"
 
 select contacts
-set order to tag "1"
+
+altd()
+
+if cID == nil
+	// cont_desc
+	cTag := "4"
+else
+	// cust_id + cont_desc
+	cTag := "3"
+endif
+
+set order to tag cTag
 
 set_a_kol(@ImeKol, @Kol, nCust_id)
 
@@ -46,7 +58,7 @@ endif
 set filter to
 cust_filter(nCust_id, cContDesc)
 
-cRet := PostojiSifra(F_CONTACTS, 1, 10, 70, cHeader, @cId, dx, dy)
+cRet := PostojiSifra(F_CONTACTS, cTag, 10, 70, cHeader, @cId, dx, dy)
 
 //cId := field->cont_id
 

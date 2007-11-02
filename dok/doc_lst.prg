@@ -281,32 +281,32 @@ local cFilter := ""
 
 if _status == 1
 	// samo otvoreni nalozi
-	cFilter += "doc_status == 4 .or. doc_status == 3 .or. doc_status == 0"
+	cFilter += "(doc_status == 0 .or. doc_status > 2)"
 else
 	// samo zatvoreni nalozi
 	cFilter += "doc_status == 1"
 	
 	// prikazi i ponistene
 	if cShReject == "D"
-		cFilter += " .or. doc_status == 2"
+		cFilter := "( " + cFilter +  " .or. doc_status == 2 )"
 	endif
 	
 endif
 
 if !EMPTY(dDateFrom)
-	cFilter += " .and. doc_date >= " + Cm2Str(dDateFrom)
+	cFilter += " .and. DTOS(doc_date) >= " + Cm2Str( DTOS(dDateFrom) )
 endif
 
 if !Empty(dDateTo)
-	cFilter += " .and. doc_date <= " + Cm2Str(dDateTo)
+	cFilter += " .and. DTOS(doc_date) <= " + Cm2Str( DTOS(dDateTo) )
 endif
 
 if !EMPTY(dDvrDFrom)
-	cFilter += " .and. doc_dvr_date >= " + Cm2Str(dDvrDFrom)
+	cFilter += " .and. DTOS(doc_dvr_da) >= " + Cm2Str( DTOS(dDvrDFrom) )
 endif
 
 if !Empty(dDvrDTo)
-	cFilter += " .and. doc_dvr_date <= " + Cm2Str(dDvrDTo)
+	cFilter += " .and. DTOS(doc_dvr_da) <= " + Cm2Str( DTOS(dDvrDTo) )
 endif
 
 if nCustomer <> 0
@@ -348,11 +348,17 @@ local cDesc
 local cTmpFilter := DBFILTER()
 
 if _status == 1
+
+	if doc_status == 5
+		// daj info o isporuci, ako je realizovan
+		// TODO: uzeti datum zatvaranja iz LOG-a ili ???
+		_sh_dvr_info( 0 )
+	else
 	
-	// daj info o kasnjenju
-	_sh_dvr_warr( _chk_date( doc_dvr_date ), ;
+		// daj info o kasnjenju
+		_sh_dvr_warr( _chk_date( doc_dvr_date ), ;
 			_chk_time( doc_dvr_time ) )
-			
+	endif		
 endif
 
 // prikazi status dokumenta na pregledu
@@ -711,10 +717,10 @@ return
 // ------------------------------------------------
 // setuj status naloga realizovan, ponisten, opis
 // ------------------------------------------------
-static function _g_doc_status(nDoc_status, cDesc)
+static function _g_doc_status( nDoc_status, cDesc )
 local cStat := "R"
 local nX := 1
-local nBoxX := 10
+local nBoxX := 11
 local nBoxY := 60
 local cColor := "BG+/B"
 
@@ -734,6 +740,9 @@ Box(, nBoxX, nBoxY)
 	
 	nX += 1
 	
+	@ m_x + nX, m_y + 2 SAY SPACE(3) + "(N) realizovan, nije isporucen" COLOR cColor
+	nX += 1
+	
 	@ m_x + nX, m_y + 2 SAY SPACE(3) + "(D) djelimicno realizovan" COLOR cColor
 	
 	nX += 1
@@ -742,7 +751,7 @@ Box(, nBoxX, nBoxY)
 	
 	nX += 2
 	
-	@ m_x + nX, m_y + 2 SAY "postavi status na -------->" GET cStat VALID cStat $ "RXD" PICT "@!"
+	@ m_x + nX, m_y + 2 SAY "postavi status na -------->" GET cStat VALID cStat $ "RXDN" PICT "@!"
 	
 	nX += 2
 	
@@ -750,6 +759,7 @@ Box(, nBoxX, nBoxY)
 	
 	read
 BoxC()
+
 
 if cStat == "R"
 	// closed
@@ -765,6 +775,12 @@ if cStat == "D"
 	// partialy done
 	nDoc_status := 4
 endif
+
+if cStat == "N"
+	// closed but not delivered
+	nDoc_status := 5
+endif
+
 
 ESC_RETURN 0
 
@@ -845,6 +861,35 @@ endif
 return
 
 
+
+// ------------------------------------------
+// prikazi info koliko dana nije preuzeta roba
+// nDays - dana kasnjenja
+// ------------------------------------------
+static function _sh_dvr_info( nDays, nX, nLen )
+local cColOk := "GR+/B"
+local cColor
+local cTmp := ""
+
+if nX == nil
+	nX := 2
+endif
+
+if nLen == nil
+	nLen := 20 
+endif
+
+if nDays > 0
+	cTmp := ALLTRIM(STR(nDays)) + " dana"
+	cColor := cColOk
+endif
+
+@ nX, m_y + 1 SAY PADR(cTmp, nLen) COLOR cColor
+
+return
+
+
+
 // ----------------------------------------------------
 // prikaz statusa dokumenta na pregledu
 // ----------------------------------------------------
@@ -886,6 +931,10 @@ do case
 		cTmp := " realizovan dio"
 		cColor := "W/G+"
 		
+	case doc_status == 5
+		
+		cTmp := "real.nije isporucen"
+		cColor := "W/G+"
 endcase
 
 @ nX, nY SAY PADR( cTmp , 20 ) COLOR cColor

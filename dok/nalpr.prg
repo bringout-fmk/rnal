@@ -239,6 +239,16 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		
 	endif
 
+	// proizvodjac i LOT
+	? RAZMAK
+	? RAZMAK
+	?? PADL("", LEN_IT_NO)
+	?? " "
+	?? "proizvodjac: _________________________"
+	?? " "
+	?? "LOT: __________________________"
+	
+	
 	? RAZMAK
 	?? PADL("", LEN_IT_NO)
 	?? " "

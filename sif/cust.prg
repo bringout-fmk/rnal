@@ -8,6 +8,7 @@
 function s_customers(cId, cCustDesc, dx, dy)
 local nTArea
 local cHeader
+local cTag := "1"
 private ImeKol
 private Kol
 
@@ -18,7 +19,7 @@ cHeader += SPACE(5)
 cHeader += "/ 'K' - pregled kontakata"
 
 select customs
-set order to tag "1"
+set order to tag cTag
 
 if cCustDesc == nil
 	cCustDesc := ""
@@ -37,7 +38,7 @@ endif
 // postavi filter...
 set_f_kol(cCustDesc)	
 
-cRet := PostojiSifra(F_CUSTOMS, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
+cRet := PostojiSifra(F_CUSTOMS, cTag, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
 //cId := field->cust_id
 
@@ -116,15 +117,24 @@ return .t.
 // key handler funkcija
 // -----------------------------------------
 static function key_handler(Ch)
+local cTblFilter := DBFILTER()
+local nRec := RECNO()
+local nRet := DE_CONT
+
 do case
 	case UPPER(CHR(Ch)) == "K"
 	
 		// pregled kontakata
 		s_contacts(nil, field->cust_id)
-		return DE_CONT
+		nRet := DE_CONT
 		
 endcase
-return DE_CONT
+
+select customs
+//set filter to cTblFilter
+go (nRec)
+
+return nRet
 
 
 // -------------------------------

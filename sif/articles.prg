@@ -22,13 +22,14 @@ static __aop_sep
 // otvara sifrarnik artikala
 // cId - artikal id
 // ------------------------------------------------
-function s_articles(cId, lAutoFind, lQuickFind )
+function s_articles( cId, lAutoFind, lQuickFind )
 local nBoxX := 22
 local nBoxY := 77
 local nTArea
 local cHeader
 local cFooter
 local cOptions := ""
+local cTag := "1"
 local GetList:={}
 private ImeKol
 private Kol

@@ -70,7 +70,7 @@ _doc_it_insert( __doc_no )
 // azuriranje tabele _DOC_OPS
 _doc_op_insert( __doc_no )
 
-set_doc_marker(__doc_no, 0)
+set_doc_marker( __doc_no, 0 )
 
 if __doc_stat <> 3
 
@@ -263,7 +263,7 @@ return 1
 // ----------------------------------------
 // markiranje statusa dokumenta busy
 // nDoc_no - dokument broj
-// nMarker - 0, 1, 2 ili 3
+// nMarker - 0, 1, 2, 3, 4, 5
 // ----------------------------------------
 function set_doc_marker( nDoc_no, nMarker )
 local nTArea

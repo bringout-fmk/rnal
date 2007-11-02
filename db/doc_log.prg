@@ -532,6 +532,9 @@ do case
 	case nDoc_status == 4
 		// partialy done
 		cDoc_log_type := "98"
+	case nDoc_status == 5
+		// closed but not delivered
+		cDoc_log_type := "96"
 
 endcase
 
