@@ -63,10 +63,7 @@ Box(,21,77)
 
 // na dnu dodaj i schemu da se zna sta se pravi...
 
-@ m_x + 21, col() + 2 SAY "|"
-@ m_x + 21, col() + 1 SAY "shema: "
-@ m_x + 21, col() + 1 SAY PADR( g_a_piccode( __el_schema ), 25 ) ;
-			COLOR cSchClr
+_sh_piccode( __el_schema ) 
 
 
 // uspravna crta
@@ -193,10 +190,15 @@ return nRet
 // ------------------------------------------------
 // automatska shema elemenata prema tip artikla
 // ------------------------------------------------
-static function auto_el_gen( nArt_id, nArtType, cSchema )
+function auto_el_gen( nArt_id, nArtType, cSchema, nStartFrom )
 local nTArea := SELECT()
 local aSchema
 local cSep := "-"
+local nRbr
+
+if nStartFrom == nil
+	nStartFrom := 0
+endif
 
 // aschema[1] = G
 // aschema[2] = F
@@ -212,7 +214,13 @@ for i := 1 to LEN(aSchema)
 	// tipa = aSchema[i] = G ili F ili ????
 	select elements
 	
-	elem_edit( nArt_id, .t., ALLTRIM( aSchema[i] ), i )
+	nRbr := i
+	
+	if nStartFrom > 0
+		nRbr += nStartFrom
+	endif
+	
+	elem_edit( nArt_id, .t., ALLTRIM( aSchema[i] ), nRbr )
 	
 next
 
@@ -603,13 +611,181 @@ do case
 			
 		endif
 
+	case UPPER(CHR(Ch)) == "C"
+		
+		// convert element...
+		
+		if ALIAS() <> "ELEMENTS"
+			
+			return DE_CONT
+		
+		endif
+
+		// convert only elements...
+
+		nEl_id := field->el_id
+		nEl_gr_id := field->e_gr_id
+		
+		nRet := el_convert( nEl_id, nEl_gr_id, art_id )
+
+	
+	case UPPER(CHR(Ch)) == "U"
+		
+		// restore element...
+		
+		if ALIAS() <> "ELEMENTS"
+			
+			return DE_CONT
+		
+		endif
+
+		// restore only elements...
+
+		nEl_id := field->el_id
+		nEl_gr_id := field->e_gr_id
+		
+		nRet := el_restore( nEl_id, nEl_gr_id, art_id )
+
 endcase
+
+
+if ALIAS() == "ELEMENTS"
+	upd_el_piccode( art_id )
+endif
+
 
 m_x := nX
 m_y := nY
 
 return nRet
 
+
+
+
+// -------------------------------------------
+// update piccode of article
+// -------------------------------------------
+static function upd_el_piccode( nArt_id )
+local nTRec := RECNO()
+local cSchema := ""
+local cTmp 
+local i := 0
+local cSep := "-"
+
+go top
+do while !EOF() .and. field->art_id == nArt_id 
+	
+	i += 1
+	
+	cTmp := ALLTRIM( g_e_gr_desc( field->e_gr_id, nil, .f. ) )
+	
+	if i <> 1
+		cSchema += cSep
+	endif
+	
+	cSchema += cTmp
+
+	skip
+enddo
+
+_sh_piccode( cSchema )
+
+go (nTRec)
+
+return
+
+
+// ---------------------------------------------
+// prikazi piccode na formi unosa
+// ---------------------------------------------
+static function _sh_piccode( cSchema )
+local nX := 22
+local nY := 33
+local cSchClr := "GR+/B"
+
+@ nX, nY SAY "|"
+@ nX, col() + 1 SAY "shema: "
+@ nX, col() + 1 SAY PADR( g_a_piccode( cSchema ), 25 ) ;
+			COLOR cSchClr
+
+
+return
+
+
+// -----------------------------------------------------------
+// configure element...
+// -----------------------------------------------------------
+static function el_convert( nEl_id, nEl_gr_id, nArt_id )
+local nRet := DE_CONT
+local nEl_no := field->el_no
+local nX := 1
+local cSelect := "1"
+local nFolNr := 1
+local cGr_code
+
+// uzmi "kod" grupe
+cGr_code := ALLTRIM( g_e_gr_desc( nEl_gr_id, nil, .f. ) )
+
+if cGr_code <> ALLTRIM( gGlassJoker )
+
+	// ako nije staklo ... 
+	
+	msgbeep("Konverzija se vrsi samo na elementu tipa staklo !!!")
+	
+	return nRet
+
+endif
+
+Box(, 10, 60)
+
+	@ m_x + nX, m_y + 2 SAY "***** konvertovanje stavke artikla"
+	
+	nX += 2
+
+	@ m_x + nX, m_y + 2 SAY "(1) staklo -> lami staklo sa folijom"
+	
+	nX += 2 
+
+	@ m_x + nX, m_y + 2 SAY "selekcija:" GET cSelect VALID cSelect $ "1"
+
+	read
+
+	if cSelect == "1"
+		
+		nX += 2
+
+		@ m_x + nX, m_y + 2 SAY "broj folija lami stakla:" GET nFolNr PICT "9"
+		
+		read
+		
+	endif
+	
+BoxC()
+
+if LastKey() == K_ESC
+	return DE_CONT
+endif
+
+
+if cSelect == "1"
+	
+	// lami staklo
+	a_lami_gen( field->el_no, nFolNr, nArt_id )
+	
+	nRet := DE_REFRESH 
+	
+endif
+
+return nRet
+
+
+// -----------------------------------------------------------
+// unconfigure element
+// -----------------------------------------------------------
+static function el_restore( )
+local nRet := DE_CONT
+
+return nRet
 
 
 

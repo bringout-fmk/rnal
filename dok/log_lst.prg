@@ -185,6 +185,8 @@ do case
 		xRet := "real.dio"
 	case cType == "97"
 		xRet := "ponisten"
+	case cType == "96"
+		xRet := "nije ispor."
 	case cType == "10"
 		xRet := "osn.podaci"
 	case cType == "11"
@@ -269,6 +271,8 @@ do case
 	case cDoc_log_type == "98"
 		cRet := _lit_99_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "97"
+		cRet := _lit_99_get(nDoc_no, nDoc_log_no)
+	case cDoc_log_type == "96"
 		cRet := _lit_99_get(nDoc_no, nDoc_log_no)
 	case cDoc_log_type == "10"
 		cRet := _lit_10_get(nDoc_no, nDoc_log_no)

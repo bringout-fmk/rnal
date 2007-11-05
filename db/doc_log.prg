@@ -1238,6 +1238,8 @@ do case
 		cRet := "ponisten nalog...#"
 	case nStat == 4
 		cRet := "djelimicno zatvoren nalog...#"
+	case nStat == 5
+		cRet := "zatvoren, ali nije isporucen...#"
 endcase
 
 select (nTArea)

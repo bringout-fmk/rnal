@@ -240,9 +240,9 @@ return cSchema
 function g_a_piccode( cSchema )
 local cPicCode := cSchema
 
-cPicCode := STRTRAN( cPicCode, "_FL_", CHR(178) )
+cPicCode := STRTRAN( cPicCode, "FL", CHR(177) )
 cPicCode := STRTRAN( cPicCode, "G", CHR(219) )
-cPicCode := STRTRAN( cPicCode, "F", "_" )
+cPicCode := STRTRAN( cPicCode, "F", " " )
 cPicCode := STRTRAN( cPicCode, "-", "" )
 
 return cPicCode
