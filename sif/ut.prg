@@ -99,7 +99,6 @@ if ((Ch == K_CTRL_N) .or. (Ch == K_F4)) .or. lAuto == .t.
 		return .f.
 	endif
 	
-	altd()
 	set filter to
 	set order to tag &cIndexTag
 	
@@ -124,8 +123,6 @@ return .t.
 static function _last_id( cFieldName )
 local nLast_rec := 0
 
-altd()
-
 go top
 seek STR(9999999999, 10)
 skip -1
@@ -133,6 +130,72 @@ skip -1
 nLast_rec := field->&cFieldName
 
 return nLast_rec
+
+
+
+// --------------------------------------
+// testiraj id u sifrarniku
+// wId - polje id proslijedjeno po ref.
+// cFieldName - ime id polja
+// --------------------------------------
+function _chk_id( wid, cFieldName, cIndexTag  )
+local nTRec
+local cTBFilter := DBFILTER()
+local lSeek := .t.
+local nIndexOrd := INDEXORD()
+
+if cIndexTag == nil
+	cIndexTag := "1"
+endif
+
+set filter to
+set order to tag &cIndexTag
+go top
+
+seek STR( wid, 10 )
+
+if FOUND()
+	lSeek := .f.
+endif
+	
+set filter to &cTBFilter
+set order to tag ALLTRIM(STR(nIndexOrd))
+go bottom
+
+if lSeek == .f.
+	// dodaj novi id
+	lSeek := _inc_id(@wid, cFieldName )
+endif
+
+return lSeek
+
+
+// --------------------------------
+// edit sifre u sifraniku
+// --------------------------------
+function wid_edit( cField )
+local nRet := DE_CONT
+local nId
+
+nId := field->&(cField)
+
+nId += 1
+
+Box(,1,50) 
+	@ m_x + 1, m_y + 2 SAY "Ispravi sifru na:" GET nId PICT REPLICATE("9",10)
+	read
+BoxC()
+
+if LastKey() <> K_ESC
+
+	replace field->&(cField) with nId
+	nRet := DE_REFRESH
+
+endif
+
+return nRet
+
+
 
 
 // ---------------------------------------------

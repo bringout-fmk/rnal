@@ -19,6 +19,13 @@ AADD(opcexe, {|| lst_real_tek_dan() })
 AADD(opc, "3. nalozi van roka na tekuci dan ")
 AADD(opcexe, {|| lst_vrok_tek_dan() })
 
+AADD(opc, "------------------------------------------- ")
+AADD(opcexe, {|| nil })
+
+AADD(opc, "P. specifikacija naloga za poslovodje  ")
+AADD(opcexe, {|| m_get_spec( 1 ) })
+
+
 
 Menu_SC("rpt_rnal")
 

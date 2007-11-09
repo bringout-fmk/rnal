@@ -895,6 +895,7 @@ return
 // ----------------------------------------------------
 static function _sh_doc_status( doc_status, nX, nY )
 local cTmp
+local cDoc_stat
 
 if nX == nil
 	nX := 2
@@ -904,42 +905,77 @@ if nY == nil
 	nY := 21
 endif
 
+// daj opis
+cTmp := g_doc_status( doc_status )
+
 do case
 
 	case doc_status == 0
 		
-		cTmp := " otvoren"
 		cColor := "GR+/B"
 		
 	case doc_status == 1
 		
-		cTmp := " realizovan"
 		cColor := "GB+/B"
 		
 	case doc_status == 2
 		
-		cTmp := " ponisten"
 		cColor := "W/R+"
 		
 	case doc_status == 3
 		
-		cTmp := " zauzet"
 		cColor := "GR+/G+"
 		
 	case doc_status == 4
 		
-		cTmp := " realizovan dio"
 		cColor := "W/G+"
 		
 	case doc_status == 5
 		
-		cTmp := "real.nije isporucen"
 		cColor := "W/G+"
 endcase
 
 @ nX, nY SAY PADR( cTmp , 20 ) COLOR cColor
 
 return
+
+
+// --------------------------------------------
+// vraca staus dokumenta
+// --------------------------------------------
+function g_doc_status( doc_status ) 
+local cTmp := ""
+
+do case
+
+	case doc_status == 0
+		
+		cTmp := " otvoren"
+		
+	case doc_status == 1
+		
+		cTmp := " realizovan"
+		
+	case doc_status == 2
+		
+		cTmp := " ponisten"
+		
+	case doc_status == 3
+		
+		cTmp := " zauzet"
+		
+	case doc_status == 4
+		
+		cTmp := " realizovan dio"
+		
+	case doc_status == 5
+		
+		cTmp := "real.nije isporucen"
+endcase
+
+return cTmp
+
+
 
 
 // ------------------------------------------------

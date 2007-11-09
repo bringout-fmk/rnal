@@ -113,6 +113,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	
 	nArt_id := field->art_id
 	nDoc_it_no := field->doc_it_no
+	nDoc_no := field->doc_no
 	
 	// nadji proizvod
 	select articles
@@ -120,11 +121,9 @@ do while !EOF() .and. field->doc_no == __doc_no
 
 	if lGroups == .t.
 		
-		altd()
-		
 		// odredi grupu artikla
 		// - izo i kaljeno, izo i bruseno ili ....
-		nDoc_gr_no := set_art_docgr( nArt_id, nDoc_it_no )
+		nDoc_gr_no := set_art_docgr( nArt_id, nDoc_no, nDoc_it_no )
 		
 	else
 		
@@ -411,6 +410,8 @@ do case
 		cGr := "IZO i bruseno"
 	case nGr == 7
 		cGr := "LAMI-RG"
+	case nGr == -99
+		cGr := "!!! ARTICLE-ERROR !!!"
 endcase
 
 return cGr
@@ -419,7 +420,7 @@ return cGr
 // -----------------------------------------------
 // setuj grupu artikla za stampu naloga
 // -----------------------------------------------
-function set_art_docgr( nArt_id, nDocit_no )
+function set_art_docgr( nArt_id, nDoc_no, nDocit_no )
 local nGroup := 1
 local aArt := {}
 local lIsIZO := .f.
@@ -429,11 +430,16 @@ local lIsKaljeno := .f.
 // daj matricu aArt sa definicijom artikla....
 _art_set_descr( nArt_id, nil, nil, @aArt, .t. )
 
+if aArt == nil .or. LEN(aArt) == 0
+	nGroup := -99
+	return nGroup
+endif
+
 // da li je artikal IZO...
 lIsIZO := is_izo( aArt )
 lIsLAMI := is_lami( aArt )
-lIsBruseno := is_bruseno( aArt, nDocIt_no )
-lIsKaljeno := is_kaljeno( aArt, nDocIt_no )
+lIsBruseno := is_bruseno( aArt, nDoc_no, nDocIt_no )
+lIsKaljeno := is_kaljeno( aArt, nDoc_no, nDocIt_no )
 
 do case
 	case lIsLAMI == .t.
@@ -475,6 +481,7 @@ local nFrame
 local cGlCode := ALLTRIM( gGlassJoker )
 local cFrCode := ALLTRIM( gFrameJoker )
 
+
 nElNo := aArticle[ LEN(aArticle), 1 ]
 
 if nElNo > 1
@@ -515,7 +522,7 @@ return lRet
 // ---------------------------------------------
 // da li je staklo kaljeno ???
 // ---------------------------------------------
-function is_kaljeno( aArticle, nDocit_no )
+function is_kaljeno( aArticle, nDoc_no, nDocit_no )
 local lRet := .f.
 local cSrcJok := ALLTRIM( gAopKaljenje )
 
@@ -524,7 +531,7 @@ lRet := ck_obr( aArticle, cSrcJok )
 
 if lRet == .f.
 	// provjeri i tabelu DOC_OPS
-	lRet := ck_obr_aops( nDocit_no, cSrcJok )
+	lRet := ck_obr_aops( nDoc_no, nDocit_no, cSrcJok )
 endif
 
 return lRet 
@@ -533,7 +540,7 @@ return lRet
 // ---------------------------------------------
 // da li je staklo kaljeno ???
 // ---------------------------------------------
-function is_bruseno( aArticle, nDocit_no )
+function is_bruseno( aArticle, nDoc_no, nDocit_no )
 local lRet := .f.
 local cSrcJok := ALLTRIM( gAopBrusenje )
 
@@ -542,7 +549,7 @@ lRet := ck_obr( aArticle, cSrcJok )
 
 if lRet == .f.
 	// provjeri i tabelu DOC_OPS
-	lRet := ck_obr_aops( nDocit_no, cSrcJok )
+	lRet := ck_obr_aops( nDoc_no, nDocit_no, cSrcJok )
 endif
 
 return lRet 
@@ -567,7 +574,7 @@ return lRet
 //   cSrcObrada - djoker obrade <AOP_K> .... 
 //                koju obradu trazimo
 // ---------------------------------------
-static function ck_obr_aops( nDocit_no, cSrcObrada )
+static function ck_obr_aops( nDoc_no, nDocit_no, cSrcObrada )
 local lRet := .f.
 local nTArea := SELECT()
 local nTable := F_DOC_OPS
@@ -581,8 +588,6 @@ endif
 select (nTable)
 set order to tag "1"
 go top
-	
-nDoc_no := __doc_no
 	
 seek docno_str(nDoc_no) + docit_str(nDocit_no)
 	

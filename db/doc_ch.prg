@@ -88,11 +88,12 @@ return
 // box sa unosom podataka osnovnih
 // --------------------------------------
 static function _box_main(nCust, nPrior, cDesc)
+local cCust := SPACE(10)
 
 Box(, 7, 65)
 	cDesc := SPACE(150)
 	@ m_x + 1, m_y + 2 SAY "Promjena na osnovnim podacima naloga:"
-	@ m_x + 3, m_y + 2 SAY "Narucioc:" GET nCust VALID {|| s_customers(@nCust), show_it( g_cust_desc( nCust ) ) }
+	@ m_x + 3, m_y + 2 SAY "Narucioc:" GET cCust VALID {|| s_customers(@cCust, cCust), set_var(@nCust, @cCust), show_it( g_cust_desc( nCust ) ) }
 	@ m_x + 4, m_y + 2 SAY "Prioritet (1/2/3):" GET nPrior VALID nPrior > 0 .and. nPrior < 4
 	@ m_x + 7, m_y + 2 SAY "Opis promjene:" GET cDesc PICT "@S40"
 	read
@@ -266,7 +267,8 @@ local cDesc
 local aArr
 local cType := "E"
 local nCont_id := VAL(STR(0, 10))
-local cCont_desc := SPACE(150)
+local cCont_desc := SPACE( 150 )
+local nCust_id := VAL(STR(0, 10))
 
 if lNew == nil
 	lNew := .f.
@@ -276,12 +278,13 @@ if !lNew
 	
 	select docs
 	
+	nCust_id := field->cust_id
 	nCont_id := field->cont_id
 	cCont_desc := field->cont_add_desc
 	
 endif
 
-if _box_cont(@nCont_id, @cCont_desc, @cDesc) == 0
+if _box_cont(@nCust_id, @nCont_id, @cCont_desc, @cDesc) == 0
 	return 
 endif
 
@@ -318,8 +321,11 @@ return
 // ------------------------------------
 // box sa podatkom o kontaktu
 // ------------------------------------
-static function _box_cont(nCont, cContdesc, cDesc)
+static function _box_cont(nCust, nCont, cContdesc, cDesc)
 local lNew := .f.
+local cCont := SPACE(10)
+
+cCont := PADR( ALLTRIM( STR( nCont ) ), 10 )
 
 if nCont == 0
 	lNew := .t.
@@ -335,7 +341,7 @@ Box(, 7, 65)
 		@ m_x + 1, m_y + 2 SAY "Ispravka kontakta naloga:"
 	endif
 	
-	@ m_x + 3, m_y + 2 SAY PADL("Kontakt:",20) GET nCont VALID {|| s_contacts(@nCont) , show_it( g_cont_desc( nCont ) )}
+	@ m_x + 3, m_y + 2 SAY PADL("Kontakt:",20) GET cCont VALID {|| s_contacts(@cCont, nCust, cCont), set_var( @nCont, @cCont ) , show_it( g_cont_desc( nCont ) )}
 	
 	@ m_x + 4, m_y + 2 SAY PADL("Kontakt, dodatni opis:",20) GET cContDesc PICT "@S30"
 	
