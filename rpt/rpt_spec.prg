@@ -295,7 +295,11 @@ if gPrinter == "R"
 	? "#%LANDS#"
 endif
 
+// naslov izvjestaja
 _rpt_descr()
+// info operater, datum
+__rpt_info()
+// header
 _rpt_head()
 
 select _tmp1
