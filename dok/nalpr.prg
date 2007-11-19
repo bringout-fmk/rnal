@@ -239,20 +239,35 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		
 	endif
 
-	// proizvodjac i LOT
-	? RAZMAK
-	? RAZMAK
-	?? PADL("", LEN_IT_NO)
-	?? " "
-	?? "proizvodjac: _________________________"
-	?? " "
-	?? "LOT: __________________________"
 	
+	if lSh_art_desc == .t.
 	
-	? RAZMAK
-	?? PADL("", LEN_IT_NO)
-	?? " "
-	?? REPLICATE("-", LEN_DESC)
+		// proizvodjac i LOT
+		? RAZMAK
+		? RAZMAK
+		?? PADL("", LEN_IT_NO)
+		?? " "
+		?? "proizvodjac: _________________________"
+		?? " "
+		?? "LOT: __________________________"
+
+		// provjeri za novu stranicu
+		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	
+			++ nPage
+			Nstr_a4(nPage, .t.)
+		
+    		endif	
+	endif
+
+	if lSh_art_desc == .t.
+	
+		? RAZMAK
+		?? PADL("", LEN_IT_NO)
+		?? " "
+		?? REPLICATE("-", LEN_DESC)
+	
+	endif
 	
 	// dodatne operacije operacije....
 	
@@ -327,7 +342,11 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		if !EMPTY(field->aop_att_desc) .and. ALLTRIM(field->aop_att_desc) <> "?????"
 			?? ", "
 			?? ALLTRIM(field->aop_att_desc)
+			?? ", "
+			?? ALLTRIM(field->aop_value)
+			
 		endif
+
 		
 		if !EMPTY(field->doc_op_desc)
 			
@@ -407,7 +426,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	endif
 	
 	? cLine
-
+	
 	select t_docit
 	skip
 
@@ -639,6 +658,8 @@ local cCont_desc
 local cCont_tel
 local cContadesc
 local cCont_add_desc
+local cObjId
+local cObj_desc
 local cDoc_no
 local cRazmak := SPACE(2)
 local nLeft := 15
@@ -668,6 +689,10 @@ cCont_tel := g_t_pars_opis("P12")
 cContadesc := g_t_pars_opis("P13")
 cCont_add_desc := g_t_pars_opis("N09")
 
+// get/set objects data
+cObjId := g_t_pars_opis("P20")
+cObj_desc := g_t_pars_opis("P21")
+
 B_OFF
 
 // doc_date + doc_time + doc_dvr_date + doc_dvr_time
@@ -687,8 +712,11 @@ p_line(cRazmak + cPom, 12, .f.)
 // priority + sh_place
 cPom := "Prioritet: "
 cPom += cPriority
-cPom += ",  "
-cPom += "Mjesto isporuke: "
+cPom += ", "
+cPom += "Objekat: "
+cPom += cObj_desc 
+cPom += ", "
+cPom += "Mjesto isp.: "
 cPom += cDoc_ship_place
 	
 aPom := SjeciStr( cPom, 100 )

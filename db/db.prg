@@ -167,6 +167,7 @@ AADD(gaDBFs, { F_E_AOPS, "E_AOPS", P_SIFPATH } )
 AADD(gaDBFs, { F_E_ATT, "E_ATT", P_SIFPATH } )
 AADD(gaDBFs, { F_CUSTOMS, "CUSTOMS", P_SIFPATH } )
 AADD(gaDBFs, { F_CONTACTS, "CONTACTS", P_SIFPATH } )
+AADD(gaDBFs, { F_OBJECTS, "OBJECTS", P_SIFPATH } )
 
 return
 
@@ -210,6 +211,7 @@ cre_tbls(nArea, "AOPS")
 cre_tbls(nArea, "AOPS_ATT")
 cre_tbls(nArea, "CUSTOMS")
 cre_tbls(nArea, "CONTACTS")
+cre_tbls(nArea, "OBJECTS")
 cre_sifk(nArea)
 
 // kreiranje tabele pretraga parametri
@@ -242,6 +244,7 @@ AADD(aDBf,{ "doc_dvr_time", "C", 8,  0 })
 AADD(aDBf,{ "doc_ship_place", "C", 200, 0 })
 AADD(aDBf,{ "cust_id", "N", 10, 0 })
 AADD(aDBf,{ "cont_id", "N", 10, 0 })
+AADD(aDBf,{ "obj_id", "N", 10, 0 })
 AADD(aDBf,{ "cont_add_desc", "C", 200, 0 })
 AADD(aDBf,{ "doc_pay_id", "N", 4, 0 })
 AADD(aDBf,{ "doc_paid", "C", 1, 0 })
@@ -293,6 +296,7 @@ AADD(aDBf,{ "doc_it_el_no", "N", 10, 0 })
 AADD(aDBf,{ "doc_op_no", "N", 4, 0 })
 AADD(aDBf,{ "aop_id", "N", 10,  0 })
 AADD(aDBf,{ "aop_att_id", "N", 10,  0 })
+AADD(aDBf,{ "aop_value", "C", 150,  0 })
 AADD(aDBf,{ "doc_op_desc", "C", 150,  0 })
 
 return aDbf
@@ -540,6 +544,22 @@ AADD(aDBf,{ "match_code", "C", 10, 0 })
 return aDbf
 
 
+// ------------------------------------------------------
+// vraca matricu sa strukturom tabele OBJECTS
+//   aDBF := {...}
+// ------------------------------------------------------
+function a_objects()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "obj_id", "N", 10, 0 })
+AADD(aDBf,{ "cust_id", "N", 10, 0 })
+AADD(aDBf,{ "obj_desc", "C", 150, 0 })
+AADD(aDBf,{ "match_code", "C", 10, 0 })
+
+return aDbf
+
+
 // ---------------------------------------------
 // vraca strukturu tabele SIFK
 // ---------------------------------------------
@@ -617,6 +637,8 @@ do case
 		nArea2 := F_CUSTOMS
 	case cTable == "CONTACTS"
 		nArea2 := F_CONTACTS
+	case cTable == "OBJECTS"
+		nArea2 := F_OBJECTS
 endcase
 
 if (nArea==-1 .or. nArea == nArea2)
@@ -689,6 +711,10 @@ if (nArea==-1 .or. nArea == nArea2)
 			aDbf := a_contacts()
 			cPath := SIFPATH
 			
+		case cTable == "OBJECTS"
+			aDbf := a_objects()
+			cPath := SIFPATH
+			
 		case cTable == "AOPS"
 			aDbf := a_aops()
 			cPath := SIFPATH
@@ -748,6 +774,13 @@ if (nArea==-1 .or. nArea == nArea2)
 			CREATE_INDEX("2", "STR(cust_id,10)+STR(cont_id,10)", cPath + cTable, .t.)
 			CREATE_INDEX("3", "STR(cust_id,10)+cont_desc", cPath + cTable, .t.)
 			CREATE_INDEX("4", "cont_desc", cPath + cTable, .t.)
+		
+		case (nArea2 == F_OBJECTS)
+			CREATE_INDEX("1", "STR(obj_id,10)", cPath + cTable, .t.)
+			CREATE_INDEX("2", "STR(cust_id,10)+STR(obj_id,10)", cPath + cTable, .t.)
+			CREATE_INDEX("3", "STR(cust_id,10)+obj_desc", cPath + cTable, .t.)
+			CREATE_INDEX("4", "obj_desc", cPath + cTable, .t.)
+	
 		case (nArea2 == F_AOPS)
 			CREATE_INDEX("1", "STR(aop_id,10)", cPath + cTable, .t.)
 		case (nArea2 == F_AOPS_ATT)
@@ -821,7 +854,7 @@ if i==F_E_GROUPS .or. i==F_E_GR_ATT .or. i==F_E_GR_VAL
 	lIdiDalje:=.t.
 endif
 
-if i==F_CUSTOMS .or. i==F_CONTACTS
+if i==F_CUSTOMS .or. i==F_CONTACTS .or. i==F_OBJECTS
 	lIdiDalje:=.t.
 endif
 
@@ -914,7 +947,7 @@ endif
  
 aKum  := { F_DOCS, F_DOC_IT, F_DOC_OPS, F_DOC_LOG, F_DOC_LIT }
 aPriv := { F__DOCS, F__DOC_IT, F__DOC_OPS }
-aSif  := { F_AOPS, F_AOPS_ATT, F_E_GROUPS, F_E_GR_ATT, F_E_GR_VAL, F_ARTICLES, F_ELEMENTS, F_E_AOPS, F_E_ATT }
+aSif  := { F_AOPS, F_AOPS_ATT, F_E_GROUPS, F_E_GR_ATT, F_E_GR_VAL, F_ARTICLES, F_ELEMENTS, F_E_AOPS, F_E_ATT, F_OBJECTS, F_CUSTOMS, F_CONTACTS }
 
 if cSif == "N"
 	aSif := {}

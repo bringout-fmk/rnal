@@ -127,6 +127,11 @@ if !used()
 	O_CONTACTS
 endif
 
+select F_OBJECTS
+if !used()
+	O_OBJECTS
+endif
+
 select F_AOPS
 if !used()
 	O_AOPS

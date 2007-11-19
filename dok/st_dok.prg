@@ -214,6 +214,8 @@ local cAop_desc
 local nAop_att_id
 local cAop_att_desc
 local cDoc_op_desc
+local cAop_Value
+
 
 if ( __temp == .t. )
 	nTable := F__DOC_OPS
@@ -245,6 +247,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nArt_id := field->art_id
 
 	aElem := {}
+	
 	_g_art_elements( @aElem, nArt_id )
 	
 	// vrati broj elementa artikla (1, 2, 3 ...)
@@ -262,10 +265,12 @@ do while !EOF() .and. field->doc_no == __doc_no
 
 	cDoc_op_desc := ALLTRIM( field->doc_op_desc )
 	
+	cAop_value := g_aop_value( field->aop_value )
+	
 	a_t_docop( __doc_no, nDoc_op_no, nDoc_it_no, ;
 		   nElem_no, cDoc_el_desc, ;
                    nAop_id, cAop_desc, ;
-		   nAop_att_id, cAop_att_desc, cDoc_op_desc)
+		   nAop_att_id, cAop_att_desc, cDoc_op_desc, cAop_value )
 
 	select (nTable)
 	skip
@@ -291,6 +296,7 @@ seek docno_str( __doc_no )
 
 _fill_customer( field->cust_id )
 _fill_contacts( field->cont_id )
+_fill_objects( field->obj_id)
 
 select (nTable)
 
@@ -389,6 +395,31 @@ add_tpars("P13", cCont_add_desc )
 select (nTArea)
 return
 
+
+// ----------------------------------------
+// dodaj podatke o objektu
+// ----------------------------------------
+static function _fill_objects( nObj_id )
+local nTArea := SELECT()
+local cObj_desc := ""
+
+select objects
+set order to tag "1"
+go top
+seek objid_str(nObj_id)
+
+if FOUND()
+	cObj_desc := ALLTRIM( objects->obj_desc )
+endif
+
+add_tpars("P20", objid_str(nObj_id))
+add_tpars("P21", cObj_desc )
+
+select (nTArea)
+return
+
+
+
 // ---------------------------------------------
 // vraca opis grupe za stampu dokumenta
 // ---------------------------------------------
@@ -405,10 +436,8 @@ do case
 	case nGr == 4
 		cGr := "IZO i rezano"
 	case nGr == 5
-		cGr := "IZO i kaljeno"
+		cGr := "IZO i kaljeno-bruseno"
 	case nGr == 6
-		cGr := "IZO i bruseno"
-	case nGr == 7
 		cGr := "LAMI-RG"
 	case nGr == -99
 		cGr := "!!! ARTICLE-ERROR !!!"
@@ -444,22 +473,19 @@ lIsKaljeno := is_kaljeno( aArt, nDoc_no, nDocIt_no )
 do case
 	case lIsLAMI == .t.
 		// LAMI staklo
-		nGroup := 7
-	case lIsIZO == .t. .and. lIsBruseno == .t.
-		// IZO i bruseno
 		nGroup := 6
-	case lIsIZO == .t. .and. lIsKaljeno == .t.
+	case lIsIZO == .t. .and. ( lIsKaljeno == .t. .or. lIsBruseno == .t. )
 		// IZO i kaljeno
 		nGroup := 5
 	case lIsIZO == .t.
 		// IZO - rezano
 		nGroup := 4
-	case lIsIZO == .f. .and. lIsBruseno == .t.
-		// bruseno
-		nGroup := 3
 	case lIsIZO == .f. .and. lIsKaljeno == .t.
 		// kaljeno
 		nGroup := 2
+	case lIsIZO == .f. .and. lIsBruseno == .t.
+		// bruseno
+		nGroup := 3
 	case lIsIZO == .f.
 		// rezano
 		nGroup := 1

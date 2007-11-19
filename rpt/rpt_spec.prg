@@ -74,19 +74,15 @@ Box(, nBoxX, nBoxY)
 	
 	nX += 1
 	
-	@ m_x + nX, m_y + 2 SAY "(2) - kaljeno    (5) - IZO i kaljeno"
+	@ m_x + nX, m_y + 2 SAY "(2) - kaljeno    (5) - IZO i kaljeno/bruseno"
 	
 	nX += 1
 	
-	@ m_x + nX, m_y + 2 SAY "(3) - bruseno    (6) - IZO i bruseno"
+	@ m_x + nX, m_y + 2 SAY "(3) - bruseno    (6) - LAMI-RG"
 	
- 	nX += 1
-	
-	@ m_x + nX, m_y + 2 SAY "(7) - LAMI-RG"
-
 	nX += 2
 
-	@ m_x + nX, m_y + 2 SAY "Grupa artikala (0 - sve grupe):" GET nGroup VALID nGroup >= 0 .and. nGroup < 8 PICT "9"
+	@ m_x + nX, m_y + 2 SAY "Grupa artikala (0 - sve grupe):" GET nGroup VALID nGroup >= 0 .and. nGroup < 7 PICT "9"
 	
 	read
 BoxC()
@@ -289,7 +285,7 @@ static function _p_rpt_spec( nGroup )
 START PRINT CRET
 
 ?
-P_COND2
+P_COND
 
 if gPrinter == "R"
 	? "#%LANDS#"
@@ -391,7 +387,7 @@ return
 static function _nstr()
 local lRet := .f.
 
-if prow() > 55
+if prow() > 40
 	lRet := .t.
 endif
 
@@ -511,5 +507,6 @@ replace field->doc_log with cDoc_log
 
 select (nTArea)
 return
+
 
 

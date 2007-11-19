@@ -129,6 +129,8 @@ local dDvrDTo := CTOD("")
 local cCustomer := PADR("", 10)
 local nCustomer := VAL(STR(0, 10))
 local cContact := PADR("", 10)
+local cObject := PADR("", 10)
+local nObject := VAL(STR(0, 10))
 local nContact := VAL(STR(0, 10))
 local nOperater := VAL(STR(0, 3))
 local cOperater := PADR("", 3)
@@ -152,6 +154,7 @@ RPar("d3", @dDvrDFrom)
 RPar("d4", @dDvrDTo)
 RPar("c1", @cCustomer)
 RPar("c2", @cContact)
+RPar("c3", @cObject)
 RPar("o1", @nOperater)
 RPar("s1", @nSort)
 RPar("s2", @cShowRejected)
@@ -168,7 +171,11 @@ nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("Kontakt (prazno-svi):", 25) GET cContact VALID {|| EMPTY(cContact) .or. s_contacts( @cContact, nCustomer, cContact ), set_var(@nContact, @cContact), show_it( g_cont_desc( nContact ) ) } WHEN set_opc_box( nBoxX, 60, "kontakt osoba naloga, pretrazi sifrarnik", nil, nil, cHelpClr )
 
-nX += 2
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL("Objekat isporuke:", 25) GET cObject VALID {|| EMPTY(cObject) .or. s_objects( @cObject, nCustomer, cObject ), set_var(@nObject, @cObject), show_it( g_obj_desc( nObject ) ) } WHEN set_opc_box( nBoxX, 60, "objekat isporuke, pretrazi sifrarnik", nil, nil, cHelpClr )
+
+nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL( "Datum naloga od:", 18) GET dDateFrom WHEN set_opc_box( nBoxX, 60 )
 @ m_x + nX, col() + 1 SAY "do:" GET dDateTo WHEN set_opc_box( nBoxX, 60 )
@@ -235,6 +242,7 @@ WPar("d3", dDvrDFrom)
 WPar("d4", dDvrDTo)
 WPar("c1", cCustomer)
 WPar("c2", cContact)
+WPar("c3", cObject)
 WPar("o1", nOperater)
 WPar("s1", nSort)
 WPar("s2", cShowRejected)
@@ -246,6 +254,7 @@ cFilter := gen_filter(dDateFrom, ;
 			dDvrDTo, ;
 			nCustomer, ;
 			nContact, ;
+			nObject, ;
 			nOperater, ;
 			cShowRejected )
 
@@ -275,7 +284,7 @@ return .f.
 // generise string filtera
 // ---------------------------------
 static function gen_filter( dDateFrom, dDateTo, dDvrDFrom, dDvrDTo, ;
-			nCustomer, nContact, nOper, cShReject )
+			nCustomer, nContact, nObject, nOper, cShReject )
 local nClosed := 1
 local cFilter := ""
 
@@ -315,6 +324,10 @@ endif
 
 if nContact <> 0
 	cFilter += " .and. cont_id == " + contid_str(nContact)
+endif
+
+if nObject <> 0
+	cFilter += " .and. obj_id == " + objid_str(nObject)
 endif
 
 if nOper <> 0
@@ -997,10 +1010,15 @@ endif
 
 // napuni string sa opisom
 cTmp := ""
+
+cTmp += ALLTRIM( g_obj_desc( obj_id ) )
+cTmp += ", "
 cTmp += ALLTRIM(doc_sh_desc) 
+
 if !EMPTY(cTmp)
 	cTmp += ", "
 endif
+
 cTmp += ALLTRIM(doc_desc)
 
 // pretvori string u matricu....

@@ -33,6 +33,7 @@
 
 #xcommand O_E_GROUPS => select(F_E_GROUPS); use (SIFPATH + "E_GROUPS"); set order to tag "1"
 #xcommand O_CUSTOMS => select(F_CUSTOMS); use (SIFPATH + "CUSTOMS"); set order to tag "1"
+#xcommand O_OBJECTS => select(F_OBJECTS); use (SIFPATH + "OBJECTS"); set order to tag "1"
 #xcommand O_CONTACTS => select(F_CONTACTS); use (SIFPATH + "CONTACTS"); set order to tag "1"
 #xcommand O_E_GR_ATT => select(F_E_GR_ATT); use (SIFPATH + "E_GR_ATT"); set order to tag "1"
 #xcommand O_E_GR_VAL => select(F_E_GR_VAL); use (SIFPATH+"E_GR_VAL"); set order to tag "1"

@@ -113,8 +113,11 @@ local nTRec := RecNo()
 local cShipPlace
 local cDvrTime
 local dDvrDate
+local nObj_id
+local cObj_id
 local cDesc
 local aArr
+local nCust_id
 
 if Pitanje(,"Zelite izmjeniti podatke o isporuci naloga (D/N)?", "D") == "N"
 	return
@@ -125,14 +128,16 @@ select docs
 cShipPlace := field->doc_ship_place
 dDvrDate := field->doc_dvr_date
 cDvrTime := field->doc_dvr_time
+nObj_id := field->obj_id
+nCust_id := field->cust_id
 
 // box sa unosom podataka
-if _box_ship(@cShipPlace, @cDvrTime, @dDvrDate, @cDesc) == 0
+if _box_ship(@nObj_id, @cShipPlace, @cDvrTime, @dDvrDate, @cDesc, nCust_id) == 0
 	return
 endif
 
 // logiraj isporuku
-aArr := a_log_ship( dDvrDate, cDvrTime, cShipPlace )
+aArr := a_log_ship( nObj_id, dDvrDate, cDvrTime, cShipPlace )
 log_ship(__doc_no, cDesc, "E", aArr)
 
 select docs
@@ -151,6 +156,10 @@ if _doc_dvr_date <> dDvrDate
 	_doc_dvr_date := dDvrDate
 endif
 
+if _obj_id <> nObj_id
+	_obj_id := nObj_id
+endif
+
 _operater_id := __oper_id
 
 Gather()
@@ -164,15 +173,18 @@ return
 // --------------------------------------
 // box sa unosom podataka o isporuci
 // --------------------------------------
-static function _box_ship(cShip, cTime, dDate, cDesc)
+static function _box_ship(nObj_id, cShip, cTime, dDate, cDesc, nCust_id )
+local cObj_id := PADR(STR(nObj_id, 10), 10)
 
-Box(, 7, 65)
+Box(, 8, 65)
 	cDesc := SPACE(150)
 	@ m_x + 1, m_y + 2 SAY "Promjena podataka o isporuci:"
-	@ m_x + 3, m_y + 2 SAY PADL("Novo mjesto isporuke:",22) GET cShip VALID !EMPTY(cShip) PICT "@S30"
-	@ m_x + 4, m_y + 2 SAY PADL("Novo vrijeme isporuke:",22) GET cTime VALID !EMPTY(cTime)
-	@ m_x + 5, m_y + 2 SAY PADL("Novi datum isporuke:",22) GET dDate VALID !EMPTY(dDate)
-	@ m_x + 7, m_y + 2 SAY PADL("Opis promjene:",22) GET cDesc PICT "@S40"
+	
+	@ m_x + 3, m_y + 2 SAY PADL("Novi objekat isporuke:",22) GET cObj_id VALID {|| s_objects( @cObj_id, nCust_id, cObj_id ), set_var(@nObj_id, @cObj_id), show_it( ALLTRIM(g_obj_desc( nObj_id ) ) )  } 
+	@ m_x + 4, m_y + 2 SAY PADL("Novo mjesto isporuke:",22) GET cShip VALID !EMPTY(cShip) PICT "@S30"
+	@ m_x + 5, m_y + 2 SAY PADL("Novo vrijeme isporuke:",22) GET cTime VALID !EMPTY(cTime)
+	@ m_x + 6, m_y + 2 SAY PADL("Novi datum isporuke:",22) GET dDate VALID !EMPTY(dDate)
+	@ m_x + 8, m_y + 2 SAY PADL("Opis promjene:",22) GET cDesc PICT "@S40"
 	read
 BoxC()
 

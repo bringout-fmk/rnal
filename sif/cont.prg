@@ -40,7 +40,6 @@ else
 	cTag := "3"
 endif
 
-set order to tag cTag
 
 set_a_kol(@ImeKol, @Kol, nCust_id)
 
@@ -51,10 +50,12 @@ if VALTYPE(cId) == "C"
 		cId := VAL(cId)
 		nCust_id := -1
 		cContDesc := ""
+		cTag := "1"
 		
 	endif
 endif
 
+set order to tag cTag
 set filter to
 cust_filter(nCust_id, cContDesc)
 

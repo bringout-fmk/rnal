@@ -123,6 +123,7 @@ if l_new_ops
 	_aop_att_id := 0
 	_doc_op_desc := PADR("", LEN(_doc_op_desc))
 	_doc_it_no := __item_no
+	_aop_value := PADR("", LEN( _aop_value ))
 	
 	cAop := PADR("", 10)
 	cAopAtt := PADR("", 10)
@@ -154,6 +155,13 @@ nX += 2
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("atribut dod. operacije:", nLeft) GET cAopAtt VALID {|| s_aops_att(@cAopAtt, _aop_id, cAopAtt ), set_var(@_aop_att_id, @cAopAtt), show_it(g_aop_att_desc( _aop_att_id ), 20) } WHEN set_opc_box( nBoxX, 50, "odaberi atribut dodatne operacije", "99 - otvori sifrarnik")
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL( "vrijednost:", nLeft ) GET _aop_value ;
+	VALID is_g_config( @_aop_value, _aop_att_id ) ;
+	PICT "@S40" ;
+	WHEN set_opc_box( nBoxX, 50, "vrijednost operacije ako postoji", "kod brusenja, poliranja..." )
 
 nX += 2
 

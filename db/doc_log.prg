@@ -32,7 +32,8 @@ go top
 
 // logiraj podatke o isporuci
 cDesc := "Inicijalni podaci isporuke"
-aArr := a_log_ship( field->doc_dvr_date, ;
+aArr := a_log_ship( field->obj_id, ;
+		field->doc_dvr_date, ;
 		field->doc_dvr_time, ;
 		field->doc_ship_place)
 		
@@ -95,9 +96,9 @@ return aArr
 // puni matricu sa podacima isporuke
 // aArr = { doc_dvr_date, doc_dvr_time, doc_ship_place }
 // -------------------------------------------------
-function a_log_ship(dDate, cTime, cPlace)
+function a_log_ship(nObj_id, dDate, cTime, cPlace)
 local aArr := {}
-AADD(aArr, { dDate, cTime, cPlace })
+AADD(aArr, { nObj_id, dDate, cTime, cPlace })
 return aArr
 
 
@@ -198,9 +199,10 @@ append blank
 replace doc_no with nDoc_no
 replace doc_log_no with nDoc_log_no
 replace doc_lit_no with nDoc_lit_no
-replace date_1 with aArr[1, 1]
-replace char_1 with aArr[1, 2]
-replace char_2 with aArr[1, 3]
+replace date_1 with aArr[1, 2]
+replace int_1 with aArr[1, 1]
+replace char_1 with aArr[1, 3]
+replace char_2 with aArr[1, 4]
 replace doc_lit_action with cAction
 
 return
@@ -1291,6 +1293,8 @@ seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
 do while !EOF() .and. field->doc_no == nDoc_no ;
 		.and. field->doc_log_no == nDoc_log_no
 
+	cRet += "objekat: " + ALLTRIM( g_obj_desc( field->int_1 ) )
+	cRet += "#"
 	cRet += "datum isp.: " + DTOC(field->date_1)
 	cRet += "#"
 	cRet += "vrij.isp.: " + ALLTRIM(field->char_1)

@@ -103,6 +103,7 @@ AADD(aArr,{ "aop_desc"   , "C" , 150 ,  0 })
 AADD(aArr,{ "aop_att_id" , "N" ,  10 ,  0 })
 AADD(aArr,{ "aop_att_desc" , "C" , 150 ,  0 })
 AADD(aArr,{ "doc_op_desc", "C" , 150 ,  0 })
+AADD(aArr,{ "aop_value", "C" , 150 ,  0 })
 
 return
 
@@ -230,7 +231,8 @@ function a_t_docop( nDoc_no, nDoc_op_no, nDoc_it_no, ;
 		   nDoc_el_no, cDoc_el_desc, ;	
                    nAop_id, cAop_desc, ;
 		   nAop_att_id, cAop_att_desc , ;
-		   cDoc_op_desc)
+		   cDoc_op_desc, ;
+		   cAop_value )
 
 O_T_DOCOP
 select t_docop
@@ -246,6 +248,7 @@ replace aop_desc with cAop_desc
 replace aop_att_id with nAop_att_id
 replace aop_att_desc with cAop_att_desc
 replace doc_op_desc with cDoc_op_desc
+replace aop_value with cAop_value
 
 return
 

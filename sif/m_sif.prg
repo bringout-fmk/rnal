@@ -27,6 +27,13 @@ else
 	AADD(opcexe, {|| msgbeep( cZabrana ) })
 endif
 
+AADD(opc, "3. objekti")
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "OBJECTS")
+	AADD(opcexe, {|| s_objects() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
 AADD(opc, "-------------------------")
 AADD(opcexe, {|| nil})
 

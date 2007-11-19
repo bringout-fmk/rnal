@@ -16,7 +16,7 @@ nTArea := SELECT()
 
 cHeader := "Narucioci"
 cHeader += SPACE(5)
-cHeader += "/ 'K' - pregled kontakata"
+cHeader += "/ 'K' - pr.kontakata  / 'O' - pr.objekata"
 
 select customs
 set order to tag cTag
@@ -129,6 +129,12 @@ do case
 		s_contacts(nil, field->cust_id)
 		nRet := DE_CONT
 		
+	case UPPER(CHR(Ch)) == "O"
+	
+		// pregled objekata
+		s_objects(nil, field->cust_id)
+		nRet := DE_CONT
+	
 	case CH == K_F3
 		
 		// ispravka sifre 

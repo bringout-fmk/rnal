@@ -19,11 +19,17 @@ AADD(opcexe, {|| lst_real_tek_dan() })
 AADD(opc, "3. nalozi van roka na tekuci dan ")
 AADD(opcexe, {|| lst_vrok_tek_dan() })
 
+AADD(opc, "4. lista naloga >= od proizvoljnog datuma ")
+AADD(opcexe, {|| lst_ch_date() })
+
 AADD(opc, "------------------------------------------- ")
 AADD(opcexe, {|| nil })
 
 AADD(opc, "P. specifikacija naloga za poslovodje  ")
 AADD(opcexe, {|| m_get_spec( 1 ) })
+
+AADD(opc, "T. test  ")
+AADD(opcexe, {|| glass_config() })
 
 
 
