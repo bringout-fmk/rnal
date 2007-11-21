@@ -124,7 +124,7 @@ endif
 for i:=1 to LEN( aArr )
 
 	if aArr[i, 2] == "G" .and. aArr[i, 4] == ALLTRIM(gDefGlTick) .and. IF(nGlass > 0, aArr[i, 1] == nGlass , .t.)
-		xRet += VAL( aArr[ i, 5 ] )
+		xRet += glass_tick( aArr[ i, 5 ] )
 	endif
 	
 next

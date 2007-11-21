@@ -90,6 +90,8 @@ local nZHeigh := 0
 local nNeto := 0
 local nBruto := 0
 local lGroups := .t.
+local nGr1 
+local nGr2
 
 if lZpoGN == nil
 	lZPoGN := .f.
@@ -163,9 +165,6 @@ do while !EOF() .and. field->doc_no == __doc_no
 	
 	if lZpoGN == .t.
 
-
-		altd()
-		
 		aZpoGN := {}
 		// zaokruzi vrijednosti....
 		_art_set_descr( nArt_id, nil, nil, @aZpoGN, lZpoGN )
@@ -184,10 +183,30 @@ do while !EOF() .and. field->doc_no == __doc_no
 		
 	endif
 	
-	a_t_docit( __doc_no, nDoc_gr_no, nDoc_it_no, nArt_id, cArt_desc , ;
+	nGr1 := 0
+	nGr2 := 0
+	
+	// odredi da li je jedna grupa ili vise za ovu stavku
+	g_ggroups( nDoc_gr_no, @nGr1, @nGr2 )
+
+	// dodaj u stavke
+	a_t_docit( __doc_no, nGr1, nDoc_it_no, nArt_id, cArt_desc , ;
 		  cDoc_it_schema, cDoc_it_desc, nQtty, nHeigh, nWidth, ;
 		  nDocit_altt, cDocit_city, nTotal, ;
 		  nZHeigh, nZWidth, nNeto, nBruto )
+	
+	
+	if nGr2 <> 0
+	
+		// razdvoji nalog na 2 dijela	
+		// ako ima vise grupa
+		
+		a_t_docit( __doc_no, nGr2, nDoc_it_no, nArt_id, cArt_desc , ;
+		  cDoc_it_schema, cDoc_it_desc, nQtty, nHeigh, nWidth, ;
+		  nDocit_altt, cDocit_city, nTotal, ;
+		  nZHeigh, nZWidth, nNeto, nBruto )
+
+	endif
 	
 	select ( nTable )
 	skip
@@ -434,10 +453,8 @@ do case
 	case nGr == 3
 		cGr := "bruseno"
 	case nGr == 4
-		cGr := "IZO i rezano"
+		cGr := "IZO"
 	case nGr == 5
-		cGr := "IZO i kaljeno-bruseno"
-	case nGr == 6
 		cGr := "LAMI-RG"
 	case nGr == -99
 		cGr := "!!! ARTICLE-ERROR !!!"
@@ -471,22 +488,40 @@ lIsBruseno := is_bruseno( aArt, nDoc_no, nDocIt_no )
 lIsKaljeno := is_kaljeno( aArt, nDoc_no, nDocIt_no )
 
 do case
+	
+	case lIsKaljeno == .t. .and. lIsIZO == .t.
+		// izo i kaljeno
+		nGroup := 42
+		
+	case lIsKaljeno == .t. .and. lIsLAMI == .t.
+		// lami i kaljeno
+		nGroup := 52
+		
+	case lIsKaljeno == .t. 
+		// kaljeno
+		nGroup := 2
+		
+	case lIsBruseno == .t. .and. lIsIZO == .t.
+		// izo i bruseno
+		nGroup := 43
+		
+	case lIsBruseno == .t. .and. lIsLami == .t.
+		// lami i bruseno
+		nGroup := 53
+		
+	case lIsBruseno == .t.
+		// bruseno
+		nGroup := 3
+		
 	case lIsLAMI == .t.
 		// LAMI staklo
-		nGroup := 6
-	case lIsIZO == .t. .and. ( lIsKaljeno == .t. .or. lIsBruseno == .t. )
-		// IZO i kaljeno
 		nGroup := 5
+		
 	case lIsIZO == .t.
 		// IZO - rezano
 		nGroup := 4
-	case lIsIZO == .f. .and. lIsKaljeno == .t.
-		// kaljeno
-		nGroup := 2
-	case lIsIZO == .f. .and. lIsBruseno == .t.
-		// bruseno
-		nGroup := 3
-	case lIsIZO == .f.
+		
+	otherwise
 		// rezano
 		nGroup := 1
 	
@@ -642,6 +677,44 @@ enddo
 select (nTArea)
 return lRet
 
+
+
+// ----------------------------------------
+// vraca grupe za slozene grupe
+// ----------------------------------------
+function g_ggroups( nGr, nGr1, nGr2 )
+
+if nGr < 10
+	
+	nGr1 := nGr
+	nGr2 := 0
+	
+	return
+endif
+
+if nGr = 42
+	
+	nGr1 := 4 
+	nGr2 := 2
+	
+elseif nGr = 52
+	
+	nGr1 := 5
+	nGr2 := 2
+	
+elseif nGr = 43
+
+	nGr1 := 4
+	nGr2 := 3
+
+elseif nGr = 53
+	
+	nGr1 := 5
+	nGr2 := 3
+
+endif
+
+return
 
 
 

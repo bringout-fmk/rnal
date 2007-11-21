@@ -70,19 +70,19 @@ Box(, nBoxX, nBoxY)
 
 	nX += 1
 
-	@ m_x + nX, m_y + 2 SAY "(1) - rezano     (4) - IZO i rezano"
+	@ m_x + nX, m_y + 2 SAY "(1) - rezano               (4) - IZO"
 	
 	nX += 1
 	
-	@ m_x + nX, m_y + 2 SAY "(2) - kaljeno    (5) - IZO i kaljeno/bruseno"
+	@ m_x + nX, m_y + 2 SAY "(2) - kaljeno              (5) - LAMI"
 	
 	nX += 1
 	
-	@ m_x + nX, m_y + 2 SAY "(3) - bruseno    (6) - LAMI-RG"
+	@ m_x + nX, m_y + 2 SAY "(3) - bruseno"
 	
 	nX += 2
 
-	@ m_x + nX, m_y + 2 SAY "Grupa artikala (0 - sve grupe):" GET nGroup VALID nGroup >= 0 .and. nGroup < 7 PICT "9"
+	@ m_x + nX, m_y + 2 SAY "Grupa artikala (0 - sve grupe):" GET nGroup VALID nGroup >= 0 .and. nGroup < 6 PICT "9"
 	
 	read
 BoxC()
@@ -106,7 +106,14 @@ local aArtArr := {}
 local nCount := 0
 local cCust_desc
 local aField
+local nScan
+local ii
+local cAop
+local cAopDesc
 local aGrCount := {}
+local nGr1 
+local nGr2
+
 
 // kreiraj tmp tabelu
 aField := _spec_fields()
@@ -116,8 +123,6 @@ O__TMP1
 
 // otvori potrebne tabele
 o_tables( .f. )
-
-altd()
 
 _main_filter( dD_from, dD_to, nOper )
 
@@ -131,6 +136,11 @@ do while !EOF()
 	__doc_no := nDoc_no
 	
 	cCust_desc := ALLTRIM( g_cust_desc( docs->cust_id ) )
+	
+	if "NN" $ cCust_desc
+		cCust_desc := cCust_Desc + "/" + ;
+			ALLTRIM( g_cont_desc( docs->cont_id ) )
+	endif
 	
 	cDoc_stat := g_doc_status( docs->doc_status )
 	
@@ -172,7 +182,8 @@ do while !EOF()
 		
 		nArt_id := field->art_id
 		nDoc_it_no := field->doc_it_no
-	
+		nQtty := field->doc_it_qtty
+		
 		// check group of item
 		nIt_group := set_art_docgr( nArt_id, nDoc_no, nDoc_it_no )
 		
@@ -196,28 +207,51 @@ do while !EOF()
 		set order to tag "1"
 		go top
 		seek docno_str( nDoc_no ) + docit_str( nDoc_it_no)
+		
+		aAop := {}
 
 		do while !EOF() .and. field->doc_no == nDoc_no ;
 				.and. field->doc_it_no == nDoc_it_no
 
-			if !EMPTY( cAop )
-				cAop += ", "
-			endif
+			cAopDesc := ALLTRIM( g_aop_desc( field->aop_id) )
+
+			nScan := ASCAN( aAop, {|xVal| xVal[1] == cAopDesc } )
 			
-			cAop += ALLTRIM( g_aop_desc( field->aop_id ) )
+			if nScan == 0
+				
+				AADD(aAop, {cAopDesc} )
+				
+			endif
 			
 			skip
 		
 		enddo
 
+		cAop := ""
+		
+		if LEN(aAop) > 0
+			for ii := 1 to LEN( aAop )
+				
+				if ii <> 1
+					cAop += ", "
+				endif
+				
+				cAop += aAop[ ii, 1 ] 
+			next
+		endif
+
 		select doc_it
 
 		// item description
-		cItem := ALLTRIM( STR(field->doc_it_qtty, 10, 2) )
-		cItem += " x " 
-		cItem += ALLTRIM( PADR( g_art_desc( nArt_id ), 60 ) )
-		cItem += cAop
-
+		cItem := ALLTRIM( g_art_desc( nArt_id ) )
+		cItemAop := cAop
+		
+		nGr1 := 0
+		nGr2 := 0
+		
+		// rasclani grupe
+		g_ggroups( nIt_group, @nGr1, @nGr2 )
+		
 		_ins_tmp1( nDoc_no, ;
 			cCust_desc, ;
 			docs->doc_date , ;
@@ -229,9 +263,31 @@ do while !EOF()
 			docs->doc_desc, ;
 			docs->doc_sh_desc, ;
 			cDoc_oper, ;
+			nQtty, ;
 			cItem, ;
-			nIt_group, ;
+			cItemAop, ;
+			nGr1, ;
 			cLog )
+
+		if nGr2 <> 0
+			_ins_tmp1( nDoc_no, ;
+			cCust_desc, ;
+			docs->doc_date , ;
+			docs->doc_dvr_date, ;
+			docs->doc_dvr_time, ;
+			cDoc_stat, ;
+			cDoc_prior, ;
+			cDoc_div, ;
+			docs->doc_desc, ;
+			docs->doc_sh_desc, ;
+			cDoc_oper, ;
+			nQtty, ;
+			cItem, ;
+			cItemAop, ;
+			nGr2, ;
+			cLog )
+
+		endif
 
 		++ nCount
 		
@@ -285,11 +341,7 @@ static function _p_rpt_spec( nGroup )
 START PRINT CRET
 
 ?
-P_COND
-
-if gPrinter == "R"
-	? "#%LANDS#"
-endif
+P_COND2
 
 // naslov izvjestaja
 _rpt_descr()
@@ -326,19 +378,19 @@ do while !EOF()
 	
 	@ prow(), pcol() + 1 SAY PADR( field->cust_desc, 30 )
 	
-	@ prow(), pcol() + 1 SAY PADR( DToC( field->doc_date ) + " / " + ;
-				DToC( field->doc_dvr_d ) + " / " + ;
-				ALLTRIM( field->doc_dvr_t ), 30 )
+	@ prow(), pcol() + 1 SAY PADR( DToC( field->doc_date ) + "/" + ;
+				DToC( field->doc_dvr_d ), 17 ) 
 	
-	
-	@ prow(), pcol() + 1 SAY PADR( PADR( field->doc_prior, 8 ) + " / " + ;
-				PADR( field->doc_stat, 15 ), 30 )
-	
-	@ prow(), pcol() + 1 SAY PADR( field->doc_oper, 20 )
-	
-	@ prow(), pcol() + 1 SAY PADR( field->doc_sdesc, 50 )
+	@ prow(), pcol() + 1 SAY " " + PADR( ALLTRIM(field->doc_prior ) + " - " + ;
+				ALLTRIM( field->doc_stat ) + " - " + ;
+				ALLTRIM( field->doc_oper ) + " - (" + ;
+				ALLTRIM( field->doc_sdesc ) + " )";
+				, 100 )
 	
 	nCount := 0
+	
+	nTotQtty := 0
+	cItemAop := ""
 
 	do while !EOF() .and. field->doc_no == nDoc_no
 		
@@ -348,23 +400,34 @@ do while !EOF()
 		
 		++ nCount
 		
-		? SPACE(5)
-		
-		@ prow(), pcol() + 1 SAY STR(nCount, 3) + ") " + field->doc_item
+		nTotQtty += field->qtty
 	
-		cLog := field->doc_log 
-		cDiv := field->doc_div
+		if !EMPTY( ALLTRIM(field->doc_aop) )
+			cItemAop += ", " + ALLTRIM( field->doc_aop )
+		endif
+		
+		cLog := ALLTRIM( field->doc_log ) 
+		cDiv := ALLTRIM( field->doc_div )
 		
 		skip
 	enddo
 	
-	? SPACE(5)
+	? SPACE(10)
+	@ prow(), pcol() + 1 SAY "broj stakala: " + ALLTRIM(STR( nTotQtty, 12 ))
+	
+	if !EMPTY( cItemAop )
+	
+		@ prow(), pcol() + 1 SAY ", op.: " + cItemAop
+	
+	endif
+	
+	? SPACE(10)
 	@ prow(), pcol() + 1 SAY "DIV: " + cDiv
 	
 	// upisi i log na kraju
 	if !EMPTY( cLog )
 		
-		@ prow(), pcol() + 2 SAY ", zadnja promjena:"
+		@ prow(), pcol() + 2 SAY SPACE(3) + ", zadnja promjena:"
 		
 		@ prow(), pcol() + 1 SAY cLog
 		
@@ -387,7 +450,7 @@ return
 static function _nstr()
 local lRet := .f.
 
-if prow() > 40
+if prow() > 65
 	lRet := .t.
 endif
 
@@ -423,25 +486,17 @@ cLine := REPLICATE("-", 10)
 cLine += SPACE(1)
 cLine += REPLICATE("-", 30)
 cLine += SPACE(1)
-cLine += REPLICATE("-", 30)
+cLine += REPLICATE("-", 17)
 cLine += SPACE(1)
-cLine += REPLICATE("-", 30)
-cLine += SPACE(1)
-cLine += REPLICATE("-", 20)
-cLine += SPACE(1)
-cLine += REPLICATE("-", 50)
+cLine += REPLICATE("-", 100)
 
 cTxt := PADR("Nalog br.", 10)
 cTxt += SPACE(1)
 cTxt += PADR("Partner", 30)
 cTxt += SPACE(1)
-cTxt += PADR("Vremenski termini", 30)
+cTxt += PADR("Termini", 17)
 cTxt += SPACE(1)
-cTxt += PADR("Status/Prioritet", 30)
-cTxt += SPACE(1)
-cTxt += PADR("Operater", 20)
-cTxt += SPACE(1)
-cTxt += PADR("Opis naloga", 50)
+cTxt += PADR("Ostale info (prioritet - status - operater - opis)", 100)
 
 ? cLine
 ? cTxt
@@ -469,6 +524,8 @@ AADD( aDbf, { "doc_div", "C", 20, 0 })
 AADD( aDbf, { "doc_desc", "C", 100, 0 })
 AADD( aDbf, { "doc_sdesc", "C", 100, 0 })
 AADD( aDbf, { "doc_item", "C", 250, 0 })
+AADD( aDbf, { "doc_aop", "C", 250, 0 })
+AADD( aDbf, { "qtty", "N", 15, 5 })
 AADD( aDbf, { "it_group", "N", 5, 0 })
 AADD( aDbf, { "doc_log", "C", 200, 0 })
 
@@ -482,7 +539,7 @@ static function _ins_tmp1( nDoc_no, cCust_desc, dDoc_date, dDoc_dvr_d, ;
 		cDoc_dvr_t, ;
 		cDoc_stat, cDoc_prior, ;
 		cDoc_div, cDoc_desc, cDoc_sDesc, cDoc_oper, ;
-		cDoc_item, nIt_group, cDoc_log )
+		nQtty, cDoc_item, cDoc_aop ,nIt_group, cDoc_log )
 
 local nTArea := SELECT()
 
@@ -502,6 +559,8 @@ replace field->doc_div with cDoc_div
 replace field->doc_desc with cDoc_desc
 replace field->doc_sdesc with cDoc_sdesc
 replace field->doc_item with cDoc_item
+replace field->doc_aop with cDoc_aop
+replace field->qtty with nQtty
 replace field->it_group with nIt_group
 replace field->doc_log with cDoc_log
 

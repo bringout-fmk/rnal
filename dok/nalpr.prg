@@ -55,8 +55,6 @@ set order to tag "2"
 go top
 nDoc_no := field->doc_no
 
-altd()
-
 // izvuci sve grupe....
 do while !EOF() .and. field->doc_no == nDoc_no
 	
@@ -100,6 +98,7 @@ function p_a4_nalpr(lStartPrint, nDoc_gr, nGr_cnt, nGr_total )
 local lShow_zagl
 local i
 local nDocRbr := 0
+local nCount := 0
 
 nDuzStrKorekcija := 0
 lPrintedTotal := .f.
@@ -153,12 +152,19 @@ nPage := 1
 aArt_desc := {}
 nArt_id := 0
 nArt_tmp := 0
+
 lSh_art_desc := .f.
+lSh_it_desc := .f.
+cTmpItDesc := ""
+cItDesc := ""
+
+nCount := 0
 
 // stampaj podatke 
 do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	
 	lSh_art_desc := .f.
+	
 	nArt_id := field->art_id
 	
 	if nArt_tmp <> nArt_id 
@@ -166,7 +172,14 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		lSh_art_desc := .t.
 
 	endif
+
+	// dodaj prored samo ako je drugi artikal
+	if nCount > 0 .and. lSh_art_desc == .t.
 	
+		? cLine
+	
+	endif
+
 	cDoc_no := docno_str( field->doc_no )
 	cDoc_it_no := docit_str( field->doc_it_no )
 	
@@ -192,7 +205,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	?? " "
 	
 	// proizvod, naziv robe, jmj
-	?? aArt_desc[1]
+	?? ALLTRIM( aArt_desc[1] ) + " " + REPLICATE(".", (LEN_DESC - 1 ) - LEN(ALLTRIM( aArt_desc[1] ))) 
 	
 	?? " "
 	
@@ -260,14 +273,14 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
     		endif	
 	endif
 
-	if lSh_art_desc == .t.
+	//if lSh_art_desc == .t.
 	
-		? RAZMAK
-		?? PADL("", LEN_IT_NO)
-		?? " "
-		?? REPLICATE("-", LEN_DESC)
+	//	? RAZMAK
+	//	?? PADL("", LEN_IT_NO)
+	//	?? " "
+	//	?? REPLICATE("-", LEN_DESC)
 	
-	endif
+	//endif
 	
 	// dodatne operacije operacije....
 	
@@ -278,19 +291,32 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	go top
 	seek docno_str(t_docit->doc_no) + docit_str(t_docit->doc_it_no)
 
+	
 	do while !EOF() .and. field->doc_no == t_docit->doc_no ;
 			.and. field->doc_it_no == t_docit->doc_it_no
 
 	    // uzmi element
 	    nDoc_el_no := field->doc_el_no
 	    
+	    
 	    nElDesc := 1
 	    nElCount := 0
-	    
+	    lSh_op_desc := .f.
+	    cOpTmpDesc := ""
+	    cDoc_op_desc := ""
+    
 	    do while !EOF() .and. field->doc_no == t_docit->doc_no ;
 	    		    .and. field->doc_it_no == t_docit->doc_it_no ;
 			    .and. field->doc_el_no == nDoc_el_no
 		
+	 	cDoc_op_desc := ALLTRIM(field->doc_op_desc)
+	    
+	   	if cOpTmpDesc <> cDoc_op_desc
+	    	
+			lSh_op_desc := .t.
+	    
+	   	endif
+	   
 		// el.op.header
 		if nOpHeader == 1
 			
@@ -348,7 +374,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		endif
 
 		
-		if !EMPTY(field->doc_op_desc)
+		if !EMPTY(field->doc_op_desc) .and. lSh_op_desc == .t.
 			
 			cPom := "- napomene: "
 			cPom += ALLTRIM( field->doc_op_desc )
@@ -369,6 +395,8 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		
 		skip
 	   
+		cOpTmpDesc := cDoc_op_desc
+	   
 	   enddo
 	   
 	enddo
@@ -378,7 +406,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	// napomene za item:
 	// - napomene
 	// - shema u prilogu
-	
+
 	if !EMPTY( field->doc_it_desc ) ;
 		.or. field->doc_it_altt <> 0 ;
 		.or. ( field->doc_it_schema == "D" )
@@ -403,16 +431,22 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			cPom += ", "
 			cPom += "nadmorska visina = " + ALLTRIM(STR(field->doc_it_altt, 12, 2)) + " m"
 		endif
+	
+		cItDesc := cPom
 		
-		aDoc_it_desc := SjeciStr( cPom , 100 )
-		
-		// podvuci
-		//? RAZMAK
-		//?? PADL( "", LEN_IT_NO )
-		//?? " "
-		//?? REPLICATE( "-", LEN_DESC )
+		altd()
 
-		for i:=1 to LEN(aDoc_it_desc)
+		lSh_it_desc := .f.
+		
+		if ALLTRIM(cTmpItDesc) <> ALLTRIM(cItDesc)
+			lSh_it_desc := .t.
+		endif
+	
+		if lSh_it_desc == .t.
+		
+		   aDoc_it_desc := SjeciStr( cItDesc , 100 )
+		
+		   for i:=1 to LEN(aDoc_it_desc)
 						
 			? RAZMAK
 
@@ -421,16 +455,19 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			?? " "
 			
 			?? aDoc_it_desc[i]
-		next
+		   next
 		
+		endif
 	endif
-	
-	? cLine
+
 	
 	select t_docit
 	skip
 
-	nArt_tmp := nArt_id 
+	nArt_tmp := nArt_id
+	cTmpItDesc := cItDesc
+	
+	++ nCount 
 	
 enddo
 

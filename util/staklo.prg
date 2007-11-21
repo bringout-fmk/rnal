@@ -163,4 +163,34 @@ next
 return
 
 
+// ---------------------------------
+// glass tickness
+// ---------------------------------
+function glass_tick( cTick )
+local nGlTick := 0
+local aTmp := {}
+local cTmp := ""
+local i
+
+// ovo je slucaj za LAMI staklo...
+if "." $ cTick
+
+	// ex: "33.1"
+	aTmp := TokToNiz( cTick, "." )
+	// ex: "33"
+	cTmp := aTmp[1]
+
+	for i:=1 to LEN(cTmp)
+		nGlTick += VAL ( SUBSTR( cTmp, i, 1 ) )
+	next
+
+	// ex: "33" -> 6
+else
+	// klasicno staklo...
+	nGlTick := VAL( ALLTRIM(cTick) )
+endif
+
+return nGlTick
+
+
 
