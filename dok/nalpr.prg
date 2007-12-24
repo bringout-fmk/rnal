@@ -23,6 +23,23 @@ static lPrintedTotal := .f.
 // za prikaz vecih fontova
 static nDuzStrKorekcija := 0
 
+// ----------------------------------------------
+// definicija linije za glavnu tabelu sa stavkama
+// nVar - 1 = nalog
+//        2 = obracunski list
+// ----------------------------------------------
+static function g_line( )
+local cLine
+
+// linija za naloge
+cLine := RAZMAK
+cLine += REPLICATE("-", LEN_IT_NO ) 
+cLine += " " + REPLICATE("-", LEN_DESC)
+cLine += " " + REPLICATE("-", LEN_DIMENSION)
+cLine += " " + REPLICATE("-", LEN_DIMENSION)
+cLine += " " + REPLICATE("-", LEN_QTTY)
+
+return cLine
 
 
 // ------------------------------------------------------
@@ -124,7 +141,7 @@ B_ON
 
 ?
 
-cLine := g_line()
+cLine := g_line(1)
 
 // setuj len_ukupno
 LEN_TOTAL := LEN( cLine )
@@ -481,6 +498,8 @@ endif
 
 B_OFF
 
+?
+
 s_nal_izdao()
 
 s_nal_footer()
@@ -595,7 +614,7 @@ static function s_tbl_header()
 local cLine
 local cRow1
 
-cLine := g_line()
+cLine := g_line(1)
 
 ? cLine
 
@@ -656,23 +675,6 @@ p_line(cRazmak + cDlhead, 10, .t.)
 ?
 
 return
-
-
-
-// ----------------------------------------------
-// definicija linije za glavnu tabelu sa stavkama
-// ----------------------------------------------
-static function g_line()
-local cLine
-
-cLine := RAZMAK
-cLine += REPLICATE("-", LEN_IT_NO ) 
-cLine += " " + REPLICATE("-", LEN_DESC)
-cLine += " " + REPLICATE("-", LEN_DIMENSION)
-cLine += " " + REPLICATE("-", LEN_DIMENSION)
-cLine += " " + REPLICATE("-", LEN_QTTY)
-
-return cLine
 
 
 
@@ -809,7 +811,7 @@ return
 function NStr_a4(nPage, lShZagl)
 local cLine
 
-cLine := g_line()
+cLine := g_line(1)
 
 // korekcija duzine je na svako strani razlicita
 nDuzStrKorekcija := 0 

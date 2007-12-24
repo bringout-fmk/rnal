@@ -42,8 +42,21 @@ __doc_no := _docs->doc_no
 __doc_stat := _docs->doc_status
 
 if __doc_stat < 3 .and. !doc_exist( __doc_no )
-	MsgBeep("Nalog " + ALLTRIM(STR( __doc_no )) + " nije moguce azurirati !!!")
+	
+	MsgBeep("Nalog " + ALLTRIM(STR( __doc_no )) + " nije moguce azurirati !!!#Status dokumenta = " + ALLTRIM(STR(__doc_stat)) )
+	
+	// resetuj dokument broj
+	select _docs
+		
+	fill__doc_no( 0, .t. )
+		
+	select _docs
+	go top
+
+	msgbeep("Ponovite operaciju stampe i azuriranja naloga !")
+
 	return 0
+	
 endif
 
 MsgO("Azuriranje naloga u toku...")
@@ -473,7 +486,7 @@ set order to tag "A"
 go top
 seek d_busy() + docno_str( nDoc_no )
 
-if FOUND()
+if FOUND() .and. docs->doc_no == nDoc_no
 	lRet := .t.
 endif
 
@@ -569,13 +582,17 @@ return nNewBrNal
 // ----------------------------------------------
 // napuni pripremne tabele sa brojem naloga
 // ----------------------------------------------
-function fill__doc_no( nDoc_no )
+function fill__doc_no( nDoc_no, lForce )
 local nTRec
 local nTArea
 local nAPPRec
 
+if lForce == nil
+	lForce := .f.
+endif
+
 // ako je broj 0 ne poduzimaj nista....
-if ( nDoc_no == 0 )
+if ( nDoc_no == 0 .and. lForce == .f. )
 	return
 endif
 

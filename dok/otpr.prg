@@ -24,6 +24,30 @@ static lPrintedTotal := .f.
 static nDuzStrKorekcija := 0
 
 
+// ----------------------------------------------
+// definicija linije za glavnu tabelu sa stavkama
+// nVar - 1 = nalog
+//        2 = obracunski list
+// ----------------------------------------------
+static function g_line( )
+local cLine
+
+// linija za obraèunski list
+cLine := RAZMAK
+cLine += REPLICATE("-", LEN_IT_NO ) 
+cLine += " " + REPLICATE("-", LEN_DESC)
+cLine += " " + REPLICATE("-", LEN_QTTY)
+cLine += " " + REPLICATE("-", LEN_DIMENSION)
+cLine += " " + REPLICATE("-", LEN_DIMENSION)
+cLine += " " + REPLICATE("-", LEN_DIMENSION)
+cLine += " " + REPLICATE("-", LEN_DIMENSION)
+cLine += " " + REPLICATE("-", LEN_VALUE)
+cLine += " " + REPLICATE("-", LEN_VALUE)
+cLine += " " + REPLICATE("-", LEN_VALUE)
+
+return cLine
+
+
 
 // ------------------------------------------------------
 // glavna funkcija za poziv stampe obracunskog lista
@@ -81,7 +105,7 @@ nTTotal := VAL(g_t_pars_opis("N10"))
 // zaglavlje 
 obrl_header()
 
-cLine := g_line()
+cLine := g_line(2)
 
 // broj dokumenta.....
 cDoc_no := g_t_pars_opis("N01")
@@ -208,7 +232,9 @@ do while !EOF()
 		++ nPage
 		Nstr_a4(nPage, .t.)
 		
-    	endif	
+    		P_COND2
+	
+	endif	
 
 	// ostatak naziva artikla....
 	if LEN(aArt_desc) > 1
@@ -227,6 +253,7 @@ do while !EOF()
 			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 				++ nPage
 				Nstr_a4(nPage, .t.)
+				P_COND2
 			endif	
 		next
 		
@@ -241,6 +268,7 @@ enddo
 if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 	++nPage
 	Nstr_a4(nPage, .t.)
+	P_COND2
 endif	
 
 ? cLine
@@ -351,7 +379,7 @@ local cLine
 local cRow1
 local cRow2
 
-cLine := g_line()
+cLine := g_line(2)
 
 ? cLine
 
@@ -427,27 +455,6 @@ p_line(cRazmak + cDlhead, 10, .t.)
 
 return
 
-
-
-// ----------------------------------------------
-// definicija linije za glavnu tabelu sa stavkama
-// ----------------------------------------------
-static function g_line()
-local cLine
-
-cLine := RAZMAK
-cLine += REPLICATE("-", LEN_IT_NO ) 
-cLine += " " + REPLICATE("-", LEN_DESC)
-cLine += " " + REPLICATE("-", LEN_QTTY)
-cLine += " " + REPLICATE("-", LEN_DIMENSION)
-cLine += " " + REPLICATE("-", LEN_DIMENSION)
-cLine += " " + REPLICATE("-", LEN_DIMENSION)
-cLine += " " + REPLICATE("-", LEN_DIMENSION)
-cLine += " " + REPLICATE("-", LEN_VALUE)
-cLine += " " + REPLICATE("-", LEN_VALUE)
-cLine += " " + REPLICATE("-", LEN_VALUE)
-
-return cLine
 
 
 

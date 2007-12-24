@@ -155,6 +155,8 @@ do while !EOF()
 
 	seek docno_str( nDoc_no )
 
+	cLog := ""
+	
 	do while !EOF() .and. field->doc_no == nDoc_no
 		
 		cLog := DTOC( field->doc_log_date ) 
@@ -386,17 +388,13 @@ do while !EOF()
 				ALLTRIM( field->doc_oper ) + " - (" + ;
 				ALLTRIM( field->doc_sdesc ) + " )";
 				, 100 )
-	
+
 	nCount := 0
 	
 	nTotQtty := 0
 	cItemAop := ""
 
 	do while !EOF() .and. field->doc_no == nDoc_no
-		
-		if _nstr() == .t.
-			FF
-		endif
 		
 		++ nCount
 		
@@ -450,7 +448,7 @@ return
 static function _nstr()
 local lRet := .f.
 
-if prow() > 65
+if prow() > 62
 	lRet := .t.
 endif
 
