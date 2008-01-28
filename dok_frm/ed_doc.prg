@@ -270,7 +270,7 @@ aImeKol := {}
 aKol:={}
 
 AADD(aImeKol, {"dod.oper", {|| PADR(g_aop_desc( aop_id ),10) }, "aop_id"})
-AADD(aImeKol, {"atr.dod.oper", {|| PADR( g_aop_att_desc( aop_att_id ), 10 )}, "aop_att_id" })
+AADD(aImeKol, {"atr.dod.oper", {|| PADR( g_aop_att_desc( aop_att_id ), 10 ) }, "aop_att_id" })
 AADD(aImeKol, {"dod.opis", {|| PADR(doc_op_desc, 15) + ".."}, "doc_op_desc" })
 
 for i:=1 to LEN(aImeKol)
@@ -278,8 +278,6 @@ for i:=1 to LEN(aImeKol)
 next
 
 return
-
-
 
 
 // ---------------------------------------------

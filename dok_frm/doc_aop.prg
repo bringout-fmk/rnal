@@ -105,6 +105,57 @@ m_y := nY
 return nRet
 
 
+
+// -------------------------------------------------------
+// kopiranje operacija sa prethodne stavke
+// -------------------------------------------------------
+function _cp_oper( nDoc_no, nArt_id, nDoc_it_no )
+local nTArea := SELECT()
+local nTRec := RECNO()
+local nRec 
+local nSrchItem := nDoc_it_no - 1
+local nCnt := 0
+
+select _doc_ops
+set order to tag "1"
+go top
+seek docno_str( nDoc_no ) + docit_str( nSrchItem )
+
+do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_it_no == nSrchItem
+
+	skip 1
+	
+	nRec := RECNO()
+	
+	skip -1
+	
+	Scatter()
+	
+	append blank
+	
+	_doc_it_no := nDoc_it_no
+	
+	Gather()
+	
+	++ nCnt
+	
+	go (nRec)
+
+enddo
+
+select (nTArea)
+go (nTRec)
+
+if nCnt > 0
+	msgbeep("Kopirano: " + ALLTRIM(STR(nCnt)) + " operacija !")
+endif
+
+return
+
+
+
+
 // -------------------------------------------------
 // forma za unos podataka 
 // -------------------------------------------------

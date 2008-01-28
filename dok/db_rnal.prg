@@ -77,14 +77,19 @@ AADD(aArr,{ "art_id"     , "N" ,  10 ,  0 })
 AADD(aArr,{ "art_desc"   , "C" , 250 ,  0 })
 AADD(aArr,{ "doc_it_qtty", "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_heigh" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_h2" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_width" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_w2" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_type" , "C" ,  1 ,  0 })
 AADD(aArr,{ "doc_it_altt" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_acity" , "C" ,  50 ,  0 })
 AADD(aArr,{ "doc_it_schema" , "C" ,   1 ,  0 })
 AADD(aArr,{ "doc_it_desc" , "C" , 150 ,  0 })
 AADD(aArr,{ "doc_it_total" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_zwidth" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_zw2" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_zheight" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_zh2" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_neto" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_bruto" , "N" ,  15 ,  5 })
 
@@ -194,10 +199,14 @@ return xRet
 
 // dodaj stavke u tabelu T_RNST
 function a_t_docit( nDoc_no, nDoc_gr_no, nDoc_it_no, nArt_id, cArt_desc, ;
-		    cDoc_it_schema, cDoc_it_desc, ;
-		    nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, nDoc_it_altt, ;
+		    cDoc_it_schema, cDoc_it_desc, cDoc_it_type, ;
+		    nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, ;
+		    nDoc_it_h2, nDoc_it_w2, ;
+		    nDoc_it_altt, ;
 		    cDoc_it_city, ;
-		    nDoc_it_total, nGNHeigh, nGNWidth, nNeto, nBruto )
+		    nDoc_it_total, nGNHeigh, nGNWidth, ;
+		    nGnH2, nGNW2, ;
+		    nNeto, nBruto )
 
 O_T_DOCIT
 select t_docit
@@ -209,7 +218,10 @@ replace art_id with nArt_id
 replace art_desc with cArt_desc
 replace doc_it_qtty with nDoc_it_qtty
 replace doc_it_heigh with nDoc_it_heigh
+replace doc_it_h2 with nDoc_it_h2
 replace doc_it_width with nDoc_it_width
+replace doc_it_w2 with nDoc_it_w2
+replace doc_it_type with cDoc_it_type
 replace doc_it_altt with nDoc_it_altt
 replace doc_acity with cDoc_it_city
 replace doc_it_total with nDoc_it_total
@@ -218,7 +230,9 @@ replace doc_it_desc with cDoc_it_desc
 
 if nGNHeigh <> nil
 	replace doc_it_zheight with nGNHeigh
+	replace doc_it_zh2 with nGNH2
 	replace doc_it_zwidth with nGNWidth
+	replace doc_it_zw2 with nGNW2
 	replace doc_it_neto with nNeto
 	replace doc_it_bruto with nBruto
 endif

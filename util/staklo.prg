@@ -31,7 +31,9 @@ return nVal / 10
 // ispisuje box sa slikom stakla i odabirom 
 // obrade na stranicama
 // ---------------------------------------------------
-function glass_config( cConfType, cD1, cD2, cD3, cD4, nR1, nR2, nR3, nR4 )
+function glass_config( nWidth, nHeigh, ;
+			cV1, cV2, cV3, cV4, ;
+			nR1, nR2, nR3, nR4 )
 
 local nBoxX := 17
 local nBoxY := 56
@@ -43,6 +45,11 @@ local nGBott := 15
 local cColSch := "GR+/G+"
 
 private GetList := {}
+
+cV1 := "N"
+cV2 := cV1
+cV3 := cV1
+cV4 := cV1
 
 cD1 := "N"
 cD2 := cD1
@@ -56,63 +63,76 @@ nR4 := nR1
 
 Box(, nBoxX, nBoxY)
 
+	nStX := m_x + 2
+	nStY := m_y + 2
+
 	@ m_x + 1, m_y + 2 SAY "##glass_config##  select operations..."
 
-	_show_glass( nGLen, nGTop, nGBott, nGLeft, cColSch ) 
+	_show_glass( nGLen, nGTop, nGBott, nGLeft, cColSch, nWidth, nHeigh ) 
 	
-	if cConfType == "#G_CONFIG#"
-		
-		// top
-		@ m_x + nGTop - 1, m_y + (nBoxY / 2) - 1 SAY "d1 ?" GET cD1 ;
-			PICT "@!" VALID cD1 $ "DN"
+	// top
+	@ m_x + nGTop - 1, m_y + (nBoxY / 2) - 1 SAY "d1 ?" GET cV1 ;
+		PICT "@!" VALID cV1 $ "DN"
 	
-		// left
-		@ m_x + (nBoxX / 2 ) + 1, m_y + (nGLeft - 6 ) SAY "d2 ?" GET cD2 ;
-			PICT "@!" VALID cD2 $ "DN"
+	// left
+	@ m_x + (nBoxX / 2 ) + 1, m_y + (nGLeft - 6 ) SAY "d2 ?" GET cV2 ;
+		PICT "@!" VALID cV2 $ "DN"
 	
-		// right
-		@ m_x + (nBoxX / 2 ) + 1, m_y + (nGLeft + nGLen + 3) SAY "d3 ?" GET cD3; 
-			PICT "@!" VALID cD3 $ "DN"
+	// right
+	@ m_x + (nBoxX / 2 ) + 1, m_y + (nGLeft + nGLen + 3) SAY "d3 ?" GET cV3; 
+		PICT "@!" VALID cV3 $ "DN"
 	
-		// bottom
-		@ m_x + nGBott + 1, m_y + (nBoxY / 2) - 1 SAY "d4 ?" GET cD4 ; 
-			PICT "@!" VALID cD4 $ "DN"
+	// bottom
+	@ m_x + nGBott + 1, m_y + (nBoxY / 2) - 1 SAY "d4 ?" GET cV4 ; 
+			PICT "@!" VALID cV4 $ "DN"
 	
-	endif
 	
-	if cConfType == "#G_CONFIG_RADIUS#"
-		
-		// top left
-		@ m_x + nGTop - 1, m_y + ( nGLeft - 4 ) SAY "r1 ?" GET cD1 ;
-			PICT "@!" VALID cD1 $ "DN"
-	
-		@ m_x + nGTop - 1, col() + 1 GET nR1 PICT "99999" ;
-			WHEN cD1 == "D"
-	
-		// top right
-		@ m_x + nGTop - 1, m_y + ( nGLen + 3 ) SAY "r2 ?" GET cD2 ;
-			PICT "@!" VALID cD2 $ "DN"
-	
-		@ m_x + nGTop - 1, col() + 1 GET nR2 PICT "99999" ;
-			WHEN cD2 == "D"
-	
-		// bott. left
-		@ m_x + nGBott + 1, m_y + ( nGLeft - 4 ) SAY "r3 ?" GET cD3; 
-			PICT "@!" VALID cD3 $ "DN"
-	
-		@ m_x + nGBott + 1, col() + 1 GET nR3 PICT "99999" ;
-			WHEN cD3 == "D"
-	
-		// bott. right
-		@ m_x + nGBott + 1, m_y + ( nGLen + 3 ) SAY "r4 ?" GET cD4 ; 
-			PICT "@!" VALID cD4 $ "DN"
-
-		@ m_x + nGBott + 1, col() + 1 GET nR4 PICT "99999" ;
-			WHEN cD4 == "D"
-
-	endif
-	
+	// procitaj prvo stranice
 	read
+	
+	
+      if pitanje(, "Definisati radijuse ?", "N") == "D"
+
+	// pobrisi prethodno
+	@ nStX, nStY CLEAR TO nStX + nBoxX - 3, nStY + nBoxY - 2
+
+
+	_show_glass( nGLen, nGTop, nGBott, nGLeft, cColSch, nWidth, nHeigh ) 
+		
+	// top left
+	@ m_x + nGTop - 1, m_y + ( nGLeft - 4 ) SAY "r1 ?" GET cD1 ;
+		PICT "@!" VALID cD1 $ "DN"
+	
+	@ m_x + nGTop - 1, col() + 1 GET nR1 PICT "99999" ;
+		WHEN cD1 == "D" VALID val_radius( nR1, nWidth, nHeigh )
+	
+	// top right
+	@ m_x + nGTop - 1, m_y + ( nGLen + 3 ) SAY "r2 ?" GET cD2 ;
+		PICT "@!" VALID cD2 $ "DN"
+	
+	@ m_x + nGTop - 1, col() + 1 GET nR2 PICT "99999" ;
+		WHEN cD2 == "D" VALID val_radius( nR2, nWidth, nHeigh )
+	
+	// bott. left
+	@ m_x + nGBott + 1, m_y + ( nGLeft - 4 ) SAY "r3 ?" GET cD3; 
+		PICT "@!" VALID cD3 $ "DN"
+	
+	@ m_x + nGBott + 1, col() + 1 GET nR3 PICT "99999" ;
+		WHEN cD3 == "D" VALID val_radius( nR3, nWidth, nHeigh )
+	
+	// bott. right
+	@ m_x + nGBott + 1, m_y + ( nGLen + 3 ) SAY "r4 ?" GET cD4 ; 
+		PICT "@!" VALID cD4 $ "DN"
+
+	@ m_x + nGBott + 1, col() + 1 GET nR4 PICT "99999" ;
+		WHEN cD4 == "D" VALID val_radius( nR4, nWidth, nHeigh )
+
+	read
+	
+	// zatim procitaj radijuse
+	
+      endif
+	
 BoxC()
 
 if LastKey() == K_ESC
@@ -121,6 +141,24 @@ endif
 
 return .t.
 
+
+// -------------------------
+// validacija radijusa na 
+// osnovu dimenzija A i B
+// stakla
+// -------------------------
+function val_radius( nRadius, nA, nB )
+local lRet := .t.
+
+if nRadius > ( nA / 2 ) .or. nRadius > ( nB / 2 )
+	lRet := .f.
+endif
+
+if lRet == .f.
+	msgbeep("Radijus ne moze biti veci od pola duzine stranice !")
+endif
+
+return lRet
 
 
 // ----------------------------------------
@@ -131,9 +169,11 @@ return .t.
 // nLeft - lijeva strana
 // cColSch - kolor shema
 // ----------------------------------------
-static function _show_glass( nLenght, nTop, nBottom, nLeft, cColSch )
+static function _show_glass( nLenght, nTop, nBottom, nLeft, cColSch, ;
+				nWidth, nHeigh)
 local i
 local nTmp 
+local nDimPos := nBottom - nTop 
 
 // gornja strana
 @ m_x + nTop, m_y + nLeft SAY CHR(218) ;
@@ -159,6 +199,11 @@ next
 @ m_x + nBottom, m_y + nLeft + 1 + nLenght SAY CHR(217) ;
 		COLOR cColSch
 
+// ispisi dimenzije stakla
+@ m_x + nDimPos - 1, m_y + 20 SAY "glass dimensions:"
+@ m_x + nDimPos, m_y + 20 SAY ALLTRIM(STR(nWidth, 12, 2)) + ;
+				" x " + ;
+				ALLTRIM(STR(nHeigh, 12, 2)) + " mm" 
 
 return
 

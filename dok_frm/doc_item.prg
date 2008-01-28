@@ -20,6 +20,8 @@ local cBoxNaz := "unos nove stavke"
 local nRet := 0
 local nFuncRet := 0
 local cGetDOper := "N"
+local lCopyAop
+local nArt
 private GetList:={}
 
 _doc := nDoc_no
@@ -64,11 +66,46 @@ do while .t.
 		
 		if cGetDOper == "D"
 			
-			e_doc_ops( _doc, ;
+			lCopyAop := .f.
+			
+			// operacije moguæe kopirati samo ako je isti 
+			// artikal i ako je redni broj <> 1
+			altd()
+
+			if _doc_it->doc_it_no <> 1
+				
+				nArt := _doc_it->art_id
+				
+				skip -1
+				
+				if nArt == _doc_it->art_id
+				
+					lCopyAop := .t.
+				
+				endif
+				
+				skip 1
+			
+			endif
+			
+			if lCopyAop == .t. .and. pitanje(, "koristi operacije prethodne stavke ?", "N") == "D"
+			
+				// kopiraj operacije...
+				_cp_oper( _doc, ;
+					_doc_it->art_id, ;
+					_doc_it->doc_it_no )
+			
+			else
+				
+				// manualno unesi operacije
+				
+				e_doc_ops( _doc, ;
 				   lNew, ;
 				   _doc_it->art_id, ;
 				   _doc_it->doc_it_no )
 				   
+			endif
+			
 			select _doc_it
 			
 		endif
@@ -114,7 +151,8 @@ if l_new_it
 	_doc_it_no := inc_docit( _doc )
 	_doc_it_altt := 0
 	_doc_acity := SPACE( LEN(_doc_acity) )
-
+	_doc_it_type := " "
+	
 	// ako je nova stavka i vrijednost je 0, uzmi default...
 	if _doc_it_altt == 0
 		_doc_it_altt := gDefNVM
@@ -135,30 +173,77 @@ nX += 2
 
 @ m_x + nX, m_y + 2 SAY PADL("ARTIKAL (*):", nLeft) GET _art_id VALID {|| s_articles( @_art_id, .f., .t. ), show_it( g_art_desc( _art_id, nil, .f. ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "0 - otvori sifrarnik i pretrazi" )
 
-nX += 2
+nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("shema u prilogu (D/N)? (*):", nLeft + 9) GET _doc_it_schema PICT "@!" VALID _doc_it_schema $ "DN" WHEN {|| _set_arr( _art_id, @aArtArr), set_opc_box( nBoxX, 50, "da li postoji dodatna shema kao prilog") }
+@ m_x + nX, m_y + 2 SAY PADL("Tip artikla (*):", nLeft) GET _doc_it_type VALID {|| _doc_it_type $ " SR", show_it( _g_doc_it_type( _doc_it_type ) ) } WHEN set_opc_box( nBoxX, 50, "' ' - standardni, 'R' - radius, 'S' - shape") PICT "@!"
+
+read
+
+ESC_RETURN 0
+
+// set opisa na formi
+cDimADesc := "(A) sirina [mm] (*):"
+cDimBDesc := "(B) visina [mm] (*):"
+cDimCDesc := "(C) sirina [mm] (*):"
+cDimDDesc := "(D) visina [mm] (*):"
+
+if _doc_it_type == "R"
+	cDimADesc := "(A) fi [mm] (*):"
+	cDimBDesc := "(B) fi [mm] (*):"
+endif
+
+if _doc_it_type $ "SR"
+	_doc_it_schema := "D"
+endif
+
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL("shema u prilogu (D/N)? (*):", nLeft + 9) GET _doc_it_schema PICT "@!" VALID {|| _doc_it_schema $ "DN" } WHEN {|| _set_arr( _art_id, @aArtArr), set_opc_box( nBoxX, 50, "da li postoji dodatna shema kao prilog") }
 
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("dod.nap.stavke:", nLeft) GET _doc_it_desc PICT "@S40" WHEN set_opc_box( nBoxX, 50, "dodatne napomene vezane za samu stavku")
 
 nX += 2
+	
+@ m_x + nX, m_y + 2 SAY PADL( cDimADesc , nLeft + 3) GET _doc_it_width PICT Pic_Dim() VALID val_width(_doc_it_width) .and. rule_items("DOC_IT_WIDTH", _doc_it_width, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
 
-@ m_x + nX, m_y + 2 SAY PADL("sirina [mm] (*):", nLeft + 3) GET _doc_it_width PICT Pic_Dim() VALID val_width(_doc_it_width) .and. rule_items("DOC_IT_WIDTH", _doc_it_width, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
+// ako je tip SHAPE
+if _doc_it_type == "S"
+	
+	@ m_x + nX, col() + 2 SAY PADL( cDimCDesc , nLeft + 3) GET _doc_it_w2 PICT Pic_Dim() VALID val_width(_doc_it_w2) .and. rule_items("DOC_IT_WIDTH", _doc_it_w2, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
+
+else
+
+	_doc_it_w2 := 0
+
+endif
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("visina [mm] (*):", nLeft + 3) GET _doc_it_heigh PICT Pic_Dim() VALID val_heigh(_doc_it_heigh) .and. rule_items("DOC_IT_HEIGH", _doc_it_heigh, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
+@ m_x + nX, m_y + 2 SAY PADL( cDimBDesc , nLeft + 3) GET _doc_it_heigh PICT Pic_Dim() VALID val_heigh(_doc_it_heigh) .and. rule_items("DOC_IT_HEIGH", _doc_it_heigh, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
+
+// ako je tip SHAPE
+if _doc_it_type == "S"
+		
+	@ m_x + nX, col() + 2 SAY PADL( cDimDDesc , nLeft + 3) GET _doc_it_h2 PICT Pic_Dim() VALID val_heigh(_doc_it_h2) .and. rule_items("DOC_IT_HEIGH", _doc_it_h2, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
+
+else
+	_doc_it_h2 := 0
+endif
 
 nX += 1
+
 
 @ m_x + nX, m_y + 2 SAY PADL("kolicina [kom] (*):", nLeft + 3) GET _doc_it_qtty PICT Pic_Qtty() VALID val_qtty(_doc_it_qtty) .and. rule_items("DOC_IT_QTTY", _doc_it_qtty, aArtArr ) WHEN set_opc_box( nBoxX, 50 )
-
 
 nX += 1
 
 read
+
+ESC_RETURN 0
+
 
 if rule_items( "DOC_IT_ALTT", _doc_it_altt, aArtArr ) <> .t.
 
@@ -189,6 +274,27 @@ read
 ESC_RETURN 0
 
 return 1
+
+
+
+
+
+
+
+
+// -----------------------------------
+// vraca tip stavke naloga
+// -----------------------------------
+function _g_doc_it_type( cType )
+local cRet := "standard"
+
+if cType == "S"
+	cRet := "shape"
+elseif cType == "R"
+	cRet := "radius"
+endif
+
+return cRet 
 
 
 // ------------------------------------
@@ -229,6 +335,18 @@ select (nTArea)
 go (nTRec)
 
 return nRet
+
+
+// -------------------------------------
+// validacija precnika (fi)
+// -------------------------------------
+static function val_fi( nVal )
+local lRet := .f.
+if nVal <> 0
+	lRet := .t.
+endif
+val_msg(lRet, "FI mora biti <> 0 !")
+return lRet
 
 
 // -------------------------------------

@@ -84,8 +84,12 @@ local nDoc_gr_no := 0
 local nQtty
 local nTotal
 local nHeigh
+local nHe2
 local nWidth
+local nWi2
 local nZWidth := 0
+local nZH2 := 0
+local nZW2 := 0
 local nZHeigh := 0
 local nNeto := 0
 local nBruto := 0
@@ -116,6 +120,9 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nArt_id := field->art_id
 	nDoc_it_no := field->doc_it_no
 	nDoc_no := field->doc_no
+
+	// tip artikla
+	cDoc_it_type := field->doc_it_type
 	
 	// nadji proizvod
 	select articles
@@ -145,7 +152,11 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nQtty := field->doc_it_qtty
 	nHeigh := field->doc_it_heigh
 	nWidth := field->doc_it_width
-	
+
+	// dimenzije ako je oblik SHAPE
+	nHe2 := field->doc_it_h2
+	nWi2 := field->doc_it_w2
+
 	// nadmorska visina
 	// samo ako je razlicita vrijednost od default-ne
 	if (field->doc_it_altt <> gDefNVM) .or. ;
@@ -170,11 +181,13 @@ do while !EOF() .and. field->doc_no == __doc_no
 		_art_set_descr( nArt_id, nil, nil, @aZpoGN, lZpoGN )
 		
 		nZHeigh := obrl_zaok( nHeigh, aZpoGN )
+		nZH2 := obrl_zaok( nHe2, aZpoGN)
 		
 		nZWidth := obrl_zaok( nWidth, aZpoGN )
+		nZW2 := obrl_zaok( nWi2, aZpoGN)
 		
 		// ako se zaokruzuje onda total ide po zaokr.vrijednostima
-		nTotal := ROUND( c_ukvadrat( nQtty, nZHeigh, nZWidth ), 2)
+		nTotal := ROUND( c_ukvadrat( nQtty, nZHeigh, nZWidth, nZH2, nZW2 ), 2)
 		
 		// izracunaj neto
 		nNeto := ROUND( obrl_neto( nTotal, aZpoGN ), 2)
@@ -191,9 +204,13 @@ do while !EOF() .and. field->doc_no == __doc_no
 
 	// dodaj u stavke
 	a_t_docit( __doc_no, nGr1, nDoc_it_no, nArt_id, cArt_desc , ;
-		  cDoc_it_schema, cDoc_it_desc, nQtty, nHeigh, nWidth, ;
+		  cDoc_it_schema, cDoc_it_desc, cDoc_it_Type, ;
+		  nQtty, nHeigh, nWidth, ;
+		  nHe2, nWi2, ;
 		  nDocit_altt, cDocit_city, nTotal, ;
-		  nZHeigh, nZWidth, nNeto, nBruto )
+		  nZHeigh, nZWidth, ;
+		  nZH2, nZW2, ;
+		  nNeto, nBruto )
 	
 	
 	if nGr2 <> 0
@@ -202,9 +219,13 @@ do while !EOF() .and. field->doc_no == __doc_no
 		// ako ima vise grupa
 		
 		a_t_docit( __doc_no, nGr2, nDoc_it_no, nArt_id, cArt_desc , ;
-		  cDoc_it_schema, cDoc_it_desc, nQtty, nHeigh, nWidth, ;
+		  cDoc_it_schema, cDoc_it_desc, cDoc_it_type, ;
+		  nQtty, nHeigh, nWidth, ;
+		  nHe2, nWi2, ;
 		  nDocit_altt, cDocit_city, nTotal, ;
-		  nZHeigh, nZWidth, nNeto, nBruto )
+		  nZHeigh, nZWidth, ;
+		  nZH2, nZW2, ;
+		  nNeto, nBruto )
 
 	endif
 	
@@ -251,48 +272,90 @@ set order to tag "1"
 go top
 seek docno_str(__doc_no)
 
+cRecord := ""
+cTmpRecord := "XX"
+
 do while !EOF() .and. field->doc_no == __doc_no
 
 	nElem_no := 0
 	nDoc_it_no := field->doc_it_no
 	nDoc_op_no := field->doc_op_no
 	nDoc_el_no := field->doc_it_el_no
-	
-	select (nTable2)
-	set order to tag "1"
-	go top
-	seek docno_str( __doc_no ) + docit_str( nDoc_it_no )
 
-	nArt_id := field->art_id
+	// uzmi sve operacije za jednu stavku
+	// ispitaj da li trebas da da je dodajes za stampu
 
-	aElem := {}
-	
-	_g_art_elements( @aElem, nArt_id )
-	
-	// vrati broj elementa artikla (1, 2, 3 ...)
-	_g_elem_no( aElem, nDoc_el_no, @nElem_no )
-	
-	cDoc_el_desc := get_elem_desc( aElem, nDoc_el_no, 150 )
-	
-	select (nTable)
-	
-	nAop_id := field->aop_id
-	nAop_att_id := field->aop_att_id
+	nRec := RECNO()
 
-	cAop_desc := g_aop_desc( nAop_id )
-	cAop_att_desc := g_aop_att_desc( nAop_att_id )
+	cRecord := ""
+	
+	do while !EOF() .and. field->doc_no == __doc_no ;
+			.and. field->doc_it_no == nDoc_it_no
+	
+		nAop_id := field->aop_id
+		nAop_att_id := field->aop_att_id
 
-	cDoc_op_desc := ALLTRIM( field->doc_op_desc )
+		cRecord += g_aop_desc( nAop_id) 
+		cRecord += ","
+		cRecord += g_aop_att_desc( nAop_att_id )
+		cRecord += "#"
+
+		skip
+	enddo
+
+	// ako su identicne operacije samo idi dalje....
+	if cRecord == cTmpRecord
+		loop
+	endif
+
+	// vrati se na zapis gdje si bio na pocetku...
+	go (nRec)
+
+       do while !EOF() .and. field->doc_no == __doc_no ;
+			.and. field->doc_it_no == nDoc_it_no
+
+	 select (nTable2)
+	 set order to tag "1"
+	 go top
+	 seek docno_str( __doc_no ) + docit_str( nDoc_it_no )
+
+	 nArt_id := field->art_id
+
+	 aElem := {}
 	
-	cAop_value := g_aop_value( field->aop_value )
+	 _g_art_elements( @aElem, nArt_id )
 	
-	a_t_docop( __doc_no, nDoc_op_no, nDoc_it_no, ;
+	 // vrati broj elementa artikla (1, 2, 3 ...)
+	 _g_elem_no( aElem, nDoc_el_no, @nElem_no )
+	
+	 cDoc_el_desc := get_elem_desc( aElem, nDoc_el_no, 150 )
+	
+	 select (nTable)
+	
+	 nAop_id := field->aop_id
+	 nAop_att_id := field->aop_att_id
+
+	 cAop_desc := g_aop_desc( nAop_id )
+	 cAop_att_desc := g_aop_att_desc( nAop_att_id )
+
+	 cDoc_op_desc := ALLTRIM( field->doc_op_desc )
+	
+	 cAop_value := g_aop_value( field->aop_value )
+
+	 a_t_docop( __doc_no, nDoc_op_no, nDoc_it_no, ;
 		   nElem_no, cDoc_el_desc, ;
                    nAop_id, cAop_desc, ;
 		   nAop_att_id, cAop_att_desc, cDoc_op_desc, cAop_value )
 
-	select (nTable)
-	skip
+
+	 select (nTable)
+	 
+	 skip
+	
+       enddo
+
+       cTmpRecord := cRecord
+	
 enddo
 
 return

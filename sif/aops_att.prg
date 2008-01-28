@@ -218,7 +218,6 @@ endif
 
 // izbaci konfigurator ako postoji
 cAopAttDesc := STRTRAN( cAopAttDesc, "#G_CONFIG#", "" )
-cAopAttDesc := STRTRAN( cAopAttDesc, "#G_CONFIG_RADIUS#", "" )
 
 select (nTArea)
 
@@ -230,6 +229,9 @@ return cAopAttDesc
 // ako se koristi setuj cVal
 // ---------------------------------------------
 function is_g_config( cVal, nAop_att_id )
+
+local nHeigh
+local nWidth
 
 local nTArea := SELECT()
 local lGConf := .f.
@@ -256,6 +258,19 @@ if !EMPTY( cVal )
 	return .t.
 endif
 
+nDoc_it_no := field->doc_it_no
+nDoc_no := field->doc_no
+
+select _doc_it
+set order to tag "1"
+go top
+seek docno_str(nDoc_no) + docit_str(nDoc_it_no)
+
+// uzmi dimenzije
+nHeigh := _doc_it->doc_it_heigh
+nWidth := _doc_it->doc_it_width
+
+
 O_AOPS_ATT
 select aops_att
 set order to tag "1"
@@ -269,23 +284,10 @@ if FOUND()
 	if "#G_CONFIG#" $ field->aop_att_full
 		
 		lGConf := .t.
-		cConf := "#G_CONFIG#"
-		// D - dimension
-		cIns := "D"
 		
-	elseif "#G_CONFIG_RADIUS#" $ field->aop_att_full
-
-		lGConf := .t.
-		cConf := "#G_CONFIG_RADIUS#"
-		// R - round
-		cIns := "R"
-
 	elseif "#" $ field->aop_att_full
 	
 		lGConf := .f.
-		cConf := ""
-		cIns := ""
-		
 
 		aTmp := TokToNiz( field->aop_att_full, "#" )
 		cVal := PADR(  ALLTRIM(aTmp[2]) , 150 )
@@ -302,7 +304,7 @@ endif
 // show glass config
 if lGConf == .t.
 
-	if glass_config( cConf, @cV1, @cV2, @cV3, @cV4, ;
+	if glass_config( nWidth, nHeigh, @cV1, @cV2, @cV3, @cV4, ;
 			@nR1, @nR2, @nR3, @nR4 ) == .t.
 		
 		// shema za G_CONFIG
@@ -314,66 +316,54 @@ if lGConf == .t.
 		// val 1/4 - sirine stakla (gornja/donja)
 		// val 2/3 - visine stakla (gornja/donja)
 		
-		// shema za G_CONFIG_CORNERS
-		// 
-		//   val1              val2
-		//  
-		//   val3              val4
-		//
-		// coskovi stakla
 		
 		// get string...
 		cVal := "#"
 		
-		if cV1 == "D"
-			cVal += cIns + "-1" 
-			if nR1 <> 0
-				cVal += ";" + ALLTRIM(STR(nR1))
-			endif
-			cVal += "#"
+		// prvo stranice
+		if cV1 == "D"	
+			cVal += "D1#" 
 		endif
-
 	
 		if cV2 == "D"
-		
-			cVal += cIns + "-2"
-			
-			if nR2 <> 0
-				cVal += ";" + ALLTRIM(STR(nR2))
-			endif
-		
-			
-			cVal += "#"
+			cVal += "D2#"
 		endif
 		
 		if cV3 == "D"
-		
-			cVal += cIns + "-3"
-			
-			if nR3 <> 0
-				cVal += ";" + ALLTRIM(STR(nR3))
-			endif
-		
-			cVal += "#"
+			cVal += "D3#"
 		endif
 	
 		if cV4 == "D"
-			cVal += cIns + "-4"
-			
-			if nR4 <> 0
-				cVal += ";" + ALLTRIM(STR(nR4))
-			endif
-		
-			cVal += "#"
+			cVal += "D4#"
 		endif
+
+		// zatim radijusi
+
+		if nR1 <> 0
+			cVal += "R1=" + ALLTRIM(STR(nR1)) + "#"
+		endif
+
+		if nR2 <> 0
+			cVal += "R2=" + ALLTRIM(STR(nR2)) + "#"
+		endif
+
+		if nR3 <> 0
+			cVal += "R3=" + ALLTRIM(STR(nR3)) + "#"
+		endif
+		
+		if nR4 <> 0
+			cVal += "R4=" + ALLTRIM(STR(nR4)) + "#"
+		endif
+
 
 		// formira string
 		// 
 		// npr: kod brusenja stranica gornje i donje stranice
+		// i obrade 1 radijusa
 		//
 		// joker + ":" + string vrijednosti 
 		// 
-		// <AOP_B_STR>:#V-1#V-2#
+		// <AOP_B_STR>:#D1#D4#R1=200#
 		
 		cVal := PADR( cJoker + ":" + cVal, 150 )
 	endif
@@ -403,8 +393,6 @@ cVal := ALLTRIM( cVal )
 
 aTmp := TokToNiz( cVal, ":" )
 
-altd()
-
 if aTmp == nil .or. LEN(aTmp) == 0 .or. LEN(aTmp) == 1 
 	return cVal
 endif
@@ -433,7 +421,6 @@ local aTmp := {}
 
 cStr := ALLTRIM( cStr )
 
-altd()
 
 aTmp := TokToNiz( cStr, "#" )
 
@@ -441,7 +428,9 @@ if aTmp == nil .or. LEN(aTmp) == 0
 	return ""
 endif
 
-if LEN(aTmp) == 4
+
+if LEN(aTmp) == 4 .and. ;
+	( aTmp[1] + aTmp[2] + aTmp[3] + aTmp[4] == "D1D2D3D4" )
 	cRet := "kompletno staklo"
 elseif LEN(aTmp) < 4 
 	cRet := "pogledaj skicu"

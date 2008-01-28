@@ -130,8 +130,6 @@ Box(, 1, 50 )
 
 do while !EOF()
 
-	altd()
-
 	nDoc_no := field->doc_no
 	__doc_no := nDoc_no
 	
@@ -232,14 +230,16 @@ do while !EOF()
 		cAop := ""
 		
 		if LEN(aAop) > 0
+		
 			for ii := 1 to LEN( aAop )
 				
 				if ii <> 1
-					cAop += ", "
+					cAop += "#"
 				endif
 				
 				cAop += aAop[ ii, 1 ] 
 			next
+		
 		endif
 
 		select doc_it
@@ -250,9 +250,11 @@ do while !EOF()
 		
 		nGr1 := 0
 		nGr2 := 0
-		
-		// rasclani grupe
-		g_ggroups( nIt_group, @nGr1, @nGr2 )
+	
+		if nGroup <> 0
+			// rasclani grupe ako je zadata grupa...
+			g_ggroups( nIt_group, @nGr1, @nGr2 )
+		endif
 		
 		_ins_tmp1( nDoc_no, ;
 			cCust_desc, ;
@@ -339,6 +341,11 @@ return
 // stampa se iz _tmp0 tabele
 // ------------------------------------------
 static function _p_rpt_spec( nGroup )
+local i
+local ii
+local nScan
+local aItemAop
+local cPom
 
 START PRINT CRET
 
@@ -361,71 +368,119 @@ do while !EOF()
 	
 		// preskoci ako filterises po grupi
 		if field->it_group <> nGroup
+			
 			skip
 			loop
+			
 		endif
 		
 	endif
-
 
 	if _nstr() == .t.
 		FF
 	endif
 	
+	// pripremi varijable za ispis...
 	nDoc_no := field->doc_no
+	
+	cCustDesc := field->cust_desc
+	
+	cDate := DTOC( field->doc_date ) + "/" + ;
+		DTOC( field->doc_dvr_d )
+	
+	cDescr := ALLTRIM( field->doc_prior ) + " - " + ;
+		ALLTRIM( field->doc_stat ) + " - " + ;
+		ALLTRIM( field->doc_oper ) + " - (" + ;
+		ALLTRIM( field->doc_sdesc ) + " )"
 
-	// ispisi prvu stavku
-
-	? docno_str( field->doc_no )
-	
-	@ prow(), pcol() + 1 SAY PADR( field->cust_desc, 30 )
-	
-	@ prow(), pcol() + 1 SAY PADR( DToC( field->doc_date ) + "/" + ;
-				DToC( field->doc_dvr_d ), 17 ) 
-	
-	@ prow(), pcol() + 1 SAY " " + PADR( ALLTRIM(field->doc_prior ) + " - " + ;
-				ALLTRIM( field->doc_stat ) + " - " + ;
-				ALLTRIM( field->doc_oper ) + " - (" + ;
-				ALLTRIM( field->doc_sdesc ) + " )";
-				, 100 )
 
 	nCount := 0
 	
 	nTotQtty := 0
 	cItemAop := ""
 
+	aItemAop := {}
+	nScan := 0
+	
+	// sracunaj kolicinu artikala na nalogu
 	do while !EOF() .and. field->doc_no == nDoc_no
 		
 		++ nCount
 		
 		nTotQtty += field->qtty
 	
-		if !EMPTY( ALLTRIM(field->doc_aop) )
-			cItemAop += ", " + ALLTRIM( field->doc_aop )
+		// dodatna operacija stavke
+		cItemAop := ALLTRIM( field->doc_aop )
+		
+		if !EMPTY( cItemAop )
+			
+			// razbij string "brusenje#poliranje#kaljenje#" 
+			// -> u matricu
+			aPom := TokToNiz( cItemAop, "#" )
+			
+			for ii:=1 to LEN(aPom)
+			
+				nScan := ASCAN( aItemAop, ;
+					{|xVar| aPom[ii] == xVar[1] })
+		
+				if nScan = 0
+					AADD(aItemAop, { aPom[ii] })
+				endif
+			next
 		endif
 		
-		cLog := ALLTRIM( field->doc_log ) 
+		// divizor
 		cDiv := ALLTRIM( field->doc_div )
+		
+		// zapamti i log
+		cLog := ALLTRIM( field->doc_log ) 
 		
 		skip
 	enddo
 	
+	// dodaj divizora na veliki opis...
+	cDescr := cDiv + " - " + cDescr
+
+	// ispisi prvu stavku
+
+	// broj dokumenta
+	? docno_str( nDoc_no )
+	
+	// partner / naruèioc / kontakt
+	@ prow(), pcol() + 1 SAY PADR( cCustDesc, 30 )
+	
+	// datumi - isporuka
+	@ prow(), pcol() + 1 SAY PADR( cDate , 17 ) 
+	
+	// prioritet, statusi, operater ....
+	@ prow(), pcol() + 1 SAY " " + PADR( cDescr , 100 )
+
 	? SPACE(10)
+	
 	@ prow(), pcol() + 1 SAY "broj stakala: " + ALLTRIM(STR( nTotQtty, 12 ))
 	
-	if !EMPTY( cItemAop )
+	// dodatne operacije stavke...
+	if LEN(aItemAop) > 0
+		
+		cPom := ""
+		
+		for i:=1 to LEN(aItemAop)
+			if i <> 1
+				cPom += ", "
+			endif
+			cPom += aItemAop[i, 1]
+		next
 	
-		@ prow(), pcol() + 1 SAY ", op.: " + cItemAop
+		@ prow(), pcol() + 1 SAY ", op.: " + cPom
 	
 	endif
 	
-	? SPACE(10)
-	@ prow(), pcol() + 1 SAY "DIV: " + cDiv
-	
-	// upisi i log na kraju
+	// upisi i log na kraju ako postoji
 	if !EMPTY( cLog )
 		
-		@ prow(), pcol() + 2 SAY SPACE(3) + ", zadnja promjena:"
+		? SPACE(10)
+		
+		@ prow(), pcol() + 2 SAY "zadnja promjena: "
 		
 		@ prow(), pcol() + 1 SAY cLog
 		
@@ -494,7 +549,7 @@ cTxt += PADR("Partner", 30)
 cTxt += SPACE(1)
 cTxt += PADR("Termini", 17)
 cTxt += SPACE(1)
-cTxt += PADR("Ostale info (prioritet - status - operater - opis)", 100)
+cTxt += PADR("Ostale info (divizor - prioritet - status - operater - opis)", 100)
 
 ? cLine
 ? cTxt

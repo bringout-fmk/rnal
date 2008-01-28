@@ -116,6 +116,7 @@ local lShow_zagl
 local i
 local nDocRbr := 0
 local nCount := 0
+local cDoc_it_type := ""
 
 nDuzStrKorekcija := 0
 lPrintedTotal := .f.
@@ -199,6 +200,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 
 	cDoc_no := docno_str( field->doc_no )
 	cDoc_it_no := docit_str( field->doc_it_no )
+	cDoc_It_type := field->doc_it_type
 	
 	// prikazuj naziv artikla
 	if lSh_art_desc == .t.
@@ -222,17 +224,26 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	?? " "
 	
 	// proizvod, naziv robe, jmj
-	?? ALLTRIM( aArt_desc[1] ) + " " + REPLICATE(".", (LEN_DESC - 1 ) - LEN(ALLTRIM( aArt_desc[1] ))) 
-	
-	?? " "
-	
-	// sirina
-	?? show_number(field->doc_it_width, nil, -10 )
+	?? ALLTRIM( aArt_desc[1] ) + " " + REPLICATE(".", (LEN_DESC - 1 ) - LEN(ALLTRIM( aArt_desc[1]) ) )
 
 	?? " "
 
-	// visina
-	?? show_number(field->doc_it_heigh, nil, -10 )
+	if cDoc_it_type == "R"
+	  
+	  // prikazi fi
+	  ?? PADL( show_fi( field->doc_it_width, field->doc_it_heigh ), 21 )
+	
+	else
+	
+	  // sirina
+	  ?? show_number(field->doc_it_width, nil, -10 )
+
+	  ?? " "
+
+	  // visina
+ 	  ?? show_number(field->doc_it_heigh, nil, -10 )
+	
+	endif
 	
 	?? " "
 
@@ -247,8 +258,39 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		
     	endif	
 
+	// ako postoje druge dimenzije
+	if (field->doc_it_h2 <> 0 .or. field->doc_it_w2 <> 0)
+			
+		? RAZMAK
+			
+		?? PADL("", LEN_IT_NO)
+			
+		?? " "
+			
+		?? PADL("", LEN_DESC)
+
+		?? " "
+		
+		// ostale dimenzije
+		?? show_number(field->doc_it_w2, nil, -10 )
+
+		?? " "
+		
+		// visina
+		?? show_number(field->doc_it_h2, nil, -10 )
+	
+	endif
+	
+	// provjeri za novu stranicu
+	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	
+		++ nPage
+		Nstr_a4(nPage, .t.)
+		
+    	endif	
+	
 	// ostatak naziva artikla....
-	if LEN(aArt_desc) > 1
+	if LEN(aArt_desc) > 1 
 		
 		for i:=2 to LEN(aArt_desc)
 		
@@ -259,7 +301,8 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			?? " "
 			
 			?? aArt_desc[i]
-		
+	
+			
 			// provjeri za novu stranicu
 			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 				++ nPage
@@ -290,18 +333,11 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
     		endif	
 	endif
 
-	//if lSh_art_desc == .t.
-	
-	//	? RAZMAK
-	//	?? PADL("", LEN_IT_NO)
-	//	?? " "
-	//	?? REPLICATE("-", LEN_DESC)
-	
-	//endif
 	
 	// dodatne operacije operacije....
 	
 	nOpHeader := 1
+
 
 	select t_docop
 	set order to tag "1"
@@ -319,20 +355,23 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	    nElDesc := 1
 	    nElCount := 0
 	    lSh_op_desc := .f.
+	    lSh_oper := .f.
 	    cOpTmpDesc := ""
 	    cDoc_op_desc := ""
-    
+	
 	    do while !EOF() .and. field->doc_no == t_docit->doc_no ;
 	    		    .and. field->doc_it_no == t_docit->doc_it_no ;
 			    .and. field->doc_el_no == nDoc_el_no
 		
 	 	cDoc_op_desc := ALLTRIM(field->doc_op_desc)
-	    
+	    	
+		
 	   	if cOpTmpDesc <> cDoc_op_desc
 	    	
 			lSh_op_desc := .t.
 	    
 	   	endif
+
 	   
 		// el.op.header
 		if nOpHeader == 1
@@ -354,7 +393,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		endif
 		
 		// element...
-		if nElDesc == 1
+		if nElDesc == 1 
 			
 			? RAZMAK
 		    	?? PADL("", LEN_IT_NO)
@@ -369,6 +408,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			nElDesc := 0
 	
 		endif
+		
 		
 		// operacije....
 		
@@ -407,6 +447,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			next
 			
 		endif
+		
 		
 		select t_docop
 		
@@ -510,6 +551,32 @@ if lStartPrint
 endif
 
 return
+
+
+
+
+// --------------------------------------------
+// prikaz fi iznosa na nalogu
+// --------------------------------------------
+static function show_fi( nWidth, nHeigh )
+local nFi := nWidth
+local nFi2 := nHeigh
+local cTmp := ""
+
+if ( nFi + nFi2 ) = 0
+	return cTmp
+endif
+
+cTmp := "fi= "
+
+if nFi == nFi2
+	cTmp += ALLTRIM(STR( nFi, 12, 2 )) 
+else
+	cTmp += ALLTRIM(STR( nFi, 12, 2)) + ", " + ;
+		ALLTRIM(STR( nFi2, 12, 2))
+endif
+
+return cTmp
 
 
 // ----------------------------------------
