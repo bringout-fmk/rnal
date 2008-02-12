@@ -780,4 +780,36 @@ endif
 return
 
 
+// ----------------------------------------------
+// printanje naloga, po zadatom broju 
+// ----------------------------------------------
+function prn_nal()
+local GetList := {}
+local nDoc_no := 0 
 
+Box(,1, 30)
+	@ m_x+1, m_y+2 SAY "Broj naloga:" GET nDoc_no PICT "999999999" 
+	read
+BoxC()
+
+if LastKey() == K_ESC .or. nDoc_no = 0
+	return
+endif
+
+// sada stampaj nalog nDoc_no
+o_tables( )
+
+select docs
+set order to tag "1"
+seek docno_str( nDoc_no )
+
+if field->doc_no <> nDoc_no
+	msgbeep("Trazeni nalog ne postoji !!!")
+	return
+endif
+
+// stampaj nalog
+st_nalpr(.f., nDoc_no)
+
+
+return

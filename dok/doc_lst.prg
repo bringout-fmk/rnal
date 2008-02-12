@@ -55,7 +55,7 @@ go top
 
 set_a_kol(@ImeKol, @Kol)
 
-ObjDbedit("lstnal", nBoxX, nBoxY, {|| key_handler() }, cHeader, cFooter, , , , , 4)
+ObjDbedit("lstnal", nBoxX, nBoxY, {|| key_handler() }, cHeader, cFooter, , , , , 5)
 
 BoxC()
 
@@ -1001,7 +1001,7 @@ local nTxtLen := 77
 local cColor := "GR+/B"
 
 if nX == nil
-	nX := 19
+	nX := 18
 endif
 
 if nY == nil
@@ -1027,6 +1027,7 @@ aTmp := SjeciStr( cTmp, nTxtLen )
 // pocisti postojece linije
 @ nX + 1, nY SAY SPACE( nTxtLen ) COLOR cColor
 @ nX + 2, nY SAY SPACE( nTxtLen ) COLOR cColor
+@ nX + 3, nY SAY SPACE( nTxtLen ) COLOR cColor
 
 // ispisi info
 for i := 1 to LEN( aTmp )

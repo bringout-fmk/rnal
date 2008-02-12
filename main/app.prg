@@ -102,6 +102,7 @@ else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
+
 AADD(opc, "2. lista otvorenih naloga ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "MAIN", "DOKLSTO"))
 	AADD(opcexe, {|| frm_lst_docs(1)})
@@ -123,7 +124,14 @@ else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
-AADD(opc, "5. export naloga u fmk ")
+AADD(opc, "S. stampa azuriranog naloga  ")
+if (ImaPravoPristupa(goModul:oDataBase:cName, "MAIN", "STNAL"))
+	AADD(opcexe, {|| prn_nal()})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
+AADD(opc, "E. export naloga u fmk ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "MAIN", "DOKEXP"))
 	AADD(opcexe, {|| m_gr_expfmk() })
 else

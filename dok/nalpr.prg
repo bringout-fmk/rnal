@@ -212,132 +212,11 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	
 	aArt_desc := SjeciStr( cArt_desc, LEN_DESC )	
 	
-	// ------------------------------------------
-	// prvi red...
-	// ------------------------------------------
 	
-	? RAZMAK
-	
-	// r.br
-	?? PADL(ALLTRIM( STR( ++nDocRbr) ) + ")", LEN_IT_NO)
-	
-	?? " "
-	
-	// proizvod, naziv robe, jmj
-	?? ALLTRIM( aArt_desc[1] ) + " " + REPLICATE(".", (LEN_DESC - 1 ) - LEN(ALLTRIM( aArt_desc[1]) ) )
-
-	?? " "
-
-	if cDoc_it_type == "R"
-	  
-	  // prikazi fi
-	  ?? PADL( show_fi( field->doc_it_width, field->doc_it_heigh ), 21 )
-	
-	else
-	
-	  // sirina
-	  ?? show_number(field->doc_it_width, nil, -10 )
-
-	  ?? " "
-
-	  // visina
- 	  ?? show_number(field->doc_it_heigh, nil, -10 )
-	
-	endif
-	
-	?? " "
-
-	// kolicina
-	?? show_number(field->doc_it_qtty, nil, -10 )
-
-	// provjeri za novu stranicu
-	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-	
-		++ nPage
-		Nstr_a4(nPage, .t.)
-		
-    	endif	
-
-	// ako postoje druge dimenzije
-	if (field->doc_it_h2 <> 0 .or. field->doc_it_w2 <> 0)
-			
-		? RAZMAK
-			
-		?? PADL("", LEN_IT_NO)
-			
-		?? " "
-			
-		?? PADL("", LEN_DESC)
-
-		?? " "
-		
-		// ostale dimenzije
-		?? show_number(field->doc_it_w2, nil, -10 )
-
-		?? " "
-		
-		// visina
-		?? show_number(field->doc_it_h2, nil, -10 )
-	
-	endif
-	
-	// provjeri za novu stranicu
-	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-	
-		++ nPage
-		Nstr_a4(nPage, .t.)
-		
-    	endif	
-	
-	// ostatak naziva artikla....
-	if LEN(aArt_desc) > 1 
-		
-		for i:=2 to LEN(aArt_desc)
-		
-			? RAZMAK
-			
-			?? PADL("", LEN_IT_NO)
-			
-			?? " "
-			
-			?? aArt_desc[i]
-	
-			
-			// provjeri za novu stranicu
-			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-				++ nPage
-				Nstr_a4(nPage, .t.)
-			endif	
-		next
-		
-	endif
-
-	
-	if lSh_art_desc == .t.
-	
-		// proizvodjac i LOT
-		? RAZMAK
-		? RAZMAK
-		?? PADL("", LEN_IT_NO)
-		?? " "
-		?? "proizvodjac: _________________________"
-		?? " "
-		?? "LOT: __________________________"
-
-		// provjeri za novu stranicu
-		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-	
-			++ nPage
-			Nstr_a4(nPage, .t.)
-		
-    		endif	
-	endif
-
-	
+	// prvo ispisi sve operacije
 	// dodatne operacije operacije....
 	
 	nOpHeader := 1
-
 
 	select t_docop
 	set order to tag "1"
@@ -448,7 +327,6 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			
 		endif
 		
-		
 		select t_docop
 		
 		skip
@@ -518,6 +396,129 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		endif
 	endif
 
+	
+	select t_docit
+	
+	if lSh_art_desc == .t.
+	
+		// proizvodjac i LOT
+		? RAZMAK
+		? RAZMAK
+		?? PADL("", LEN_IT_NO)
+		?? " "
+		?? "proizvodjac: _________________________"
+		?? " "
+		?? "LOT: __________________________"
+
+		// provjeri za novu stranicu
+		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	
+			++ nPage
+			Nstr_a4(nPage, .t.)
+		
+    		endif	
+	endif
+
+
+	// ------------------------------------------
+	// zatim sam artikal i dimenzije 
+	// ------------------------------------------
+	
+	? RAZMAK
+	
+	// r.br
+	?? PADL(ALLTRIM( STR( ++nDocRbr) ) + ")", LEN_IT_NO)
+	
+	?? " "
+	
+	// proizvod, naziv robe, jmj
+	?? ALLTRIM( aArt_desc[1] ) + " " + REPLICATE(".", (LEN_DESC - 1 ) - LEN(ALLTRIM( aArt_desc[1]) ) )
+
+	?? " "
+
+	if cDoc_it_type == "R"
+	  
+	  // prikazi fi
+	  ?? PADL( show_fi( field->doc_it_width, field->doc_it_heigh ), 21 )
+	
+	else
+	
+	  // sirina
+	  ?? show_number(field->doc_it_width, nil, -10 )
+
+	  ?? " "
+
+	  // visina
+ 	  ?? show_number(field->doc_it_heigh, nil, -10 )
+	
+	endif
+	
+	?? " "
+
+	// kolicina
+	?? show_number(field->doc_it_qtty, nil, -10 )
+
+	// provjeri za novu stranicu
+	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	
+		++ nPage
+		Nstr_a4(nPage, .t.)
+		
+    	endif	
+
+	// ako postoje druge dimenzije
+	if (field->doc_it_h2 <> 0 .or. field->doc_it_w2 <> 0)
+			
+		? RAZMAK
+			
+		?? PADL("", LEN_IT_NO)
+			
+		?? " "
+			
+		?? PADL("", LEN_DESC)
+
+		?? " "
+		
+		// ostale dimenzije
+		?? show_number(field->doc_it_w2, nil, -10 )
+
+		?? " "
+		
+		// visina
+		?? show_number(field->doc_it_h2, nil, -10 )
+	
+	endif
+	
+	// provjeri za novu stranicu
+	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	
+		++ nPage
+		Nstr_a4(nPage, .t.)
+		
+    	endif	
+	
+	// ostatak naziva artikla....
+	if LEN(aArt_desc) > 1 
+		
+		for i:=2 to LEN(aArt_desc)
+		
+			? RAZMAK
+			
+			?? PADL("", LEN_IT_NO)
+			
+			?? " "
+			
+			?? aArt_desc[i]
+	
+			
+			// provjeri za novu stranicu
+			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+				++ nPage
+				Nstr_a4(nPage, .t.)
+			endif	
+		next
+		
+	endif
 	
 	select t_docit
 	skip

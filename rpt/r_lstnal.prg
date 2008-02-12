@@ -1,15 +1,25 @@
 #include "\dev\fmk\rnal\rnal.ch"
 
 
+
 // --------------------------------------------------
 // lista naloga otvorenih na tekuci dan
 // --------------------------------------------------
 function lst_tek_dan()
 local cLine
+local nOperater
+local GetList:={}
 
 O_DOCS
 O_CUSTOMS
 O_CONTACTS
+
+nOperater := GetUserID()
+
+Box( , 1, 60)
+	@ m_x + 1, m_y + 2 SAY "Operater (0 - svi)" GET nOperater PICT "999"
+	read
+BoxC()
 
 select docs
 set order to tag "D1"
@@ -30,12 +40,20 @@ r_list_zagl()
 
 do while !EOF() .and. DTOS(field->doc_date) == DTOS( DATE() )
 	
+	// ako je za tekuæeg operatera
+	if nOperater <> 0
+		if field->operater_id <> nOperater
+			skip
+			loop
+		endif
+	endif
+
 	// ako je nalog zatvoren, preskoci
-	
 	if (field->doc_status == 1 ) .or. ( field->doc_status == 2 )
 		skip
 		loop
 	endif
+
 	
 	cPom := ""
 	cPom += PADR( docno_str(field->doc_no) , 10)
@@ -123,10 +141,18 @@ return
 function lst_ch_date()
 local cLine
 local dDate := DATE()
+local nOperater
 
-Box(, 1, 45)
-	@ m_x + 1, m_y + 2 SAY "Listaj naloge >= datum" GET dDate
+nOperater := GetUserID()
+
+Box(, 3, 60)
+	
+	@ m_x + 1, m_y + 2 SAY "Operater (0 - svi)" GET nOperater PICT "999"
+	
+	@ m_x + 3, m_y + 2 SAY "Listaj naloge >= datum" GET dDate
+	
 	read
+
 BoxC()
 
 if LastKey() == K_ESC
@@ -156,8 +182,16 @@ r_list_zagl()
 
 do while !EOF() .and. DTOS(field->doc_date) >= DTOS( dDate )
 	
-	// ako je nalog zatvoren, preskoci
+	// operater uslov
+	if nOperater <> 0 
+		if field->operater_id <> nOperater
+			skip
+			loop
+		endif
+	endif
+
 	
+	// ako je nalog zatvoren, preskoci
 	if (field->doc_status == 1 ) .or. ( field->doc_status == 2 )
 		
 		skip
@@ -194,10 +228,21 @@ return
 // ---------------------------------------------------------
 function lst_real_tek_dan()
 local cLine
+local nOperater
+local cCurrent := "D"
+local GetList:={}
 
 O_DOCS
 O_CUSTOMS
 O_CONTACTS
+
+nOperater := GetUserID()
+
+Box(, 3, 60)
+	@ m_x + 1, m_y + 2 SAY "Operater (0 - svi)" GET nOperater PICT "999" 
+	@ m_x + 3, m_y + 2 SAY "Nalozi prispjeli samo na tekuci dan ?" GET cCurrent PICT "@!" VALID cCurrent $ "DN"
+	read
+BoxC()
 
 select docs
 set order to tag "D2"
@@ -215,10 +260,25 @@ START PRINT CRET
 
 r_list_zagl()
 
-do while !EOF() .and. DTOS(field->doc_dvr_date) == DTOS( DATE() )
+do while !EOF() .and. DTOS(field->doc_dvr_date) >= DTOS( DATE() )
+	
+	// uslov po operateru
+	if nOperater <> 0 
+		if field->operater_id <> nOperater
+			skip
+			loop
+		endif
+	endif
+	
+	// samo tekuci dan!
+	if cCurrent == "D"
+		if DTOS(field->doc_dvr_date) <> DTOS(DATE())
+			skip
+			loop
+		endif
+	endif
 	
 	// ako je zatvoren, preskoci..
-	
 	if field->doc_status == 1 .or. ;
 		field->doc_status == 2
 		skip
@@ -254,14 +314,20 @@ return
 function lst_vrok_tek_dan()
 local cLine
 local nDays := 0
+local nOperater
 
-Box(, 1, 65)
+nOperater := GetUserID()
+
+Box(, 3, 65)
 	
-	@ m_x + 1, m_y + 2 SAY "Uzeti u obzir do br.predh.dana:" GET nDays PICT "99999"
+	@ m_x + 1, m_y + 2 SAY "Operater (0 - svi)" GET nOperater PICT "999"
+	
+	@ m_x + 3, m_y + 2 SAY "Uzeti u obzir do br.predh.dana:" GET nDays PICT "99999"
 	
 	read
 
 BoxC()
+
 
 O_DOCS
 O_CUSTOMS
@@ -282,6 +348,14 @@ START PRINT CRET
 r_list_zagl()
 
 do while !EOF()
+	
+	// uslov po operateru
+	if nOperater <> 0
+		if field->operater_id <> nOperater
+			skip
+			loop
+		endif
+	endif
 	
 	// ako je realizovan, preskoci
 	if field->doc_status == 1 .or. ;
