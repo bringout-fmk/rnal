@@ -233,6 +233,7 @@ function exp_2_fmk( nDoc_no, lTemp, lOneByOne )
 local nTArea := SELECT()
 local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
+local nADOC_OP := F_DOC_OPS
 local nCust_id
 
 if lOneByOne == nil
@@ -264,6 +265,7 @@ endif
 if lTemp == .t.
 	nADOCS := F__DOCS
 	nADOC_IT := F__DOC_IT
+	nADOC_OP := F__DOC_OPS
 endif
 
 select (nADOCS)
@@ -348,9 +350,9 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	
 	// uzmi cijenu robe iz sifrarnika robe
 	nPrice := g_art_price( cIdRoba )
-	
+
+	// uzmi opis artikla
 	cArt_desc := g_art_desc( nArt_id )
-	
 
 	aZpoGN := {}
 	
@@ -461,6 +463,135 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	select (nADOC_IT)
 	
 enddo
+
+
+// sada obradi i sve operacije ovog dokumenta
+select (nADOC_OP)
+set order to tag "1"
+go top
+
+// pregledaj samo stavke kod kojih je value <> ""
+do while !EOF()
+
+	// ako je vrijednost prazna - preskoci
+	if EMPTY( field->aop_value )
+		skip
+		loop
+	endif
+
+	// nasao sam nesto !
+	// pozicioniraj se i na doc_it
+
+	nDoc_no := field->doc_no
+	nDoc_it := field->doc_it_no
+
+	select (nADOC_IT)
+	set order to tag "1"
+	go top
+	seek docno_str( nDoc_no ) + docit_str( nDoc_it )
+
+	nArt_id := field->art_id
+	nQtty := field->doc_it_qtty
+	nWidth := field->doc_it_width
+	nHeigh := field->doc_it_heigh
+
+	select (nADOC_OP)
+
+	cIdRoba := ""
+	nPrice := ""
+	nKol := ""
+
+	// daj mi vrijednosti za fakt....
+	_g_fakt_values( field->aop_value, nArt_id, nQtty, nWidth, nHeigh, ;
+		@cIdRoba, @nPrice, @nKol )
+
+
+	// upisi...
+	select X_TBL
+	
+	go bottom
+	skip -1
+
+	if !EMPTY( x_tbl->rbr )
+		nRbr := VAL( x_tbl->rbr )
+	endif
+	
+	append blank
+	
+	scatter()
+
+	_txt := ""
+	_rbr := STR( ++nRbr, 3 )
+	_idpartner := cPartn
+	_idfirma := "10"
+	_brdok := cBrDok
+	_idtipdok := cIdVd
+	_datdok := dDatDok
+	_idroba := cIdRoba
+	_cijena := nPrice
+	_kolicina := nKol
+	_dindem := "KM "
+	_zaokr := 2
+	
+	Gather()
+
+	// idi dalje
+	select (nADOC_OP)
+	skip
+
+enddo
+
+
+// ---------------------------------------
+// daj mi vrijednosti za fakt....
+// setuju se varijable:
+//    cIdRoba, nPrice, nKol 
+// ---------------------------------------
+static function _g_fakt_values( cValue, nArt_id, nQtty, nWidth, nHeigh, ;
+				cIdRoba, nPrice, nKol )
+
+cValue := ALLTRIM( cValue )
+
+// napomena:
+// ----------
+// ovdje treba napraviti neko iscitavanje iz pravila 
+
+
+// busenje rupa
+if "<A_BU_HOLE" $ cValue
+
+endif
+
+// brusenje
+if "<A_BR_STR" $ cValue
+	
+	nTmp := 0
+	
+	if "#D1#" $ cValue
+		nTmp += nWidth
+	endif
+	
+	if "#D4#" $ cValue
+		nTmp += nWidth
+	endif
+
+	if "#D2#" $ cValue
+		nTmp += nHeigh
+	endif
+
+	if "#D3#" $ cValue
+		nTmp += nHeigh
+	endif
+
+	nKol := nQtty * nTmp
+	
+endif
+
+
+
+return
+
+
 
 // ---------------------------------------
 // setuj da je prenesen u fmk
