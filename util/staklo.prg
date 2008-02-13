@@ -142,6 +142,97 @@ endif
 return .t.
 
 
+
+// --------------------------------------
+// konfigurator busenja
+// cJoker - joker operacije
+// --------------------------------------
+function hole_config( cJoker )
+local nBoxX := 12
+local nBoxY := 65
+local nX := 1
+local cRet := ""
+local nHole1 := 0
+local nHole2 := 0
+local nHole3 := 0
+local nHole4 := 0
+local nHole5 := 0
+local cTmp := ""
+local GetList := {}
+
+// generisi box za definisanje rupa...
+Box(, nBoxX, nBoxY)
+	
+	@ m_x + nX, m_y + 2 SAY "#HOLE_CONFIG#"
+
+	nX += 2
+
+	@ m_x + nX, m_y + 2 SAY "Rupa 1 (fi):" GET nHole1 PICT "999"
+
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY "Rupa 2 (fi):" GET nHole2 PICT "999"
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY "Rupa 3 (fi):" GET nHole3 PICT "999"
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY "Rupa 4 (fi):" GET nHole4 PICT "999"
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY "Rupa 5 (fi):" GET nHole5 PICT "999"
+	
+	read
+BoxC()
+
+cTmp := ""
+
+// rupa 1
+if nHole1 <> 0
+	cTmp += "H1=" + ALLTRIM(STR(nHole1)) + "#" 
+endif
+
+// rupa 2
+if nHole2 <> 0
+	cTmp += "H2=" + ALLTRIM(STR(nHole2)) + "#" 
+endif
+
+// rupa 1
+if nHole3 <> 0
+	cTmp += "H3=" + ALLTRIM(STR(nHole3)) + "#" 
+endif
+
+// rupa 1
+if nHole4 <> 0
+	cTmp += "H4=" + ALLTRIM(STR(nHole4)) + "#" 
+endif
+
+// rupa 1
+if nHole5 <> 0
+	cTmp += "H5=" + ALLTRIM(STR(nHole5)) + "#" 
+endif
+
+if !EMPTY( cTmp )
+	cTmp := "#" + cTmp
+endif
+
+// formiraj gotov string
+// <A_BU_HOLE>:#H1=2#H2=5#
+//  hole1 = 2mm
+//  hole2 = 5mm
+
+if !EMPTY( cTmp )
+	cRet := cJoker + ":" + cTmp
+endif
+
+return cRet
+
+
+
+
 // -------------------------
 // validacija radijusa na 
 // osnovu dimenzija A i B

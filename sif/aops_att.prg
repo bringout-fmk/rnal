@@ -216,8 +216,9 @@ if FOUND()
 	endif
 endif
 
-// izbaci konfigurator ako postoji
+// izbaci konfiguratore ako postoje
 cAopAttDesc := STRTRAN( cAopAttDesc, "#G_CONFIG#", "" )
+cAopAttDesc := STRTRAN( cAopAttDesc, "#HOLE_CONFIG#", "" )
 
 select (nTArea)
 
@@ -235,6 +236,7 @@ local nWidth
 
 local nTArea := SELECT()
 local lGConf := .f.
+local lHConf := .f.
 
 local cConf := ""
 
@@ -280,10 +282,14 @@ seek aop_att_str(nAop_att_id)
 if FOUND()
 	
 	// standarni konfigurator
-	
 	if "#G_CONFIG#" $ field->aop_att_full
 		
 		lGConf := .t.
+	
+	// konfigurator busenja rupa
+	elseif "#HOLE_CONFIG#" $ field->aop_att_full
+		
+		lHConf := .t.
 		
 	elseif "#" $ field->aop_att_full
 	
@@ -367,6 +373,13 @@ if lGConf == .t.
 		
 		cVal := PADR( cJoker + ":" + cVal, 150 )
 	endif
+	
+endif
+
+if lHConf == .t.
+
+	// konfigurator busenja rupa
+	cVal := hole_config( cJoker )
 	
 endif
 
