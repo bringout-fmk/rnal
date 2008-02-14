@@ -314,11 +314,17 @@ do while !EOF() .and. field->doc_no == __doc_no
        do while !EOF() .and. field->doc_no == __doc_no ;
 			.and. field->doc_it_no == nDoc_it_no
 
+	 
+	 nElem_no := 0
+	 nDoc_it_no := field->doc_it_no
+	 nDoc_op_no := field->doc_op_no
+	 nDoc_el_no := field->doc_it_el_no
+	 
 	 select (nTable2)
 	 set order to tag "1"
 	 go top
 	 seek docno_str( __doc_no ) + docit_str( nDoc_it_no )
-
+	
 	 nArt_id := field->art_id
 
 	 aElem := {}
