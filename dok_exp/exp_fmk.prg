@@ -235,6 +235,7 @@ local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
 local nADOC_OP := F_DOC_OPS
 local nCust_id
+local i
 
 if lOneByOne == nil
 	lOneByOne := .t.
@@ -470,21 +471,24 @@ select (nADOC_OP)
 set order to tag "1"
 go top
 
-// pregledaj samo stavke kod kojih je value <> ""
+altd()
+
+nRbr := 0
+
 do while !EOF()
 
-	// ako je vrijednost prazna - preskoci
-	if EMPTY( field->aop_value )
-		skip
-		loop
-	endif
+	// uzmi joker operacije... 
+	// npr: <A_BU_HOLE>
+	cJoker := g_aop_joker ( field->aop_id )
 
-	// nasao sam nesto !
-	// pozicioniraj se i na doc_it
+	// uzmi i vrijednost....
+	cValue := ALLTRIM( field->aop_value )
 
+	// uzmi podatke broj naloga i broj stavke	
 	nDoc_no := field->doc_no
 	nDoc_it := field->doc_it_no
 
+	// pronadji ih u stavkama naloga
 	select (nADOC_IT)
 	set order to tag "1"
 	go top
@@ -501,39 +505,76 @@ do while !EOF()
 	nPrice := ""
 	nKol := ""
 
-	// daj mi vrijednosti za fakt....
-	_g_fakt_values( field->aop_value, nArt_id, nQtty, nWidth, nHeigh, ;
-		@cIdRoba, @nPrice, @nKol )
+	// daj mi vrijednosti za fakt u pom.matricu ....
+	aTo_fakt := _g_fakt_values( cJoker, cValue, nArt_id, ;
+			nQtty, nWidth, nHeigh )
 
+
+	altd()
 
 	// upisi...
 	select X_TBL
 	
-	go bottom
-	skip -1
+	for i:=1 to LEN( aTo_fakt )
+	
+		set order to tag "1"
+		go bottom
+		skip -1
 
-	if !EMPTY( x_tbl->rbr )
-		nRbr := VAL( x_tbl->rbr )
-	endif
-	
-	append blank
-	
-	scatter()
+		if !EMPTY( x_tbl->rbr )
+			nRbr := VAL( x_tbl->rbr )
+		endif
+		
+		// pronadji sifru...
+		set order to tag "3"
+		go top
 
-	_txt := ""
-	_rbr := STR( ++nRbr, 3 )
-	_idpartner := cPartn
-	_idfirma := "10"
-	_brdok := cBrDok
-	_idtipdok := cIdVd
-	_datdok := dDatDok
-	_idroba := cIdRoba
-	_cijena := nPrice
-	_kolicina := nKol
-	_dindem := "KM "
-	_zaokr := 2
+		
+		cIdRoba := aTo_fakt[ i, 1 ]
+		// pronadji da li ima u pripremi ova stavka pa samo 
+		// nadodaj
+		
+		nPrice := g_art_price( cIdRoba )
+		
+		select x_tbl 
 	
-	Gather()
+		seek "10" + cIdRoba
+		
+		if FOUND()
+			
+			scatter()
+			// uvecaj kolicinu
+			_kolicina := _kolicina + aTo_fakt[ i, 2 ]
+			
+			gather()
+			
+			loop
+		
+		endif
+		
+		set order to tag "1"
+		go top
+		
+		append blank
+		
+		scatter()
+
+		_txt := ""
+		_rbr := STR( ++nRbr, 3 )
+		_idpartner := cPartn
+		_idfirma := "10"
+		_brdok := cBrDok
+		_idtipdok := cIdVd
+		_datdok := dDatDok
+		_idroba := aTo_fakt[ i, 1 ]
+		_cijena := nPrice
+		_kolicina := aTo_fakt[ i, 2 ]
+		_dindem := "KM "
+		_zaokr := 2
+	
+		Gather()
+
+	next
 
 	// idi dalje
 	select (nADOC_OP)
@@ -547,49 +588,106 @@ enddo
 // setuju se varijable:
 //    cIdRoba, nPrice, nKol 
 // ---------------------------------------
-static function _g_fakt_values( cValue, nArt_id, nQtty, nWidth, nHeigh, ;
-				cIdRoba, nPrice, nKol )
+static function _g_fakt_values( cJoker, cValue, nArt_id, nQtty, ;
+				nWidth, nHeigh )
 
-cValue := ALLTRIM( cValue )
+local aArr := {}
+local aRet := {}
 
-// napomena:
-// ----------
-// ovdje treba napraviti neko iscitavanje iz pravila 
+// uzmi u matricu artikal i njegove stavke
+_art_set_descr( nArt_id, nil, nil, @aArr, .t. )
 
+// broj elemenata...
+nElCount := aArr[ LEN( aArr ), 1 ]
+
+// debljina stakla
+nTickness := g_gl_tickness( aArr, 1 )
+
+// tip stakla
+cType := g_gl_type( aArr, 1 )
+
+
+// sada isprovjeravaj sve....
+
+altd()
 
 // busenje rupa
-if "<A_BU_HOLE" $ cValue
+if cJoker == "<A_BU_HOLE>" 
 
+	// vrijednost = "H1=5;H2=6;..."
+	// skontaj koliko ima rupa...
+	aTmp := {}
+	aTmp := TokToNiz( cValue, ":" )
+	// prvi dio je sam joker dakle gledamo drugi clan...
+	// #H1=15#H2=22# itd...
+	cTmp := aTmp[ 2 ]
+	aTmp := TokToNiz( cTmp, "#" )
+	
+	// atmp[1] = H1=15
+	// aTmp[2] = H2=25
+	
+	for i := 1 to LEN( aTmp )
+		
+		// za svaku rupu odredi koja je sifra .....
+		aTmp2 := {}
+		aTmp2 := TokToNiz( aTmp[i], "=" )
+		
+		// debljina rupe
+		nHoleTick := VAL( aTmp2[ 2 ] )
+		
+		// sifra artikla je ?
+		cIdRoba := rule_s_fmk( cJoker, nHoleTick, "", "" )
+		
+		AADD( aRet, { cIdRoba, 1, 0 })
+		
+	next
+	
 endif
 
 // brusenje
-if "<A_BR_STR" $ cValue
+if cJoker == "<A_BR_STR>" 
 	
-	nTmp := 0
+	// sifra artikla
+	cIdRoba := rule_s_fmk( cJoker, nTickness, cType, "" )
+
+	// uzmi kolicinu
+	_g_kol( cValue, @nKol, nQtty, nHeigh, nWidth )
 	
-	if "#D1#" $ cValue
-		nTmp += nWidth
-	endif
-	
-	if "#D4#" $ cValue
-		nTmp += nWidth
-	endif
-
-	if "#D2#" $ cValue
-		nTmp += nHeigh
-	endif
-
-	if "#D3#" $ cValue
-		nTmp += nHeigh
-	endif
-
-	nKol := nQtty * nTmp
+	AADD( aRet, { cIdRoba, nKol, 0 })
 	
 endif
 
 
+return aRet
+
+
+// ----------------------------------------------------
+// sracunaj kolicinu na osnovu vrijednosti polja
+// ----------------------------------------------------
+static function _g_kol( cValue, nKol, nQtty, nHeigh, nWidth )
+
+local nTmp := 0
+	
+if "#D1#" $ cValue
+	nTmp += nWidth
+endif
+	
+if "#D4#" $ cValue
+	nTmp += nWidth
+endif
+
+if "#D2#" $ cValue
+	nTmp += nHeigh
+endif
+
+if "#D3#" $ cValue
+	nTmp += nHeigh
+endif
+
+nKol := nQtty * nTmp
 
 return
+
 
 
 
