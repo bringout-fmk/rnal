@@ -219,6 +219,7 @@ endif
 // izbaci konfiguratore ako postoje
 cAopAttDesc := STRTRAN( cAopAttDesc, "#G_CONFIG#", "" )
 cAopAttDesc := STRTRAN( cAopAttDesc, "#HOLE_CONFIG#", "" )
+cAopAttDesc := STRTRAN( cAopAttDesc, "#STAMP_CONFIG#", "" )
 
 select (nTArea)
 
@@ -237,6 +238,7 @@ local nWidth
 local nTArea := SELECT()
 local lGConf := .f.
 local lHConf := .f.
+local lStConf := .f.
 
 local cConf := ""
 
@@ -290,7 +292,12 @@ if FOUND()
 	elseif "#HOLE_CONFIG#" $ field->aop_att_full
 		
 		lHConf := .t.
+	
+	// konfigurator pozicije pecata
+	elseif "#STAMP_CONFIG#" $ field->aop_att_full
 		
+		lStConf := .t.
+	
 	elseif "#" $ field->aop_att_full
 	
 		lGConf := .f.
@@ -381,6 +388,14 @@ if lHConf == .t.
 	// konfigurator busenja rupa
 	cVal := hole_config( cJoker )
 	
+endif
+
+if lStConf == .t. .and. ;
+	pitanje(,"Unjeti pozicije pecata (D/N) ?", "D") == "D"
+	
+	// konfigurator pozicije pecata
+	cVal := stamp_config( cJoker, nWidth, nHeigh )
+
 endif
 
 select (nTArea)

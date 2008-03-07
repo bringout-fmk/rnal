@@ -157,6 +157,11 @@ local nHole2 := 0
 local nHole3 := 0
 local nHole4 := 0
 local nHole5 := 0
+local nHole6 := 0
+local nHole7 := 0
+local nHole8 := 0
+local nHole9 := 0
+local nHole10 := 0
 local cTmp := ""
 local GetList := {}
 
@@ -186,6 +191,32 @@ Box(, nBoxX, nBoxY)
 	@ m_x + nX, m_y + 2 SAY "Rupa 5 (fi):" GET nHole5 PICT "999"
 	
 	read
+
+	if pitanje(,"Da li postoji jos rupa ?", "N" ) == "D"
+	
+		nX += 1
+	
+		@ m_x + nX, m_y + 2 SAY "Rupa 6 (fi):" GET nHole6 PICT "999"
+		
+		nX += 1
+	
+		@ m_x + nX, m_y + 2 SAY "Rupa 7 (fi):" GET nHole7 PICT "999"
+
+		nX += 1
+	
+		@ m_x + nX, m_y + 2 SAY "Rupa 8 (fi):" GET nHole8 PICT "999"
+		
+		nX += 1
+	
+		@ m_x + nX, m_y + 2 SAY "Rupa 9 (fi):" GET nHole9 PICT "999"
+		
+		nX += 1
+	
+		@ m_x + nX, m_y + 2 SAY "Rupa 10 (fi):" GET nHole10 PICT "999"
+
+		read
+
+	endif
 BoxC()
 
 cTmp := ""
@@ -200,20 +231,46 @@ if nHole2 <> 0
 	cTmp += "H2=" + ALLTRIM(STR(nHole2)) + "#" 
 endif
 
-// rupa 1
+// rupa 3
 if nHole3 <> 0
 	cTmp += "H3=" + ALLTRIM(STR(nHole3)) + "#" 
 endif
 
-// rupa 1
+// rupa 4
 if nHole4 <> 0
 	cTmp += "H4=" + ALLTRIM(STR(nHole4)) + "#" 
 endif
 
-// rupa 1
+// rupa 5
 if nHole5 <> 0
 	cTmp += "H5=" + ALLTRIM(STR(nHole5)) + "#" 
 endif
+
+// rupa 6
+if nHole6 <> 0
+	cTmp += "H6=" + ALLTRIM(STR(nHole6)) + "#" 
+endif
+
+// rupa 7
+if nHole7 <> 0
+	cTmp += "H7=" + ALLTRIM(STR(nHole7)) + "#" 
+endif
+
+// rupa 8
+if nHole8 <> 0
+	cTmp += "H8=" + ALLTRIM(STR(nHole8)) + "#" 
+endif
+
+// rupa 9
+if nHole9 <> 0
+	cTmp += "H9=" + ALLTRIM(STR(nHole9)) + "#" 
+endif
+
+// rupa 10
+if nHole10 <> 0
+	cTmp += "H10=" + ALLTRIM(STR(nHole10)) + "#" 
+endif
+
 
 if !EMPTY( cTmp )
 	cTmp := "#" + cTmp
@@ -229,6 +286,151 @@ if !EMPTY( cTmp )
 endif
 
 return cRet
+
+
+
+
+
+// ---------------------------------------------------
+// konfigurator pozicije peèata 
+// ---------------------------------------------------
+function stamp_config( cJoker, nWidth, nHeigh )
+
+local nBoxX := 17
+local nBoxY := 56
+local cReturn := ""
+local cTmp := ""
+local nGLen := 40
+local nGLeft := 8
+local nGTop := 6
+local nGBott := 15
+local cColSch := "GR+/G+"
+
+private GetList := {}
+
+// varijable
+cStampInfo := "P"
+nX1 := nY1 := 0
+nX2 := nY2 := 0
+nX3 := nY3 := 0
+nX4 := nY4 := 0
+
+Box(, nBoxX, nBoxY)
+
+	do while .t.
+
+	nStX := m_x + 2
+	nStY := m_y + 2
+
+	@ m_x + 1, m_y + 2 SAY "##stamp_position##  select position..."
+
+	@ m_x + 3, m_y + 2 SAY "vrsta pecata [P]ositiv / [N]egativ:" GET cStampInfo VALID cStampInfo $ "PN" PICT "@!"
+
+	_show_glass( nGLen, nGTop, nGBott, nGLeft, cColSch, nWidth, nHeigh ) 
+	
+	// x1
+	@ m_x + nGTop - 1, m_y + nGLeft GET nX1 PICT "999" ;
+		VALID val_stamp( nX1, nWidth, nHeigh )
+	@ m_x + nGTop - 1, col() SAY "mm"
+	
+	// x2
+	@ m_x + nGTop - 1, col() + nGLen - 8 GET nX2 PICT "999" ;
+		VALID val_stamp( nX2, nWidth, nHeigh )
+	@ m_x + nGTop - 1, col() SAY "mm"
+	
+	// y1
+	@ m_x + nGTop + 1, m_y + 2 GET nY1 PICT "999" ;
+		VALID val_stamp( nY1, nWidth, nHeigh )
+	@ m_x + nGTop + 1, col() SAY "mm"
+	
+	// y2
+	@ m_x + nGTop + 1, col() + ( nGLen  + 4 ) GET nY2 PICT "999" ;
+		VALID val_stamp( nY2, nWidth, nHeigh )
+	@ m_x + nGTop + 1, col() SAY "mm"
+	
+	// y3
+	@ m_x + nGBott - 2, m_y + 2 GET nY3 PICT "999" ;
+		VALID val_stamp( nY3, nWidth, nHeigh )
+	@ m_x + nGBott - 2, col() SAY "mm"
+	
+	// y4
+	@ m_x + nGBott - 2, col() + ( nGLen + 4 ) GET nY4 PICT "999" ;
+		VALID val_stamp( nY4, nWidth, nHeigh )
+	@ m_x + nGBott - 2, col() SAY "mm"
+	
+	// x3
+	@ m_x + nGBott + 1, m_y + nGLeft GET nX3 PICT "999" ;
+		VALID val_stamp( nX3, nWidth, nHeigh )
+	@ m_x + nGBott + 1, col() SAY "mm"
+	
+	// x4
+	@ m_x + nGBott + 1, col() + ( nGLen - 8 ) GET nX4 PICT "999" ;
+		VALID val_stamp( nX4, nWidth, nHeigh )
+	@ m_x + nGBott + 1, col() SAY "mm"
+
+	
+	read
+	
+	// mora biti unesena pozicija
+	if (nX1 + nX2 + nX3 + nX4 + nY1 + nY2 + nY3 + nY4 ) <> 0
+		exit
+	endif
+
+	enddo
+BoxC()
+
+if LastKey() == K_ESC
+	return cReturn
+endif
+
+cTmp := ""
+
+if nX1 <> 0
+	cTmp += "X1=" + ALLTRIM(STR(nX1)) + "#"
+endif
+if nY1 <> 0
+	cTmp += "Y1=" + ALLTRIM(STR(nY1)) + "#"
+endif
+if nX2 <> 0
+	cTmp += "X2=" + ALLTRIM(STR(nX2)) + "#"
+endif
+if nY2 <> 0
+	cTmp += "Y2=" + ALLTRIM(STR(nY2)) + "#"
+endif
+if nX3 <> 0
+	cTmp += "X3=" + ALLTRIM(STR(nX3)) + "#"
+endif
+if nY3 <> 0
+	cTmp += "Y3=" + ALLTRIM(STR(nY3)) + "#"
+endif
+if nX4 <> 0
+	cTmp += "X4=" + ALLTRIM(STR(nX4)) + "#"
+endif
+if nY4 <> 0
+	cTmp += "Y4=" + ALLTRIM(STR(nY4)) + "#"
+endif
+
+if !EMPTY(cTmp)
+	
+	// primjer stringa koji se dobije:
+	//  <A_K>:P#X1=20#Y1=25#
+	
+	cReturn := cJoker + ":" + cStampInfo + "#" + cTmp
+
+endif
+
+return cReturn
+
+
+// -------------------------
+// validacija pecata 
+// osnovu dimenzija A i B
+// stakla
+// -------------------------
+function val_stamp( nDim, nA, nB )
+local lRet := .t.
+// trenutno nas nista ne interesuje....
+return lRet
 
 
 

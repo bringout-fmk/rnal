@@ -471,8 +471,6 @@ select (nADOC_OP)
 set order to tag "1"
 go top
 
-altd()
-
 nRbr := 0
 
 do while !EOF()
@@ -510,16 +508,13 @@ do while !EOF()
 			nQtty, nWidth, nHeigh )
 
 
-	altd()
-
 	// upisi...
 	select X_TBL
-	
+
 	for i:=1 to LEN( aTo_fakt )
 	
 		set order to tag "1"
 		go bottom
-		skip -1
 
 		if !EMPTY( x_tbl->rbr )
 			nRbr := VAL( x_tbl->rbr )
@@ -534,8 +529,6 @@ do while !EOF()
 		// pronadji da li ima u pripremi ova stavka pa samo 
 		// nadodaj
 		
-		nPrice := g_art_price( cIdRoba )
-		
 		select x_tbl 
 	
 		seek "10" + cIdRoba
@@ -543,7 +536,8 @@ do while !EOF()
 		if FOUND()
 			
 			scatter()
-			// uvecaj kolicinu
+			
+			// samo uvecaj kolicinu...
 			_kolicina := _kolicina + aTo_fakt[ i, 2 ]
 			
 			gather()
@@ -551,7 +545,11 @@ do while !EOF()
 			loop
 		
 		endif
-		
+	
+		// cijena artikla
+		nPrice := g_art_price( PADR( cIdRoba, 10 ) )
+	
+		select x_tbl
 		set order to tag "1"
 		go top
 		
@@ -567,6 +565,8 @@ do while !EOF()
 		_idtipdok := cIdVd
 		_datdok := dDatDok
 		_idroba := aTo_fakt[ i, 1 ]
+		
+		
 		_cijena := nPrice
 		_kolicina := aTo_fakt[ i, 2 ]
 		_dindem := "KM "
@@ -581,6 +581,24 @@ do while !EOF()
 	skip
 
 enddo
+
+// setuj da je prenesen u fmk
+select (nADocs)
+seek docno_str(nDoc_no)
+replace doc_in_fmk with 1
+
+select (245)
+use
+
+if lOneByOne == .t.
+	msgbeep("export dokumenta zavrsen !")
+endif
+
+select (nTArea)
+
+return
+
+
 
 
 // ---------------------------------------
@@ -609,10 +627,8 @@ cType := g_gl_type( aArr, 1 )
 
 // sada isprovjeravaj sve....
 
-altd()
-
 // busenje rupa
-if cJoker == "<A_BU_HOLE>" 
+if cJoker == "<A_BU_HOLE>"  .and. !EMPTY( cValue ) 
 
 	// vrijednost = "H1=5;H2=6;..."
 	// skontaj koliko ima rupa...
@@ -641,11 +657,8 @@ if cJoker == "<A_BU_HOLE>"
 		AADD( aRet, { cIdRoba, 1, 0 })
 		
 	next
-	
-endif
 
-// brusenje
-if cJoker == "<A_BR_STR>" 
+elseif cJoker == "<A_BR_STR>" .and. !EMPTY( cValue ) 
 	
 	// sifra artikla
 	cIdRoba := rule_s_fmk( cJoker, nTickness, cType, "" )
@@ -655,10 +668,23 @@ if cJoker == "<A_BR_STR>"
 	
 	AADD( aRet, { cIdRoba, nKol, 0 })
 	
+	
+elseif EMPTY( cValue )
+
+	cIdRoba := rule_s_fmk( cJoker, nTickness, cType, "" )
+
+	// kolicina se uzima sa naloga
+	
+	nKol := nQtty
+	
+	AADD( aRet, { cIdRoba, nKol, 0 } )
+	
 endif
 
 
 return aRet
+
+
 
 
 // ----------------------------------------------------
@@ -689,24 +715,6 @@ nKol := nQtty * nTmp
 return
 
 
-
-
-// ---------------------------------------
-// setuj da je prenesen u fmk
-// ---------------------------------------
-select (nADocs)
-seek docno_str(nDoc_no)
-replace doc_in_fmk with 1
-
-select (245)
-use
-
-if lOneByOne == .t.
-	msgbeep("export dokumenta zavrsen !")
-endif
-
-select (nTArea)
-return
 
 
 // ----------------------------------------------------
