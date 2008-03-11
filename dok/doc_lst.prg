@@ -331,7 +331,7 @@ if nObject <> 0
 endif
 
 if nOper <> 0
-	cFilter += " .and. operater_id == " + str( nOper, 3 )
+	cFilter += " .and. operater_i == " + str( nOper, 3 )
 endif
 
 return cFilter

@@ -441,6 +441,28 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	  // prikazi fi
 	  ?? PADL( show_fi( field->doc_it_width, field->doc_it_heigh ), 21 )
 	
+	elseif cDoc_it_type == "S"
+		
+	  ? RAZMAK
+	  
+	  ?? PADL( "", LEN_IT_NO )	
+	  
+	  ?? " "
+	  
+	  ?? PADR( "", LEN_DESC - 10 )
+	  
+	  ?? " " 
+	  
+	  // ovo moram podvuci u drugi red
+	  
+	  // sirina 1 / 2
+	  ?? PADL( show_shape( field->doc_it_width, field->doc_it_w2 ), 15 )
+	
+	  ?? " "
+	  
+	  // visina 1 / 2
+	  ?? PADL( show_shape( field->doc_it_heigh, field->doc_it_h2), 15 )
+	  
 	else
 	
 	  // sirina
@@ -465,29 +487,6 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		Nstr_a4(nPage, .t.)
 		
     	endif	
-
-	// ako postoje druge dimenzije
-	if (field->doc_it_h2 <> 0 .or. field->doc_it_w2 <> 0)
-			
-		? RAZMAK
-			
-		?? PADL("", LEN_IT_NO)
-			
-		?? " "
-			
-		?? PADL("", LEN_DESC)
-
-		?? " "
-		
-		// ostale dimenzije
-		?? show_number(field->doc_it_w2, nil, -10 )
-
-		?? " "
-		
-		// visina
-		?? show_number(field->doc_it_h2, nil, -10 )
-	
-	endif
 	
 	// provjeri za novu stranicu
 	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
@@ -578,6 +577,22 @@ else
 endif
 
 return cTmp
+
+
+
+
+// --------------------------------------------
+// prikaz shaped iznosa na nalogu
+// --------------------------------------------
+static function show_shape( nD1, nD2 )
+local cTmp := ""
+
+cTmp := ALLTRIM( STR( nD1, 12, 2 ) )
+cTmp += "/"
+cTmp += ALLTRIM( STR( nD2, 12, 2 ) )
+
+return cTmp
+
 
 
 // ----------------------------------------
