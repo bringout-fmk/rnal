@@ -114,6 +114,9 @@ set order to tag "1"
 go top
 seek docno_str(__doc_no)
 
+nArtTmp := -1
+nGrTmp := -1
+
 // filuj stavke
 do while !EOF() .and. field->doc_no == __doc_no
 	
@@ -146,6 +149,11 @@ do while !EOF() .and. field->doc_no == __doc_no
 	// temporary
 	cArt_desc := "(" + cArt_desc + ")"
 	cArt_desc += " " + cArt_full_desc
+
+	// ako je artikal isti ne treba mu opis...
+	if ( nArt_Id == nArtTmp ) .and. ( nGrTmp == nDoc_gr_no )
+		cArt_desc := ""
+	endif
 
 	select ( nTable )
 	
@@ -228,6 +236,9 @@ do while !EOF() .and. field->doc_no == __doc_no
 		  nNeto, nBruto )
 
 	endif
+	
+	nArtTmp := nArt_Id
+	nGrTmp := nDoc_gr_no
 	
 	select ( nTable )
 	skip

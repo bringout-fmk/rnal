@@ -175,7 +175,12 @@ do while !EOF()
 	nUZHeig += nZaHeig
 	nUZWidt += nZaWidt
 
-	cArt_desc := ALLTRIM( field->art_desc )
+	if EMPTY( field->art_desc )
+		cArt_desc := "-//-"
+	else
+		cArt_desc := ALLTRIM( field->art_desc )
+	endif
+	
 	aArt_desc := SjeciStr( cArt_desc, LEN_DESC )	
 	
 	// ------------------------------------------

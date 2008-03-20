@@ -436,8 +436,15 @@ do case
 	case aTmp[1] == "<AOP_Z_C>"
 		
 		cRet := _cre_aop_Str( aTmp[2] )
+
+	// pozicija peèata
+	case aTmp[1] == "STAMP"
 		
+		cRet := stamp_read( cVal )
+		
+
 endcase
+
 
 return cRet
 

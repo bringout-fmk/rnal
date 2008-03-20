@@ -181,18 +181,20 @@ nCount := 0
 // stampaj podatke 
 do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	
-	lSh_art_desc := .f.
+	lAops := .f.
 	
-	nArt_id := field->art_id
+	//lSh_art_desc := .f.
 	
-	if nArt_tmp <> nArt_id 
+	//nArt_id := field->art_id
+	
+	//if nArt_tmp <> nArt_id 
 		
-		lSh_art_desc := .t.
+		//lSh_art_desc := .t.
 
-	endif
+	//endif
 
 	// dodaj prored samo ako je drugi artikal
-	if nCount > 0 .and. lSh_art_desc == .t.
+	if nCount > 0 .and. !EMPTY( field->art_desc ) //lSh_art_desc == .t.
 	
 		? cLine
 	
@@ -203,7 +205,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	cDoc_It_type := field->doc_it_type
 	
 	// prikazuj naziv artikla
-	if lSh_art_desc == .t.
+	if !EMPTY( field->art_desc )     //lSh_art_desc == .t.
 		cArt_desc := ALLTRIM( field->art_desc )
 	else
 		cPom := "-//-"
@@ -212,12 +214,46 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	
 	aArt_desc := SjeciStr( cArt_desc, LEN_DESC )	
 	
+	// prvi red
+	// 1) naziv i sifra artikla
 	
-	// prvo ispisi sve operacije
-	// dodatne operacije operacije....
+	? RAZMAK
 	
-	nOpHeader := 1
+	// r.br
+	?? PADL(ALLTRIM( STR( ++nDocRbr) ) + ")", LEN_IT_NO)
+	
+	?? " "
+	
+	// proizvod, naziv robe, jmj
+	?? ALLTRIM( aArt_desc[1] ) + " " + REPLICATE(".", (LEN_DESC - 1 ) - LEN(ALLTRIM( aArt_desc[1]) ) )
 
+	// ostatak naziva artikla....
+	// drugi red
+	
+	if LEN(aArt_desc) > 1 
+		
+		for i:=2 to LEN(aArt_desc)
+		
+			? RAZMAK
+			
+			?? PADL("", LEN_IT_NO)
+			
+			?? " "
+			
+			?? aArt_desc[i]
+	
+			
+			// provjeri za novu stranicu
+			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+				++ nPage
+				Nstr_a4(nPage, .t.)
+			endif	
+		next
+		
+	endif
+	
+	// zatim obrade i napomene obrada, operacije
+	
 	select t_docop
 	set order to tag "1"
 	go top
@@ -229,7 +265,6 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 
 	    // uzmi element
 	    nDoc_el_no := field->doc_el_no
-	    
 	    
 	    nElDesc := 1
 	    nElCount := 0
@@ -244,33 +279,6 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		
 	 	cDoc_op_desc := ALLTRIM(field->doc_op_desc)
 	    	
-		
-	   	if cOpTmpDesc <> cDoc_op_desc
-	    	
-			lSh_op_desc := .t.
-	    
-	   	endif
-
-	   
-		// el.op.header
-		if nOpHeader == 1
-			
-			// ? RAZMAK
-		     	//?? PADL("", LEN_IT_NO)
-		     	//?? " "
-			//cPom := "Br.elementa, dodatne operacije:"
-			//?? cPom
-			// podvlaka
-			//? RAZMAK
-			//?? PADL("", LEN_IT_NO)
-			//?? " "
-			//?? REPLICATE("-", LEN( cPom ) )
-			
-			// iskljuci ga do daljnjeg
-			nOpHeader := 0
-			
-		endif
-		
 		// element...
 		if nElDesc == 1 
 			
@@ -282,9 +290,14 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			B_OFF
 	    		?? " "
 	    		?? ALLTRIM( field->doc_el_desc )
-		
+			?? ", "
+			// prikazi lot broj
+			?? show_lot()
+			
 			// iskljuci ga do daljnjeg
 			nElDesc := 0
+	
+			lAops := .t.
 	
 		endif
 		
@@ -308,9 +321,8 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 			?? ALLTRIM(field->aop_value)
 			
 		endif
-
 		
-		if !EMPTY(field->doc_op_desc) .and. lSh_op_desc == .t.
+		if !EMPTY(field->doc_op_desc) 
 			
 			cPom := "- napomene: "
 			cPom += ALLTRIM( field->doc_op_desc )
@@ -331,111 +343,56 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		
 		skip
 	   
-		cOpTmpDesc := cDoc_op_desc
-	   
 	   enddo
 	   
 	enddo
 
 	select t_docit
 	
-	// napomene za item:
-	// - napomene
-	// - shema u prilogu
 
-	if !EMPTY( field->doc_it_desc ) ;
-		.or. field->doc_it_altt <> 0 ;
-		.or. ( field->doc_it_schema == "D" )
-	
-		cPom := "Napomene: " + ;
-			ALLTRIM( field->doc_it_desc )
+	// lot broj ako nema operacija itd...
+	if lAops == .f. .and. !EMPTY( field->art_desc )
 		
-		if field->doc_it_schema == "D"
-		
-			cPom += " "
-			cPom += "(SHEMA U PRILOGU)"
-		endif	
-
-		// nadmorska visina
-		if field->doc_it_altt <> 0
-			
-			if !EMPTY( field->doc_acity )
-				cPom += "Montaza: "
-				cPom += ALLTRIM(field->doc_acity)
-			endif
-			
-			cPom += ", "
-			cPom += "nadmorska visina = " + ALLTRIM(STR(field->doc_it_altt, 12, 2)) + " m"
-		endif
-	
-		cItDesc := cPom
-		
-		altd()
-
-		lSh_it_desc := .f.
-		
-		if ALLTRIM(cTmpItDesc) <> ALLTRIM(cItDesc)
-			lSh_it_desc := .t.
-		endif
-	
-		if lSh_it_desc == .t.
-		
-		   aDoc_it_desc := SjeciStr( cItDesc , 100 )
-		
-		   for i:=1 to LEN(aDoc_it_desc)
-						
-			? RAZMAK
-
-			?? PADL("", LEN_IT_NO)
-
-			?? " "
-			
-			?? aDoc_it_desc[i]
-		   next
-		
-		endif
-	endif
-
-	
-	select t_docit
-	
-	if lSh_art_desc == .t.
-	
-		// proizvodjac i LOT
-		? RAZMAK
-		? RAZMAK
-		?? PADL("", LEN_IT_NO)
-		?? " "
-		?? "proizvodjac: _________________________"
-		?? " "
-		?? "LOT: __________________________"
-
 		// provjeri za novu stranicu
 		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-	
+			
 			++ nPage
 			Nstr_a4(nPage, .t.)
 		
     		endif	
+		
+		? RAZMAK
+		?? PADL("", LEN_IT_NO)
+		?? " "
+		?? show_lot()
+	
+		lAops := .t.
 	endif
-
-
-	// ------------------------------------------
-	// zatim sam artikal i dimenzije 
-	// ------------------------------------------
 	
-	? RAZMAK
+		
+	// zatim dimenzije 
 	
-	// r.br
-	?? PADL(ALLTRIM( STR( ++nDocRbr) ) + ")", LEN_IT_NO)
+	if lAops == .t.    
+	
+		// ako postoje obrade u artiklu dodaj tackice
+	
+		// provjeri za novu stranicu
+		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+			
+			++ nPage
+			Nstr_a4(nPage, .t.)
+		
+    		endif	
+	
+		? RAZMAK
+		?? PADL("", LEN_IT_NO)
+		?? " "
+		?? REPLICATE(".", LEN_DESC  )
+	
+	endif
 	
 	?? " "
 	
-	// proizvod, naziv robe, jmj
-	?? ALLTRIM( aArt_desc[1] ) + " " + REPLICATE(".", (LEN_DESC - 1 ) - LEN(ALLTRIM( aArt_desc[1]) ) )
-
-	?? " "
-
 	if cDoc_it_type == "R"
 	  
 	  // prikazi fi
@@ -480,49 +437,73 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	// kolicina
 	?? show_number(field->doc_it_qtty, nil, -10 )
 
-	// provjeri za novu stranicu
-	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 	
-		++ nPage
-		Nstr_a4(nPage, .t.)
-		
-    	endif	
+	// napomene za item:
+	// - napomene
+	// - shema u prilogu
+
+	if !EMPTY( field->doc_it_desc ) ;
+		.or. field->doc_it_altt <> 0 ;
+		.or. ( field->doc_it_schema == "D" )
 	
-	// provjeri za novu stranicu
-	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+		cPom := "Napomene: " + ;
+			ALLTRIM( field->doc_it_desc )
+		
+		if field->doc_it_schema == "D"
+		
+			cPom += " "
+			cPom += "(SHEMA U PRILOGU)"
+		endif	
+
+		// nadmorska visina
+		if field->doc_it_altt <> 0
+			
+			if !EMPTY( field->doc_acity )
+				cPom += "Montaza: "
+				cPom += ALLTRIM(field->doc_acity)
+			endif
+			
+			cPom += ", "
+			cPom += "nadmorska visina = " + ALLTRIM(STR(field->doc_it_altt, 12, 2)) + " m"
+		endif
 	
-		++ nPage
-		Nstr_a4(nPage, .t.)
+		cItDesc := cPom
 		
-    	endif	
+		lSh_it_desc := .f.
+		
+		if ALLTRIM(cTmpItDesc) <> ALLTRIM(cItDesc)
+			lSh_it_desc := .t.
+		endif
 	
-	// ostatak naziva artikla....
-	if LEN(aArt_desc) > 1 
+		if lSh_it_desc == .t.
 		
-		for i:=2 to LEN(aArt_desc)
+		   aDoc_it_desc := SjeciStr( cItDesc , 100 )
 		
+		   for i:=1 to LEN(aDoc_it_desc)
+						
 			? RAZMAK
-			
 			?? PADL("", LEN_IT_NO)
-			
 			?? " "
-			
-			?? aArt_desc[i]
-	
-			
-			// provjeri za novu stranicu
-			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-				++ nPage
-				Nstr_a4(nPage, .t.)
-			endif	
-		next
+			?? aDoc_it_desc[i]
+		   
+		   next
 		
+		endif
 	endif
+	
+	select t_docit
+	
+	// provjeri za novu stranicu
+	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	
+		++ nPage
+		Nstr_a4(nPage, .t.)
+		
+    	endif	
 	
 	select t_docit
 	skip
 
-	nArt_tmp := nArt_id
 	cTmpItDesc := cItDesc
 	
 	++ nCount 
@@ -551,6 +532,20 @@ if lStartPrint
 endif
 
 return
+
+
+
+// -----------------------------------------
+// vraæa string LOT broja
+// -----------------------------------------
+static function show_lot()
+local cReturn := ""
+
+cReturn += "proizv.: ______________"
+cReturn += ","
+cReturn += "LOT: _____________"
+
+return cReturn
 
 
 

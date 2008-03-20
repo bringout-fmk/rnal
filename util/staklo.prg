@@ -310,6 +310,7 @@ private GetList := {}
 
 // varijable
 cStampInfo := "P"
+cStampSch := "N"
 nX1 := nY1 := 0
 nX2 := nY2 := 0
 nX3 := nY3 := 0
@@ -324,58 +325,70 @@ Box(, nBoxX, nBoxY)
 
 	@ m_x + 1, m_y + 2 SAY "##stamp_position##  select position..."
 
-	@ m_x + 3, m_y + 2 SAY "vrsta pecata [P]ositiv / [N]egativ:" GET cStampInfo VALID cStampInfo $ "PN" PICT "@!"
+	@ m_x + 2, m_y + 2 SAY "vrsta pecata [P]ositiv / [N]egativ:" GET cStampInfo VALID cStampInfo $ "PN" PICT "@!"
+	
+	@ m_x + 3, m_y + 2 SAY "pogledati shemu u prilogu (D/N)?" GET cStampSch VALID cStampSch $ "DN" PICT "@!" 
 
-	_show_glass( nGLen, nGTop, nGBott, nGLeft, cColSch, nWidth, nHeigh ) 
-	
-	// x1
-	@ m_x + nGTop - 1, m_y + nGLeft GET nX1 PICT "999" ;
-		VALID val_stamp( nX1, nWidth, nHeigh )
-	@ m_x + nGTop - 1, col() SAY "mm"
-	
-	// x2
-	@ m_x + nGTop - 1, col() + nGLen - 8 GET nX2 PICT "999" ;
-		VALID val_stamp( nX2, nWidth, nHeigh )
-	@ m_x + nGTop - 1, col() SAY "mm"
-	
-	// y1
-	@ m_x + nGTop + 1, m_y + 2 GET nY1 PICT "999" ;
-		VALID val_stamp( nY1, nWidth, nHeigh )
-	@ m_x + nGTop + 1, col() SAY "mm"
-	
-	// y2
-	@ m_x + nGTop + 1, col() + ( nGLen  + 4 ) GET nY2 PICT "999" ;
-		VALID val_stamp( nY2, nWidth, nHeigh )
-	@ m_x + nGTop + 1, col() SAY "mm"
-	
-	// y3
-	@ m_x + nGBott - 2, m_y + 2 GET nY3 PICT "999" ;
-		VALID val_stamp( nY3, nWidth, nHeigh )
-	@ m_x + nGBott - 2, col() SAY "mm"
-	
-	// y4
-	@ m_x + nGBott - 2, col() + ( nGLen + 4 ) GET nY4 PICT "999" ;
-		VALID val_stamp( nY4, nWidth, nHeigh )
-	@ m_x + nGBott - 2, col() SAY "mm"
-	
-	// x3
-	@ m_x + nGBott + 1, m_y + nGLeft GET nX3 PICT "999" ;
-		VALID val_stamp( nX3, nWidth, nHeigh )
-	@ m_x + nGBott + 1, col() SAY "mm"
-	
-	// x4
-	@ m_x + nGBott + 1, col() + ( nGLen - 8 ) GET nX4 PICT "999" ;
-		VALID val_stamp( nX4, nWidth, nHeigh )
-	@ m_x + nGBott + 1, col() SAY "mm"
-
-	
 	read
 	
-	// mora biti unesena pozicija
-	if (nX1 + nX2 + nX3 + nX4 + nY1 + nY2 + nY3 + nY4 ) <> 0
+	if cStampSch == "N"
+	
+	  _show_glass( nGLen, nGTop, nGBott, nGLeft, cColSch, nWidth, nHeigh ) 
+	
+	  // x1
+	  @ m_x + nGTop - 1, m_y + nGLeft GET nX1 PICT "999" ;
+		VALID val_stamp( nX1, nWidth, nHeigh )
+	  @ m_x + nGTop - 1, col() SAY "mm"
+	
+	  // x2
+	  @ m_x + nGTop - 1, col() + nGLen - 8 GET nX2 PICT "999" ;
+		VALID val_stamp( nX2, nWidth, nHeigh )
+	  @ m_x + nGTop - 1, col() SAY "mm"
+	
+	  // y1
+	  @ m_x + nGTop + 1, m_y + 2 GET nY1 PICT "999" ;
+		VALID val_stamp( nY1, nWidth, nHeigh )
+	  @ m_x + nGTop + 1, col() SAY "mm"
+	
+	  // y2
+	  @ m_x + nGTop + 1, col() + ( nGLen  + 4 ) GET nY2 PICT "999" ;
+		VALID val_stamp( nY2, nWidth, nHeigh )
+	  @ m_x + nGTop + 1, col() SAY "mm"
+	
+	  // y3
+	  @ m_x + nGBott - 2, m_y + 2 GET nY3 PICT "999" ;
+		VALID val_stamp( nY3, nWidth, nHeigh )
+	  @ m_x + nGBott - 2, col() SAY "mm"
+	
+	  // y4
+	  @ m_x + nGBott - 2, col() + ( nGLen + 4 ) GET nY4 PICT "999" ;
+		VALID val_stamp( nY4, nWidth, nHeigh )
+	  @ m_x + nGBott - 2, col() SAY "mm"
+	
+	  // x3
+	  @ m_x + nGBott + 1, m_y + nGLeft GET nX3 PICT "999" ;
+		VALID val_stamp( nX3, nWidth, nHeigh )
+	  @ m_x + nGBott + 1, col() SAY "mm"
+	
+	  // x4
+	  @ m_x + nGBott + 1, col() + ( nGLen - 8 ) GET nX4 PICT "999" ;
+		VALID val_stamp( nX4, nWidth, nHeigh )
+	  @ m_x + nGBott + 1, col() SAY "mm"
+
+	
+	  read
+	
+	
+	  // mora biti unesena pozicija
+	  if (nX1 + nX2 + nX3 + nX4 + nY1 + nY2 + nY3 + nY4 ) <> 0
+		exit
+	  endif
+
+	else
 		exit
 	endif
-
+	
+	
 	enddo
 BoxC()
 
@@ -410,16 +423,116 @@ if nY4 <> 0
 	cTmp += "Y4=" + ALLTRIM(STR(nY4)) + "#"
 endif
 
-if !EMPTY(cTmp)
+if !EMPTY(cTmp) .or. cStampSch == "D"
+	
+	// ako je pogledaj shemu
+	if cStampSch == "D"
+		
+		cTmp := cStampSch
+		
+	endif
 	
 	// primjer stringa koji se dobije:
-	//  <A_K>:P#X1=20#Y1=25#
+	//  STAMP:P#X1=20#Y1=25#
 	
-	cReturn := cJoker + ":" + cStampInfo + "#" + cTmp
+	cReturn := "STAMP" + ":" + cStampInfo + "#" + cTmp
 
 endif
 
 return cReturn
+
+
+
+// -----------------------------------------------
+// citanje pozicije pecata za nalog
+// -----------------------------------------------
+function stamp_read( cStampStr )
+local cRet := ""
+local i
+local aTmp
+local aTmp2
+local aTmp3
+
+if EMPTY( cStampStr )
+	return cRet
+endif
+
+//        string                   1          2
+// ex: "<A_K>:P#X1=20#Y1=25" => {<A_K>} {P#X1=20#Y1=25}
+aTmp := TokToNiz( cStampStr, ":" )
+
+if aTmp[1] <> "STAMP"
+
+	return cRet
+
+endif
+
+
+// ex: "P#X1=20#Y1=25" =>  {P} {X1=20} {Y1=25}
+aTmp2 := TokToNiz( aTmp[2], "#" )
+
+cRet := "pozicija pecata: "
+
+
+// pozitiv ili negativ
+if aTmp2[1] == "P"
+	cRet += "pozitiv, "
+elseif aTmp2[1] == "N"
+	cRet += "negativ, "
+endif
+
+if aTmp2[2] == "D"
+
+	// ako je pozicija pecata, pogledati shemu
+	// ex: "P#D" => {P} {D}
+
+	cRet += " (pogledaj shemu u prilogu ) "
+	return cRet
+	
+endif
+
+
+
+// x koordinata
+aTmp3 := TokToNiz( aTmp2[2], "=" )
+
+// dodaj na ispis
+cRet += _stamp_pos( aTmp3[ 1 ] ) 
+cRet += " "
+cRet += ALLTRIM( aTmp3[2] )
+cRet += " mm - "
+
+// y koordinata
+aTmp3 := TokToNiz( aTmp2[3], "=" )
+
+// dodaj na ispis i y koordinatu
+cRet += _stamp_pos( aTmp3[ 1 ] ) 
+cRet += " "
+cRet += ALLTRIM( aTmp3[2] )
+cRet += " mm"
+
+return cRet
+
+
+// ----------------------------------------
+// pozicija peèata stranice
+// ----------------------------------------
+static function _stamp_pos( cVar )
+local cRet := ""
+
+do case
+	case cVar $ "X1#X2"
+		cRet := "gore"
+	case cVar $ "X3#X4"
+		cRet := "dole"
+	case cVar $ "Y1#Y3"
+		cRet := "lijevo"
+	case cVar $ "Y2#Y4"
+		cRet := "desno"
+endcase
+
+return cRet
+
 
 
 // -------------------------
