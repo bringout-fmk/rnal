@@ -475,10 +475,23 @@ nRbr := 0
 
 do while !EOF()
 
-	// uzmi joker operacije... 
-	// npr: <A_BU_HOLE>
-	cJoker := g_aop_joker ( field->aop_id )
+	altd()
 
+	// uzmi joker atributa operacije, ako postoji
+	cJoker := ALLTRIM( g_aatt_joker( field->aop_att_id ) )
+
+	if EMPTY(cJoker) .or. AT( "<", cJoker ) == 0
+
+		// ako je prazan ili nema "<" 
+		// uzmi joker operacije... 
+		// npr: <A_BU>
+		
+		cJoker := g_aop_joker ( field->aop_id )
+	
+	endif
+	
+	select (nADOC_OP)
+	
 	// uzmi i vrijednost....
 	cValue := ALLTRIM( field->aop_value )
 
@@ -500,8 +513,8 @@ do while !EOF()
 	select (nADOC_OP)
 
 	cIdRoba := ""
-	nPrice := ""
-	nKol := ""
+	nPrice := 0
+	nKol := 0
 
 	// daj mi vrijednosti za fakt u pom.matricu ....
 	aTo_fakt := _g_fakt_values( cJoker, cValue, nArt_id, ;
@@ -611,6 +624,7 @@ static function _g_fakt_values( cJoker, cValue, nArt_id, nQtty, ;
 
 local aArr := {}
 local aRet := {}
+local cQttyType := ""
 
 // uzmi u matricu artikal i njegove stavke
 _art_set_descr( nArt_id, nil, nil, @aArr, .t. )
@@ -627,8 +641,10 @@ cType := g_gl_type( aArr, 1 )
 
 // sada isprovjeravaj sve....
 
+altd()
+
 // busenje rupa
-if cJoker == "<A_BU_HOLE>"  .and. !EMPTY( cValue ) 
+if cJoker == "<A_BU>"  .and. !EMPTY( cValue ) 
 
 	// vrijednost = "H1=5;H2=6;..."
 	// skontaj koliko ima rupa...
@@ -652,26 +668,36 @@ if cJoker == "<A_BU_HOLE>"  .and. !EMPTY( cValue )
 		nHoleTick := VAL( aTmp2[ 2 ] )
 		
 		// sifra artikla je ?
-		cIdRoba := rule_s_fmk( cJoker, nHoleTick, "", "" )
+		cIdRoba := rule_s_fmk( cJoker, nHoleTick, "", "", @cQttyType )
 		
 		AADD( aRet, { cIdRoba, 1, 0 })
 		
 	next
 
-elseif cJoker == "<A_BR_STR>" .and. !EMPTY( cValue ) 
-	
+elseif cJoker == "<A_B>" .and. !EMPTY( cValue ) 
+
 	// sifra artikla
-	cIdRoba := rule_s_fmk( cJoker, nTickness, cType, "" )
+	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
 
 	// uzmi kolicinu
-	_g_kol( cValue, @nKol, nQtty, nHeigh, nWidth )
+	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh, nWidth )
 	
 	AADD( aRet, { cIdRoba, nKol, 0 })
 	
-	
-elseif EMPTY( cValue )
+elseif !EMPTY(cJoker) .and. EMPTY( cValue )
 
-	cIdRoba := rule_s_fmk( cJoker, nTickness, cType, "" )
+	// sifra artikla
+	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
+
+	// uzmi kolicinu
+	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh, nWidth )
+	
+	AADD( aRet, { cIdRoba, nKol, 0 })
+
+	
+elseif EMPTY(cJoker) .and. EMPTY( cValue )
+
+	cIdRoba := rule_s_fmk( cJoker, nTickness, cType, "", @cQttyType )
 
 	// kolicina se uzima sa naloga
 	
@@ -690,27 +716,57 @@ return aRet
 // ----------------------------------------------------
 // sracunaj kolicinu na osnovu vrijednosti polja
 // ----------------------------------------------------
-static function _g_kol( cValue, nKol, nQtty, nHeigh, nWidth )
+static function _g_kol( cValue, cQttyType, nKol, nQtty, nHeigh, nWidth )
 
 local nTmp := 0
+
+altd()
+
+// po metru
+if cQttyType == "M"	
+
+	// po metru, znaèi uzmi sve stranice stakla
 	
-if "#D1#" $ cValue
-	nTmp += nWidth
-endif
+	if "#D1#" $ cValue
+		nTmp += nWidth
+	endif
 	
-if "#D4#" $ cValue
-	nTmp += nWidth
+	if "#D4#" $ cValue
+		nTmp += nWidth
+	endif
+
+	if "#D2#" $ cValue
+		nTmp += nHeigh
+	endif
+
+	if "#D3#" $ cValue
+		nTmp += nHeigh
+	endif
+
+	// pretvori u metre
+	nKol := ( nQtty * nTmp ) / 1000
+	
 endif
 
-if "#D2#" $ cValue
-	nTmp += nHeigh
+// po m2
+if cQttyType == "M2"
+	
+	nKol := c_ukvadrat( nQtty, nHeigh, nWidth ) 
+	
 endif
 
-if "#D3#" $ cValue
-	nTmp += nHeigh
+// po komadu
+if cQttyType == "KOM"
+
+	nKol := nQtty
+
 endif
 
-nKol := nQtty * nTmp
+if EMPTY( cQttyType )
+
+	nKol := nQtty
+
+endif
 
 return
 

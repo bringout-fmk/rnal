@@ -115,6 +115,11 @@ endif
 AADD(aImeKol, {PADR("Dod.op.ID", 15), {|| PADR(g_aop_desc( aop_id ), 15) }, "aop_id", {|| set_aop_id(@waop_id) }, {|| s_aops( @waop_id ), show_it(g_aop_desc(waop_id))  }})
 AADD(aImeKol, {PADR("Opis", 40), {|| PADR(aop_att_full, 40)}, "aop_att_full"})
 AADD(aImeKol, {PADR("Skr. opis (sifra)", 20), {|| PADR(aop_att_desc, 20)}, "aop_att_desc"})
+
+if aops_att->(fieldpos("AOP_ATT_JO")) <> 0
+	AADD(aImeKol, { PADR("Joker", 20), {|| aop_att_joker }, "aop_att_joker"})
+endif
+
 AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
 
 for i:=1 to LEN(aImeKol)
@@ -179,6 +184,43 @@ select (nTArea)
 return lRet
 
 
+
+// -------------------------------
+// get aop_att_joker by aopatt_id
+// -------------------------------
+function g_aatt_joker( nAopatt_id )
+local cAttJoker := ""
+local nTArea := SELECT()
+
+O_AOPS_ATT
+select aops_att
+set order to tag "1"
+go top
+seek aop_att_str(nAopatt_id)
+
+if FOUND()
+
+	// ako ima polja ?
+	if aops_att->( fieldpos("AOP_ATT_JO") ) == 0
+		
+		// uzmi iz opisa
+		cAttJoker := ALLTRIM( g_aop_att_desc( nAopatt_id, .t., .f. ) )
+		return cAttJoker
+		
+	endif
+	
+	if !EMPTY(field->aop_att_joker)
+		cAttJoker := ALLTRIM(field->aop_att_joker)
+	endif
+endif
+
+select (nTArea)
+
+return cAttJoker
+
+
+
+
 // -------------------------------
 // get aop_desc by aop_id
 // -------------------------------
@@ -224,6 +266,7 @@ cAopAttDesc := STRTRAN( cAopAttDesc, "#STAMP_CONFIG#", "" )
 select (nTArea)
 
 return cAopAttDesc
+
 
 
 // ---------------------------------------------
@@ -428,12 +471,12 @@ endif
 do case
 	
 	// brusenje stranica
-	case aTmp[1] == "<AOP_B_STR>" 
+	case aTmp[1] == "<A_B>" 
 	
 		cRet := _cre_aop_str( aTmp[2] )	
 		
 	// zaobljavanje
-	case aTmp[1] == "<AOP_Z_C>"
+	case aTmp[1] == "<A_Z>"
 		
 		cRet := _cre_aop_Str( aTmp[2] )
 

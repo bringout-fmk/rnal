@@ -217,14 +217,15 @@ nRet := seek_gn(aGN, nDimenzija)
 return nRet
 
 
+
 // --------------------------------------
 // napuni matricu sa GNU zaokruzenjima
-// 21...240
+// 21...306
 // --------------------------------------
 function arr_gn()
 local aGN:={}
 
-for i:=210 to 2400 step 30
+for i:=210 to 3060 step 30
 	AADD(aGN, {i})
 next
 
