@@ -353,7 +353,13 @@ if FOUND()
 	endif
 	
 	// find joker
-	cJoker := ALLTRIM( field->aop_att_desc )
+	if aops_att->(FieldPos("AOP_ATT_JO")) <> 0
+		// uzmi iz polja joker
+		cJoker := ALLTRIM( field->aop_att_joker )
+	else
+		// uzmi iz opisa
+		cJoker := ALLTRIM( field->aop_att_desc )
+	endif
 	
 endif
 
@@ -485,7 +491,11 @@ do case
 		
 		cRet := stamp_read( cVal )
 		
+	// rupe i dimenzije
+	case aTmp[1] == "<A_BU>"
 
+		cRet := hole_read( cVal )
+		
 endcase
 
 

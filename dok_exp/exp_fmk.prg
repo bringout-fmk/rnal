@@ -683,6 +683,17 @@ elseif cJoker == "<A_B>" .and. !EMPTY( cValue )
 	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh, nWidth )
 	
 	AADD( aRet, { cIdRoba, nKol, 0 })
+
+elseif !EMPTY( cJoker ) .and. !EMPTY( cValue )
+	
+	// sifra artikla
+	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
+
+	// uzmi kolicinu
+	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh, nWidth )
+	
+	AADD( aRet, { cIdRoba, nKol, 0 })
+
 	
 elseif !EMPTY(cJoker) .and. EMPTY( cValue )
 
@@ -719,8 +730,6 @@ return aRet
 static function _g_kol( cValue, cQttyType, nKol, nQtty, nHeigh, nWidth )
 
 local nTmp := 0
-
-altd()
 
 // po metru
 if cQttyType == "M"	

@@ -289,6 +289,46 @@ return cRet
 
 
 
+// --------------------------------------------------
+// vraæa u stringu ispis rupa i dimenzija rupa
+// --------------------------------------------------
+function hole_read( cValue )
+local cRet := "" 
+local aTmp 
+local cTmp
+local aTmp2
+local i
+local aHole
+
+// "<A_BU>:#H1=24#H2=55#"
+aTmp := TokToNiz( cValue, ":")
+
+if aTmp[1] <> "<A_BU>"
+	// ovo nije busenje
+	return cRet
+endif
+
+cTmp := ALLTRIM( aTmp[2] )
+
+aTmp2 := TokToNiz( cTmp, "#" )
+
+// i sada imamo rupe ...
+// H1=24, H2=55
+
+for i := 1 to LEN( aTmp2 )
+	
+	aHole := {}
+	aHole := TokToNiz( aTmp2[i], "=" )
+
+	cHoleTick := ALLTRIM( aHole[ 2 ] )
+	
+	cRet += "fi=" + cHoleTick + " mm, "
+next
+
+
+return cRet
+
+
 
 
 // ---------------------------------------------------
