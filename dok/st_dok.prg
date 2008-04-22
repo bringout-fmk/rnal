@@ -285,6 +285,9 @@ seek docno_str(__doc_no)
 
 cRecord := ""
 cTmpRecord := "XX"
+nArticle := -99
+nTmpArticle := -99
+
 
 do while !EOF() .and. field->doc_no == __doc_no
 
@@ -314,15 +317,30 @@ do while !EOF() .and. field->doc_no == __doc_no
 		skip
 	enddo
 
+
+	// doc_it
+	// uzmi artikal...
+	select (nTable2)
+	set order to tag "1"
+	go top
+	seek docno_str( __doc_no ) + docit_str( nDoc_it_no )
+
+	nArticle := field->art_id
+	
+	// vrati se na operacije
+	select (nTable)
+
+	// vrati se na zapis gdje si bio
+	go (nRec)
+
 	// ako su identicne operacije samo idi dalje....
-	if cRecord == cTmpRecord
+	if cRecord == cTmpRecord .and. nArticle == nTmpArticle
+		skip
 		loop
 	endif
 
-	// vrati se na zapis gdje si bio na pocetku...
-	go (nRec)
 
-       do while !EOF() .and. field->doc_no == __doc_no ;
+        do while !EOF() .and. field->doc_no == __doc_no ;
 			.and. field->doc_it_no == nDoc_it_no
 
 	 
@@ -372,6 +390,7 @@ do while !EOF() .and. field->doc_no == __doc_no
        enddo
 
        cTmpRecord := cRecord
+       nTmpArticle := nArticle
 	
 enddo
 

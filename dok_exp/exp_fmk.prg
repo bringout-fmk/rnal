@@ -466,16 +466,19 @@ do while !EOF() .and. field->doc_no == nDoc_no
 enddo
 
 
+altd()
+
 // sada obradi i sve operacije ovog dokumenta
 select (nADOC_OP)
 set order to tag "1"
 go top
 
+// pretrazi po broju naloga
+seek docno_str(nDoc_no)
+
 nRbr := 0
 
-do while !EOF()
-
-	altd()
+do while !EOF() .and. field->doc_no == nDoc_no
 
 	// uzmi joker atributa operacije, ako postoji
 	cJoker := ALLTRIM( g_aatt_joker( field->aop_att_id ) )
@@ -599,6 +602,7 @@ enddo
 select (nADocs)
 seek docno_str(nDoc_no)
 replace doc_in_fmk with 1
+
 
 select (245)
 use
