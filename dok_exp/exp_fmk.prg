@@ -512,6 +512,9 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	nQtty := field->doc_it_qtty
 	nWidth := field->doc_it_width
 	nHeigh := field->doc_it_heigh
+	nW2 := field->doc_it_w2
+	nH2 := field->doc_it_h2
+	cItType := field->doc_it_type
 
 	select (nADOC_OP)
 
@@ -521,7 +524,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	// daj mi vrijednosti za fakt u pom.matricu ....
 	aTo_fakt := _g_fakt_values( cJoker, cValue, nArt_id, ;
-			nQtty, nWidth, nHeigh )
+			nQtty, nWidth, nHeigh, nW2, nH2, cItType )
 
 
 	// upisi...
@@ -624,11 +627,38 @@ return
 //    cIdRoba, nPrice, nKol 
 // ---------------------------------------
 static function _g_fakt_values( cJoker, cValue, nArt_id, nQtty, ;
-				nWidth, nHeigh )
+				nW1, nH1, nW2, nH2, cItType )
 
 local aArr := {}
 local aRet := {}
 local cQttyType := ""
+
+// standardne dimenzije
+local nHeigh1 := nH1
+local nWidth1 := nW1
+local nHeigh2 := nH2
+local nWidth2 := nW2
+
+// skontaj koje su dimenzije u pitanju
+if cItType == "R"
+	
+	// radijus - fi
+	nWidth1 := nW1
+	nHeigh1 := nH1
+	
+	if nHeigh1 == 0
+		nHeigh1 := nWidth
+	endif
+
+elseif cItType == "S"
+	
+	// shaped 
+	nHeigh1 := nH1
+	nWidth1 := nW1
+	nHeigh2 := nH2
+	nWidth2 := nW2
+	
+endif
 
 // uzmi u matricu artikal i njegove stavke
 _art_set_descr( nArt_id, nil, nil, @aArr, .t. )
@@ -644,8 +674,6 @@ cType := g_gl_type( aArr, 1 )
 
 
 // sada isprovjeravaj sve....
-
-altd()
 
 // busenje rupa
 if cJoker == "<A_BU>"  .and. !EMPTY( cValue ) 
@@ -684,7 +712,8 @@ elseif cJoker == "<A_B>" .and. !EMPTY( cValue )
 	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
 
 	// uzmi kolicinu
-	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh, nWidth )
+	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh1, nWidth1, nHeigh2, ;
+			nWidth2 )
 	
 	AADD( aRet, { cIdRoba, nKol, 0 })
 
@@ -694,7 +723,8 @@ elseif !EMPTY( cJoker ) .and. !EMPTY( cValue )
 	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
 
 	// uzmi kolicinu
-	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh, nWidth )
+	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh1, nWidth1, ;
+			nHeigh2, nWidth2 )
 	
 	AADD( aRet, { cIdRoba, nKol, 0 })
 
@@ -705,7 +735,8 @@ elseif !EMPTY(cJoker) .and. EMPTY( cValue )
 	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
 
 	// uzmi kolicinu
-	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh, nWidth )
+	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh1, nWidth1, ;
+			nHeigh2, nWidth2 )
 	
 	AADD( aRet, { cIdRoba, nKol, 0 })
 
@@ -731,9 +762,18 @@ return aRet
 // ----------------------------------------------------
 // sracunaj kolicinu na osnovu vrijednosti polja
 // ----------------------------------------------------
-static function _g_kol( cValue, cQttyType, nKol, nQtty, nHeigh, nWidth )
+static function _g_kol( cValue, cQttyType, nKol, nQtty, ;
+		nHeigh1, nWidth1, nHeigh2, nWidth2 )
 
 local nTmp := 0
+
+if nHeigh2 == nil
+	nHeigh2 := 0
+endif
+
+if nWidth2 == nil
+	nWidth2 := 0
+endif
 
 // po metru
 if cQttyType == "M"	
@@ -741,19 +781,29 @@ if cQttyType == "M"
 	// po metru, znaèi uzmi sve stranice stakla
 	
 	if "#D1#" $ cValue
-		nTmp += nWidth
+		nTmp += nWidth1
 	endif
 	
 	if "#D4#" $ cValue
-		nTmp += nWidth
+	
+		if nWidth2 <> 0
+			nTmp += nWidth2
+		else
+			nTmp += nWidth1
+		endif
+	
 	endif
 
 	if "#D2#" $ cValue
-		nTmp += nHeigh
+		nTmp += nHeigh1
 	endif
 
 	if "#D3#" $ cValue
-		nTmp += nHeigh
+		if nHeigh2 <> 0
+			nTmp += nHeigh2
+		else
+			nTmp += nHeigh1
+		endif
 	endif
 
 	// pretvori u metre
@@ -764,7 +814,7 @@ endif
 // po m2
 if cQttyType == "M2"
 	
-	nKol := c_ukvadrat( nQtty, nHeigh, nWidth ) 
+	nKol := c_ukvadrat( nQtty, nHeigh1, nWidth1 ) 
 	
 endif
 
