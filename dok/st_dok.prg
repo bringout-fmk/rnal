@@ -329,16 +329,14 @@ do while !EOF() .and. field->doc_no == __doc_no
 	
 	// vrati se na operacije
 	select (nTable)
-
-	// vrati se na zapis gdje si bio
-	go (nRec)
-
+	
 	// ako su identicne operacije samo idi dalje....
 	if cRecord == cTmpRecord .and. nArticle == nTmpArticle
-		skip
 		loop
 	endif
 
+	// vrati se na zapis gdje si bio
+	go (nRec)
 
         do while !EOF() .and. field->doc_no == __doc_no ;
 			.and. field->doc_it_no == nDoc_it_no
