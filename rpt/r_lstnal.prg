@@ -284,9 +284,11 @@ do while !EOF() .and. DTOS(field->doc_dvr_date) >= DTOS( DATE() )
 		skip
 		loop
 	endif
-	
+
+	nDoc_no := field->doc_no
+
 	cPom := ""
-	cPom += PADR( docno_str(field->doc_no) , 10)
+	cPom += PADR( docno_str(nDoc_no) , 10)
 	cPom += " "
 	cPom += PADR( DTOC(field->doc_dvr_date) , 8)
 	cPom += " "
@@ -295,7 +297,10 @@ do while !EOF() .and. DTOS(field->doc_dvr_date) >= DTOS( DATE() )
 	cPom += show_customer( field->cust_id, field->cont_id )
 	
 	? cPom
+
 	
+	select docs 
+
 	skip
 enddo
 
@@ -313,16 +318,24 @@ return
 // ---------------------------------------------------------
 function lst_vrok_tek_dan()
 local cLine
+local nDoc_no
+local cLog
 local nDays := 0
 local nOperater
+local cEmail := "N"
+local i
+local aLog
+local cPrinter
 
 nOperater := GetUserID()
 
-Box(, 3, 65)
+Box(, 5, 65)
 	
 	@ m_x + 1, m_y + 2 SAY "Operater (0 - svi)" GET nOperater PICT "999"
 	
 	@ m_x + 3, m_y + 2 SAY "Uzeti u obzir do br.predh.dana:" GET nDays PICT "99999"
+	
+	@ m_x + 5, m_y + 2 SAY "Slati report email-om ?" GET cEmail PICT "@!" VALID cEmail $ "DN"
 	
 	read
 
@@ -330,6 +343,7 @@ BoxC()
 
 
 O_DOCS
+O_DOC_LOG
 O_CUSTOMS
 O_CONTACTS
 
@@ -338,6 +352,14 @@ set order to tag "D2"
 go top
 
 r_l_get_line(@cLine)
+
+// printer setuj na 0, radi sekvenci
+if cEmail == "D"
+	
+	cPrinter := gPrinter
+	gPrinter := "0"
+	
+endif
 
 START PRINT CRET
 
@@ -384,8 +406,10 @@ do while !EOF()
 		
 	endif
 
+	nDoc_no := field->doc_no
+
 	cPom := ""
-	cPom += PADR( docno_str(field->doc_no) , 10)
+	cPom += PADR( docno_str(nDoc_no) , 10)
 	cPom += " "
 	cPom += PADR( DTOC(field->doc_dvr_date) , 8)
 	cPom += " "
@@ -395,6 +419,48 @@ do while !EOF()
 	
 	? cPom
 	
+	
+	// drugi red uzmi iz log-a
+
+	select doc_log
+	set order to tag "1"
+	go top
+
+	seek docno_str( nDoc_no )
+
+	cLog := ""
+	
+	do while !EOF() .and. field->doc_no == nDoc_no
+		
+		cLog := DTOC( field->doc_log_date ) 
+		cLog += " / " 
+		cLog += ALLTRIM( field->doc_log_time )
+		cLog += " : "
+		cLog += ALLTRIM( field->doc_log_desc )
+		
+		skip
+	enddo
+	
+	// samo za log, koji nije inicijalni....
+	if "Inicij" $ cLog
+		cLog := ""
+	endif
+
+	// ispisi log 
+	if !EMPTY( cLog )
+		
+		aLog := SjeciStr( cLog, 60 ) 
+		
+		for i := 1 to LEN( aLog )
+			
+			? SPACE(29) + aLog[ i ]
+		
+		next
+		
+	endif
+
+	// vrati se na docs i idi dalje
+	select docs
 	skip
 enddo
 
@@ -403,8 +469,17 @@ enddo
 FF
 END PRINT
 
+// posalji na email
+if cEmail == "D"
+	
+	// vrati stanje printera
+	gPrinter := cPrinter
+	
+	// posalji email
+	send_eml()
+
+endif
+
 return
-
-
 
 

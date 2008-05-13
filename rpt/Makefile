@@ -3,7 +3,7 @@ MODUL=rnal_rpt
 
 SRCDOSROOT=c:\\dev\\fmk\\rnal\\rpt\\
 
-PRGS=m_rpt.prg rpt_rnal.prg r_lstnal.prg rpt_spec.prg rpt_ut.prg
+PRGS=m_rpt.prg rpt_rnal.prg r_lstnal.prg rpt_spec.prg rpt_ut.prg rpt_eml.prg
 CS=
 ASMS=
 
