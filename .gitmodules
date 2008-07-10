@@ -1,0 +1,6 @@
+[submodule "fmk_common"]
+	path = fmk_common
+	url = git@git.bring.out.ba:fmk_common.git
+[submodule "fmk_lib"]
+	path = fmk_lib
+	url = git@git.bring.out.ba:fmk_lib.git
