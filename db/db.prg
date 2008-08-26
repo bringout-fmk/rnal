@@ -52,7 +52,6 @@ endif
 
 if fRS // radna stanica
   	if file(ToUnix(PRIVPATH+cSezona+"\P_RNAL.DBF"))
-      		// nema se sta raditi ......., pripr.dbf u sezoni postoji !
       		return
   	endif
   	aFilesK:={}
