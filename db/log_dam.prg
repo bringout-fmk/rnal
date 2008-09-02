@@ -1,4 +1,4 @@
-#include "\dev\fmk\rnal\rnal.ch"
+#include "rnal.ch"
 
 static __doc_no
 static __oper_id

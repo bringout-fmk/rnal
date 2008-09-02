@@ -1,4 +1,4 @@
-#include "\dev\fmk\rnal\rnal.ch"
+#include "rnal.ch"
 
 // u RNAL modulu ne trebamo kreirati tabele rabata
 function crerabdb()

@@ -1,4 +1,4 @@
-#include "\dev\fmk\rnal\rnal.ch"
+#include "rnal.ch"
 
 // variables
 static _el_gr

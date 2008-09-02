@@ -1,7 +1,7 @@
 VERZIJA=CDX
 MODUL=RNAL
 
-SRCDOSROOT=c:\\dev\\fmk\\rnal\\exe\\
+SRCDOSROOT=$(BASEDOS)\\fmk\\rnal\\exe\\
 PRGS=e.prg
 
 CS=
@@ -14,4 +14,4 @@ SCLIB_LIBS=sc1g_arh.lib sc1g_ba.lib sc1g_cui.lib sc1g_db.lib sc1g_os.lib sc1g_os
 
 MODUL_LIBS=rnal_m.lib rnal_db.lib rnal_df.lib rnal_sif.lib rnal_par.lib rnal_ut.lib rnal_do.lib rnal_rpt.lib rnal_ex.lib 
 
-include $(SC_BUILD_HOME_DIR)/sclib/Makefile_clipper
+include ../../fmk_lib/Makefile_clipper
