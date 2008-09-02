@@ -188,11 +188,15 @@ do while !EOF() .and. field->doc_no == __doc_no
 		// zaokruzi vrijednosti....
 		_art_set_descr( nArt_id, nil, nil, @aZpoGN, lZpoGN )
 		
-		nZHeigh := obrl_zaok( nHeigh, aZpoGN )
-		nZH2 := obrl_zaok( nHe2, aZpoGN)
+		// da li je kaljeno ? kod kaljenog nema zaokruzenja
 		
-		nZWidth := obrl_zaok( nWidth, aZpoGN )
-		nZW2 := obrl_zaok( nWi2, aZpoGN)
+		lKaljeno := is_kaljeno( aZpoGN, nDoc_no, nDoc_it_no )
+	
+		nZHeigh := obrl_zaok( nHeigh, aZpoGN, lKaljeno )
+		nZH2 := obrl_zaok( nHe2, aZpoGN, lKaljeno )
+		
+		nZWidth := obrl_zaok( nWidth, aZpoGN, lKaljeno )
+		nZW2 := obrl_zaok( nWi2, aZpoGN, lKaljeno )
 		
 		// ako se zaokruzuje onda total ide po zaokr.vrijednostima
 		nTotal := ROUND( c_ukvadrat( nQtty, nZHeigh, nZWidth, nZH2, nZW2 ), 2)

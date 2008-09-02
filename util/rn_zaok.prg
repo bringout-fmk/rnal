@@ -10,13 +10,23 @@ static S3M_ZAOKR := 3
 // ----------------------------------------
 // obracunski list zaokruzenje
 // ----------------------------------------
-function obrl_zaok( nVal, aArr )
+function obrl_zaok( nVal, aArr, lKaljeno )
 local nElCount 
 local i
 local nTickness
 local nSeek
 local nZaok := 1
 local xZaok := 0
+
+if lKaljeno == nil
+	lKaljeno := .f.
+endif
+
+if lKaljeno == .t.
+	// kod kaljenog nema zaokruzenja
+	xZaok := nVal
+	return xZaok
+endif
 
 // uzmi broj elemenata stakla
 nElCount := aArr[ LEN(aArr), 1 ]
@@ -240,8 +250,8 @@ local nRet
 local nPom
 
 // gornji limit
-if nVal > 2400 
-	return 2400
+if nVal > 3060 
+	return 3060
 endif
 
 // donji limit
