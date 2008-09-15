@@ -152,7 +152,7 @@ Box(, 10, 70)
 
 set cursor on
 
-@ m_x + nX, m_y + 2 SAY PADL("****** export GPS.opt parametri", nLeft)
+@ m_x + nX, m_y + 2 SAY PADL("****** export GPS.opt Lisec parametri", nLeft)
 
 nX += 2
 
@@ -161,6 +161,11 @@ nX += 2
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("Uvijek overwrite export fajla (D/N)?", 45) GET gExpAlwOvWrite PICT "@!" VALID gExpAlwOvWrite $ "DN"
+
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL("Dodaj (mm) na bruseno staklo:", 45) GET gAddToDim PICT "9999.99" 
+
 
 nX += 2
 
@@ -474,6 +479,7 @@ private aHistory:={}
 
 RPar("od", @gExpOutDir)
 RPar("ao", @gExpAlwOvWrite)
+RPar("ad", @gAddToDim)
 RPar("pd", @gFaPrivDir)
 RPar("kd", @gFaKumDir)
 
@@ -575,6 +581,7 @@ private aHistory:={}
 
 WPar("od", gExpOutDir)
 WPar("ao", gExpAlwOvWrite)
+WPar("ad", gAddToDim)
 WPar("pd", gFaPrivDir)
 WPar("kd", gFaKumDir)
 

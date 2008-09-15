@@ -232,6 +232,7 @@ public gExpOutDir := PADR("c:\temp\", 150)
 public gExpAlwOvWrite := "N"
 public gFaKumDir := PADR( STRTRAN( KUMPATH, "\RNAL\", "\FAKT\" ), 150 )
 public gFaPrivDir := PADR( STRTRAN( PRIVPATH, "\RNAL\", "\FAKT\" ), 150 )
+public gAddToDim := 3
 
 // default joker glass type
 public gDefGlType
@@ -269,6 +270,7 @@ Rpar( "a5", @gDefNVM )
 private cSection := "E"
 Rpar( "od", @gExpOutDir )
 Rpar( "ao", @gExpAlwOvWrite )
+Rpar( "ad", @gAddToDim )
 Rpar( "pd", @gFaPrivDir )
 Rpar( "kd", @gFaKumDir )
 

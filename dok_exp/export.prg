@@ -13,6 +13,7 @@ local cFile := ""
 local nH
 local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
+local nADOC_OP := F_DOC_OPS
 local nTArea := SELECT()
 
 local aRel
@@ -55,11 +56,22 @@ endif
 if lTemporary == .t.
 	nADOCS := F__DOCS
 	nADOC_IT := F__DOC_IT
+	nADOC_OP := F__DOC_OPS
 endif
 
 select (nADOCS)
 go top
 seek docno_str( nDoc_no )
+
+
+// ako je nalog 0 ili manje, znaci da nema broja
+// nije odstampan !
+
+if nDoc_no <= 0
+	msgbeep("Broj naloga: " + ALLTRIM(STR(nDoc_no)) + ;
+		"#Odradite prvo stampu naloga !" )
+	return
+endif
 
 // uzmi lokaciju fajla
 g_exp_location( @cLocation )
@@ -141,6 +153,7 @@ seek docno_str( nDoc_no )
 
 do while !EOF() .and. field->doc_no == nDoc_no
 
+	nDoc_it_no := field->doc_it_no
 	nArt_id := field->art_id
 	
 	select articles
@@ -197,6 +210,30 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		endif
 	
 	next
+
+	// pregledaj operacije artikla
+	// ako ima brusenje - mora se dodati po 3mm na dimenzije
+
+	select (nADOC_OP)
+	set order to tag "1"
+	go top
+	seek docno_str(nDoc_no) + docit_str(nDoc_it_no)
+
+	lBrusenje := .f.
+
+	do while !EOF() .and. field->doc_no == nDoc_no ;
+			.and. field->doc_it_no == nDoc_it_no
+
+			cJoker := g_aatt_joker( field->aop_att_id )
+			
+			if cJoker == "<A_B>"
+				lBrusenje := .t.
+				exit
+			endif
+	
+	enddo
+
+	select (nADOC_IT)
 	
 	// samo ako su dimenzije ispravne.....
 	if field->doc_it_width <> 0 .and. ;
@@ -208,8 +245,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			"", ;
 			nil, ;
 			field->doc_it_qtty, ;
-			field->doc_it_width, ;
-			field->doc_it_height, ;
+			_calc_dimension( field->doc_it_width, lBrusenje ), ;
+			_calc_dimension( field->doc_it_height, lBrusenje ), ;
 			cPosGl1, ;
 			cPosFr1, ;
 			cPosGl2, ;
@@ -281,6 +318,21 @@ msgbeep("Export zavrsen ... kreiran je fajl#" + ;
 		cLocation ) + cFile )
 
 return
+
+
+// -------------------------------------------------------------
+// kalkuliranje nove dimenzije ako je brusenje u pitanju
+// -------------------------------------------------------------
+static function _calc_dimension( nDimension, lBrusenje )
+local nNewDim := nDimension
+
+if lBrusenje == .t.
+	nNewDim := nDimension + gAddToDim
+endif
+
+return nNewDim
+
+
 
 
 
