@@ -93,6 +93,10 @@ endif
 // -----------------------------------------------------
 
 
+Box(,2, 60)
+
+@ m_x + 1, m_y + 2 SAY PADR("upisujem osnovne podatke", 50)
+
 // upisi <REL>
 aRel := add_rel( "" )
 write_rec( nH, aRel, aRelSpec )
@@ -119,6 +123,7 @@ select (nADOCS)
 // ako su podaci ispravni
 if field->cust_id <> 0
 
+	@ m_x + 1, m_y + 2 SAY PADR("upisujem podatke o partneru ...... ",50)
 	// uzmi i upisi osnovne elemente naloga
 	aOrd := add_ord( field->doc_no , ;
 		field->cust_id , ;
@@ -139,7 +144,9 @@ else
 
 	select (nTArea)
 	msgbeep("Nisu ispravni podaci narudzbe !!!!#Operacija prekinuta...")
-	
+
+	BoxC()
+
 	// izadji....
 	return
 
@@ -153,6 +160,9 @@ seek docno_str( nDoc_no )
 
 do while !EOF() .and. field->doc_no == nDoc_no
 
+	
+	@ m_x + 1, m_y + 2 SAY PADR("upisujem stavke naloga.....", 50)
+	
 	nDoc_it_no := field->doc_it_no
 	nArt_id := field->art_id
 	
@@ -209,6 +219,9 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			cPosGl3 := ALLTRIM(STR(i))
 		endif
 	
+		@ m_x + 2, m_y + 2 SAY PADR("ok stavka - " + ;
+				ALLTRIM(STR(i)), 50)
+
 	next
 
 	// pregledaj operacije artikla
@@ -230,6 +243,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 				lBrusenje := .t.
 				exit
 			endif
+
+			skip
 	
 	enddo
 
@@ -304,6 +319,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	skip
 	
 enddo
+
+BoxC()
 
 select (nADOC_IT)
 go top
