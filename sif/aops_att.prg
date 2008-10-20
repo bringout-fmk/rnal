@@ -262,6 +262,7 @@ endif
 cAopAttDesc := STRTRAN( cAopAttDesc, "#G_CONFIG#", "" )
 cAopAttDesc := STRTRAN( cAopAttDesc, "#HOLE_CONFIG#", "" )
 cAopAttDesc := STRTRAN( cAopAttDesc, "#STAMP_CONFIG#", "" )
+cAopAttDesc := STRTRAN( cAopAttDesc, "#PREP_CONFIG#", "" )
 
 select (nTArea)
 
@@ -341,6 +342,10 @@ if FOUND()
 		
 		lStConf := .t.
 	
+	elseif "#PREP_CONFIG#" $ field->aop_att_full
+		
+		lPrepConf := .t.
+
 	elseif "#" $ field->aop_att_full
 	
 		lGConf := .f.
@@ -444,6 +449,13 @@ if lStConf == .t. .and. ;
 	
 	// konfigurator pozicije pecata
 	cVal := stamp_config( cJoker, nWidth, nHeigh )
+
+endif
+
+if lPrepConf == .t.
+	
+	// konfigurator prepusta
+	cVal := prepust_config( cJoker, nWidth, nHeigh, 0, 0, 0, 0 )
 
 endif
 

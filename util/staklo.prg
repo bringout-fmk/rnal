@@ -143,6 +143,97 @@ return .t.
 
 
 
+// ---------------------------------------------------
+// staklo sa prepustom - konfigurator 
+// nove dimenzije stakla
+// ---------------------------------------------------
+function prepust_config( cJoker, nWidth, nHeigh, ;
+			nD1, nD2, nD3, nD4 )
+
+local nBoxX := 17
+local nBoxY := 66
+
+local nGLen := 40
+local nGLeft := 8
+local nGTop := 4
+local nGBott := 15
+local cColSch := "GR+/G+"
+
+private GetList := {}
+
+nD1 := nWidth
+nD2 := nHeigh
+nD3 := nD2
+nD4 := nD1
+
+Box(, nBoxX, nBoxY)
+
+	nStX := m_x + 2
+	nStY := m_y + 2
+
+	@ m_x + 1, m_y + 2 SAY "##glass_config## konfigurisanje prepusta..."
+
+	_show_glass( nGLen, nGTop, nGBott, nGLeft, cColSch, nWidth, nHeigh ) 
+	
+	// top
+	@ m_x + nGTop - 1, m_y + (nBoxY / 2) - 1 SAY "A:" GET nD1 ;
+		PICT pic_dim()
+	
+	// left
+	@ m_x + (nBoxX / 2 ) + 1, m_y + (nGLeft - 6 ) SAY "B:" GET nD2 ;
+		PICT pic_dim()
+	
+	// right
+	@ m_x + (nBoxX / 2 ) + 1, m_y + (nGLeft + nGLen + 3) SAY "C:" GET nD3; 
+		PICT pic_dim()
+	
+	// bottom
+	@ m_x + nGBott + 1, m_y + (nBoxY / 2) - 1 SAY "D:" GET nD4 ; 
+		PICT pic_dim()
+	
+	read
+	
+BoxC()
+
+if LastKey() == K_ESC
+	return ""
+endif
+
+cTmp := ""
+
+// dim. 1
+if nD1 > 0 
+ 	cTmp += "A=" + ALLTRIM(STR(nD1,12,2)) + "#" 
+endif
+// dim. 2
+if nD2 > 0 
+	cTmp += "B=" + ALLTRIM(STR(nD2,12,2)) + "#" 
+endif
+// dim. 3
+if nD3 > 0 
+	cTmp += "C=" + ALLTRIM(STR(nD3,12,2)) + "#" 
+endif
+// dim. 4
+if nD4 > 0 
+	cTmp += "D=" + ALLTRIM(STR(nD4,12,2)) + "#" 
+endif
+
+if !EMPTY( cTmp )
+	cTmp := "#" + cTmp
+endif
+
+// formiraj gotov string
+// <A_PREPD>:#D1=2#D2=5#
+//  dim1 = 2mm
+//  dim2 = 5mm itd...
+
+if !EMPTY( cTmp )
+	cRet := cJoker + ":" + cTmp
+endif
+
+return cRet
+
+
 // --------------------------------------
 // konfigurator busenja
 // cJoker - joker operacije

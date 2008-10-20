@@ -22,7 +22,7 @@ static __SPACE
 // --------------------------------------------
 function set_keywords()
 
-__REL_VER := "02.11"
+__REL_VER := "02.60"
 __REL := "<REL>"
 __ORD := "<ORD>"
 __POS := "<POS>"
@@ -279,27 +279,108 @@ return xRet
 // ------------------------------
 // dodaj u record <PO2>
 // -----------------------------
-function add_po2( cIdCode )
+function add_po2( cIdCode, ;
+		nW1, nH1, ;
+		nG1_bott, nG1_rig, nG1_top, nG1_left, ;
+		nS1_bott, nS1_rig, nS1_top, nS1_left, ;
+		nW2, nH2, ;
+		nG2_bott, nG2_rig, nG2_top, nG2_left, ;
+		nS2_bott, nS2_rig, nS2_top, nS2_left, ;
+		nOff2x, nOff2y, ;
+		nW3, nH3, ;
+		nG3_bott, nG3_rig, nG3_top, nG3_left, ;
+		nS3_bott, nS3_rig, nS3_top, nS3_left, ;
+		nOff3x, nOff3y )
+
 local aPo2 := {}
 
 set_keywords()
 
 AADD( aPo2, __PO2 )
 AADD( aPo2, cIdCode )
+AADD( aPo2, calc_dim(nW1) )
+AADD( aPo2, calc_dim(nH1) )
+AADD( aPo2, nG1_bott )
+AADD( aPo2, nG1_rig )
+AADD( aPo2, nG1_top )
+AADD( aPo2, nG1_left )
+AADD( aPo2, nS1_bott )
+AADD( aPo2, nS1_rig )
+AADD( aPo2, nS1_top )
+AADD( aPo2, nS1_left )
+AADD( aPo2, calc_dim(nW2) )
+AADD( aPo2, calc_dim(nH2) )
+AADD( aPo2, nG2_bott )
+AADD( aPo2, nG2_rig )
+AADD( aPo2, nG2_top )
+AADD( aPo2, nG2_left )
+AADD( aPo2, nS2_bott )
+AADD( aPo2, nS2_rig )
+AADD( aPo2, nS2_top )
+AADD( aPo2, nS2_left )
+AADD( aPo2, nOff2x )
+AADD( aPo2, nOff2y )
+AADD( aPo2, calc_dim(nW3) )
+AADD( aPo2, calc_dim(nH3) )
+AADD( aPo2, nG3_bott )
+AADD( aPo2, nG3_rig )
+AADD( aPo2, nG3_top )
+AADD( aPo2, nG3_left )
+AADD( aPo2, nS3_bott )
+AADD( aPo2, nS3_rig )
+AADD( aPo2, nS3_top )
+AADD( aPo2, nS3_left )
+AADD( aPo2, nOff3x )
+AADD( aPo2, nOff3y )
 
 return aPo2
 
 
 // -----------------------------------------------
 // vraca specifikaciju recorda <PO2>
+// dodatne informacije na samom rekord-u iz <POS>
 // -----------------------------------------------
 function _get_po2()
 local aPO2Spec := {}
 
 set_keywords()
 
-AADD(aPO2Spec, { __PO2,      "C",    5 } )
-AADD(aPO2Spec, { "ID_CODE",  "C",   40 } )
+AADD(aPO2Spec, { __PO2,        "C",    5 } )
+AADD(aPO2Spec, { "ID_CODE",    "C",   40 } )
+AADD(aPO2Spec, { "WIDTH1",     "N",    5 } )
+AADD(aPO2Spec, { "HEIGHT1",    "N",    5 } )
+AADD(aPO2Spec, { "GA1_BOTT",   "N",    4 } )
+AADD(aPO2Spec, { "GA1_RIGHT",  "N",    4 } )
+AADD(aPO2Spec, { "GA1_TOP",    "N",    4 } )
+AADD(aPO2Spec, { "GA1_LEFT",   "N",    4 } )
+AADD(aPO2Spec, { "ST1_BOTT",   "N",    5 } )
+AADD(aPO2Spec, { "ST1_RIGHT",  "N",    5 } )
+AADD(aPO2Spec, { "ST1_TOP",    "N",    5 } )
+AADD(aPO2Spec, { "ST1_LEFT",   "N",    5 } )
+AADD(aPO2Spec, { "WIDTH2",     "N",    5 } )
+AADD(aPO2Spec, { "HEIGHT2",    "N",    5 } )
+AADD(aPO2Spec, { "GA2_BOTT",   "N",    4 } )
+AADD(aPO2Spec, { "GA2_RIGHT",  "N",    4 } )
+AADD(aPO2Spec, { "GA2_TOP",    "N",    4 } )
+AADD(aPO2Spec, { "GA2_LEFT",   "N",    4 } )
+AADD(aPO2Spec, { "ST2_BOTT",   "N",    5 } )
+AADD(aPO2Spec, { "ST2_RIGHT",  "N",    5 } )
+AADD(aPO2Spec, { "ST2_TOP",    "N",    5 } )
+AADD(aPO2Spec, { "ST2_LEFT",   "N",    5 } )
+AADD(aPO2Spec, { "OFFS2_X",    "N",    5 } )
+AADD(aPO2Spec, { "OFFS2_Y",    "N",    5 } )
+AADD(aPO2Spec, { "WIDTH3",     "N",    5 } )
+AADD(aPO2Spec, { "HEIGHT3",    "N",    5 } )
+AADD(aPO2Spec, { "GA3_BOTT",   "N",    4 } )
+AADD(aPO2Spec, { "GA3_RIGHT",  "N",    4 } )
+AADD(aPO2Spec, { "GA3_TOP",    "N",    4 } )
+AADD(aPO2Spec, { "GA3_LEFT",   "N",    4 } )
+AADD(aPO2Spec, { "ST3_BOTT",   "N",    5 } )
+AADD(aPO2Spec, { "ST3_RIGHT",  "N",    5 } )
+AADD(aPO2Spec, { "ST3_TOP",    "N",    5 } )
+AADD(aPO2Spec, { "ST3_LEFT",   "N",    5 } )
+AADD(aPO2Spec, { "OFFS3_X",    "N",    5 } )
+AADD(aPO2Spec, { "OFFS3_Y",    "N",    5 } )
 
 return aPO2Spec
 
@@ -425,7 +506,7 @@ return aTxt
 
 
 // -----------------------------------------------
-// vraca specifikaciju recorda <PO2>
+// vraca specifikaciju recorda <TXT>
 // -----------------------------------------------
 function _get_txt( nVar )
 local aTxtSpec := {}
