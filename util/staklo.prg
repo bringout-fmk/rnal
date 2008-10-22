@@ -419,7 +419,60 @@ next
 
 return cRet
 
+// --------------------------------------------------
+// vraca u stringu ispis dimenzija prepust stakla
+// --------------------------------------------------
+function prep_read( cValue, nW, nH )
+local cRet := "" 
+local aTmp 
+local cTmp
+local aTmp2
+local i
+local aPrep
 
+// "<A_PREP>:#A=24#B=55#"
+aTmp := TokToNiz( cValue, ":")
+
+if aTmp[1] <> "<A_PREP>"
+	// ovo nije prepust
+	return cRet
+endif
+
+cTmp := ALLTRIM( aTmp[2] )
+
+aTmp2 := TokToNiz( cTmp, "#" )
+
+// i sada imamo dimenzije ...
+// A=24, B=55, C=...
+
+for i := 1 to LEN( aTmp2 )
+	
+	aPrep := {}
+	aPrep := TokToNiz( aTmp2[i], "=" )
+
+	cPrepPos := ALLTRIM( aPrep[1] )
+	cPrepDim := ALLTRIM( aPrep[2] )
+	
+	if cPrepPos == "A"
+		nW := VAL( cPrepDim )
+	endif
+
+	if cPrepPos == "B"
+		nH := VAL( cPrepDim )
+	endif
+
+	cRet += aTmp2[i] + " mm, "
+next
+
+
+return cRet
+
+
+// ---------------------------------------------
+// procitaj vrijednosti...
+// ---------------------------------------------
+function get_prep_dim( cVal, nW, nH )
+return prep_read( cVal, @nW, @nH )
 
 
 // ---------------------------------------------------

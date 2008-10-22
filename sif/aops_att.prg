@@ -283,6 +283,7 @@ local nTArea := SELECT()
 local lGConf := .f.
 local lHConf := .f.
 local lStConf := .f.
+local lPrepConf := .f.
 
 local cConf := ""
 
@@ -507,7 +508,12 @@ do case
 	case aTmp[1] == "<A_BU>"
 
 		cRet := hole_read( cVal )
-		
+	
+	// prepust
+	case aTmp[1] == "<A_PREP>"
+
+		cRet := prep_read( cVal )
+
 endcase
 
 

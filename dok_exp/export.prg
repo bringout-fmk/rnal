@@ -10,7 +10,7 @@
 function exp_2_lisec( nDoc_no, lTemporary, lWriteRel )
 local cLocation
 local cFile := ""
-local nH
+local nHnd
 local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
 local nADOC_OP := F_DOC_OPS
@@ -35,6 +35,14 @@ local aGlSpec
 local aFr1
 local aFr2
 local aFrSpec
+
+local ix
+local i
+local iy
+
+local aArticles
+local aElem
+
 
 // napuni matrice sa specifikacijama record-a
 aRelSpec := _get_rel()
@@ -79,7 +87,7 @@ endif
 g_exp_location( @cLocation )
 
 // kreiraj fajl exporta....
-if cre_exp_file( nDoc_no, cLocation, @cFile, @nH ) == 0
+if cre_exp_file( nDoc_no, cLocation, @cFile, @nHnd ) == 0
 
 	select (nTArea)
 	msgbeep("Operacija ponistena, nista nije exportovano!")
@@ -101,7 +109,7 @@ Box(,2, 60)
 
 // upisi <REL>
 aRel := add_rel( "" )
-write_rec( nH, aRel, aRelSpec )
+write_rec( nHnd, aRel, aRelSpec )
 
 select (nADOCS)
 nCustId := field->cust_id
@@ -140,7 +148,7 @@ if field->cust_id <> 0
 		field->doc_ship_place )
 		
 	// UPISI <ORD>
-	write_rec( nH, aOrd, aOrdSpec )
+	write_rec( nHnd, aOrd, aOrdSpec )
 	
 else
 
@@ -162,12 +170,15 @@ seek docno_str( nDoc_no )
 
 do while !EOF() .and. field->doc_no == nDoc_no
 
-	
+	nTRec := RECNO()
+
 	@ m_x + 1, m_y + 2 SAY PADR("upisujem stavke naloga.....", 50)
 	
 	nDoc_it_no := field->doc_it_no
 	nArt_id := field->art_id
-	
+	nHeight := field->doc_it_height
+	nWidth := field->doc_it_width
+
 	select articles
 	set order to tag "1"
 	seek artid_str( nArt_id )
@@ -184,15 +195,12 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	cPosFr1 := ""
 	cFr2 := ""
 	cPosFr2 := ""
-	// glass 1 element no
-	nGlass1 := -99
-	// glass 2 element no
-	nGlass2 := -99
-	// glass 3 element no
-	nGlass3 := -99
-	// isto vazi i za frame
-	nFrame1 := -99
-	nFrame2 := -99
+	nGl1h := 0
+	nGl1w := 0
+	nGl2h := 0
+	nGl2w := 0
+	nGl3h := 0
+	nGl3w := 0
 
 	// uzmi i razlozi artikal
 	// F4_A12_F3
@@ -207,74 +215,32 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	// ....    [2] = A12
 	// ....    [3] = F3
 	aArtDesc := TokToNiz( cArtDesc, "_" )
-	
+
+	altd()
+
+	aArticles := {}
+
 	for i := 1 to LEN( aArtDesc )
-			
-		if i == 1
-			cGl1 := aArtDesc[i]
-			cPosGl1 := ALLTRIM(STR(i))
-			nGlass1 := aElem[i, 1]
-		endif
 		
-		if i == 2
-			cFr1 := aArtDesc[i]
-			cPosFr1 := ALLTRIM(STR(i))
-			nFrame1 := aElem[i, 1]
-		endif
+		// aArt { elem_no, art_desc, position, 
+		//        width, height, a, b, c, d}
+		AADD( aArticles, { aElem[i, 1], ;
+				aArtDesc[i], ;
+				ALLTRIM(STR(i)), ;
+				nWidth, ;
+				nHeight, ;
+				0, 0, 0, 0 } )	
 		
-		if i == 3
-			cGl2 := aArtDesc[i]
-			cPosGl2 := ALLTRIM(STR(i))
-			nGlass2 := aElem[i, 1]
-		endif
-		
-		if i == 4
-			cFr2 := aArtDesc[i]
-			cPosFr2 := ALLTRIM(STR(i))
-			nFrame2 := aElem[i, 1]
-		endif
-		
-		if i == 5
-			cGl3 := aArtDesc[i]
-			cPosGl3 := ALLTRIM(STR(i))
-			nGlass3 := aElem[i, 1]
-		endif
-	
-		@ m_x + 2, m_y + 2 SAY PADR("ok stavka - " + ;
+		@ m_x + 2, m_y + 2 SAY PADR(cArtdesc + " - ok stavka - " + ;
 				ALLTRIM(STR(i)), 50)
 
 	next
-	
+
 	// pregledaj operacije artikla
 	// npr: ako ima brusenje - mora se dodati po 1.5 mm na dimenzije
 
-	nWidth := field->doc_it_width
-	nHeight := field->doc_it_height
-
-	nW1 := 0
-	nW2 := 0
-	nW3 := 0
-	nH1 := 0
-	nH2 := 0
-	nH3 := 0
-
-	// setuj pomocne dimenzije
-	if !EMPTY(cGl1)
-		nW1 := nWidth
-		nH1 := nHeight
-	endif
-	
-	if !EMPTY(cGl2)
-		nH2 := nHeight
-		nW2 := nWidth
-	endif
-
-	if !EMPTY(cGl3)
-		nH3 := nHeight
-		nW3 := nWidth
-	endif
-
-	lChange := .f.
+	// razdvoji <POS>
+	lSeparate := .f.
 
 	select (nADOC_OP)
 	set order to tag "1"
@@ -287,39 +253,94 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		cJoker := g_aatt_joker( field->aop_att_id )
 			
 		select (nADOC_OP)
-
+	
+		// moramo znati i koji je element
+		nElemPos := field->doc_it_el_no
+	
+		// kod brusenja dodaj na dimenzije po 3mm
 		if cJoker == "<A_B>"
-			
-			lChange := .t.
-
-			// moramo znati i koji je element
-			nElemPos := field->doc_it_el_no
 		
-			// radi se o staklu 1
-			if nElemPos == nGlass1
-			  nH1 := _calc_dimension( nHeight,.t. )
-			  nW1 := _calc_dimension( nWidth, .t. )
-			endif
-				
-			// radi se o staklu 2
-			if nElemPos == nGlass2
-			  nH2 := _calc_dimension( nHeight,.t. )
-			  nW2 := _calc_dimension( nWidth, .t. )
-			endif
+			lSeparate := .t. 
+
+			nScan := ASCAN( aArticles, { |xvar| xvar[1] == nElemPos } )
+
+			if nScan <> 0
+
+				// upisi preracunate vrijednosti
+				// u matricu...
+
+				nHtmp := _calc_dimension( nHeight, .t. )
+			  	nWtmp := _calc_dimension( nWidth, .t. )
 			
-			// radi se o staklu 3
-			if nElemPos == nGlass3
-			  nH3 := _calc_dimension( nHeight,.t. )
-			  nW3 := _calc_dimension( nWidth, .t. )
+				aArticles[ nScan, 4 ] := nWtmp
+				aArticles[ nScan, 5 ] := nHtmp
 			endif
-				
+		endif
+
+		// kod prepust stakala - takodjer gledaj druge dimenzije
+		if cJoker = "<A_PREP>"
+			
+			lSeparate := .t.
+
+			cValue := field->aop_value 
+
+			nScan := ASCAN( aArticles, { |xvar| xvar[1] == nElemPos } )
+
+			nH := 0
+			nW := 0
+
+			// izracunaj koje su dimenzije prepusta
+			get_prep_dim( cValue, @nW, @nH )
+
+			if nScan <> 0
+
+				aArticles[ nScan, 4 ] := nW
+				aArticles[ nScan, 5 ] := nH
+			endif
+
 		endif
 
 		skip
 	enddo
 
 	select (nADOC_IT)
+	go (nTRec)
 	
+	// napuni varijable
+	for ix := 1 to LEN(aArticles)
+		
+		if ix == 1
+			cGl1 := aArticles[ix, 2]
+			cPosGl1 := aArticles[ix, 3]
+			nGl1w := aArticles[ix, 4]
+			nGl1h := aArticles[ix, 5]
+		endif
+		
+		if ix == 2
+			cFr1 := aArticles[ix, 2]
+			cPosFr1 := aArticles[ix, 3]
+		endif
+
+		if ix == 3
+			cGl2 := aArticles[ix, 2]
+			cPosGl2 := aArticles[ix, 3]
+			nGl2w := aArticles[ix, 4]
+			nGl2h := aArticles[ix, 5]
+		endif
+
+		if ix == 4
+			cFr2 := aArticles[ix, 2]
+			cPosFr2 := aArticles[ix, 3]
+		endif
+
+		if ix == 5
+			cGl3 := aArticles[ix, 2]
+			cPosGl3 := aArticles[ix, 3]
+			nGl3w := aArticles[ix, 4]
+			nGl3h := aArticles[ix, 5]
+		endif
+	next
+
 	// samo ako su dimenzije ispravne.....
 	if field->doc_it_width <> 0 .and. ;
 		field->doc_it_height <> 0 .and. ;
@@ -339,55 +360,55 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			cPosGl3 )
 
 		// upisi <POS>
-		write_rec( nH, aPos, aPosSpec )
+		write_rec( nHnd, aPos, aPosSpec )
 
 		// da li ima za dodatne informacije <PO2> ?
-		if lChange == .t. 
+		if lSeparate == .t. 
 	
 			aPo2 := add_po2( "", ;
-				nW1, ;
-				nH1, ;
+				nGl1w, ;
+				nGl1h, ;
 				0, 0, 0, 0, 0, 0, 0, 0, ;
-				nW2, ;
-				nH2, ;
+				nGl2w, ;
+				nGl2h, ;
 				0, 0, 0, 0, 0, 0, 0, 0, ;
-				nW3, ;
-				nH3, ;
+				nGl3w, ;
+				nGl3h, ;
 				0, 0, 0, 0, 0, 0, 0, 0 )
 		
 			// upisi <PO2>
-			write_rec( nH, aPo2, aPo2Spec )
+			write_rec( nHnd, aPo2, aPo2Spec )
 		endif
 
 		// upisi <GLx>, <FRx>
 		if !EMPTY( cGl1 )
 		
 			aGl1 := add_glx( "1", cGl1 )
-			write_rec( nH, aGl1, aGlSpec )
+			write_rec( nHnd, aGl1, aGlSpec )
 		
 		endif
 		if !EMPTY( cFr1 )
 			
 			aFr1 := add_frx( "1", cFr1 )
-			write_rec( nH, aFr1, aFrSpec )
+			write_rec( nHnd, aFr1, aFrSpec )
 			
 		endif
 		if !EMPTY( cGl2 )
 			
 			aGl2 := add_glx( "2", cGl2 )
-			write_rec( nH, aGl2, aGlSpec )
+			write_rec( nHnd, aGl2, aGlSpec )
 			
 		endif
 		if !EMPTY( cFr2 )
 			
 			aFr2 := add_frx( "2", cFr2 )
-			write_rec( nH, aFr2, aFrSpec )
+			write_rec( nHnd, aFr2, aFrSpec )
 			
 		endif
 		if !EMPTY( cGl3 )
 
 			aGl3 := add_glx( "3", cGl3 )
-			write_rec( nH, aGl3, aGlSpec )
+			write_rec( nHnd, aGl3, aGlSpec )
 		
 		endif
 		
@@ -397,13 +418,15 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			// upisi <TXT> ostale informacije
 			aTxt := add_txt( 1, ALLTRIM( field->doc_it_desc ) )
 
-			write_rec(nH, aTxt, aTxtSpec )
+			write_rec(nHnd, aTxt, aTxtSpec )
 	
 		endif
 
 	endif
 
 	select (nADOC_IT)
+	go (nTRec)
+
 	skip
 	
 enddo
