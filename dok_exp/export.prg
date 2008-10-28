@@ -216,20 +216,28 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	// ....    [3] = F3
 	aArtDesc := TokToNiz( cArtDesc, "_" )
 
-	altd()
-
 	aArticles := {}
 
+	altd()
+
 	for i := 1 to LEN( aArtDesc )
+	
+		nElem := aElem[i, 1]
+		// sta je ovaj elemenat
 		
+		cType := g_grd_by_elid( nElem )
+
 		// aArt { elem_no, art_desc, position, 
-		//        width, height, a, b, c, d}
-		AADD( aArticles, { aElem[i, 1], ;
+		//        width, height, posx, posy, neww, newh, 
+		//        x, y, type}
+		AADD( aArticles, { nElem, ;
 				aArtDesc[i], ;
 				ALLTRIM(STR(i)), ;
 				nWidth, ;
 				nHeight, ;
-				0, 0, 0, 0 } )	
+				0, 0, ;
+				nWidth, nHeight, ;
+				0, 0, cType } )	
 		
 		@ m_x + 2, m_y + 2 SAY PADR(cArtdesc + " - ok stavka - " + ;
 				ALLTRIM(STR(i)), 50)
@@ -237,7 +245,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	next
 
 	// pregledaj operacije artikla
-	// npr: ako ima brusenje - mora se dodati po 1.5 mm na dimenzije
+	// npr: ako ima brusenje - mora se dodati po 3 mm na dimenzije
 
 	// razdvoji <POS>
 	lSeparate := .f.
@@ -272,8 +280,13 @@ do while !EOF() .and. field->doc_no == nDoc_no
 				nHtmp := _calc_dimension( nHeight, .t. )
 			  	nWtmp := _calc_dimension( nWidth, .t. )
 			
-				aArticles[ nScan, 4 ] := nWtmp
-				aArticles[ nScan, 5 ] := nHtmp
+				// povecanje
+				aArticles[ nScan, 6 ] := gAddToDim
+				aArticles[ nScan, 7 ] := gAddToDim
+				
+				// nove dimenzije
+				aArticles[ nScan, 8 ] := nWtmp 
+				aArticles[ nScan, 9 ] := nHtmp 
 			endif
 		endif
 
@@ -289,13 +302,24 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			nH := 0
 			nW := 0
 
+			nHraz := 0
+			nWraz := 0
+
 			// izracunaj koje su dimenzije prepusta
 			get_prep_dim( cValue, @nW, @nH )
 
-			if nScan <> 0
+			nHraz := ( nH - nHeight )
+			nWraz := ( nW - nWidth )
 
-				aArticles[ nScan, 4 ] := nW
-				aArticles[ nScan, 5 ] := nH
+			if nScan <> 0
+			
+				// povecanje
+				aArticles[ nScan, 6 ] := nWraz
+				aArticles[ nScan, 7 ] := nHraz
+
+				// nova dimenzija
+				aArticles[ nScan, 8 ] := nW
+				aArticles[ nScan, 9 ] := nH
 			endif
 
 		endif
@@ -312,8 +336,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		if ix == 1
 			cGl1 := aArticles[ix, 2]
 			cPosGl1 := aArticles[ix, 3]
-			nGl1w := aArticles[ix, 4]
-			nGl1h := aArticles[ix, 5]
+			nGl1w := aArticles[ix, 8]
+			nGl1h := aArticles[ix, 9]
 		endif
 		
 		if ix == 2
@@ -324,8 +348,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		if ix == 3
 			cGl2 := aArticles[ix, 2]
 			cPosGl2 := aArticles[ix, 3]
-			nGl2w := aArticles[ix, 4]
-			nGl2h := aArticles[ix, 5]
+			nGl2w := aArticles[ix, 8]
+			nGl2h := aArticles[ix, 9]
 		endif
 
 		if ix == 4
@@ -336,15 +360,15 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		if ix == 5
 			cGl3 := aArticles[ix, 2]
 			cPosGl3 := aArticles[ix, 3]
-			nGl3w := aArticles[ix, 4]
-			nGl3h := aArticles[ix, 5]
+			nGl3w := aArticles[ix, 8]
+			nGl3h := aArticles[ix, 9]
 		endif
 	next
 
 	// samo ako su dimenzije ispravne.....
-	if field->doc_it_width <> 0 .and. ;
+	if lSeparate == .f. .and. ( field->doc_it_width <> 0 .and. ;
 		field->doc_it_height <> 0 .and. ;
-		field->doc_it_qtty <> 0
+		field->doc_it_qtty <> 0 )
 		
 		// ubaci u matricu podatke
 		aPos := add_pos( field->doc_it_no, ;
@@ -361,66 +385,103 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 		// upisi <POS>
 		write_rec( nHnd, aPos, aPosSpec )
+		
+		// upisi <GLx> <FRx>
+		_a_gx_fx( nHnd, cGl1, cGl2, cGl3, cFr1, cFr2, ;
+			aGlSpec, aFrSpec )
 
-		// da li ima za dodatne informacije <PO2> ?
-		if lSeparate == .t. 
+	endif
 	
-			aPo2 := add_po2( "", ;
-				nGl1w, ;
-				nGl1h, ;
-				0, 0, 0, 0, 0, 0, 0, 0, ;
-				nGl2w, ;
-				nGl2h, ;
-				0, 0, 0, 0, 0, 0, 0, 0, ;
-				nGl3w, ;
-				nGl3h, ;
-				0, 0, 0, 0, 0, 0, 0, 0 )
+	// da li ima za dodatne informacije <PO2> ?
+	if lSeparate == .t. 
+	   
+	   for nn := 1 to LEN( aArticles )
+	        
+	     // samo za staklo...
+	     if ALLTRIM( aArticles[nn, 12] ) == ALLTRIM( gGlassJoker )
 		
-			// upisi <PO2>
-			write_rec( nHnd, aPo2, aPo2Spec )
+		// ubaci u matricu podatke
+		aPos := add_pos( field->doc_it_no, ;
+			"", ;
+			nil, ;
+			field->doc_it_qtty, ;
+			aArticles[ nn, 8 ], ;
+			aArticles[ nn, 9 ], ;
+			cPosGl1, ;
+			cPosFr1, ;
+			cPosGl2, ;
+			cPosFr2, ;
+			cPosGl3 )
+
+		// upisi <POS>
+		write_rec( nHnd, aPos, aPosSpec )
+
+		if nn = 1
+		  aPo2 := add_po2( "", ;
+			nGl1w, ;
+			nGl1h, ;
+			0, 0, 0, 0, ;
+			0, ;
+			0, ;
+			0, 0, ;
+			nGl2w, ;
+			nGl2h, ;
+			0, 0, 0, 0, ;
+			( nGl2w - nGl1w ) , ;
+			( nGl2h - nGl1h ), ;
+			0, 0, ;
+			0, 0, ;
+			nGl3w, ;
+			nGl3h, ;
+			0, 0, 0, 0, ;
+			0, ;
+			0, ;
+			0, 0, ;
+			0, 0 )
+		endif
+		
+		if nn = 3
+		     aPo2 := add_po2( "", ;
+			nGl2w, ;
+			nGl2h, ;
+			0, 0, 0, 0, ;
+			(nGl2w - nGl1w), ;
+			(nGl2h - nGl1h), ;
+			0, 0, ;
+			nGl1w, ;
+			nGl1h, ;
+			0, 0, 0, 0, ;
+			0, ;
+			0, ;
+			0, 0, ;
+			0, 0, ;
+			nGl3w, ;
+			nGl3h, ;
+			0, 0, 0, 0, ;
+			0, ;
+			0, ;
+			0, 0, ;
+			0, 0 )
 		endif
 
-		// upisi <GLx>, <FRx>
-		if !EMPTY( cGl1 )
-		
-			aGl1 := add_glx( "1", cGl1 )
-			write_rec( nHnd, aGl1, aGlSpec )
-		
-		endif
-		if !EMPTY( cFr1 )
-			
-			aFr1 := add_frx( "1", cFr1 )
-			write_rec( nHnd, aFr1, aFrSpec )
-			
-		endif
-		if !EMPTY( cGl2 )
-			
-			aGl2 := add_glx( "2", cGl2 )
-			write_rec( nHnd, aGl2, aGlSpec )
-			
-		endif
-		if !EMPTY( cFr2 )
-			
-			aFr2 := add_frx( "2", cFr2 )
-			write_rec( nHnd, aFr2, aFrSpec )
-			
-		endif
-		if !EMPTY( cGl3 )
-
-			aGl3 := add_glx( "3", cGl3 )
-			write_rec( nHnd, aGl3, aGlSpec )
-		
-		endif
-		
-		// ako ima napomena...
-		if !EMPTY( field->doc_it_desc )
-		
-			// upisi <TXT> ostale informacije
-			aTxt := add_txt( 1, ALLTRIM( field->doc_it_desc ) )
-
-			write_rec(nHnd, aTxt, aTxtSpec )
+		// upisi <PO2>
+		write_rec( nHnd, aPo2, aPo2Spec )
 	
-		endif
+		// upisi <GLx> <FRx>
+		_a_gx_fx( nHnd, cGl1, cGl2, cGl3, cFr1, cFr2, ;
+			aGlSpec, aFrSpec )
+	    
+	    endif	
+	  next
+
+	endif
+
+	// ako ima napomena...
+	if !EMPTY( field->doc_it_desc )
+		
+		// upisi <TXT> ostale informacije
+		aTxt := add_txt( 1, ALLTRIM( field->doc_it_desc ) )
+		write_rec(nHnd, aTxt, aTxtSpec )
 
 	endif
 
@@ -445,6 +506,48 @@ msgbeep("Export zavrsen ... kreiran je fajl#" + ;
 		PADR( cLocation, 20 ) + "..." , ;
 		cLocation ) + cFile )
 
+return
+
+
+// --------------------------------------------------
+// upisi vrijednosti gx - fx
+// --------------------------------------------------
+static function _a_gx_fx(nHnd, cGl1, cGl2, cGl3, ;
+			cFr1, cFr2, ;
+			aGlSpec, aFrSpec )
+
+// upisi <GLx>, <FRx>
+if !EMPTY( cGl1 )
+		
+	aGl1 := add_glx( "1", cGl1 )
+	write_rec( nHnd, aGl1, aGlSpec )
+		
+endif
+if !EMPTY( cFr1 )
+			
+	aFr1 := add_frx( "1", cFr1 )
+	write_rec( nHnd, aFr1, aFrSpec )
+			
+endif
+if !EMPTY( cGl2 )
+			
+	aGl2 := add_glx( "2", cGl2 )
+	write_rec( nHnd, aGl2, aGlSpec )
+			
+endif
+if !EMPTY( cFr2 )
+			
+	aFr2 := add_frx( "2", cFr2 )
+	write_rec( nHnd, aFr2, aFrSpec )
+			
+endif
+if !EMPTY( cGl3 )
+
+	aGl3 := add_glx( "3", cGl3 )
+	write_rec( nHnd, aGl3, aGlSpec )
+	
+endif
+		
 return
 
 

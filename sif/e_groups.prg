@@ -169,3 +169,25 @@ select (nTArea)
 return nGroup
 
 
+// ----------------------------------------------------
+// vraca group_description by element id
+// ----------------------------------------------------
+function g_grd_by_elid( nEl_id )
+local nTArea := SELECT()
+local cGrDesc := ""
+
+O_ELEMENTS
+select elements 
+set order to tag "2"
+go top
+
+seek elid_str( nEl_id )
+
+if FOUND() .and. field->el_id == nEl_id
+	cGrDesc := g_e_gr_desc( field->e_gr_id, .t., .f. )
+endif
+
+select (nTArea)
+
+return cGrDesc
+

@@ -25,8 +25,11 @@ AADD(opcexe, {|| lst_ch_date() })
 AADD(opc, "------------------------------------------- ")
 AADD(opcexe, {|| nil })
 
-AADD(opc, "P. specifikacija naloga za poslovodje  ")
+AADD(opc, "S. specifikacija naloga za poslovodje  ")
 AADD(opcexe, {|| m_get_spec( 1 ) })
+
+AADD(opc, "P. pregled ucinka proizvodnje  ")
+AADD(opcexe, {|| m_get_rpro( ) })
 
 
 Menu_SC("rpt_rnal")
