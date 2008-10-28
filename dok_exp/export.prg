@@ -421,18 +421,18 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			nGl1w, ;
 			nGl1h, ;
 			0, 0, 0, 0, ;
-			0, ;
-			0, ;
+			_step( nGl1w, nGl2w ), ;
+			_step( nGl1h, nGl2h ), ;
 			0, 0, ;
 			nGl2w, ;
 			nGl2h, ;
 			0, 0, 0, 0, ;
-			( nGl2w - nGl1w ) , ;
-			( nGl2h - nGl1h ), ;
+			_step( nGl2w, nGl1w ) , ;
+			_step( nGl2h, nGl1h ), ;
 			0, 0, ;
 			0, 0, ;
-			nGl3w, ;
-			nGl3h, ;
+			0, ;
+			0, ;
 			0, 0, 0, 0, ;
 			0, ;
 			0, ;
@@ -445,21 +445,45 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			nGl2w, ;
 			nGl2h, ;
 			0, 0, 0, 0, ;
-			(nGl2w - nGl1w), ;
-			(nGl2h - nGl1h), ;
+			_step( nGl2w, nGl1w ), ;
+			_step( nGl2h, nGl1h ), ;
 			0, 0, ;
 			nGl1w, ;
 			nGl1h, ;
 			0, 0, 0, 0, ;
-			0, ;
-			0, ;
+			_step( nGl1w, nGl2w ), ;
+			_step( nGl1h, nGl2h ), ;
 			0, 0, ;
 			0, 0, ;
-			nGl3w, ;
-			nGl3h, ;
+			0, ;
+			0, ;
 			0, 0, 0, 0, ;
 			0, ;
 			0, ;
+			0, 0, ;
+			0, 0 )
+		endif
+	
+		if nn = 5
+		     aPo2 := add_po2( "", ;
+			nGl3w, ;
+			nGl3h, ;
+			0, 0, 0, 0, ;
+			_step( nGl3w, nGl2w ), ;
+			_step( nGl3h, nGl2h ), ;
+			0, 0, ;
+			nGl2w, ;
+			nGl2h, ;
+			0, 0, 0, 0, ;
+			_step( nGl2w, nGl1w ), ;
+			_step( nGl2h, nGl1h ), ;
+			0, 0, ;
+			0, 0, ;
+			nGl1w, ;
+			nGl1h, ;
+			0, 0, 0, 0, ;
+			_step( nGl1w, nGl2w ), ;
+			_step( nGl1h, nGl2h ), ;
 			0, 0, ;
 			0, 0 )
 		endif
@@ -507,6 +531,18 @@ msgbeep("Export zavrsen ... kreiran je fajl#" + ;
 		cLocation ) + cFile )
 
 return
+
+
+
+static function _step( nGl1, nGl2 )
+local nRazlika := 0
+
+do case
+	case nGl1 > nGl2
+		return (nGl1 - nGl2)
+endcase
+
+return nRazlika
 
 
 // --------------------------------------------------
