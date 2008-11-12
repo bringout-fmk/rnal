@@ -153,8 +153,8 @@ function prepust_config( cJoker, nWidth, nHeigh, ;
 local nBoxX := 17
 local nBoxY := 66
 
-local nGLen := 40
-local nGLeft := 8
+local nGLen := 38
+local nGLeft := 13
 local nGTop := 4
 local nGBott := 15
 local cColSch := "GR+/G+"
@@ -180,7 +180,7 @@ Box(, nBoxX, nBoxY)
 		PICT pic_dim()
 	
 	// left
-	@ m_x + (nBoxX / 2 ) + 1, m_y + (nGLeft - 6 ) SAY "B:" GET nD2 ;
+	@ m_x + (nBoxX / 2 ) + 1, m_y + (nGLeft - 10 ) SAY "B:" GET nD2 ;
 		PICT pic_dim()
 	
 	// right
@@ -196,6 +196,13 @@ Box(, nBoxX, nBoxY)
 BoxC()
 
 if LastKey() == K_ESC
+	return ""
+endif
+
+// ako su identicne mjere kao i original staklo
+// izadji
+if ( nD1 = nWidth .and. nD4 = nWidth ) .and. ;
+	( nD2 = nHeigh .and. nD3 = nHeigh )
 	return ""
 endif
 
@@ -223,7 +230,7 @@ if !EMPTY( cTmp )
 endif
 
 // formiraj gotov string
-// <A_PREPD>:#D1=2#D2=5#
+// <A_PREP>:#D1=2#D2=5#
 //  dim1 = 2mm
 //  dim2 = 5mm itd...
 

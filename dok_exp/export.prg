@@ -291,7 +291,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		endif
 
 		// kod prepust stakala - takodjer gledaj druge dimenzije
-		if cJoker = "<A_PREP>"
+		if "A_PREP" $ cJoker 
 			
 			lSeparate := .t.
 
