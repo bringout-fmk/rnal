@@ -164,6 +164,8 @@ local nX := 1
 local nLeft := 27
 local cAop := ""
 local cAopAtt := ""
+local nH
+local nW
 
 if l_new_ops
 
@@ -210,7 +212,7 @@ nX += 1
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL( "vrijednost:", nLeft ) GET _aop_value ;
-	VALID is_g_config( @_aop_value, _aop_att_id ) ;
+	VALID {|| _g_dim_it_no(_doc_it_no, @nH, @nW) .and. is_g_config( @_aop_value, _aop_att_id, nH, nW )} ;
 	PICT "@S40" ;
 	WHEN set_opc_box( nBoxX, 50, "vrijednost operacije ako postoji", "kod brusenja, poliranja..." )
 
@@ -336,6 +338,33 @@ static function g_item_desc( doc_it_no )
 local xRet := ""
 xRet := "na " + ALLTRIM(STR(doc_it_no)) + " stavku naloga"
 return xRet
+
+
+// ----------------------------------------------------
+// vraca dimenzije stavke 
+// ----------------------------------------------------
+static function _g_dim_it_no( nDoc_it_no, nH, nW )
+local nArt_id := 0
+local nTArea := SELECT()
+local nTRec := RECNO()
+
+nH := 0
+nW := 0
+
+select _doc_it
+set order to tag "1"
+seek docno_str( _doc) + docit_str( nDoc_it_no )
+
+if FOUND()
+	nH := field->doc_it_height
+	nW := field->doc_it_width
+endif
+
+select (nTArea)
+go (nTRec)
+
+return .t.
+
 
 
 // ---------------------------------------------

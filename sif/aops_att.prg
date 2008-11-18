@@ -274,10 +274,8 @@ return cAopAttDesc
 // da li se koristi konfigurator stranica
 // ako se koristi setuj cVal
 // ---------------------------------------------
-function is_g_config( cVal, nAop_att_id )
-
-local nHeigh
-local nWidth
+function is_g_config( cVal, nAop_att_id, ;
+		nHeigh, nWidth )
 
 local nTArea := SELECT()
 local lGConf := .f.
@@ -306,19 +304,6 @@ local nR4 := 0
 if !EMPTY( cVal )
 	return .t.
 endif
-
-nDoc_it_no := field->doc_it_no
-nDoc_no := field->doc_no
-
-select _doc_it
-set order to tag "1"
-go top
-seek docno_str(nDoc_no) + docit_str(nDoc_it_no)
-
-// uzmi dimenzije
-nHeigh := _doc_it->doc_it_heigh
-nWidth := _doc_it->doc_it_width
-
 
 O_AOPS_ATT
 select aops_att
