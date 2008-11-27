@@ -316,6 +316,12 @@ do while !EOF() .and. field->doc_no == __doc_no
 		cRecord += g_aop_desc( nAop_id) 
 		cRecord += ","
 		cRecord += g_aop_att_desc( nAop_att_id )
+		
+		if !EMPTY( field->aop_value )
+			cRecord += ","
+			cRecord += ALLTRIM( field->aop_value )
+		endif
+		
 		cRecord += "#"
 
 		skip
