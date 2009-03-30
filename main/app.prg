@@ -124,6 +124,13 @@ else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
+AADD(opc, "D. direktna dorada naloga  ")
+if (ImaPravoPristupa(goModul:oDataBase:cName, "MAIN", "DIRDORAD"))
+	AADD(opcexe, {|| ddor_nal()})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
 AADD(opc, "S. stampa azuriranog naloga  ")
 if (ImaPravoPristupa(goModul:oDataBase:cName, "MAIN", "STNAL"))
 	AADD(opcexe, {|| prn_nal()})
@@ -250,6 +257,9 @@ public gAopBrusenje
 // joker kaljenje
 public gAopKaljenje
 
+// timeout kod azuriranja
+public gInsTimeOut := 150
+
 
 ::super:setTGVars()
 
@@ -265,6 +275,7 @@ private cSection := "5"
 Rpar( "p1", @gPicVrijednost )
 Rpar( "a1", @gFnd_reset )
 Rpar( "a5", @gDefNVM )
+Rpar( "to", @gInsTimeOut )
 
 // sekcija "E"
 private cSection := "E"

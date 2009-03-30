@@ -59,6 +59,12 @@ _fill_main()
 // stavke naloga
 _fill_items( lGN )
 
+nCount := t_docit->(RecCount2())
+
+if nCount > 1 .and. pitanje(,"Odabrati stavke za stampu ? (D/N)","N") == "D"
+	sel_items()
+endif
+
 // printaj obracunski list
 obrl_print( .t. )
 
@@ -67,7 +73,6 @@ close all
 o_tables( __temp )
 
 return DE_REFRESH
-
 
 
 

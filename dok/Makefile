@@ -3,7 +3,7 @@ MODUL=rnal_do
 
 SRCDOSROOT=$(BASEDOS)\\fmk\\rnal\\dok\\
 
-PRGS=doc_lst.prg log_lst.prg db_rnal.prg st_dok.prg nalpr.prg otpr.prg
+PRGS=doc_lst.prg log_lst.prg db_rnal.prg st_dok.prg nalpr.prg otpr.prg sel_it.prg
 CS=
 ASMS=
 

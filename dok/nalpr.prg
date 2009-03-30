@@ -14,7 +14,7 @@ static PIC_DIMENSION := "9999999.99"
 
 static LEN_PAGE := 58
 
-static RAZMAK := 0
+static RAZMAK := " "
 
 static nPage := 0
 static lPrintedTotal := .f.
@@ -60,9 +60,6 @@ LEN_QTTY := LEN(PIC_QTTY)
 LEN_VALUE := LEN(PIC_VALUE)
 LEN_DIMENSION := LEN(PIC_DIMENSION)
 
-// razmak ce biti
-RAZMAK := SPACE(gDl_margina)
-// nek je razmak 1
 RAZMAK := SPACE(1)
 
 t_rpt_open()

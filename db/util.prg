@@ -201,6 +201,7 @@ function _set_sif_id(nId, cIdField, lAuto )
 local nTArea := SELECT()
 local nTime
 local cIndex
+private GetList:={}
 
 if lAuto == nil
 	lAuto := .f.
@@ -208,20 +209,31 @@ endif
 
 if !(FLOCK())
 	
-	nTime := 80     
+	if gInsTimeOut == nil
+		nTime := 150     
+	else
+		nTime := gInsTimeOut
+	endif
 	
-	// daj mu 10 sekundi
-      	
+      	Box(,1,40)
+
 	do while nTime > 0
         	
 		InkeySc(.125)
          	
-		nTime --
+		@ m_x + 1, m_y + 2 SAY "timeout: " + ALLTRIM(STR(nTime))
+
+		-- nTime
          	
 		if FLOCK()
           		exit
         	endif
+
+		sleep(1)
+
       	enddo
+
+	BoxC()
 	
       	if nTime == 0 .AND. !(FLOCK())
         	Beep (2)

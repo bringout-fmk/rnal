@@ -14,7 +14,7 @@ static PIC_DIMENSION := "9999999.99"
 
 static LEN_PAGE := 58
 
-static RAZMAK := 0
+static RAZMAK := " "
 
 static nPage := 0
 static lPrintedTotal := .f.
@@ -148,7 +148,13 @@ nUZWidt := 0
 
 // stampaj podatke 
 do while !EOF()
-	
+
+	// da li se stavka stampa ili ne ?
+	if field->print == "N"
+		skip
+		loop
+	endif
+
 	nArt_id := field->art_id
 	
 	cDoc_no := docno_str( field->doc_no )
@@ -361,7 +367,12 @@ return
 // footer obracunskog lista
 // ----------------------------------------
 static function s_obrl_footer()
-local cPom := "Ovjerio: _______________________"
+local cPom 
+
+cPom := "Izdao: _________________"
+cPom += SPACE(10)
+cPom += "Primio: _________________"
+
 
 // provjeri za novu stranicu
 if prow() > LEN_PAGE - DSTR_KOREKCIJA()
@@ -370,7 +381,7 @@ if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 endif	
 
 ?
-? RAZMAK + SPACE(40) + cPom
+? RAZMAK + SPACE(5) + cPom
 
 return
 

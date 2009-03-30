@@ -88,24 +88,23 @@ return
 static function _set_box( nBoxX, nBoxY )
 local cLine1 := ""
 local cLine2 := ""
-local nOptLen := 24
-local cOptSep := "| "
 
-cLine1 := PADR("<D> Dorada naloga", nOptLen)
-cLine1 += cOptSep
+cLine1 := "(D) dorada nal. "
 
 if ( _status == 1 )
-	cLine1 += PADR("<Z> Zatvori nalog", nOptLen)
-	cLine1 += cOptSep
-	cLine1 += PADR("<P> Promjene", nOptLen)
+	cLine1 += "(Z) zatv.nal. "
+	cLine1 += "(P) promjene "
 endif
 
+cLine1 += "(N) nadji.nal. "
+cLine1 += "(Q) nadji.opis"
+
+
 // druga linija je zajednicka
-cLine2 := PADR("<c-P> Stampa naloga", nOptLen)
-cLine2 += cOptSep
-cLine2 += PADR("<K> Lista kontakata", nOptLen)
-cLine2 += cOptSep
-cLine2 += PADR("<L> Lista promjena", nOptLen)
+cLine2 := "(c-P) stamp.nal. "
+cLine2 += "(c-O) obrac.list "
+cLine2 += "(K) kontakti "
+cLine2 += "(L) promjene"
 
 @ m_x + (nBoxX-1), m_y + 2 SAY cLine1
 @ m_x + (nBoxX), m_y + 2 SAY cLine2
@@ -447,6 +446,17 @@ do case
 		
 		RETURN DE_CONT
 		
+	// brza pretraga naloga
+	case ( UPPER(CHR(Ch)) == "N" )
+		
+		select docs 
+	
+		nRet := qf_nalog()
+
+		select docs
+		
+		RETURN nRet 
+	
 	// otvaranje naloga za doradu
 	case (UPPER(CHR(Ch)) == "D")
 		
@@ -678,6 +688,85 @@ do case
 endcase
 
 return DE_CONT
+
+
+// --------------------------------------------------
+// brza pretraga naloga u listi
+// --------------------------------------------------
+function qf_nalog()
+local GetList := {}
+local nDoc_no := 0 
+local cFilter := ""
+
+Box(,1, 30)
+	@ m_x+1, m_y+2 SAY "Zelim pronaci nalog:" GET nDoc_no PICT "999999999" 
+	read
+BoxC()
+
+if LastKey() == K_ESC .or. nDoc_no = 0
+	return DE_CONT
+endif
+
+cFilter := "doc_no = " + docno_str( nDoc_no )
+select docs
+set filter to &cFilter
+go top
+
+return DE_REFRESH
+
+
+
+// ----------------------------------------------
+// direktna dorada naloga, po zadatom broju 
+// ----------------------------------------------
+function ddor_nal()
+local GetList := {}
+local nDoc_no := 0 
+
+Box(,1, 30)
+	@ m_x+1, m_y+2 SAY "Broj naloga:" GET nDoc_no PICT "999999999" 
+	read
+BoxC()
+
+if LastKey() == K_ESC .or. nDoc_no = 0
+	return
+endif
+
+// otvori tabele
+o_tables(.t.)
+
+select docs
+go top
+seek docno_str( nDoc_no )
+
+// provjeri da li je zauzet
+if is_doc_busy()
+	msg_busy_doc()
+	select docs
+	return
+endif
+		
+if Pitanje(, "Otvoriti nalog radi dorade (D/N) ?", "N") == "D"
+			
+	nDoc_no := docs->doc_no
+			
+	if doc_2__doc( nDoc_no ) == 1
+				
+		MsgBeep("Nalog otvoren!#Prelazim u pripremu##Pritisni nesto za nastavak...")
+				
+	endif
+			
+	select docs
+			
+	// otvori i obradi pripremu
+	ed_document( .f. )
+		
+	return 
+endif
+		
+return
+
+
 
 // ------------------------------------------
 // box:: quick search

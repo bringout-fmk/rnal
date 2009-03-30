@@ -300,6 +300,10 @@ nX += 2
 
 @ m_x + nX, m_y+2 SAY PADL("Resetuj vrijednosti u tabeli pretrage (0/1)", nLeft) GET gFnd_reset PICT "9"
 
+nX += 1
+
+@ m_x + nX, m_y+2 SAY PADL("Timeout kod azuriranja dokumenata", nLeft) GET gInsTimeOut PICT "99999"
+
 
 nX += 2
 
@@ -510,6 +514,8 @@ RPar("a4", @gMaxHeigh )
 
 RPar("a5", @gDefNVM)
 
+RPar("to", @gInsTimeOut)
+
 close
 return
 
@@ -610,6 +616,8 @@ WPar("a3", gMaxWidth )
 WPar("a4", gMaxHeigh )
 
 WPar("a5", gDefNVM )
+
+WPar("to", gInsTimeOut )
 
 close
 
