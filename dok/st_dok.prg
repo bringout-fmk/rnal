@@ -157,7 +157,9 @@ do while !EOF() .and. field->doc_no == __doc_no
 
 	// ako je artikal isti ne treba mu opis...
 	if ( nArt_Id == nArtTmp ) .and. ( nGrTmp == nDoc_gr_no )
-		cArt_desc := ""
+		if lZpoGN == .f.
+			cArt_desc := ""
+		endif
 	endif
 
 	select ( nTable )
