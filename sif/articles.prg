@@ -1202,7 +1202,9 @@ do while !EOF() .and. field->art_id == nArt_id
 		skip
 		
 	enddo
-	
+
+	altd()
+
 	// predji na dodatne operacije elemenata....
 	select e_aops
 	set order to tag "1"
@@ -1223,11 +1225,22 @@ do while !EOF() .and. field->art_id == nArt_id
 		// atribut...
 		nAop_att_id := field->aop_att_id
 		cAopAttCode := ALLTRIM( g_aop_att_desc( nAop_att_id, nil, .f. ) )
+		if EMPTY( cAopAttCode )
+			cAopAttCode := cAopCode
+		endif
+
 		cAopAtt := ALLTRIM( g_aop_att_desc( nAop_att_id ) )
 
+		if EMPTY( cAopAtt )
+			cAopAtt := cAop
+		endif
+
+		// ukini jokere koji se koriste za pozicije pecata i slicno 
+		rem_jokers(@cAopAtt)
+
 		_f_a_attr( @aAttr, nElCount, cGr_code, cGr_desc, ;
-				cAopJoker, cAopCode + cAopAttCode, ;
-				cAop + " " + cAopAtt )
+				cAopJoker, cAopAttCode, ;
+				cAopAtt )
 		
 		skip
 	enddo

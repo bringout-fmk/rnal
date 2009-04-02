@@ -192,18 +192,39 @@ do while !EOF() .and. field->doc_no == __doc_no
 	if lZpoGN == .t.
 
 		aZpoGN := {}
+		
 		// zaokruzi vrijednosti....
 		_art_set_descr( nArt_id, nil, nil, @aZpoGN, lZpoGN )
 		
-		// da li je kaljeno ? kod kaljenog nema zaokruzenja
-		
-		lKaljeno := is_kaljeno( aZpoGN, nDoc_no, nDoc_it_no )
+		lBezZaokr := .f.
+
+		altd()
+
+		if lBezZaokr == .f.
+			// da li je kaljeno ? kod kaljenog nema zaokruzenja
+			lBezZaokr := is_kaljeno( aZpoGN, nDoc_no, nDoc_it_no )
+		endif
+
+		if lBezZaokr == .f.
+			// da li je emajlirano ? isto nema zaokruzenja
+			lBezZaokr := is_emajl(aZpoGN, nDoc_no, nDoc_it_no )
+		endif
+
+		if lBezZaokr == .f.
+			// da li je vatroglas ? isto nema zaokruzenja
+			lBezZaokr := is_vglass( aZpoGN )
+		endif
+
+		if lBezZaokr == .f.
+			// da li je plexiglas ? isto nema zaokruzenja
+			lBezZaokr := is_plex( aZpoGN )
+		endif
 	
-		nZHeigh := obrl_zaok( nHeigh, aZpoGN, lKaljeno )
-		nZH2 := obrl_zaok( nHe2, aZpoGN, lKaljeno )
+		nZHeigh := obrl_zaok( nHeigh, aZpoGN, lBezZaokr )
+		nZH2 := obrl_zaok( nHe2, aZpoGN, lBezZaokr )
 		
-		nZWidth := obrl_zaok( nWidth, aZpoGN, lKaljeno )
-		nZW2 := obrl_zaok( nWi2, aZpoGN, lKaljeno )
+		nZWidth := obrl_zaok( nWidth, aZpoGN, lBezZaokr )
+		nZW2 := obrl_zaok( nWi2, aZpoGN, lBezZaokr )
 		
 		// ako se zaokruzuje onda total ide po zaokr.vrijednostima
 		nTotal := ROUND( c_ukvadrat( nQtty, nZHeigh, nZWidth, nZH2, nZW2 ), 2)
@@ -693,6 +714,46 @@ endif
 return lRet
 
 
+// ---------------------------------------
+// da li je staklo PLEX
+// ---------------------------------------
+function is_plex( aArticle )
+local lRet := .f.
+local nRet
+
+local cGlCode := ALLTRIM( gGlassJoker )
+local cSGlCode := "PLEX"
+
+nRet := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == cGlCode .and. ;
+		ALLTRIM(xVar[5]) = cSGlCode } )
+
+if nRet <> 0
+	lRet := .t.
+endif
+
+return lRet
+
+
+// ---------------------------------------
+// da li je staklo vatroglass
+// ---------------------------------------
+function is_vglass( aArticle )
+local lRet := .f.
+local nRet
+
+local cGlCode := ALLTRIM( gGlassJoker )
+local cSGlCode := "V"
+
+nRet := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == cGlCode .and. ;
+		ALLTRIM(xVar[5]) = cSGlCode } )
+
+if nRet <> 0
+	lRet := .t.
+endif
+
+return lRet
+
+
 
 // ---------------------------------------------
 // da li je staklo kaljeno ???
@@ -700,6 +761,25 @@ return lRet
 function is_kaljeno( aArticle, nDoc_no, nDocit_no )
 local lRet := .f.
 local cSrcJok := ALLTRIM( gAopKaljenje )
+
+altd()
+// provjeri obradu iz matrice
+lRet := ck_obr( aArticle, cSrcJok )
+
+if lRet == .f.
+	// provjeri i tabelu DOC_OPS
+	lRet := ck_obr_aops( nDoc_no, nDocit_no, cSrcJok )
+endif
+
+return lRet 
+
+
+// ---------------------------------------------
+// da li je staklo emajlirano ???
+// ---------------------------------------------
+function is_emajl( aArticle, nDoc_no, nDocit_no )
+local lRet := .f.
+local cSrcJok := "<A_E>"
 
 // provjeri obradu iz matrice
 lRet := ck_obr( aArticle, cSrcJok )
@@ -710,6 +790,7 @@ if lRet == .f.
 endif
 
 return lRet 
+
 
 
 // ---------------------------------------------
@@ -736,6 +817,7 @@ return lRet
 static function ck_obr( aArticle, cSrcObrada )
 local lRet := .f.
 local nObrada 
+altd()
 nObrada := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[4]) == cSrcObrada } )
 if nObrada <> 0
 	lRet := .t.
@@ -753,7 +835,7 @@ static function ck_obr_aops( nDoc_no, nDocit_no, cSrcObrada )
 local lRet := .f.
 local nTArea := SELECT()
 local nTable := F_DOC_OPS
-
+altd()
 if __temp == .t.
 	nTable := F__DOC_OPS
 endif

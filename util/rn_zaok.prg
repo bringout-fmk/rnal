@@ -10,7 +10,7 @@ static S3M_ZAOKR := 3
 // ----------------------------------------
 // obracunski list zaokruzenje
 // ----------------------------------------
-function obrl_zaok( nVal, aArr, lKaljeno )
+function obrl_zaok( nVal, aArr, lBezZaokr )
 local nElCount 
 local i
 local nTickness
@@ -18,12 +18,12 @@ local nSeek
 local nZaok := 1
 local xZaok := 0
 
-if lKaljeno == nil
-	lKaljeno := .f.
+if lBezZaokr == nil
+	lBezZaokr := .f.
 endif
 
-if lKaljeno == .t.
-	// kod kaljenog nema zaokruzenja
+if lBezZaokr == .t.
+	// ako je bez zaokruzena, onda ga i nema!
 	xZaok := nVal
 	return xZaok
 endif

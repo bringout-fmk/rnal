@@ -259,10 +259,11 @@ if FOUND()
 endif
 
 // izbaci konfiguratore ako postoje
-cAopAttDesc := STRTRAN( cAopAttDesc, "#G_CONFIG#", "" )
-cAopAttDesc := STRTRAN( cAopAttDesc, "#HOLE_CONFIG#", "" )
-cAopAttDesc := STRTRAN( cAopAttDesc, "#STAMP_CONFIG#", "" )
-cAopAttDesc := STRTRAN( cAopAttDesc, "#PREP_CONFIG#", "" )
+rem_jokers( @cAopAttDesc )
+//cAopAttDesc := STRTRAN( cAopAttDesc, "#G_CONFIG#", "" )
+//cAopAttDesc := STRTRAN( cAopAttDesc, "#HOLE_CONFIG#", "" )
+//cAopAttDesc := STRTRAN( cAopAttDesc, "#STAMP_CONFIG#", "" )
+//cAopAttDesc := STRTRAN( cAopAttDesc, "#PREP_CONFIG#", "" )
 
 select (nTArea)
 

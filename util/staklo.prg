@@ -26,6 +26,19 @@ function mm_2_cm(nVal)
 return nVal / 10
 
 
+// --------------------------------------------
+// uklanjanje jokera iz stringa
+// --------------------------------------------
+function rem_jokers( cVal )
+
+cVal := STRTRAN( cVal, "#G_CONFIG#", "" )
+cVal := STRTRAN( cVal, "#HOLE_CONFIG#", "" )
+cVal := STRTRAN( cVal, "#STAMP_CONFIG#", "" )
+cVal := STRTRAN( cVal, "#PREP_CONFIG#", "" )
+
+return
+
+
 
 // ---------------------------------------------------
 // ispisuje box sa slikom stakla i odabirom 
