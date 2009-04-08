@@ -218,8 +218,6 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	aArticles := {}
 
-	altd()
-
 	for i := 1 to LEN( aArtDesc )
 	
 		nElem := aElem[i, 1]
@@ -274,6 +272,16 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 			if nScan <> 0
 
+				// ako su init.vrijednosti spucaj mu 
+				// tacnu h i w mjeru
+
+				if aArticles[nScan, 8] = 0
+					aArticles[nScan, 8] := nWidth
+				endif
+				if aArticles[nScan, 9] = 0
+					aArticles[nScan, 9] := nHeight
+				endif
+
 				// upisi preracunate vrijednosti
 				// u matricu...
 
@@ -281,12 +289,12 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			  	nWtmp := _calc_dimension( nWidth, .t. )
 			
 				// povecanje
-				aArticles[ nScan, 6 ] := gAddToDim
-				aArticles[ nScan, 7 ] := gAddToDim
+				aArticles[ nScan, 6 ] += gAddToDim
+				aArticles[ nScan, 7 ] += gAddToDim
 				
 				// nove dimenzije
-				aArticles[ nScan, 8 ] := nWtmp 
-				aArticles[ nScan, 9 ] := nHtmp 
+				aArticles[ nScan, 8 ] += gAddToDim 
+				aArticles[ nScan, 9 ] += gAddToDim
 			endif
 		endif
 
@@ -299,6 +307,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 			nScan := ASCAN( aArticles, { |xvar| xvar[1] == nElemPos } )
 
+			
 			nH := 0
 			nW := 0
 
@@ -313,13 +322,21 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 			if nScan <> 0
 			
+				if aArticles[nScan, 8] = 0
+					aArticles[nScan, 8] := nWidth
+				endif
+
+				if aArticles[nScan, 9] = 0
+					aArticles[nScan, 9] := nHeight
+				endif
+
 				// povecanje
-				aArticles[ nScan, 6 ] := nWraz
-				aArticles[ nScan, 7 ] := nHraz
+				aArticles[ nScan, 6 ] += nWraz
+				aArticles[ nScan, 7 ] += nHraz
 
 				// nova dimenzija
-				aArticles[ nScan, 8 ] := nW
-				aArticles[ nScan, 9 ] := nH
+				aArticles[ nScan, 8 ] += nWraz
+				aArticles[ nScan, 9 ] += nHraz
 			endif
 
 		endif
