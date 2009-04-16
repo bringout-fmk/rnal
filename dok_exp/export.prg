@@ -164,6 +164,8 @@ endif
 
 // predji na stavke naloga
 
+nCount := 0
+
 select (nADOC_IT)
 go top
 seek docno_str( nDoc_no )
@@ -230,7 +232,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		//        x, y, type}
 		AADD( aArticles, { nElem, ;
 				aArtDesc[i], ;
-				ALLTRIM(STR(i)), ;
+				ALLTRIM(STR(++nCount)), ;
 				nWidth, ;
 				nHeight, ;
 				0, 0, ;
@@ -245,8 +247,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	// pregledaj operacije artikla
 	// npr: ako ima brusenje - mora se dodati po 3 mm na dimenzije
 
-	// razdvoji <POS>
-	lSeparate := .f.
+	// ima za upis u <PO2>
+	lPo2Write := .f.
 
 	select (nADOC_OP)
 	set order to tag "1"
@@ -266,7 +268,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		// kod brusenja dodaj na dimenzije po 3mm
 		if cJoker == "<A_B>"
 		
-			lSeparate := .t. 
+			lPo2Write := .t.
 
 			nScan := ASCAN( aArticles, { |xvar| xvar[1] == nElemPos } )
 
@@ -301,7 +303,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		// kod prepust stakala - takodjer gledaj druge dimenzije
 		if "A_PREP" $ cJoker 
 			
-			lSeparate := .t.
+			lPo2Write := .t.
 
 			cValue := field->aop_value 
 
@@ -348,7 +350,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	go (nTRec)
 	
 	// napuni varijable
-	for ix := 1 to LEN(aArticles)
+	for ix := 1 to LEN( aArticles )
 		
 		if ix == 1
 			cGl1 := aArticles[ix, 2]
@@ -383,7 +385,7 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	next
 
 	// samo ako su dimenzije ispravne.....
-	if lSeparate == .f. .and. ( field->doc_it_width <> 0 .and. ;
+	if ( field->doc_it_width <> 0 .and. ;
 		field->doc_it_height <> 0 .and. ;
 		field->doc_it_qtty <> 0 )
 		
@@ -392,8 +394,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			"", ;
 			nil, ;
 			field->doc_it_qtty, ;
-			field->doc_it_width, ;
-			field->doc_it_height, ;
+			nGl1w, ;
+			nGl1h, ;
 			cPosGl1, ;
 			cPosFr1, ;
 			cPosGl2, ;
@@ -403,37 +405,12 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		// upisi <POS>
 		write_rec( nHnd, aPos, aPosSpec )
 		
-		// upisi <GLx> <FRx>
-		_a_gx_fx( nHnd, cGl1, cGl2, cGl3, cFr1, cFr2, ;
-			aGlSpec, aFrSpec )
-
+		
 	endif
 	
 	// da li ima za dodatne informacije <PO2> ?
-	if lSeparate == .t. 
+	if lPo2Write == .t. 
 	   
-	   for nn := 1 to LEN( aArticles )
-	        
-	     // samo za staklo...
-	     if ALLTRIM( aArticles[nn, 12] ) == ALLTRIM( gGlassJoker )
-		
-		// ubaci u matricu podatke
-		aPos := add_pos( field->doc_it_no, ;
-			"", ;
-			nil, ;
-			field->doc_it_qtty, ;
-			aArticles[ nn, 8 ], ;
-			aArticles[ nn, 9 ], ;
-			cPosGl1, ;
-			cPosFr1, ;
-			cPosGl2, ;
-			cPosFr2, ;
-			cPosGl3 )
-
-		// upisi <POS>
-		write_rec( nHnd, aPos, aPosSpec )
-
-		if nn = 1
 		  aPo2 := add_po2( "", ;
 			nGl1w, ;
 			nGl1h, ;
@@ -448,74 +425,23 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			_step( nGl2h, nGl1h ), ;
 			0, 0, ;
 			0, 0, ;
-			0, ;
-			0, ;
-			0, 0, 0, 0, ;
-			0, ;
-			0, ;
-			0, 0, ;
-			0, 0 )
-		endif
-		
-		if nn = 3
-		     aPo2 := add_po2( "", ;
-			nGl2w, ;
-			nGl2h, ;
-			0, 0, 0, 0, ;
-			_step( nGl2w, nGl1w ), ;
-			_step( nGl2h, nGl1h ), ;
-			0, 0, ;
-			nGl1w, ;
-			nGl1h, ;
-			0, 0, 0, 0, ;
-			_step( nGl1w, nGl2w ), ;
-			_step( nGl1h, nGl2h ), ;
-			0, 0, ;
-			0, 0, ;
-			0, ;
-			0, ;
-			0, 0, 0, 0, ;
-			0, ;
-			0, ;
-			0, 0, ;
-			0, 0 )
-		endif
-	
-		if nn = 5
-		     aPo2 := add_po2( "", ;
 			nGl3w, ;
 			nGl3h, ;
 			0, 0, 0, 0, ;
 			_step( nGl3w, nGl2w ), ;
-			_step( nGl3h, nGl2h ), ;
-			0, 0, ;
-			nGl2w, ;
-			nGl2h, ;
-			0, 0, 0, 0, ;
-			_step( nGl2w, nGl1w ), ;
-			_step( nGl2h, nGl1h ), ;
-			0, 0, ;
-			0, 0, ;
-			nGl1w, ;
-			nGl1h, ;
-			0, 0, 0, 0, ;
-			_step( nGl1w, nGl2w ), ;
-			_step( nGl1h, nGl2h ), ;
+			_step( nGl3h, nGl3h ), ;
 			0, 0, ;
 			0, 0 )
-		endif
-
+	
 		// upisi <PO2>
 		write_rec( nHnd, aPo2, aPo2Spec )
+		
 	
-		// upisi <GLx> <FRx>
-		_a_gx_fx( nHnd, cGl1, cGl2, cGl3, cFr1, cFr2, ;
-			aGlSpec, aFrSpec )
-	    
-	    endif	
-	  next
-
 	endif
+
+	// upisi <GLx> <FRx>
+	_a_gx_fx( nHnd, cGl1, cGl2, cGl3, cFr1, cFr2, ;
+			aGlSpec, aFrSpec )
 
 	// ako ima napomena...
 	if !EMPTY( field->doc_it_desc )
