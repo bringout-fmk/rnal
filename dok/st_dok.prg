@@ -472,6 +472,9 @@ add_tpars("N07", ALLTRIM(field->doc_ship_place) )
 add_tpars("N08", ALLTRIM(field->doc_desc) )
 // dokument, kontakt dodatni podaci...
 add_tpars("N09", ALLTRIM(field->cont_add_desc) )
+altd()
+// operater koji je napravio nalog
+add_tpars("N13", ALLTRIM(getfullusername(field->operater_id)) )
 
 // ako je kes, dodaj i podatke o placeno D i napomene
 if field->doc_pay_id == 2

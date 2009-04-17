@@ -601,6 +601,7 @@ return
 // -------------------------------------------
 static function s_nal_izdao()
 local cPom := ""
+local cOper := ""
 
 // provjeri za novu stranicu
 if prow() > LEN_PAGE - DSTR_KOREKCIJA()
@@ -608,9 +609,14 @@ if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 	Nstr_a4(nPage, .t.)
 endif	
 
+// izvuci operatera iz PARS
+cOper := g_t_pars_opis("N13")
+
 // nalog izdao
 cPom += "Nalog izdao: "
-cPom += PADC( ALLTRIM(goModul:oDataBase:cUser), 20)
+cPom += PADC( cOper, 20 )
+cPom += ", stampao: "
+cPom += PADC( getfullusername( getUserid( goModul:oDataBase:cUser ) ), 20 )
 cPom += " "
 cPom += "Vrijeme: "
 cPom += PADR( TIME(), 5 )

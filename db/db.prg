@@ -84,6 +84,7 @@ fNul:=.f.
 Skloni(PRIVPATH,"_DOCS.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"_DOC_IT.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"_DOC_OPS.DBF",cSezona,finverse,fda,fnul)
+Skloni(PRIVPATH,"PARAMS.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
 if fRS
@@ -105,13 +106,17 @@ else
 endif  
 
 // kumulativ
-fNul := .f.
 Skloni(KUMPATH,"DOCS.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"DOC_IT.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"DOC_OPS.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"DOC_LOG.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"DOC_LIT.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"FMK.INI",cSezona,finverse,fda,fnul)
+
+fnul := .f.
+
+// prenesi ali ne prazni, ovo su parametri...
+Skloni(KUMPATH,"KPARAMS.DBF",cSezona,finverse,fda,fnul)
 
 // sifrarnik
 Skloni(SIFPATH,"AOPS.DBF",cSezona,finverse,fda,fnul)

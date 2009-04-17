@@ -229,8 +229,8 @@ public gDg_margina := 0
 
 // ostali parametri
 public gFnd_reset := 0
-public gMaxHeigh := 1000
-public gMaxWidth := 1000
+public gMaxHeigh := 3600
+public gMaxWidth := 3600
 public gDefNVM := 560
 public gDefCity := "Sarajevo"
 
@@ -263,29 +263,32 @@ public gInsTimeOut := 150
 
 ::super:setTGVars()
 
-O_PARAMS
+O_KPARAMS
 
 // sekcija "1"
-private cSection := "1"
+cSection := "1"
 Rpar( "ff", @gFirma )
 Rpar( "fn", @gNFirma )
 
 // sekcija "5"
-private cSection := "5"
+cSection := "5"
 Rpar( "p1", @gPicVrijednost )
 Rpar( "a1", @gFnd_reset )
+Rpar( "a3", @gMaxWidth )
+Rpar( "a4", @gMaxHeigh )
 Rpar( "a5", @gDefNVM )
 Rpar( "to", @gInsTimeOut )
 
+
 // sekcija "E"
-private cSection := "E"
+cSection := "E"
 Rpar( "od", @gExpOutDir )
 Rpar( "ao", @gExpAlwOvWrite )
 Rpar( "ad", @gAddToDim )
 Rpar( "pd", @gFaPrivDir )
 Rpar( "kd", @gFaKumDir )
 
-private cSection := "1"
+cSection := "1"
 
 if Empty(gNFirma)
 	Beep(1)
