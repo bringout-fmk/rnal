@@ -716,6 +716,18 @@ if nDoc_status == 3
 
 	set_doc_marker( nDoc_no, 0 )
 
+elseif nDoc_status == 0
+	
+	// treba ga brisati i iz azuriranih naloga
+	// jer je zauzeo vec broj
+
+	select docs
+	go top
+	seek docno_str( nDoc_no )
+	if FOUND() .and. field->doc_no == nDoc_no
+		delete
+	endif
+
 endif
 
 select _docs

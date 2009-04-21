@@ -34,7 +34,8 @@ local cLine
 
 // linija za obraèunski list
 cLine := RAZMAK
-cLine += REPLICATE("-", LEN_IT_NO ) 
+cLine += REPLICATE("-", 10 ) 
+cLine += " " + REPLICATE("-", LEN_IT_NO ) 
 cLine += " " + REPLICATE("-", LEN_DESC)
 cLine += " " + REPLICATE("-", LEN_QTTY)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
@@ -99,7 +100,6 @@ if lStartPrint
 
 endif
 
-
 nTTotal := VAL(g_t_pars_opis("N10"))
 
 // zaglavlje 
@@ -111,12 +111,24 @@ cLine := g_line(2)
 cDoc_no := g_t_pars_opis("N01")
 cDoc_date := g_t_pars_opis("N02")
 cDoc_time := g_t_pars_opis("N12")
+cDocs := g_t_pars_opis("N14")
 
 // setuj len_ukupno
 LEN_TOTAL := LEN( cLine )
 
-? RAZMAK + "OBRACUNSKI LIST POVRSINA, prema nalogu br.:" + cDoc_no
-? RAZMAK + "Datum naloga: " + cDoc_date + ", vrijeme naloga: " + cDoc_time
+? RAZMAK + "OBRACUNSKI LIST POVRSINA, " 
+
+if "," $ cDocs
+	
+	?? "prema nalozima:" + cDocs
+	
+else
+	
+	?? "prema nalogu br.:" + cDoc_no
+	? RAZMAK + "Datum naloga: " + cDoc_date + ", vrijeme naloga: " + cDoc_time
+
+endif
+
 ?
 
 select t_docit
@@ -145,6 +157,8 @@ nUHeig := 0
 nUWidt := 0
 nUZHeig := 0
 nUZWidt := 0
+
+cDocXX := "XX"
 
 // stampaj podatke 
 do while !EOF()
@@ -193,8 +207,17 @@ do while !EOF()
 	// prvi red...
 	// ------------------------------------------
 	
-	? RAZMAK
+	if cDocXX <> cDoc_no
+
+		? RAZMAK
 	
+		// nalog broj
+		?? "stavke naloga broj: " + ALLTRIM( cDoc_no )
+	
+	endif
+
+	? RAZMAK + SPACE(10)
+
 	// r.br
 	?? PADL(ALLTRIM(cDoc_it_no) + ")", LEN_IT_NO)
 	
@@ -254,6 +277,10 @@ do while !EOF()
 		
 			? RAZMAK
 			
+			?? PADL("", 10)
+			
+			?? " "
+
 			?? PADL("", LEN_IT_NO)
 			
 			?? " "
@@ -270,6 +297,8 @@ do while !EOF()
 		
 	endif
 	
+	cDocXX := cDoc_no
+
 	select t_docit
 	skip
 
@@ -287,7 +316,7 @@ endif
 ? RAZMAK
 	
 // r.br
-?? PADL( "U K U P N O : ", LEN_IT_NO + 1 + LEN_DESC )
+?? PADL( "U K U P N O : ", LEN_IT_NO + 11 + LEN_DESC )
 	
 ?? " "
 	
@@ -402,8 +431,11 @@ cLine := g_line(2)
 cRow1 := RAZMAK 
 cRow2 := RAZMAK
 
-cRow1 += PADC("r.br", LEN_IT_NO) 
-cRow2 += PADC(SPACE(4), LEN_IT_NO)
+cRow1 += PADC("nalog", 10)
+cRow2 += PADC("broj", 10)
+
+cRow1 += " " + PADC("r.br", LEN_IT_NO) 
+cRow2 += " " + PADC(SPACE(4), LEN_IT_NO)
 
 cRow1 += " " + PADR("Artikal (naziv,jmj)", LEN_DESC)
 cRow2 += " " + PADR(" ", LEN_DESC )

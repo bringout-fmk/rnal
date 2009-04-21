@@ -37,6 +37,8 @@ if lst_args( @nSort ) == 0
 	
 endif
 
+private aDocs := {}
+
 private ImeKol
 private Kol
 
@@ -421,7 +423,7 @@ do case
 			
 			set filter to
 			
-			st_obr_list( .f., nDoc_no )
+			st_obr_list( .f., nDoc_no, aDocs )
 			
 			select docs
 			
@@ -457,6 +459,40 @@ do case
 		
 		RETURN nRet 
 	
+	// dodaj u listu za obracunske listove
+	case ( UPPER(CHR(Ch)) == "A" )
+
+		nScn := ASCAN( aDocs, { |xVar| xVar[1] == docs->doc_no } ) 
+
+		if nScn == 0
+			
+			// dodaj u matricu
+			AADD( aDocs, { docs->doc_no, ALLTRIM(g_cust_desc(docs->cust_id)) + "/" + ALLTRIM(g_cont_desc(docs->cont_id)) })
+
+			Beep(2)
+
+			s_ol_status( aDocs )
+		endif
+
+		return DE_CONT
+
+	// brisi iz liste za obracunske listove
+	case ( UPPER(CHR(Ch)) == "Y" )
+
+		nScn := ASCAN( aDocs, { |xVar| xVar[1] == docs->doc_no } ) 
+
+		if nScn <> 0
+
+			// preimenuj broj.... 
+			aDocs[nScn, 1] := -99
+
+			Beep(2)
+
+			s_ol_status( aDocs )
+		endif
+
+		return DE_CONT
+
 	// otvaranje naloga za doradu
 	case (UPPER(CHR(Ch)) == "D")
 		
@@ -688,6 +724,39 @@ do case
 endcase
 
 return DE_CONT
+
+
+// --------------------------------------------------------------
+// ispisuje status naloga u kontejneru za obracunski list
+// --------------------------------------------------------------
+static function s_ol_status( aArr )
+local cStr := ""
+local i
+
+if LEN(aArr) == 0
+	cStr := "! prazno !"
+else
+
+	// napuni string sa nalozima
+	for i:=1 to LEN(aArr)
+		
+		if aArr[i, 1] < 0
+			loop
+		endif
+		
+		if !EMPTY(cStr)
+			cStr += ","
+		endif
+
+		cStr += ALLTRIM(STR(aArr[i, 1]))
+	next
+endif
+
+@ 24, 2 SAY PADR("", 77) COLOR "W/G+"
+@ 24, 2 SAY "A-dodaj Y-brisi : " + cStr COLOR "W/G+"
+
+return
+
 
 
 // --------------------------------------------------

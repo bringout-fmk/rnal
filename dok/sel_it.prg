@@ -79,10 +79,11 @@ static function set_a_kol(aImeKol, aKol)
 aImeKol := {}
 aKol:={}
 
-AADD(aImeKol, {"stavka", {|| doc_it_no }, "doc_it_no", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"artikal", {|| g_art_desc(art_id,.t.,.f.) }, "art_id", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"dim." , {|| _g_dim(doc_it_qtty, doc_it_height, doc_it_width) }, "doc_it_qtty", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"marker", {|| _g_st(print) }, "print", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"nalog", {|| doc_no }, "doc_no", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"rbr", {|| PADR( ALLTRIM(STR(doc_it_no)),3) }, "doc_it_no", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {PADR("artikal",20), {|| PADR(g_art_desc(art_id,.t.,.f.),20) }, "art_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {PADR("dimenzije",20) , {|| PADR(_g_dim(doc_it_qtty, doc_it_height, doc_it_width),20) }, "doc_it_qtty", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"marker", {|| PADR(_g_st(print),3) }, "print", {|| .t.}, {|| .t.} })
 
 
 for i:=1 to LEN(aImeKol)
@@ -97,9 +98,9 @@ return
 static function _g_st( cVal )
 local cRet := ""
 
-cRet := ">> "
+cRet := ">"
 cRet += cVal
-cRet += " <<"
+cRet += "<"
 
 return cRet
 
@@ -111,9 +112,9 @@ static function _g_dim( nQtty, nH, nW )
 local cRet := ""
 
 cRet += ALLTRIM(STR(nQtty,12,0))
-cRet += " x "
+cRet += "x"
 cRet += ALLTRIM(STR(nH,12,2))
-cRet += " x "
+cRet += "x"
 cRet += ALLTRIM(STR(nW,12,2))
 
 return cRet

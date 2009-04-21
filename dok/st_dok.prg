@@ -41,11 +41,27 @@ return DE_REFRESH
 // stampa obracunskog lista
 // filovanje prn tabela
 // -------------------------------------
-function st_obr_list( lTemporary, nDoc_no )
+function st_obr_list( lTemporary, nDoc_no, aOlDocs )
 local lGN := .t.
+local i 
+local ii
+local cDocs := ""
+
+if aOlDocs == nil .or. LEN( aOlDocs ) == 0
+	// dodaj onda ovaj nalog koji treba da se stampa
+	aOlDocs := {}
+	AADD(aOlDocs, { nDoc_no, "" })
+endif
+
+// setuj opis i dokumente 
+for ii:=1 to LEN(aOlDocs)
+	if !EMPTY(cDocs)
+		cDocs += ","
+	endif
+	cDocs += ALLTRIM( STR(aOlDocs[ii, 1] ))
+next
 
 __temp := lTemporary
-__doc_no := nDoc_no
 
 // kreiraj print tabele
 t_rpt_create()
@@ -54,10 +70,27 @@ t_rpt_open()
 
 o_tables( __temp )
 
-// osnovni podaci naloga
-_fill_main()
-// stavke naloga
-_fill_items( lGN )
+// prosetaj kroz stavke za stampu !
+for i:=1 to LEN( aOlDocs ) 
+
+	if aOlDocs[i, 1] < 0
+		// ovakve stavke preskoci, jer su to brisane stavke !
+		loop
+	endif
+
+	__doc_no := aOlDocs[ i, 1 ] 
+
+	select docs
+	go top
+	seek docno_str( __doc_no )
+
+	// osnovni podaci naloga
+	_fill_main( cDocs )
+	
+	// stavke naloga
+	_fill_items( lGN )
+
+next
 
 nCount := t_docit->(RecCount2())
 
@@ -85,7 +118,7 @@ local nArt_id
 local cArt_desc
 local cArt_full_desc
 local nDoc_it_no
-local nDoc_gr_no := 0
+local cDoc_gr_no := "0"
 local nQtty
 local nTotal
 local nHeigh
@@ -98,7 +131,7 @@ local nZW2 := 0
 local nZHeigh := 0
 local nNeto := 0
 local nBruto := 0
-local lGroups := .t.
+local lGroups := .f.
 local nGr1 
 local nGr2
 
@@ -106,8 +139,8 @@ if lZpoGN == nil
 	lZPoGN := .f.
 endif
 
-if !lZpoGN .and. Pitanje(,"Razdijeliti nalog po grupama ?", "D" ) == "N"
-	lGroups := .f.
+if !lZpoGN .and. Pitanje(,"Razdijeliti nalog po grupama ?", "D" ) == "D"
+	lGroups := .t.
 endif
 
 if ( __temp == .t. )
@@ -120,7 +153,7 @@ go top
 seek docno_str(__doc_no)
 
 nArtTmp := -1
-nGrTmp := -1
+cGrTmp := "-1"
 
 // filuj stavke
 do while !EOF() .and. field->doc_no == __doc_no
@@ -140,14 +173,14 @@ do while !EOF() .and. field->doc_no == __doc_no
 		
 		// odredi grupu artikla
 		// - izo i kaljeno, izo i bruseno ili ....
-		nDoc_gr_no := set_art_docgr( nArt_id, nDoc_no, nDoc_it_no )
+		cDoc_gr_no := set_art_docgr( nArt_id, nDoc_no, nDoc_it_no )
 		
 	else
 		
-		nDoc_gr_no := 0
+		cDoc_gr_no := "0"
 		
 	endif
-
+	
 	cArt_full_desc := ALLTRIM(articles->art_full_desc)
 	cArt_desc := ALLTRIM(articles->art_desc)
 	
@@ -156,7 +189,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	cArt_desc += " " + cArt_full_desc
 
 	// ako je artikal isti ne treba mu opis...
-	if ( nArt_Id == nArtTmp ) .and. ( nGrTmp == nDoc_gr_no )
+	if ( nArt_Id == nArtTmp ) .and. ( cGrTmp == cDoc_gr_no )
 		if lZpoGN == .f.
 			cArt_desc := ""
 		endif
@@ -198,8 +231,6 @@ do while !EOF() .and. field->doc_no == __doc_no
 		
 		lBezZaokr := .f.
 
-		altd()
-
 		if lBezZaokr == .f.
 			// da li je kaljeno ? kod kaljenog nema zaokruzenja
 			lBezZaokr := is_kaljeno( aZpoGN, nDoc_no, nDoc_it_no )
@@ -236,11 +267,8 @@ do while !EOF() .and. field->doc_no == __doc_no
 		
 	endif
 	
-	nGr1 := 0
-	nGr2 := 0
-	
-	// odredi da li je jedna grupa ili vise za ovu stavku
-	g_ggroups( nDoc_gr_no, @nGr1, @nGr2 )
+	// prva grupa
+	nGr1 := VAL( SUBSTR(cDoc_gr_no, 1, 1) )
 
 	// dodaj u stavke
 	a_t_docit( __doc_no, nGr1, nDoc_it_no, nArt_id, cArt_desc , ;
@@ -253,12 +281,19 @@ do while !EOF() .and. field->doc_no == __doc_no
 		  nNeto, nBruto )
 	
 	
-	if nGr2 <> 0
+	if LEN( cDoc_gr_no ) > 1
 	
-		// razdvoji nalog na 2 dijela	
-		// ako ima vise grupa
-		
-		a_t_docit( __doc_no, nGr2, nDoc_it_no, nArt_id, cArt_desc , ;
+	    // razdvoji nalog na 2 dijela	
+	    // ako ima vise grupa
+	
+	    for xx := 1 to ( LEN(cDoc_gr_no) )
+	
+		// ako je vec kao grupa 1 onda preskoci...
+		if VAL(SUBSTR(cDoc_gr_no, xx, 1)) == nGr1
+			loop
+		endif
+
+		a_t_docit( __doc_no, VAL(SUBSTR(cDoc_Gr_no, xx, 1)), nDoc_it_no, nArt_id, cArt_desc , ;
 		  cDoc_it_schema, cDoc_it_desc, cDoc_it_type, ;
 		  nQtty, nHeigh, nWidth, ;
 		  nHe2, nWi2, ;
@@ -267,16 +302,19 @@ do while !EOF() .and. field->doc_no == __doc_no
 		  nZH2, nZW2, ;
 		  nNeto, nBruto )
 
+	    next
+
 	endif
 	
 	nArtTmp := nArt_Id
-	nGrTmp := nDoc_gr_no
+	cGrTmp := cDoc_gr_no
 	
 	select ( nTable )
 	skip
 enddo
 	
 return
+
 
 
 // --------------------------------------------------
@@ -436,8 +474,12 @@ return
 // --------------------------------------
 // napuni podatke narucioca i ostalo
 // --------------------------------------
-static function _fill_main()
+static function _fill_main( cDescr )
 local nTable := F_DOCS
+
+if cDescr == nil
+	cDescr := ""
+endif
 
 if ( __temp == .t. )
 	nTable := F__DOCS
@@ -472,9 +514,13 @@ add_tpars("N07", ALLTRIM(field->doc_ship_place) )
 add_tpars("N08", ALLTRIM(field->doc_desc) )
 // dokument, kontakt dodatni podaci...
 add_tpars("N09", ALLTRIM(field->cont_add_desc) )
-altd()
 // operater koji je napravio nalog
 add_tpars("N13", ALLTRIM(getfullusername(field->operater_id)) )
+
+// dokumenti koji su sadrzani 
+if !EMPTY(cDescr)
+	add_tpars("N14", cDescr )
+endif
 
 // ako je kes, dodaj i podatke o placeno D i napomene
 if field->doc_pay_id == 2
@@ -594,6 +640,8 @@ do case
 		cGr := "IZO"
 	case nGr == 5
 		cGr := "LAMI-RG"
+	case nGr == 6
+		cGr := "emajlirano"
 	case nGr == -99
 		cGr := "!!! ARTICLE-ERROR !!!"
 endcase
@@ -605,67 +653,98 @@ return cGr
 // setuj grupu artikla za stampu naloga
 // -----------------------------------------------
 function set_art_docgr( nArt_id, nDoc_no, nDocit_no )
-local nGroup := 1
+local cGroup := ""
 local aArt := {}
 local lIsIZO := .f.
 local lIsBruseno := .f.
 local lIsKaljeno := .f.
+local lIsLamiG := .f.
+local lIsLami := .f.
 
 // daj matricu aArt sa definicijom artikla....
 _art_set_descr( nArt_id, nil, nil, @aArt, .t. )
 
 if aArt == nil .or. LEN(aArt) == 0
-	nGroup := -99
-	return nGroup
+	cGroup := "-99"
+	return cGroup
 endif
 
 // da li je artikal IZO...
 lIsIZO := is_izo( aArt )
-lIsLAMI := is_lami( aArt )
+// lami-rg staklo
+lIsLami := is_lami( aArt )
+// lami gotovo staklo - ne laminira RG
+lIsLAMIG := is_lamig( aArt )
+
 lIsBruseno := is_bruseno( aArt, nDoc_no, nDocIt_no )
 lIsKaljeno := is_kaljeno( aArt, nDoc_no, nDocIt_no )
+lIsEmajl := is_emajl( aArt, nDoc_no, nDocIt_no )
 
-do case
-	
-	case lIsKaljeno == .t. .and. lIsIZO == .t.
-		// izo i kaljeno
-		nGroup := 42
-		
-	case lIsKaljeno == .t. .and. lIsLAMI == .t.
-		// lami i kaljeno
-		nGroup := 52
-		
-	case lIsKaljeno == .t. 
-		// kaljeno
-		nGroup := 2
-		
-	case lIsBruseno == .t. .and. lIsIZO == .t.
-		// izo i bruseno
-		nGroup := 43
-		
-	case lIsBruseno == .t. .and. lIsLami == .t.
-		// lami i bruseno
-		nGroup := 53
-		
-	case lIsBruseno == .t.
-		// bruseno
-		nGroup := 3
-		
-	case lIsLAMI == .t.
-		// LAMI staklo
-		nGroup := 5
-		
-	case lIsIZO == .t.
-		// IZO - rezano
-		nGroup := 4
-		
-	otherwise
-		// rezano
-		nGroup := 1
-	
-endcase
+// grupe su sljedece
+// 1 - rezano
+// 2 - kaljeno
+// 3 - bruseno
+// 4 - IZO
+// 5 - lami-rg
+// 6 - emajlirano
 
-return nGroup
+if lIsKaljeno == .t. 
+	cGroup += "2"
+	// treba biti uvijek i brusenje
+	if lIsBruseno == .f.
+		if !( "3" $ cGroup )
+			cGroup += "3"
+		endif
+	endif
+endif
+
+if lIsBruseno == .t. 
+	cGroup += "3"
+endif		
+
+if lIsIZO == .t. 
+	cGroup += "4"
+endif		
+
+if lIsLAMI == .t.
+	cGroup += "5"
+	
+	// treba biti uvijek i brusenje
+	if lIsBruseno == .f.
+		if !( "3" $ cGroup )
+			cGroup += "3"
+		endif
+	endif
+endif	
+
+if lIsEmajl == .t.
+	cGroup += "6"
+	
+	// emajliranje mora biti i kaljenje
+	if lIsKaljeno == .f.
+		cGroup += "2"
+	endif
+
+	// treba biti uvijek i brusenje
+	if lIsBruseno == .f.
+		if !( "3" $ cGroup )
+			cGroup += "3"
+		endif
+	endif
+endif
+
+if ( lIsKaljeno == .f. ) .and. ;
+	(lIsBruseno == .f.) .and. ;
+	(lIsIZO == .f.) .and. ;
+	(lIsEmajl == .f.) .and. ;
+	(lIsLami == .f. ) 
+
+	// ako sve ovo nije, onda je rezano
+	cGroup += "1"
+
+endif
+
+return cGroup
 
 
 // ---------------------------------------
@@ -697,10 +776,10 @@ endif
 return lRet
 
 
-// ---------------------------------------
-// da li je staklo LAMI
-// ---------------------------------------
-function is_lami( aArticle )
+// ---------------------------------------------
+// da li je staklo LAMI - gotovo LAMI staklo
+// ---------------------------------------------
+function is_lamig( aArticle )
 local lRet := .f.
 local nLAMI
 
@@ -709,6 +788,26 @@ local cLamiCode := ALLTRIM( gGlLamiJoker )
 
 nLAMI := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == cGlCode .and. ;
 		ALLTRIM(xVar[5]) == cLamiCode } )
+
+if nLAMI <> 0
+	lRet := .t.
+endif
+
+return lRet
+
+
+// ---------------------------------------------
+// da li je staklo LAMI - lami-rg staklo
+// ramaglas radi laminiranje stakla !
+// ---------------------------------------------
+function is_lami( aArticle )
+local lRet := .f.
+local nLAMI
+// folija je joker kod pravljenih stakala u elementu folija
+local cFrCode := "FL"
+
+// kod ovog tipa je bitno samo da se nadje Folija u komponenti stakla
+nLAMI := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[2]) == cFrCode } )
 
 if nLAMI <> 0
 	lRet := .t.
@@ -765,7 +864,6 @@ function is_kaljeno( aArticle, nDoc_no, nDocit_no )
 local lRet := .f.
 local cSrcJok := ALLTRIM( gAopKaljenje )
 
-altd()
 // provjeri obradu iz matrice
 lRet := ck_obr( aArticle, cSrcJok )
 

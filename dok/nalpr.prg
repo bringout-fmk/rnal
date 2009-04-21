@@ -674,6 +674,12 @@ if !EMPTY(cPayAddDesc) .and. ALLTRIM(cPayAddDesc) <> "-"
 		
 endif
 
+// oznacene pozicije na nalogu
+cPom := "Oznacene pozicije:"
+cPom += "      "
+cPom += "DA  /  NE"
+
+? RAZMAK + cPom
 
 // konacan proizvod
 cPom := "Konacan proizvod: "
