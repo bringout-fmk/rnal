@@ -688,17 +688,15 @@ lIsEmajl := is_emajl( aArt, nDoc_no, nDocIt_no )
 // 5 - lami-rg
 // 6 - emajlirano
 
-if lIsKaljeno == .t. 
-	cGroup += "2"
-	// treba biti uvijek i brusenje
-	if lIsBruseno == .f.
-		if !( "3" $ cGroup )
-			cGroup += "3"
-		endif
-	endif
+if lIsEmajl == .t.
+	cGroup += "6"
 endif
 
-if lIsBruseno == .t. 
+if lIsKaljeno == .t. .and. lIsEmajl == .f.
+	cGroup += "2"
+endif
+
+if lIsBruseno == .t. .and. ( lIsKaljeno == .f. .and. lIsEmajl == .f. )
 	cGroup += "3"
 endif		
 
@@ -708,30 +706,8 @@ endif
 
 if lIsLAMI == .t.
 	cGroup += "5"
-	
-	// treba biti uvijek i brusenje
-	if lIsBruseno == .f.
-		if !( "3" $ cGroup )
-			cGroup += "3"
-		endif
-	endif
 endif	
 
-if lIsEmajl == .t.
-	cGroup += "6"
-	
-	// emajliranje mora biti i kaljenje
-	if lIsKaljeno == .f.
-		cGroup += "2"
-	endif
-
-	// treba biti uvijek i brusenje
-	if lIsBruseno == .f.
-		if !( "3" $ cGroup )
-			cGroup += "3"
-		endif
-	endif
-endif
 
 if ( lIsKaljeno == .f. ) .and. ;
 	(lIsBruseno == .f.) .and. ;

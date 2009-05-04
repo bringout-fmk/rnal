@@ -203,6 +203,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	nGl2w := 0
 	nGl3h := 0
 	nGl3w := 0
+	nUnit_w := nWidth
+	nUnit_h := nHeight
 
 	// uzmi i razlozi artikal
 	// F4_A12_F3
@@ -394,8 +396,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			"", ;
 			nil, ;
 			field->doc_it_qtty, ;
-			nGl1w, ;
-			nGl1h, ;
+			field->doc_it_width, ;
+			field->doc_it_height, ;
 			cPosGl1, ;
 			cPosFr1, ;
 			cPosGl2, ;
@@ -410,26 +412,26 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	
 	// da li ima za dodatne informacije <PO2> ?
 	if lPo2Write == .t. 
-	   
+	  
 		  aPo2 := add_po2( "", ;
 			nGl1w, ;
 			nGl1h, ;
 			0, 0, 0, 0, ;
-			_step( nGl1w, nGl2w ), ;
-			_step( nGl1h, nGl2h ), ;
+			_step( nGl1w, nUnit_w ), ;
+			_step( nGl1h, nUnit_h ), ;
 			0, 0, ;
 			nGl2w, ;
 			nGl2h, ;
 			0, 0, 0, 0, ;
-			_step( nGl2w, nGl1w ) , ;
-			_step( nGl2h, nGl1h ), ;
+			_step( nGl2w, nUnit_w ) , ;
+			_step( nGl2h, nUnit_h ), ;
 			0, 0, ;
 			0, 0, ;
 			nGl3w, ;
 			nGl3h, ;
 			0, 0, 0, 0, ;
-			_step( nGl3w, nGl2w ), ;
-			_step( nGl3h, nGl3h ), ;
+			_step( nGl3w, nUnit_w ), ;
+			_step( nGl3h, nUnit_h ), ;
 			0, 0, ;
 			0, 0 )
 	
@@ -475,17 +477,24 @@ msgbeep("Export zavrsen ... kreiran je fajl#" + ;
 
 return
 
-
-
-static function _step( nGl1, nGl2 )
-local nRazlika := 0
+// ----------------------------------------------------
+// step vrijednost kod razlicite dimenzije stakla
+// nGl1 - vrijednost za staklo
+// nUnit - vrijednost za kompletnu jedinicu
+// ----------------------------------------------------
+static function _step( nGl1, nUnit )
+local nZero := 0
+local nStep := 0
 
 do case
-	case nGl1 > nGl2
-		return (nGl1 - nGl2)
+	case ( nGl1 <> 0 ) .and. ( nGl1 <> nUnit ) 
+		
+		nStep := ABS(nGl1 - nUnit)
+		return nStep
+
 endcase
 
-return nRazlika
+return nZero
 
 
 // --------------------------------------------------
