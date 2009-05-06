@@ -9,6 +9,7 @@ local nCustomer
 local dDateFrom
 local dDateTo
 local cGens
+local lSumirati
 local cTBFilt := ""
 local lFilterAll := .f.
 
@@ -24,7 +25,7 @@ private _exp_customer
 o_tables( .f. )
 
 // setuj uslove generacije
-if _g_vars( @nCustomer, @dDateFrom, @dDateTo, @cGens ) == .f.
+if _g_vars( @nCustomer, @dDateFrom, @dDateTo, @cGens, @lSumirati ) == .f.
 	return
 endif
 
@@ -65,7 +66,7 @@ if LastKey() == K_ESC
 		
 		// prebaci u FAKT
 
-		exp_2_fmk( doc_no, .f. , .f.  )		
+		exp_2_fmk( doc_no, .f. , .f., lSumirati  )		
 		
 		select docs
 		
@@ -188,7 +189,7 @@ return xRet
 // ---------------------------------------------
 // uslovi za generaciju
 // ---------------------------------------------
-static function _g_vars( nCustomer, dDateFrom, dDateTo, cGens )
+static function _g_vars( nCustomer, dDateFrom, dDateTo, cGens, lSumirati )
 local nX := 1
 
 nCustomer := 0
@@ -196,6 +197,8 @@ cCustomer := SPACE(10)
 dDateFrom := DATE()-31
 dDateTo := DATE()
 cGens := "N"
+lSumirati := .t.
+cSumirati := "D"
 
 Box(, 10, 70 )
 	
@@ -214,6 +217,11 @@ Box(, 10, 70 )
 	
 	@ m_x + nX, m_y + 2 SAY "Uzeti u obzir vec prenesene dokumente ?" GET cGens VALID cGens $ "DN" PICT "@!"
 	
+	nX += 1
+
+	@ m_x + nX, m_y + 2 SAY "Sumirati iste artikle sa naloga ?" GET cSumirati VALID cSumirati $ "DN" PICT "@!"
+	
+
 	read
 BoxC()
 
@@ -221,15 +229,29 @@ if LastKey() == K_ESC
 	return .f.
 endif
 
+if cSumirati == "N"
+	lSumirati := .f.
+endif
+
+
 return .t.
 
+
+// -----------------------------------------
+// box za upit sumiranja
+// -----------------------------------------
+static function _g_sumbox( lReturn )
+
+lReturn := Pitanje(,"Sumirati stavke sa naloga (D/N)","D") = "D"
+
+return
 
 
 
 // ------------------------------------------
 // export u FMK
 // ------------------------------------------
-function exp_2_fmk( nDoc_no, lTemp, lOneByOne )
+function exp_2_fmk( nDoc_no, lTemp, lOneByOne, lSumirati )
 local nTArea := SELECT()
 local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
@@ -239,6 +261,11 @@ local i
 
 if lOneByOne == nil
 	lOneByOne := .t.
+endif
+
+if lSumirati == nil
+	// sumirati stavke da ili ne
+	_g_sumbox( @lSumirati )
 endif
 
 if !FILE(ALLTRIM(gFaPrivDir) + "PRIPR.DBF")
@@ -466,8 +493,6 @@ do while !EOF() .and. field->doc_no == nDoc_no
 enddo
 
 
-altd()
-
 // sada obradi i sve operacije ovog dokumenta
 select (nADOC_OP)
 set order to tag "1"
@@ -529,42 +554,45 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	// upisi...
 	select X_TBL
-
+		
 	for i:=1 to LEN( aTo_fakt )
 	
 		set order to tag "1"
 		go bottom
-
+	
 		if !EMPTY( x_tbl->rbr )
 			nRbr := VAL( x_tbl->rbr )
 		endif
+	
+	   	if lSumirati == .t.
 		
-		// pronadji sifru...
-		set order to tag "3"
-		go top
+			// pronadji sifru...
+			set order to tag "3"
+			go top
 
 		
-		cIdRoba := aTo_fakt[ i, 1 ]
-		// pronadji da li ima u pripremi ova stavka pa samo 
-		// nadodaj
+			cIdRoba := aTo_fakt[ i, 1 ]
+			// pronadji da li ima u pripremi ova stavka pa samo 
+			// nadodaj
 		
-		select x_tbl 
+			select x_tbl 
 	
-		seek "10" + cIdRoba
+			seek "10" + cIdRoba
 		
-		if FOUND()
+			if FOUND()
 			
-			scatter()
+				scatter()
 			
-			// samo uvecaj kolicinu...
-			_kolicina := _kolicina + aTo_fakt[ i, 2 ]
+				// samo uvecaj kolicinu...
+				_kolicina := _kolicina + aTo_fakt[ i, 2 ]
 			
-			gather()
+				gather()
 			
-			loop
+				loop
 		
-		endif
-	
+			endif
+	    	endif
+
 		// cijena artikla
 		nPrice := g_art_price( PADR( cIdRoba, 10 ) )
 	
