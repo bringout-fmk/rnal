@@ -70,19 +70,19 @@ Box(, nBoxX, nBoxY)
 
 	nX += 1
 
-	@ m_x + nX, m_y + 2 SAY "(1) - rezano               (4) - IZO"
+	@ m_x + nX, m_y + 2 SAY "(1) - rezano          (4) - IZO"
 	
 	nX += 1
 	
-	@ m_x + nX, m_y + 2 SAY "(2) - kaljeno              (5) - LAMI"
+	@ m_x + nX, m_y + 2 SAY "(2) - kaljeno         (5) - LAMI"
 	
 	nX += 1
 	
-	@ m_x + nX, m_y + 2 SAY "(3) - bruseno"
+	@ m_x + nX, m_y + 2 SAY "(3) - bruseno         (6) - emajlirano"
 	
 	nX += 2
 
-	@ m_x + nX, m_y + 2 SAY "Grupa artikala (0 - sve grupe):" GET nGroup VALID nGroup >= 0 .and. nGroup < 6 PICT "9"
+	@ m_x + nX, m_y + 2 SAY "Grupa artikala (0 - sve grupe):" GET nGroup VALID nGroup >= 0 .and. nGroup < 7 PICT "9"
 	
 	read
 BoxC()
@@ -171,8 +171,6 @@ do while !EOF()
 		cLog := ""
 	endif
 	
-	aGrCount := {}
-	
 	select doc_it
 	set order to tag "1"
 	go top
@@ -184,19 +182,19 @@ do while !EOF()
 		nDoc_it_no := field->doc_it_no
 		nQtty := field->doc_it_qtty
 		
+		// matrica sa stavkama i elementima artikla
+		aArtDesc := {}
+
+		// napuni matricu aArtDesc radi podataka o artiklu !
+		_art_set_descr( nArt_id, nil, nil, @aArtDesc, .t. )
+
 		// check group of item
-		nIt_group := set_art_docgr( nArt_id, nDoc_no, nDoc_it_no )
+		// "0156" itd...
+		cIt_group := set_art_docgr( nArt_id, nDoc_no, nDoc_it_no )
 		
-		nScan := ASCAN(aGrCount, {|xVar| xVar[1] == nIt_Group })
-		
-		if nScan == 0
-			AADD( aGrCount, { nIt_group })
-		endif
-		
-		cDiv := ALLTRIM( STR( LEN(aGrCount) ) )
+		cDiv := ALLTRIM( STR( LEN(cIt_group) ) )
 		
 		cDoc_div := "(" + cDiv + "/" + cDiv + ")"
-		
 	
 		// uzmi operaciju za ovu stavku naloga....
 		// if exist
@@ -242,20 +240,24 @@ do while !EOF()
 		
 		endif
 
+		// provjeri da li je artikal LAMI-RG staklo ?
+		lIsLami := is_lami( aArtDesc )
+
+		if lIsLami == .t.
+			if !EMPTY(cAop)
+				cAop += "#"
+			endif
+			cAop += "lami-rg"
+		endif
+
 		select doc_it
 
 		// item description
 		cItem := ALLTRIM( g_art_desc( nArt_id ) )
 		cItemAop := cAop
 		
-		nGr1 := 0
-		nGr2 := 0
+		nGr1 := VAL( SUBSTR( cIt_group, 1, 1 ) )
 	
-		if nGroup <> 0
-			// rasclani grupe ako je zadata grupa...
-			g_ggroups( nIt_group, @nGr1, @nGr2 )
-		endif
-		
 		_ins_tmp1( nDoc_no, ;
 			cCust_desc, ;
 			docs->doc_date , ;
@@ -273,7 +275,16 @@ do while !EOF()
 			nGr1, ;
 			cLog )
 
-		if nGr2 <> 0
+		// ako ima vise grupa...
+
+		if LEN( cIt_group ) > 1 
+
+		    for xx := 1 to LEN( cIt_group )
+                       
+		       if VAL(SUBSTR(cIt_group, xx, 1)) == nGr1
+		       	  loop
+		       endif
+
 			_ins_tmp1( nDoc_no, ;
 			cCust_desc, ;
 			docs->doc_date , ;
@@ -288,9 +299,11 @@ do while !EOF()
 			nQtty, ;
 			cItem, ;
 			cItemAop, ;
-			nGr2, ;
+			VAL(SUBSTR(cIt_group, xx, 1)), ;
 			cLog )
-
+		    
+		    next
+		
 		endif
 
 		++ nCount
