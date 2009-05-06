@@ -279,6 +279,12 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		// element...
 		if nElDesc == 1 
 			
+			// provjeri za novu stranicu
+			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+				++ nPage
+				Nstr_a4(nPage, .t.)
+			endif			
+			
 			? RAZMAK
 		    	?? PADL("", LEN_IT_NO)
 			?? " "
@@ -298,6 +304,11 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	
 		endif
 		
+		// provjeri za novu stranicu
+		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+			++ nPage
+			Nstr_a4(nPage, .t.)
+		endif
 		
 		// operacije....
 		
@@ -906,7 +917,7 @@ nDuzStrKorekcija := 0
 //P_COND
 
 ? cLine
-p_line( "Prenos na sljedecu stranicu", 12, .f. )
+p_line( " Prenos na sljedecu stranicu", 12, .f. )
 ? cLine
 
 FF
@@ -917,6 +928,7 @@ FF
 if nPage <> nil
 	p_line( "       Strana:" + str(nPage, 3), 12, .f.)
 endif
+? cLine
 
 return
 
@@ -934,6 +946,5 @@ endif
 
 return nPom
 
-return
 
 
