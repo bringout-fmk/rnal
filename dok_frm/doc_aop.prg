@@ -9,6 +9,7 @@ static __art_id
 static __art_type
 static _form_article
 static _a_elem
+static _a_arr
 
 // ------------------------------------------
 // unos ispravka operacija naloga
@@ -39,6 +40,11 @@ _from_article := .f.
 if nItem_no > 0
 	_from_article := .t.
 endif
+
+_a_arr := {}
+
+// napuni matricu sa artiklom
+_art_set_descr( __art_id, nil, nil, @_a_arr, .t. )
 
 // napuni matricu sa elementima artikla
 _g_art_elements( @_a_elem, __art_id )
@@ -203,11 +209,11 @@ nX += 1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("dodatna operacija (*):", nLeft) GET cAop VALID {|| s_aops( @cAop, cAop ), set_var(@_aop_id, @cAop) , show_it( g_aop_desc( _aop_id ), 20) } WHEN set_opc_box( nBoxX, 50, "odaberi dodatnu operaciju", "0 - otvori sifrarnik")
+@ m_x + nX, m_y + 2 SAY PADL("dodatna operacija (*):", nLeft) GET cAop VALID {|| s_aops( @cAop, cAop ), set_var(@_aop_id, @cAop) , show_it( g_aop_desc( _aop_id ), 20), rule_aop(g_aop_joker(_aop_id), _a_arr ) } WHEN set_opc_box( nBoxX, 50, "odaberi dodatnu operaciju", "0 - otvori sifrarnik")
 
 nX += 1
 
-@ m_x + nX, m_y + 2 SAY PADL("atribut dod. operacije:", nLeft) GET cAopAtt VALID {|| s_aops_att(@cAopAtt, _aop_id, cAopAtt ), set_var(@_aop_att_id, @cAopAtt), show_it(g_aop_att_desc( _aop_att_id ), 20) } WHEN set_opc_box( nBoxX, 50, "odaberi atribut dodatne operacije", "99 - otvori sifrarnik")
+@ m_x + nX, m_y + 2 SAY PADL("atribut dod. operacije:", nLeft) GET cAopAtt VALID {|| s_aops_att(@cAopAtt, _aop_id, cAopAtt ), set_var(@_aop_att_id, @cAopAtt), show_it(g_aop_att_desc( _aop_att_id ), 20), rule_aop( g_aatt_joker(_aop_att_id), _a_arr ) } WHEN set_opc_box( nBoxX, 50, "odaberi atribut dodatne operacije", "99 - otvori sifrarnik")
 
 nX += 1
 

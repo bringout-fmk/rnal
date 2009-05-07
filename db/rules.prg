@@ -173,7 +173,7 @@ if nLevel <= 3
 	
 elseif nLevel == 4
 	
-	if Pitanje(, "Zanemariti ovo pravilo (D/N) ?", "N" ) == "D"
+	if Pitanje(, "Zelite zanemariti ovo pravilo (D/N) ?", "N" ) == "D"
 	
 		lRet := .t.
 	
@@ -378,6 +378,97 @@ return cReturn
 
 
 
+// -------------------------------------------
+// pravilo za unos operacija
+// -------------------------------------------
+function rule_aop( xVal, aArr, lShErr )
+local nErrLevel := 0
+
+if lShErr == nil
+	lShErr := .t.
+endif
+
+// ako se koriste pravila ? uopste
+if is_fmkrules()
+	
+	nErrLevel := _rule_aop_( xVal, aArr, lShErr )
+
+endif
+
+return err_validate( nErrLevel )
+
+
+
+// ---------------------------------------------
+// rule za unos opracija dokumenta
+// 
+//   aArr -> matrica sa definicijom artikla...
+// ---------------------------------------------
+static function _rule_aop_( xVal,  aArr, lShErr )
+
+local nReturn := 0
+local nTArea := SELECT()
+
+local cObj := "ITEMS"
+local cCond := "DOC_IT_AOP"
+local cMod := goModul:oDataBase:cName
+
+local nErrLevel
+local cKtoList
+local cNalog
+
+O_FMKRULES
+select fmkrules
+set order to tag "ITEM1"
+go top
+
+seek g_rulemod( cMod ) + g_ruleobj( cObj ) + g_rule_c5( cCond )
+
+do while !EOF() .and. field->modul_name == g_rulemod( cMod ) ;
+		.and. field->rule_obj == g_ruleobj( cObj ) ;
+		.and. field->rule_c5 == g_rule_c5( cCond )
+	
+	// pravilo: koja operacija <A_KSR> recimo
+	cAopCond := ALLTRIM( fmkrules->rule_c7 )
+	
+	// operator, < > = <> itd...
+	xOperCond := ALLTRIM( fmkrules->rule_c2 )
+	
+	// vrijednost koja se provjerava
+	xValue := ALLTRIM( fmkrules->rule_c3 )
+	
+	// tip elementa
+	xType := ALLTRIM( fmkrules->rule_c4 )
+
+	// atribut elementa
+	xAttType := ALLTRIM( fmkrules->rule_c6 )
+
+	nErrLevel := fmkrules->rule_level
+
+	// da li postoji artikal koji zadovoljava ovo ???
+	if nErrLevel <> 0 .and. cAopCond == xVal .and. ;
+		_r_aop_cond( xVal, xValue, xType, ;
+			xAttType, xOperCond, aArr )
+		
+		nReturn := nErrLevel
+		
+		if lShErr == .t.
+			sh_rule_err( fmkrules->rule_ermsg, nErrLevel )
+		endif
+		
+		
+
+		exit
+	
+	endif
+	
+	skip
+	
+enddo
+
+select (nTArea)
+
+return nReturn
 
 
 // -------------------------------------------
@@ -562,6 +653,49 @@ select (nTArea)
 
 return nReturn
 
+
+// ---------------------------------------------------------
+// uslov za provjeru operacija i artikala
+// ---------------------------------------------------------
+static function _r_aop_cond( cSearch, cVal, cEl_type, ;
+	cEl_att, cOper, aArr )
+
+local lReturn := .f.
+local nScan
+
+nScan := 0
+
+if cOper == "="
+
+	nScan := ASCAN( aArr, { |xV| ALLTRIM(xV[2]) == ALLTRIM(cEl_type) ;
+		.and. ALLTRIM(xV[4]) == ALLTRIM(cEl_att) ;
+		.and. ALLTRIM(xV[5]) == ALLTRIM(cVal) } )
+
+elseif cOper == ">"
+	
+	nScan := ASCAN( aArr, { |xV| ALLTRIM(xV[2]) == ALLTRIM(cEl_type) ;
+		.and. ALLTRIM(xV[4]) == ALLTRIM(cEl_att) ;
+		.and. ALLTRIM(xV[5]) > ALLTRIM(cVal) } )
+
+elseif cOper == "<"
+	
+	nScan := ASCAN( aArr, { |xV| ALLTRIM(xV[2]) == ALLTRIM(cEl_type) ;
+		.and. ALLTRIM(xV[4]) == ALLTRIM(cEl_att) ;
+		.and. ALLTRIM(xV[5]) < ALLTRIM(cVal) } )
+
+elseif cOper == "<>"
+	
+	nScan := ASCAN( aArr, { |xV| ALLTRIM(xV[2]) == ALLTRIM(cEl_type) ;
+		.and. ALLTRIM(xV[4]) == ALLTRIM(cEl_att) ;
+		.and. ALLTRIM(xV[5]) <> ALLTRIM(cVal) } )
+
+endif
+
+if nScan <> 0
+	lReturn := .t.
+endif
+
+return lReturn
 
 
 
