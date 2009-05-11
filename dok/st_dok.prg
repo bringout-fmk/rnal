@@ -665,7 +665,7 @@ local lIsLami := .f.
 _art_set_descr( nArt_id, nil, nil, @aArt, .t. )
 
 if aArt == nil .or. LEN(aArt) == 0
-	cGroup := "-99"
+	cGroup := "0"
 	return cGroup
 endif
 
@@ -894,7 +894,6 @@ return lRet
 static function ck_obr( aArticle, cSrcObrada )
 local lRet := .f.
 local nObrada 
-altd()
 nObrada := ASCAN(aArticle, {|xVar| ALLTRIM(xVar[4]) == cSrcObrada } )
 if nObrada <> 0
 	lRet := .t.
@@ -912,7 +911,6 @@ static function ck_obr_aops( nDoc_no, nDocit_no, cSrcObrada )
 local lRet := .f.
 local nTArea := SELECT()
 local nTable := F_DOC_OPS
-altd()
 if __temp == .t.
 	nTable := F__DOC_OPS
 endif
@@ -950,44 +948,6 @@ enddo
 select (nTArea)
 return lRet
 
-
-
-// ----------------------------------------
-// vraca grupe za slozene grupe
-// ----------------------------------------
-function g_ggroups( nGr, nGr1, nGr2 )
-
-if nGr < 10
-	
-	nGr1 := nGr
-	nGr2 := 0
-	
-	return
-endif
-
-if nGr = 42
-	
-	nGr1 := 4 
-	nGr2 := 2
-	
-elseif nGr = 52
-	
-	nGr1 := 5
-	nGr2 := 2
-	
-elseif nGr = 43
-
-	nGr1 := 4
-	nGr2 := 3
-
-elseif nGr = 53
-	
-	nGr1 := 5
-	nGr2 := 3
-
-endif
-
-return
 
 
 // ----------------------------------------------
