@@ -350,7 +350,9 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	select (nADOC_IT)
 	go (nTRec)
-	
+
+	altd()
+
 	// napuni varijable
 	for ix := 1 to LEN( aArticles )
 		
@@ -396,8 +398,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			"", ;
 			nil, ;
 			field->doc_it_qtty, ;
-			field->doc_it_width, ;
-			field->doc_it_height, ;
+			nGl1w, ;
+			nGl1h, ;
 			cPosGl1, ;
 			cPosFr1, ;
 			cPosGl2, ;
@@ -417,21 +419,21 @@ do while !EOF() .and. field->doc_no == nDoc_no
 			nGl1w, ;
 			nGl1h, ;
 			0, 0, 0, 0, ;
-			_step( nGl1w, nUnit_w ), ;
-			_step( nGl1h, nUnit_h ), ;
+			0, ; //_step( nGl1w, nUnit_w ), ;
+			0, ; //_step( nGl1h, nUnit_h ), ;
 			0, 0, ;
 			nGl2w, ;
 			nGl2h, ;
 			0, 0, 0, 0, ;
-			_step( nGl2w, nUnit_w ) , ;
-			_step( nGl2h, nUnit_h ), ;
+			_step( nGl2w, nGl1w ) , ;
+			_step( nGl2h, nGl1h ), ;
 			0, 0, ;
 			0, 0, ;
 			nGl3w, ;
 			nGl3h, ;
 			0, 0, 0, 0, ;
-			_step( nGl3w, nUnit_w ), ;
-			_step( nGl3h, nUnit_h ), ;
+			_step( nGl3w, nGl2w ), ;
+			_step( nGl3h, nGl2h ), ;
 			0, 0, ;
 			0, 0 )
 	
