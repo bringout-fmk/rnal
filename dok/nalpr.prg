@@ -685,6 +685,12 @@ if !EMPTY(cPayAddDesc) .and. ALLTRIM(cPayAddDesc) <> "-"
 		
 endif
 
+// provjeri za novu stranicu
+if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	++ nPage
+	Nstr_a4(nPage, .t.)
+endif	
+
 // oznacene pozicije na nalogu
 cPom := "Oznacene pozicije:"
 cPom += "      "
@@ -698,6 +704,27 @@ cPom += "  VALIDAN  "
 cPom += "  NIJE VALIDAN  "
 cPom += " ovjerio: __________________ "
 cPom += ", vrijeme: _____________"
+
+? RAZMAK + cPom
+
+?
+?
+
+// provjeri za novu stranicu
+if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	++ nPage
+	Nstr_a4(nPage, .t.)
+endif	
+
+// potvrda narudzbe
+
+cPom := "Narucilac potvrdjuje narudzbu:"
+cPom += " "
+cPom += "_______________"
+cPom += " "
+cPom += "  Datum:"
+cPom += " "
+cPom += "_________"
 
 ? RAZMAK + cPom
 
