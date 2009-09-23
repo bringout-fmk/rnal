@@ -35,6 +35,7 @@ cVal := STRTRAN( cVal, "#G_CONFIG#", "" )
 cVal := STRTRAN( cVal, "#HOLE_CONFIG#", "" )
 cVal := STRTRAN( cVal, "#STAMP_CONFIG#", "" )
 cVal := STRTRAN( cVal, "#PREP_CONFIG#", "" )
+cVal := STRTRAN( cVal, "#RAL_CONFIG#", "" )
 
 return
 

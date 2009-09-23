@@ -142,6 +142,11 @@ if !used()
 	O_AOPS_ATT
 endif
 
+select F_RAL
+if !used()
+	O_RAL
+endif
+
 return
 
 

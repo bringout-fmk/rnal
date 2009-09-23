@@ -3,7 +3,7 @@ MODUL=rnal_ut
 
 SRCDOSROOT=$(BASEDOS)\\fmk\\rnal\\util\\
 
-PRGS=rn_zaok.prg rnal.prg staklo.prg
+PRGS=rn_zaok.prg rnal.prg staklo.prg ral.prg
 CS=
 ASMS=
 

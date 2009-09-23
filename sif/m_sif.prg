@@ -85,6 +85,13 @@ else
 	AADD(opcexe, {|| msgbeep( cZabrana ) })
 endif
 
+AADD(opc, "11. RAL definicije")
+if ImaPravoPristupa(goModul:oDataBase:cName, "SIF", "RAL")
+	AADD(opcexe, {|| sif_ral() })
+else
+	AADD(opcexe, {|| msgbeep( cZabrana ) })
+endif
+
 
 Izbor := 1
 

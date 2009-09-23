@@ -283,6 +283,7 @@ local lGConf := .f.
 local lHConf := .f.
 local lStConf := .f.
 local lPrepConf := .f.
+local lRalConf := .f.
 
 local cConf := ""
 
@@ -324,6 +325,11 @@ if FOUND()
 		
 		lHConf := .t.
 	
+	// RAL - konfigurator
+	elseif "#RAL_CONFIG#" $ field->aop_att_full
+		
+		lRalConf := .t.
+
 	// konfigurator pozicije pecata
 	elseif "#STAMP_CONFIG#" $ field->aop_att_full
 		
@@ -429,6 +435,10 @@ if lHConf == .t.
 	// konfigurator busenja rupa
 	cVal := hole_config( cJoker )
 	
+endif
+
+if lRalConf == .t.
+	cVal := PADR( get_ral(), 150 )
 endif
 
 if lStConf == .t. .and. ;

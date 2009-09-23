@@ -43,6 +43,6 @@
 #xcommand O_ELEMENTS => select(F_ELEMENTS); use (SIFPATH + "ELEMENTS"); set order to tag "1"
 #xcommand O_E_AOPS => select(F_E_AOPS); use (SIFPATH + "E_AOPS"); set order to tag "1"
 #xcommand O_E_ATT => select(F_E_ATT); use (SIFPATH + "E_ATT"); set order to tag "1"
-
+#xcommand O_RAL => select(F_RAL); use (SIFPATH + "RAL"); set order to tag "1"
 
 

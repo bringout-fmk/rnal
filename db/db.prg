@@ -226,8 +226,12 @@ cre_relation()
 
 // kreiraj pravila : RULES
 cre_fmkrules()
+
 // kreiraj pravila : RULES cdx files
 c_rule_cdx()
+
+// kreiraj tabelu "RAL"
+c_tbl_ral()
 
 return
 
