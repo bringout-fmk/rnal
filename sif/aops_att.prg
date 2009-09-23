@@ -510,6 +510,9 @@ do case
 
 		cRet := prep_read( cVal )
 
+	case aTmp[1] == "RAL"
+
+		cRet := g_ral_value( VAL(aTmp[2]) )
 endcase
 
 

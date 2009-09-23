@@ -84,6 +84,7 @@ return
 // vraca ral informacije
 // --------------------------------------
 function get_ral()
+local cRet := ""
 local nRal := 0
 local GetList := {}
 local nTarea := SELECT()
@@ -98,10 +99,71 @@ BoxC()
 select (nTarea)
 
 if LastKey() == K_ESC
-	return ""
+	return cRet
 endif
 
-return ALLTRIM( STR( nRal, 5 ))
+cRet := "RAL:" + ALLTRIM( STR( nRal, 5 ))
 
+return cRet
+
+
+
+// ----------------------------------------
+// vraca informaciju o ral-u
+// nRal - oznaka RAL-a (numeric)
+// ----------------------------------------
+function g_ral_value( nRal )
+local xRet := ""
+local nTArea := SELECT()
+O_RAL
+
+seek STR(nRal, 5)
+
+if FOUND()
+	
+	// prva boja
+	if field->col_1 <> 0 .and. field->colp_1 <> 0
+		xRet += " " 
+		xRet += ALLTRIM(STR(field->col_1)) 
+		xRet +=	" (" 
+		xRet += ALLTRIM(STR(field->colp_1, 12, 2)) + "%"
+		xRet +=  ")"
+	endif
+
+	// druga boja
+	if field->col_2 <> 0 .and. field->colp_2 <> 0
+		xRet += " " 
+		xRet += ALLTRIM(STR(field->col_2)) 
+		xRet +=	" (" 
+		xRet += ALLTRIM(STR(field->colp_2, 12, 2)) + "%"
+		xRet +=  ")"
+	endif
+	
+	// treca boja
+	if field->col_3 <> 0 .and. field->colp_3 <> 0
+		xRet += " " 
+		xRet += ALLTRIM(STR(field->col_3)) 
+		xRet +=	" (" 
+		xRet += ALLTRIM(STR(field->colp_3, 12, 2)) + "%"
+		xRet +=  ")"
+	endif
+	
+	// cetvrta boja
+	if field->col_4 <> 0 .and. field->colp_4 <> 0
+		xRet += " " 
+		xRet += ALLTRIM(STR(field->col_4)) 
+		xRet +=	" (" 
+		xRet += ALLTRIM(STR(field->colp_4, 12, 2)) + "%"
+		xRet +=  ")"
+	endif
+
+endif
+
+if !EMPTY(xRet)
+	xRet := "RAL-" + ALLTRIM(STR(field->id,5)) + ":" + xRet
+endif
+
+select (nTArea)
+return xRet
 
 
