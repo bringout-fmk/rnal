@@ -297,13 +297,17 @@ return
 // ----------------------------------------------
 function calc_ral( nRal, nTick, nRoller, nUm2 )
 local nTArea := SELECT()
-local nColor1 := 0
-local nColor2 := 0
-local nColor3 := 0
-local nColor4 := 0
+local nColor1 := 0.00000000000
+local nColor2 := 0.00000000000
+local nColor3 := 0.00000000000
+local nColor4 := 0.00000000000
 local aColor := {}
 
+
+altd()
+
 O_RAL
+go top
 seek STR(nRal, 5) + STR(nTick, 2)
 
 if FOUND()
@@ -349,7 +353,7 @@ if nPercent = 0
 	return nRet
 endif
 
-nRet := (((nPercent / 100) * nUm2 * nRoller ) / 1000 )
+nRet := Round2( (((nPercent / 100) * nUm2 * nRoller ) / 1000 ), 12 )
 
 return nRet
 
