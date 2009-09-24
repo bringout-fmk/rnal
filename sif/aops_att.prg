@@ -276,7 +276,7 @@ return cAopAttDesc
 // ako se koristi setuj cVal
 // ---------------------------------------------
 function is_g_config( cVal, nAop_att_id, ;
-		nHeigh, nWidth )
+		nHeigh, nWidth, nTick )
 
 local nTArea := SELECT()
 local lGConf := .f.
@@ -438,7 +438,7 @@ if lHConf == .t.
 endif
 
 if lRalConf == .t.
-	cVal := PADR( get_ral(), 150 )
+	cVal := PADR( get_ral( nTick ), 150 )
 endif
 
 if lStConf == .t. .and. ;
@@ -467,6 +467,7 @@ return .t.
 function g_aop_value( cVal )
 local cRet := ""
 local aTmp := {}
+local aRal := {}
 
 if EMPTY(cVal)
 	return ""
@@ -512,7 +513,8 @@ do case
 
 	case aTmp[1] == "RAL"
 
-		cRet := g_ral_value( VAL(aTmp[2]) )
+		aRal := TokToNiz( aTmp[2], "#" )
+		cRet := g_ral_value( VAL(aRal[1]), VAL(aRal[2]) )
 endcase
 
 

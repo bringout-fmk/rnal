@@ -10,7 +10,10 @@ local cPath := SIFPATH
 local cTable := "RAL"
 
 AADD( aDbf, { "id", "N", 5, 0 })
+AADD( aDbf, { "int_code", "N", 8, 0 })
+AADD( aDbf, { "gl_tick", "N", 2, 0 })
 AADD( aDbf, { "desc", "C", 50, 0 })
+AADD( aDbf, { "en_desc", "C", 50, 0 })
 AADD( aDbf, { "col_1", "N", 8, 0 })
 AADD( aDbf, { "col_2", "N", 8, 0 })
 AADD( aDbf, { "col_3", "N", 8, 0 })
@@ -24,7 +27,7 @@ if !FILE( cPath + cTable + ".DBF" )
 	DbCreate2( cPath + cTable, aDbf )
 endif
 
-CREATE_INDEX("1", "STR(id,5)", cPath + cTable, .t.)
+CREATE_INDEX("1", "STR(id,5)+STR(gl_tick,2)", cPath + cTable, .t.)
 CREATE_INDEX("2", "desc", cPath + cTable, .t.)
 
 return
@@ -48,6 +51,7 @@ PostojiSifra(F_RAL, 1, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 return
 
 
+
 // ----------------------------------------
 // obrada tipki na tastaturi
 // ----------------------------------------
@@ -63,7 +67,12 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("RAL", 5), {|| id }, "id", {|| .t.}, {|| .t.}})
-AADD(aImeKol, {PADC("Opis", 20), {|| PADR(desc, 20)}, "desc"})
+AADD(aImeKol, {PADC("RG COL.", 8), {|| int_code }, "int_code", ;
+	{|| .t.}, {|| .t.}})
+AADD(aImeKol, {PADC("Debljina", 8), {|| gl_tick }, "gl_tick", ;
+	{|| .t.}, {|| .t.}})
+AADD(aImeKol, {PADC("Naziv", 20), {|| PADR(desc, 20)}, "desc"})
+AADD(aImeKol, {PADC("en.naziv", 20), {|| PADR(en_desc, 20)}, "en_desc"})
 AADD(aImeKol, {PADC("Boja 1", 10), {|| col_1 }, "col_1"})
 AADD(aImeKol, {PADC("% boje 1", 12), {|| colp_1 }, "colp_1"})
 AADD(aImeKol, {PADC("Boja 2", 10), {|| col_2 }, "col_2"})
@@ -83,18 +92,43 @@ return
 // --------------------------------------
 // vraca ral informacije
 // --------------------------------------
-function get_ral()
+function get_ral( nTick )
 local cRet := ""
 local nRal := 0
 local GetList := {}
 local nTarea := SELECT()
 
+if nTick == nil
+	nTick := 0
+endif
+
 O_RAL
 
 Box(,1,40)
-	@ m_x + 1, m_y + 2 SAY "RAL ->" GET nRal PICT "99999" VALID sif_ral(@nRal)
+	@ m_x + 1, m_y + 2 SAY "RAL ->" GET nRal PICT "99999"
 	read
 BoxC()
+
+altd()
+
+// probaj naci po debljini...
+select ral
+go top
+seek STR( nRal, 5 ) + STR( nTick, 2 )
+
+if !FOUND()
+	// probaj samo po ral-u
+	go top
+	seek STR( nRal, 5 )
+
+	if !FOUND()
+		// otvori sifrarnik pa izaberi...
+		sif_ral( @nRal )
+	endif
+endif
+
+// uzmi vrijednost iz polja
+nTick := field->gl_tick
 
 select (nTarea)
 
@@ -102,7 +136,8 @@ if LastKey() == K_ESC
 	return cRet
 endif
 
-cRet := "RAL:" + ALLTRIM( STR( nRal, 5 ))
+cRet := "RAL:" + ALLTRIM( STR( nRal, 5 )) + ;
+	"#" + ALLTRIM(STR(nTick, 2))
 
 return cRet
 
@@ -111,16 +146,29 @@ return cRet
 // ----------------------------------------
 // vraca informaciju o ral-u
 // nRal - oznaka RAL-a (numeric)
+// nTick - debljina stakla
 // ----------------------------------------
-function g_ral_value( nRal )
+function g_ral_value( nRal, nTick )
 local xRet := ""
 local nTArea := SELECT()
 O_RAL
 
-seek STR(nRal, 5)
+if nTick == nil
+	nTick := 0
+endif
+
+if nTick = 0
+	seek STR(nRal, 5)
+else
+	seek STR(nRal, 5) + STR(nTick, 2)
+endif
 
 if FOUND()
 	
+	// opis
+	xRet += " "
+	xRet += ALLTRIM( field->en_desc )
+
 	// prva boja
 	if field->col_1 <> 0 .and. field->colp_1 <> 0
 		xRet += " " 

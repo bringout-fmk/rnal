@@ -28,6 +28,8 @@ local nRet := 0
 local nFuncRet := 0
 private GetList:={}
 
+altd()
+
 if nItem_no == nil
 	nItem_no := 0
 endif
@@ -172,6 +174,8 @@ local cAop := ""
 local cAopAtt := ""
 local nH
 local nW
+local nElement := 0
+local nTick := 0
 
 if l_new_ops
 
@@ -205,7 +209,7 @@ nX += 2
 	
 nX += 1
 	
-@ m_x + nX, m_y + 2 SAY PADL(" -> element stavke (*):", nLeft) GET _doc_it_el_no VALID {|| get_it_element( @_doc_it_el_no ), show_it( get_elem_desc( _a_elem, _doc_it_el_no ), 26 ) } WHEN {|| _g_art_elements( @_a_elem, _g_art_it_no( _doc_it_no) ), set_opc_box( nBoxX, 50, "odnosi se na odredjeni element stavke", "") }
+@ m_x + nX, m_y + 2 SAY PADL(" -> element stavke (*):", nLeft) GET _doc_it_el_no VALID {|| get_it_element( @_doc_it_el_no, @nElement ), show_it( get_elem_desc( _a_elem, _doc_it_el_no ), 26 ) } WHEN {|| _g_art_elements( @_a_elem, _g_art_it_no( _doc_it_no) ), set_opc_box( nBoxX, 50, "odnosi se na odredjeni element stavke", "") }
 
 nX += 2
 
@@ -218,7 +222,7 @@ nX += 1
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL( "vrijednost:", nLeft ) GET _aop_value ;
-	VALID {|| _g_dim_it_no(_doc_it_no, @nH, @nW) .and. is_g_config( @_aop_value, _aop_att_id, nH, nW )} ;
+	VALID {|| _g_dim_it_no(_doc_it_no, nElement, @nH, @nW, @nTick) .and. is_g_config( @_aop_value, _aop_att_id, nH, nW, nTick )} ;
 	PICT "@S40" ;
 	WHEN set_opc_box( nBoxX, 50, "vrijednost operacije ako postoji", "kod brusenja, poliranja..." )
 
@@ -259,16 +263,17 @@ return xRet
 // --------------------------------------------------
 // vraca arr sa elementima artikla...
 // --------------------------------------------------
-function get_it_element( nDoc_it_e_id )
+function get_it_element( nDoc_it_e_id, nElement )
 local nXX := m_x
 local nYY := m_y
 
 if nDoc_it_e_id > 0
+	nElement := _get_a_element( _a_elem, nDoc_it_e_id )
 	return .t.
 endif
 
 // odaberi element
-nDoc_it_e_id := _pick_element( _a_elem )
+nDoc_it_e_id := _pick_element( _a_elem, @nElement )
 
 m_x := nXX
 m_y := nYY
@@ -276,11 +281,26 @@ m_y := nYY
 return .t.
 
 
+// ------------------------------------------------
+// vraca element iz matrice
+// ------------------------------------------------
+static function _get_a_element( aElem, nEl_no )
+local nTmp 
+
+nTmp := ASCAN( aElem, { |xVal| xVal[1] = nEl_no })
+
+if nTmp <> 0
+	nElement := aElem[ nTmp, 3 ]
+endif
+
+return nElement
+
+
+
 // -----------------------------------------
 // uzmi element...
 // -----------------------------------------
-static function _pick_element( aElem )
-local nChoice := 1
+static function _pick_element( aElem, nChoice )
 local nRet
 local i
 local cPom
@@ -288,6 +308,8 @@ private GetList:={}
 private izbor := 1
 private opc := {}
 private opcexe := {}
+
+nChoice := 1
 
 for i:=1 to LEN(aElem)
 
@@ -349,21 +371,29 @@ return xRet
 // ----------------------------------------------------
 // vraca dimenzije stavke 
 // ----------------------------------------------------
-static function _g_dim_it_no( nDoc_it_no, nH, nW )
+static function _g_dim_it_no( nDoc_it_no, nElement, nH, nW, nTick )
 local nArt_id := 0
 local nTArea := SELECT()
 local nTRec := RECNO()
+local aArr := {}
 
 nH := 0
 nW := 0
+nTick := 0
 
 select _doc_it
 set order to tag "1"
 seek docno_str( _doc) + docit_str( nDoc_it_no )
 
 if FOUND()
+	
 	nH := field->doc_it_height
 	nW := field->doc_it_width
+
+	// uzmi debljinu...
+
+	nTick := g_gl_tickness( _a_arr, nElement )
+
 endif
 
 select (nTArea)
