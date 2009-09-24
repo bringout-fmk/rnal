@@ -95,6 +95,7 @@ return
 function get_ral( nTick )
 local cRet := ""
 local nRal := 0
+local nRoller := 1
 local GetList := {}
 local nTarea := SELECT()
 
@@ -104,12 +105,15 @@ endif
 
 O_RAL
 
-Box(,1,40)
-	@ m_x + 1, m_y + 2 SAY "RAL ->" GET nRal PICT "99999"
-	read
-BoxC()
+Box(,2,40)
 
-altd()
+	@ m_x + 1, m_y + 2 SAY "Valjak (1/2/3):" GET nRoller PICT "9" ;
+		VALID sh_roller( nRoller )
+	@ m_x + 2, m_y + 2 SAY "         RAL ->" GET nRal PICT "99999"
+	
+	read
+
+BoxC()
 
 // probaj naci po debljini...
 select ral
@@ -136,11 +140,52 @@ if LastKey() == K_ESC
 	return cRet
 endif
 
+// format stringa je:
+// ------------------
+// "RAL:1000#4#80"
+//
+// 1000 - oznaka ral
+// 4 - debljina, 0 - default
+// 80 - valjak gramaza...
+
 cRet := "RAL:" + ALLTRIM( STR( nRal, 5 )) + ;
-	"#" + ALLTRIM(STR(nTick, 2))
+	"#" + ALLTRIM(STR(nTick, 2)) + ;
+	"#" + ALLTRIM(STR( _g_roller( nRoller ) ))
 
 return cRet
 
+
+// --------------------------------------------
+// ispisuje vrijednost valjka
+// --------------------------------------------
+static function sh_roller( nRoll )
+local nValue := _g_roller( nRoll )
+local cValue
+
+cValue := "-> " + ALLTRIM(STR(nValue)) + " g/m2"
+
+@ m_x + 1, col() + 2 SAY PADR(cValue, 12)
+
+return .t.
+
+
+
+// ------------------------------------------
+// vraca roller dimenziju
+// ------------------------------------------
+static function _g_roller( nRoll )
+local nVal := 80
+
+do case
+	case nRoll = 1
+		nVal := 80
+	case nRoll = 2
+		nVal := 100
+	case nRoll = 3
+		nVal := 150
+endcase
+
+return nVal
 
 
 // ----------------------------------------
@@ -213,5 +258,105 @@ endif
 
 select (nTArea)
 return xRet
+
+
+// ----------------------------------------------
+// ispisi utrosak boja
+// ----------------------------------------------
+function sh_ral_calc( aColor )
+local cTmp := ""
+local i
+
+// 1. 152000 (54.00%) -> 0.091 kg
+// 2. 182000 (44.00%) -> 0.072 kg
+// itd....
+
+? "RAL: utrosak boja (kg)"
+? "-----------------------------------"
+
+for i:=1 to LEN(aColor)
+
+	cTmp := STR(i,1) + ;
+		". " + ;
+		PADR( STR(aColor[i, 1], 8) + ;
+		PADR(" (" + ;
+		STR(aColor[i, 2], 12, 2) + "%"
+		") ", 12) + ;
+		" -> " + ;
+		PADR( STR(aColor[i, 3], 15, 3) ) + ;
+		" kg"
+
+	? cTmp
+next
+
+return
+
+
+
+// ----------------------------------------------
+// izracunaj ukupni utrosak boja
+//
+// nRal - ral oznaka
+// nTick - debljina stakla
+// nRoller - valjak 
+// nUm2 - ukupna kvadratura stakla
+// ----------------------------------------------
+function calc_ral( nRal, nTick, nRoller, nUm2 )
+local nTArea := SELECT()
+local nColor1 := 0
+local nColor2 := 0
+local nColor3 := 0
+local nColor4 := 0
+local aColor := {}
+
+O_RAL
+seek STR(nRal, 5) + STR(nTick, 2)
+
+if FOUND()
+	
+	nColor1 := c_ral_color( field->colp_1, nUm2, nRoller )
+	nColor2 := c_ral_color( field->colp_2, nUm2, nRoller )
+	nColor3 := c_ral_color( field->colp_3, nUm2, nRoller )
+	nColor4 := c_ral_color( field->colp_4, nUm2, nRoller )
+	
+	if nColor1 <> 0
+		AADD( aColor, { field->col_1, field->colp_1, nColor1 } )
+	endif
+	if nColor2 <> 0
+		AADD( aColor, { field->col_2, field->colp_2, nColor2 } )
+	endif
+	if nColor3 <> 0
+		AADD( aColor, { field->col_3, field->colp_3, nColor3 } )
+	endif
+	if nColor4 <> 0
+		AADD( aColor, { field->col_4, field->colp_4, nColor4 } )
+	endif
+
+endif
+
+select (nTArea)
+
+return aColor
+
+
+
+// --------------------------------------------------------------
+// izracunaj utrosak boje u "kg"
+//
+// nPercent = procenat boje
+// nRoller = valjak (gr/m2)
+// nUm2 = ukupna kvadratura stakla
+// 
+// --------------------------------------------------------------
+function c_ral_color( nPercent, nUm2, nRoller )
+local nRet := 0
+
+if nPercent = 0
+	return nRet
+endif
+
+nRet := (((nPercent / 100) * nUm2 * nRoller ) / 1000 )
+
+return nRet
 
 
