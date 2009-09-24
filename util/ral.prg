@@ -162,7 +162,7 @@ static function sh_roller( nRoll )
 local nValue := _g_roller( nRoll )
 local cValue
 
-cValue := "-> " + ALLTRIM(STR(nValue)) + " g/m2"
+cValue := "-> " + ALLTRIM(STR(nValue)) + " gr/m2"
 
 @ m_x + 1, col() + 2 SAY PADR(cValue, 12)
 
@@ -274,17 +274,11 @@ local i
 ? "RAL: utrosak boja (kg)"
 ? "-----------------------------------"
 
-for i:=1 to LEN(aColor)
+for i := 1 to LEN(aColor)
 
-	cTmp := STR(i,1) + ;
-		". " + ;
-		PADR( STR(aColor[i, 1], 8) + ;
-		PADR(" (" + ;
-		STR(aColor[i, 2], 12, 2) + "%"
-		") ", 12) + ;
-		" -> " + ;
-		PADR( STR(aColor[i, 3], 15, 3) ) + ;
-		" kg"
+	cTmp := STR(i, 1) + ". " + PADR( STR(aColor[i, 1], 8), 8 ) + ;
+		PADR(" (" + STR(aColor[i, 2], 12, 2) + "%" + ") ", 12) + ;
+		" -> " + PADR( STR(aColor[i, 3], 15, 3), 12 ) + " kg"
 
 	? cTmp
 next
