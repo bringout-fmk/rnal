@@ -10,7 +10,6 @@ local cPath := SIFPATH
 local cTable := "RAL"
 
 AADD( aDbf, { "id", "N", 5, 0 })
-AADD( aDbf, { "int_code", "N", 8, 0 })
 AADD( aDbf, { "gl_tick", "N", 2, 0 })
 AADD( aDbf, { "desc", "C", 50, 0 })
 AADD( aDbf, { "en_desc", "C", 50, 0 })
@@ -67,8 +66,6 @@ aKol := {}
 aImeKol := {}
 
 AADD(aImeKol, {PADC("RAL", 5), {|| id }, "id", {|| .t.}, {|| .t.}})
-AADD(aImeKol, {PADC("RG COL.", 8), {|| int_code }, "int_code", ;
-	{|| .t.}, {|| .t.}})
 AADD(aImeKol, {PADC("Debljina", 8), {|| gl_tick }, "gl_tick", ;
 	{|| .t.}, {|| .t.}})
 AADD(aImeKol, {PADC("Naziv", 20), {|| PADR(desc, 20)}, "desc"})
