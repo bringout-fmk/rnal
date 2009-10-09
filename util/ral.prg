@@ -190,13 +190,17 @@ return nVal
 // nRal - oznaka RAL-a (numeric)
 // nTick - debljina stakla
 // ----------------------------------------
-function g_ral_value( nRal, nTick )
+function g_ral_value( nRal, nTick, nRoller )
 local xRet := ""
 local nTArea := SELECT()
 O_RAL
 
 if nTick == nil
 	nTick := 0
+endif
+
+if nRoller == nil
+	nRoller := 80
 endif
 
 if nTick = 0
@@ -210,6 +214,8 @@ if FOUND()
 	// opis
 	xRet += " "
 	xRet += ALLTRIM( field->en_desc )
+	xRet += " "
+	xRet += ALLTRIM( STR(nRoller) ) + " gr/m2" 
 
 	// prva boja
 	if field->col_1 <> 0 .and. field->colp_1 <> 0

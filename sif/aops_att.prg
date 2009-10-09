@@ -514,7 +514,8 @@ do case
 	case aTmp[1] == "RAL"
 
 		aRal := TokToNiz( aTmp[2], "#" )
-		cRet := g_ral_value( VAL(aRal[1]), VAL(aRal[2]) )
+		cRet := g_ral_value( VAL(aRal[1]), ;
+				VAL(aRal[2]), VAL(aRal[3]) )
 endcase
 
 
