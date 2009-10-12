@@ -486,6 +486,26 @@ do case
 		
 		return DE_CONT
 
+	case Ch == K_ALT_C
+
+		nRet := DE_CONT
+
+		if ALIAS() == "_DOC_IT"
+			// kopiranje stavki naloga
+			if cp_items() <> 0
+				nRet := DE_REFRESH
+			endif
+		else
+			msgbeep("Za ovu operaciju pozicionirajte se na#unos stavki naloga !!!")
+		endif
+
+		select _doc_it
+
+		m_x := nX
+		m_y := nY
+
+		return nRet
+
 	case Ch == K_ALT_A
 		
 		nRet := DE_CONT

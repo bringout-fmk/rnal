@@ -90,8 +90,6 @@ _main_filter( dD_f, dD_t, nOper )
 
 Box(, 1, 50 )
 
-altd()
-
 do while !EOF()
 	
 	// uzmi podatke dokumenta da vidis treba li da se generise
@@ -107,7 +105,8 @@ do while !EOF()
 
 	// provjeri uslove !!!
 
-	if ( docs->doc_status == 1 .or. docs->doc_status == 2 )
+	// ako je rejected ili busy... preskoci
+	if ( docs->doc_status == 2 .or. docs->doc_status == 3 )
 		select docs_aop
 		skip
 		loop
@@ -180,22 +179,6 @@ do while !EOF()
 	nUm2 := c_ukvadrat( field->doc_it_qtty, ;
 		field->doc_it_height, ;
 		field->doc_it_widht) 
-
-	// ALI OVO MI PRAKTICNO NE TREBA !!!!
-	//
-	// napuni matricu artikla
-	//_art_set_descr( nArt_id, nil, nil, @aArt, .t. )
-	
-	// interesuje me jos debljina stakla ove stavke
-	
-	// daj mi elemente
-	//_g_art_elements( @aElem, nArt_id )
-	
-	// daj mi koji je element u pitanju ?
-	//get_it_element( nDoc_it_el_no, @nElement )
-	
-	// debljina je 
-	//nTick := g_gl_tickness( aArt, nElement )
 
 	// sada imam sve potrebne podatke za obracun
 	aArr := calc_ral( nRal, nTick, nRoller, nUm2 )

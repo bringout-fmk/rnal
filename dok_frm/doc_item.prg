@@ -149,13 +149,16 @@ if l_new_it
 	
 	_doc_no := _doc
 	_doc_it_no := inc_docit( _doc )
-	_doc_it_altt := 0
-	_doc_acity := SPACE( LEN(_doc_acity) )
+	//_doc_it_altt := 0
+	//_doc_acity := SPACE( LEN(_doc_acity) )
 	_doc_it_type := " "
 	
 	// ako je nova stavka i vrijednost je 0, uzmi default...
 	if _doc_it_altt == 0
 		_doc_it_altt := gDefNVM
+	endif
+
+	if EMPTY( _doc_acity )
 		_doc_acity := PADR( gDefCity, 50 )
 	endif
 
@@ -257,6 +260,10 @@ else
 	
 	// pobrisi screen na lokaciji nadmorske visine
 	@ m_x + nX, m_y + 2 SAY SPACE(70)
+	
+	// ponisti vrijednosti da ne bi ostale zapamcene u bazi
+	_doc_it_altt := 0
+	_doc_acity := ""
 	
 endif
 
@@ -409,5 +416,155 @@ if lRet == .f.
 	MsgBeeP(cMsg)
 endif
 return 
+
+
+
+// -----------------------------------------------
+// kopiranje stavki sa drugog naloga
+// -----------------------------------------------
+function cp_items()
+local nDocCopy
+local cQ_it
+local cQ_aops
+local nRet := 1
+local nTArea := SELECT()
+
+nRet := _cp_box( @nDocCopy, @cQ_it, @cQ_aops )
+
+// ako necu nista raditi - izlazim
+if nRet = 0
+	return nRet
+endif
+
+select _docs
+
+// imam parametre, idem na kopiranje
+__cp_items( _docs->doc_no, nDocCopy, cQ_it, cQ_aops )
+
+select (nTArea)
+
+return nRet
+
+
+// ----------------------------------------------
+// box sa uslovim kopiranja
+// 
+// nDoc - broj dokumenta
+// cQ_it - pitanje za kopiranje stavki (d/n)
+// cQ_aops - pitanje za kopiranje operac. (d/n)
+// ----------------------------------------------
+static function _cp_box( nDoc, cQ_It, cQ_Aops )
+local nRet := 1
+local GetList := {}
+
+nDoc := 0
+cQ_it := "D"
+cQ_Aops := "D"
+
+Box(, 5, 55 )
+	
+	@ m_x + 1, m_y + 2 SAY "Nalog iz kojeg kopiramo:" GET nDoc ;
+		PICT "9999999999" VALID ( nDoc > 0 )
+
+	@ m_x + 3, m_y + 2 SAY "   Kopirati stavke naloga (D/N)" GET cQ_it ;
+		PICT "@!" VALID ( cQ_it $ "DN" )
+	
+	@ m_x + 4, m_y + 2 SAY "Kopirati operacije naloga (D/N)" GET cQ_Aops ;
+		PICT "@!" VALID ( cQ_Aops $ "DN" )
+
+	read
+BoxC()
+
+
+if LastKey() == K_ESC
+	nRet := 0
+endif
+
+return nRet
+
+
+
+// ---------------------------------------------------
+// kopiraj stavke naloga 
+// 
+// nDoc - originalni dokument
+// nDocCopy - dokument s kojeg kopiramo
+// ---------------------------------------------------
+static function __cp_items( nDoc, nDocCopy, cQ_it, cQ_aops )
+local nTArea := SELECT()
+local nDocItCopy 
+
+if cQ_it == "N"
+	return
+endif
+	
+select doc_it
+set order to tag "1"
+go top
+seek docno_str( nDocCopy )
+
+// kada sam pronasao nalog sada idemo na kopiranje stavki ...
+select _doc_it
+go bottom
+// redni broj
+nDoc_it_no := field->doc_it_no
+	
+select doc_it
+do while !EOF() .and. field->doc_no = nDocCopy
+
+	nDocItCopy := field->doc_it_no
+		
+	scatter()
+		
+	select _doc_it
+	append blank
+
+	// zamjeni broj dokumenta i redni broj
+	_doc_no := nDoc
+	_doc_it_no := ++nDoc_it_no
+		
+	gather()
+
+	// kopiraj i operacije ove stavke, ako je to uredu
+	if cQ_aops == "N"
+
+		select doc_it
+		skip
+		loop
+	
+	endif
+
+	select doc_ops
+	go top
+	seek docno_str( nDocCopy ) + docit_str( nDocItCopy )
+
+	do while !EOF() .and. field->doc_no = nDocCopy ;
+			.and. field->doc_it_no = nDocItCopy
+				
+		scatter()
+		
+		select _doc_ops
+		append blank
+				
+		// samo ovo zamjeni sa trenutnim dokumentom
+		_doc_no := nDoc
+		_doc_it_no := nDoc_it_no
+
+		gather()
+
+		select doc_ops				
+		skip
+
+	enddo
+		
+	select doc_it
+	skip
+
+enddo
+
+select (nTArea)
+
+return
+
 
 
