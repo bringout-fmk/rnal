@@ -104,7 +104,7 @@ cLine1 += "(Q) nadji.opis"
 
 // druga linija je zajednicka
 cLine2 := "(c-P) stamp.nal. "
-cLine2 += "(c-O) obrac.list "
+cLine2 += "(c-O) specif.    "
 cLine2 += "(K) kontakti "
 cLine2 += "(L) promjene"
 
@@ -416,7 +416,7 @@ do case
 	// stampa naloga
 	case (Ch == K_CTRL_O)
 		
-		if Pitanje(, "Stampati obracunski list (D/N) ?", "D") == "D"
+		if Pitanje(, "Stampati specifikaciju (D/N) ?", "D") == "D"
 			
 			nDoc_no := docs->doc_no
 			nTRec := RecNo()

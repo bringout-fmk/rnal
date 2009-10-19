@@ -112,11 +112,13 @@ cDoc_no := g_t_pars_opis("N01")
 cDoc_date := g_t_pars_opis("N02")
 cDoc_time := g_t_pars_opis("N12")
 cDocs := g_t_pars_opis("N14")
+cCust := g_t_pars_opis("P02")
+cObject := g_t_pars_opis("P21")
 
 // setuj len_ukupno
 LEN_TOTAL := LEN( cLine )
 
-? RAZMAK + "OBRACUNSKI LIST POVRSINA, " 
+? RAZMAK + "SPECIFIKACIJA, " 
 
 if "," $ cDocs
 	
@@ -126,8 +128,10 @@ else
 	
 	?? "prema nalogu br.:" + cDoc_no
 	? RAZMAK + "Datum naloga: " + cDoc_date + ", vrijeme naloga: " + cDoc_time
-
 endif
+
+// kupac, objekat
+? RAZMAK + "Kupac: " + ALLTRIM( cCust ) + ", obj: " + ALLTRIM( cObject )
 
 ?
 
