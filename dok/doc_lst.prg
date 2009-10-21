@@ -437,6 +437,30 @@ do case
 		select docs
 		return DE_CONT
 	
+	// stampa labele
+	case (Ch == K_CTRL_L)
+		
+		if Pitanje(, "Stampati naljepnice (D/N) ?", "D") == "D"
+			
+			nDoc_no := docs->doc_no
+			nTRec := RecNo()
+			
+			set filter to
+			
+			st_label( .f., nDoc_no )
+			
+			select docs
+			
+			set_f_kol( cTmpFilter )
+			
+			go (nTRec)
+			
+			return DE_REFRESH
+		endif
+		
+		select docs
+		return DE_CONT
+	
 	// pregled kontakata.... naloga
 	case ( UPPER(CHR(Ch)) == "K" )
 		

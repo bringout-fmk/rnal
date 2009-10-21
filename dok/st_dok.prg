@@ -109,6 +109,38 @@ return DE_REFRESH
 
 
 
+// -------------------------------------
+// stampa labela na osnovu naloga
+// -------------------------------------
+function st_label( lTemporary, nDoc_no )
+
+__temp := lTemporary
+__doc_no := nDoc_no
+
+// kreiraj print tabele
+t_rpt_create()
+// otvori tabele
+t_rpt_open()
+
+o_tables( __temp )
+
+// osnovni podaci naloga
+_fill_main()
+// stavke naloga
+_fill_items()
+// operacije
+_fill_aops()
+
+// printaj labele
+lab_print( lTemporary )
+
+close all
+
+o_tables( __temp )
+
+return DE_REFRESH
+
+
 // ----------------------------------
 // filuj tabele za stampu
 // ----------------------------------
@@ -450,11 +482,13 @@ do while !EOF() .and. field->doc_no == __doc_no
 	 cDoc_op_desc := ALLTRIM( field->doc_op_desc )
 	
 	 cAop_value := g_aop_value( field->aop_value )
+	 cAop_vraw := ALLTRIM(field->aop_value)
 
 	 a_t_docop( __doc_no, nDoc_op_no, nDoc_it_no, ;
 		   nElem_no, cDoc_el_desc, ;
                    nAop_id, cAop_desc, ;
-		   nAop_att_id, cAop_att_desc, cDoc_op_desc, cAop_value )
+		   nAop_att_id, cAop_att_desc, ;
+		   cDoc_op_desc, cAop_value, cAop_vraw )
 
 
 	 select (nTable)
