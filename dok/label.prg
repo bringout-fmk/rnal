@@ -31,7 +31,7 @@ cCust := g_t_pars_opis("P02")
 cObject := g_t_pars_opis("P21")
 
 // otvori xml za upis
-open_xml(EXEPATH + "java\data.xml")
+open_xml("h:\data.xml")
 // upisi header
 xml_head()
 // <label>
@@ -112,12 +112,15 @@ clear screen
 
 // stampanje labele
 cCmdLine := "java -jar " + EXEPATH + "java\jodrep.jar " + ;
-	EXEPATH + "java\rg-1.odt " +  EXEPATH + "java\data.xml " + ;
-	EXEPATH + "java\rg-gen.odt"
+	"h:\rg-1.odt h:\data.xml " + ;
+	"h:\rg-gen.odt"
 
 ? cCmdLine
 ?
 
+run &cCmdLine
+
+cCmdLine := "h:\rg-gen.odt"
 run &cCmdLine
 
 restore screen from cScreen
