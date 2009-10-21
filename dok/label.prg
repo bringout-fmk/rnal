@@ -24,13 +24,14 @@ return
 // stampa labele...
 // -----------------------------------
 static function _lab_print( lTemporary )
+private cCmdLine
 
 // daj mi osnovne podatke o dokumentu
 cCust := g_t_pars_opis("P02")
 cObject := g_t_pars_opis("P21")
 
 // otvori xml za upis
-open_xml()
+open_xml(EXEPATH + "java\data.xml")
 // upisi header
 xml_head()
 // <label>
@@ -64,6 +65,7 @@ do while !EOF()
 	// <qtty></qtty>
 	xml_node( "qtty", ALLTRIM(STR(nQty, 12)) )
 	// <gl_type></gl_type>
+	xml_node( "gl_type", "-" )
 
 	cRawValue := ""
 
@@ -87,10 +89,11 @@ do while !EOF()
 	
 	select t_docit
 
-	// <pos></pos>
-	
 	// <l_pos></l_pos>
-	xml_node( "l_pos", cRawValue )
+	xml_node( "l_pos", "-" )
+	
+	// <pos></pos>
+	xml_node( "pos", cRawValue )
 
 	// </glass>
 	xml_subnode( "glass", .t. )
@@ -104,13 +107,20 @@ enddo
 xml_subnode("label", .t.)
 close_xml()
 
-altd()
+save screen to cScreen
+clear screen
+
 // stampanje labele
-cCmdLine := "start java -jar " + EXEPATH + "java\" + "JODReports-2.1-RC.jar" + ;
-	" " + EXEPATH + "rg_label.odt " + PRIVPATH + "data.xml " + ;
-	PRIVPATH + "label.odt"
+cCmdLine := "java -jar " + EXEPATH + "java\jodrep.jar " + ;
+	EXEPATH + "java\rg-1.odt " +  EXEPATH + "java\data.xml " + ;
+	EXEPATH + "java\rg-gen.odt"
+
+? cCmdLine
+?
 
 run &cCmdLine
+
+restore screen from cScreen
 
 return
 
