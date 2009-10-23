@@ -113,6 +113,7 @@ return DE_REFRESH
 // stampa labela na osnovu naloga
 // -------------------------------------
 function st_label( lTemporary, nDoc_no )
+local lGn := .t.
 
 __temp := lTemporary
 __doc_no := nDoc_no
@@ -127,7 +128,7 @@ o_tables( __temp )
 // osnovni podaci naloga
 _fill_main()
 // stavke naloga
-_fill_items()
+_fill_items( lGn )
 // operacije
 _fill_aops()
 
@@ -166,6 +167,7 @@ local nBruto := 0
 local lGroups := .f.
 local nGr1 
 local nGr2
+local cPosition
 
 if lZpoGN == nil
 	lZPoGN := .f.
@@ -193,6 +195,13 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nArt_id := field->art_id
 	nDoc_it_no := field->doc_it_no
 	nDoc_no := field->doc_no
+	
+	cDoc_it_pos := ALLTRIM(field->doc_it_pos)
+	cPosition := ""
+
+	if !EMPTY( cDoc_it_pos )
+		cPosition := "pozicija: " + cDoc_it_pos
+	endif
 
 	// tip artikla
 	cDoc_it_type := field->doc_it_type
@@ -252,7 +261,8 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nTotal := ROUND( c_ukvadrat(nQtty, nHeigh, nWidth), 2)
 
 	cDoc_it_schema := field->doc_it_schema
-	cDoc_it_desc := field->doc_it_desc
+	// na napomene dodaj i poziciju ako postoji...
+	cDoc_it_desc := cPosition + ALLTRIM( field->doc_it_desc )
 	
 	if lZpoGN == .t.
 
@@ -310,7 +320,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 		  nDocit_altt, cDocit_city, nTotal, ;
 		  nZHeigh, nZWidth, ;
 		  nZH2, nZW2, ;
-		  nNeto, nBruto )
+		  nNeto, nBruto, cDoc_it_pos )
 	
 	
 	if LEN( cDoc_gr_no ) > 1
@@ -332,7 +342,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 		  nDocit_altt, cDocit_city, nTotal, ;
 		  nZHeigh, nZWidth, ;
 		  nZH2, nZW2, ;
-		  nNeto, nBruto )
+		  nNeto, nBruto, cDoc_it_pos )
 
 	    next
 

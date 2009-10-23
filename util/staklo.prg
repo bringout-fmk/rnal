@@ -1,5 +1,17 @@
 #include "rnal.ch"
 
+// --------------------------------
+// pretvara mm u inch-e
+// --------------------------------
+function to_inch( nVal )
+local nConv := nVal
+
+if nVal <> 0
+	nConv := ROUND2(( nVal / 25.4 ), 2)
+endif
+
+return nConv
+
 
 // -----------------------------------------------------
 // kalkulise kvadratne metre
@@ -848,5 +860,18 @@ endif
 
 return nGlTick
 
+
+
+// ---------------------------------------------
+// da li se radi o rama-term staklu
+// ---------------------------------------------
+function is_ramaterm( cArticle )
+local lRet := .f.
+
+if "_A" $ cArticle
+	lRet := .t.
+endif
+
+return lRet
 
 

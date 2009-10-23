@@ -241,6 +241,9 @@ public gFaKumDir := PADR( STRTRAN( KUMPATH, "\RNAL\", "\FAKT\" ), 150 )
 public gFaPrivDir := PADR( STRTRAN( PRIVPATH, "\RNAL\", "\FAKT\" ), 150 )
 public gAddToDim := 3
 
+// putanja do open office-a
+public gOOPath := PADR('"c:\Program Files\OpenOffice.org 3\program\swriter.exe"', 200)
+
 // default joker glass type
 public gDefGlType
 // default joker glass tick
@@ -287,6 +290,8 @@ Rpar( "ao", @gExpAlwOvWrite )
 Rpar( "ad", @gAddToDim )
 Rpar( "pd", @gFaPrivDir )
 Rpar( "kd", @gFaKumDir )
+
+Rpar( "oo", @gOOPath )
 
 cSection := "1"
 

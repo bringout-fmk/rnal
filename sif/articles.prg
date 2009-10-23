@@ -139,6 +139,7 @@ aImeKol := {}
 
 AADD(aImeKol, {PADC("ID/MC", 10), {|| sif_idmc(art_id)}, "art_id", {|| _inc_id(@wart_id, "ART_ID"), .f.}, {|| .t.}})
 AADD(aImeKol, { "sifra :: puni naziv", {|| ALLTRIM(art_desc) + " :: " + UPPER(art_full_desc) }, "art_desc" })
+AADD(aImeKol, { "labela opis", {|| ALLTRIM(art_lab_desc) }, "art_desc" })
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -661,11 +662,13 @@ static function art_ed_desc( nArt_id )
 local cArt_desc := PADR(field->art_desc, 100)
 local cArt_mcode := PADR(field->match_code, 10)
 local cArt_full_desc := PADR(field->art_full_desc, 250)
+local cArt_lab_desc := PADR(field->art_lab_desc, 200)
 local cDBFilter := DBFILTER()
 local nTRec := RECNO()
 local nRet := 0
 
-if _box_art_desc( @cArt_desc, @cArt_full_desc, @cArt_mcode ) == 1
+if _box_art_desc( @cArt_desc, @cArt_full_desc, @cArt_lab_desc, ;
+		@cArt_mcode ) == 1
 	
 	set filter to
 	set order to tag "1"
@@ -677,6 +680,7 @@ if _box_art_desc( @cArt_desc, @cArt_full_desc, @cArt_mcode ) == 1
 	
 	_art_desc := cArt_desc
 	_art_full_desc := cArt_full_desc
+	_art_lab_desc := cArt_lab_desc
 	_match_code := cArt_mcode
 	
 	Gather()
@@ -1412,6 +1416,7 @@ static function _art_apnd( nArt_id, cArt_Desc, cArt_full_desc, cArt_mcode, lNew 
 local lAppend := .f.
 local lExist := .f.
 local nExist_id := 0
+local cArt_lab_desc := ""
 
 // provjeri da li vec postoji ovakav artikal
 lExist := _chk_art_exist( nArt_id, cArt_desc, @nExist_id )
@@ -1445,10 +1450,12 @@ if FOUND()
 
 		cArt_desc := PADR(cArt_desc, 100)
 		cArt_full_desc := PADR(cArt_full_desc, 250)
+		cArt_lab_desc := PADR(cArt_lab_desc, 200)
 		cArt_mcode := PADR(cArt_mcode, 10)
 		
 		// daj box za pregled korekciju
-		if _box_art_desc( @cArt_desc, @cArt_full_desc, @cArt_mcode ) == 1
+		if _box_art_desc( @cArt_desc, @cArt_full_desc, ;
+			@cArt_lab_desc, @cArt_mcode ) == 1
 			
 			Scatter()
 			
@@ -1562,17 +1569,19 @@ return
 // ------------------------------------------------------
 // box za unos naziva artikla i match_code-a
 // ------------------------------------------------------
-static function _box_art_desc( cArt_desc, cArt_full_desc, cArt_mcode )
+static function _box_art_desc( cArt_desc, cArt_full_desc, ;
+		cArt_lab_desc, cArt_mcode )
 private GetList:={}
 
-Box(, 5, 70)
+Box(, 6, 70)
 	
 	@ m_x + 1, m_y + 2 SAY "*** pregled/korekcija podataka artikla"
 	
 	@ m_x + 3, m_y + 2 SAY "Puni naziv:" GET cArt_full_desc PICT "@S57" VALID !EMPTY(cArt_full_desc)
 	@ m_x + 4, m_y + 2 SAY "Skr. naziv:" GET cArt_desc PICT "@S57" VALID !EMPTY(cArt_desc)
+	@ m_x + 5, m_y + 2 SAY "Lab. tekst:" GET cArt_lab_desc PICT "@S57" 
 	
-	@ m_x + 5, m_y + 2 SAY "Match code:" GET cArt_mcode
+	@ m_x + 6, m_y + 2 SAY "Match code:" GET cArt_mcode
 	
 	read
 	

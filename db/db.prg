@@ -263,6 +263,7 @@ AADD(aDBf,{ "doc_sh_desc", "C", 100, 0 })
 AADD(aDBf,{ "doc_status", "N", 2, 0 })
 AADD(aDBf,{ "operater_id", "N", 3, 0 })
 AADD(aDBf,{ "doc_in_fmk", "N", 1, 0 })
+AADD(aDBf,{ "fmk_doc", "C", 15, 0 })
 
 return aDbf
 
@@ -289,6 +290,7 @@ AADD(aDBf,{ "doc_it_desc",  "C", 150,  0 })
 AADD(aDBf,{ "doc_it_type",  "C", 1,  0 })
 AADD(aDBf,{ "doc_it_w2", "N", 15,  5 })
 AADD(aDBf,{ "doc_it_h2", "N", 15,  5 })
+AADD(aDBf,{ "doc_it_pos", "C", 20,  0 })
 
 return aDbf
 
@@ -374,6 +376,7 @@ aDbf:={}
 AADD(aDBf,{ "art_id", "N", 10, 0 })
 AADD(aDBf,{ "art_desc", "C", 100, 0 })
 AADD(aDBf,{ "art_full_desc", "C", 250, 0 })
+AADD(aDBf,{ "art_lab_desc", "C", 200, 0 })
 AADD(aDBf,{ "match_code", "C", 10, 0 })
 
 return aDbf

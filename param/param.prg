@@ -148,7 +148,7 @@ function ed_ex_params()
 local nX := 1
 local nLeft := 40
 
-Box(, 10, 70)
+Box(, 15, 70)
 
 set cursor on
 
@@ -178,6 +178,14 @@ nX += 2
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("FAKT direktorij privatni:", 20) GET gFaPrivDir PICT "@S45"
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("****** ostali parametri", nLeft)
+
+nX += 2
+
+@ m_x + nX, m_y + 2 SAY PADL("Lokacija openoffice:", 20) GET gOOPath PICT "@S45"
 
 read
 
@@ -486,6 +494,7 @@ RPar("ao", @gExpAlwOvWrite)
 RPar("ad", @gAddToDim)
 RPar("pd", @gFaPrivDir)
 RPar("kd", @gFaKumDir)
+RPar("oo", @gOOPath)
 
 close
 return
@@ -590,6 +599,7 @@ WPar("ao", gExpAlwOvWrite)
 WPar("ad", gAddToDim)
 WPar("pd", gFaPrivDir)
 WPar("kd", gFaKumDir)
+WPar("oo", gOOPath)
 
 close
 

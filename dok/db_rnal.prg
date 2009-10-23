@@ -92,6 +92,7 @@ AADD(aArr,{ "doc_it_zheight" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_zh2" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_neto" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_bruto" , "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_pos" , "C" ,  20 ,  0 })
 AADD(aArr,{ "print" , "C" ,  1 ,  0 })
 
 return
@@ -208,7 +209,7 @@ function a_t_docit( nDoc_no, nDoc_gr_no, nDoc_it_no, nArt_id, cArt_desc, ;
 		    cDoc_it_city, ;
 		    nDoc_it_total, nGNHeigh, nGNWidth, ;
 		    nGnH2, nGNW2, ;
-		    nNeto, nBruto )
+		    nNeto, nBruto, cDoc_it_pos )
 
 O_T_DOCIT
 select t_docit
@@ -231,6 +232,7 @@ replace doc_it_schema with cDoc_it_schema
 replace doc_it_desc with cDoc_it_desc
 // printanje stavki iz tabele "D" - printaj, "N" - ne printaj
 replace print with "D"
+replace doc_it_pos with cDoc_it_pos
 
 if nGNHeigh <> nil
 	replace doc_it_zheight with nGNHeigh

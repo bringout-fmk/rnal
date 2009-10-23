@@ -204,6 +204,9 @@ nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("shema u prilogu (D/N)? (*):", nLeft + 9) GET _doc_it_schema PICT "@!" VALID {|| _doc_it_schema $ "DN" } WHEN {|| _set_arr( _art_id, @aArtArr), set_opc_box( nBoxX, 50, "da li postoji dodatna shema kao prilog") }
 
+@ m_x + nX, col() + 2 SAY "pozicija" GET _doc_it_pos ;
+	WHEN {|| set_opc_box(nBoxX, 50, "pozicija naljepnice") }
+
 nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("dod.nap.stavke:", nLeft) GET _doc_it_desc PICT "@S40" WHEN set_opc_box( nBoxX, 50, "dodatne napomene vezane za samu stavku")
