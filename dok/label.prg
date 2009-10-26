@@ -44,12 +44,12 @@ local cCity
 private cCmdLine
 
 // daj mi osnovne podatke o dokumentu
-cC_desc := g_t_pars_opis("P02")
+cC_desc := strkzn( g_t_pars_opis("P02"), "8", "U" )
 cC_tel := g_t_pars_opis("P04")
-cC_addr := g_t_pars_opis("P03")
-cCn_desc := g_t_pars_opis("P11")
+cC_addr := strkzn( g_t_pars_opis("P03"), "8", "U" )
+cCn_desc := strkzn( g_t_pars_opis("P11"), "8", "U" )
 cCn_tel := g_t_pars_opis("P12")
-cCn_addr := g_t_pars_opis("P13")
+cCn_addr := strkzn( g_t_pars_opis("P13"), "8", "U" )
 
 if ALLTRIM( cC_desc ) == "NN"
 	cC_desc := cCn_desc
@@ -57,7 +57,7 @@ if ALLTRIM( cC_desc ) == "NN"
 	cC_addr := cCn_addr
 endif
 
-cObject := g_t_pars_opis("P21")
+cObject := strkzn( g_t_pars_opis("P21"), "8", "U" )
 
 // otvori xml za upis
 open_xml("c:\data.xml")
@@ -101,7 +101,7 @@ do while !EOF()
 	seek artid_str(nArt_id)
 	
 	cL_desc := ALLTRIM( field->art_lab_desc )
-   	cF_desc := ALLTRIM( field->art_full_desc )
+   	cF_desc := strkzn( ALLTRIM( field->art_full_desc ), "8", "U" )
    	cS_desc := ALLTRIM( field->art_desc )
 
 	if EMPTY(cL_desc)
@@ -211,8 +211,8 @@ close_xml()
 
 cOdtName := ""
 
-// daj nam ime template-a
-if _g_label( "c:\", @cOdtName ) = 0
+// izaberi sablon
+if g_afile( "c:\", "_rg*.odt", @cOdtName ) = 0
 	return
 endif
 

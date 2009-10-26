@@ -364,6 +364,7 @@ if EMPTY( cPartn )
 endif
 
 cIdVd := "12"
+cCtrlNo := "22"
 cBrDok := fa_new_doc( "10", cIdVd )
 
 cFmkDoc := cIdVd + "-" + ALLTRIM(cBrdok)
@@ -464,6 +465,8 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	_kolicina := nM2
 	_dindem := "KM "
 	_zaokr := 2
+	// veza, broj naloga
+	_idpm := "RN-" + ALLTRIM(STR( nDoc_No ))
 
 	// roba tip U - nista
 	a_to_txt( "", .t. )
