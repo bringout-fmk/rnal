@@ -998,6 +998,7 @@ AADD(aImeKol, {PADC("Dok.br",10), {|| doc_no }, "doc_no", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Prioritet" , {|| PADR( s_priority(doc_priority) ,10) }, "doc_priority", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Vr.plac" , {|| PADR( s_pay_id(doc_pay_id) ,10) }, "doc_pay_id", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"Plac." , {|| PADR( doc_paid , 4) }, "doc_paid", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"FMK" , {|| fmk_doc }, "fmk_doc", {|| .t.}, {|| .t.} })
 
 aKol:={}
 

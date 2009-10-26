@@ -256,6 +256,7 @@ local nTArea := SELECT()
 local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
 local nADOC_OP := F_DOC_OPS
+local cFmkDoc
 local nCust_id
 local i
 
@@ -364,6 +365,8 @@ endif
 
 cIdVd := "12"
 cBrDok := fa_new_doc( "10", cIdVd )
+
+cFmkDoc := cIdVd + "-" + ALLTRIM(cBrdok)
 
 select (nADOC_IT)
 set order to tag "3"
@@ -633,7 +636,7 @@ enddo
 select (nADocs)
 seek docno_str(nDoc_no)
 replace doc_in_fmk with 1
-
+replace fmk_doc with cFmkDoc
 
 select (245)
 use
