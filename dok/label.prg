@@ -23,7 +23,7 @@ return
 // -----------------------------------
 // stampa labele...
 // -----------------------------------
-static function _lab_print( lTemporary )
+static function _lab_print( lTemporary, lDirectPrint )
 local lCheckErr := .f.
 // default vrijednost pozicije
 local cL_pos_def := "Unutra"
@@ -42,6 +42,10 @@ local cCn_tel
 local cCn_addr
 local cCity
 private cCmdLine
+
+if lDirectPrint == nil
+	lDirectPrint := .f.
+endif
 
 // daj mi osnovne podatke o dokumentu
 cC_desc := strkzn( g_t_pars_opis("P02"), "8", "U" )
@@ -225,8 +229,10 @@ save screen to cScreen
 
 clear screen
 
+cJODRep := ALLTRIM( gJODRep )
+
 // stampanje labele
-cCmdLine := "java -jar " + EXEPATH + "java\jodrep.jar " + ;
+cCmdLine := "java -jar " + cJODRep + " " + ;
 	"c:\" + cOdtName + " c:\data.xml c:\rg-lab.odt"
 
 ? cCmdLine
@@ -241,10 +247,15 @@ endif
 
 clear screen
 
-cOOPath := gOOPath
+cOOStart := '"' + ALLTRIM( gOOPath ) + ALLTRIM( gOOWriter ) + '"'
+cOOParam := ""
+
+if lDirectPrint == .t.
+	cOOParam := "-pt"
+endif
 
 // otvori naljepnicu
-cCmdLine := "start " + ALLTRIM(cOOPath) + " c:\rg-lab.odt"
+cCmdLine := "start " + cOOStart + " " + cOOParam + " c:\rg-lab.odt"
 
 run &cCmdLine
 

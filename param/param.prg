@@ -183,10 +183,6 @@ nX += 2
 
 @ m_x + nX, m_y + 2 SAY PADL("****** ostali parametri", nLeft)
 
-nX += 2
-
-@ m_x + nX, m_y + 2 SAY PADL("Lokacija openoffice:", 20) GET gOOPath PICT "@S45"
-
 read
 
 BoxC()
@@ -494,7 +490,6 @@ RPar("ao", @gExpAlwOvWrite)
 RPar("ad", @gAddToDim)
 RPar("pd", @gFaPrivDir)
 RPar("kd", @gFaKumDir)
-RPar("oo", @gOOPath)
 
 close
 return
@@ -599,7 +594,6 @@ WPar("ao", gExpAlwOvWrite)
 WPar("ad", gAddToDim)
 WPar("pd", gFaPrivDir)
 WPar("kd", gFaKumDir)
-WPar("oo", gOOPath)
 
 close
 
