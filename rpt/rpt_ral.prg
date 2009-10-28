@@ -107,7 +107,7 @@ do while !EOF()
 
 	// ako je rejected ili busy... preskoci
 	if ( docs->doc_status == 2 .or. docs->doc_status == 3 )
-		select docs_aop
+		select doc_ops
 		skip
 		loop
 	endif
