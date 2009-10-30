@@ -359,6 +359,7 @@ static function key_handler()
 local nDoc_no
 local nDoc_status
 local cDesc
+local nTRec
 local cTmpFilter := DBFILTER()
 
 if _status == 1
@@ -701,14 +702,19 @@ do case
 		nRec := RECNO()
 		
 		nDoc_no := docs->doc_no
-
 		
 		// export dokumenta
 		m_export( nDoc_no, .f., .t. )
 		
+		select docs	
+		//set order to tag "1"
+		set_f_kol( cTmpFilter )
+		
+		go top
+
 		go (nRec)
 		
-		return DE_CONT
+		return DE_REFRESH
 
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )

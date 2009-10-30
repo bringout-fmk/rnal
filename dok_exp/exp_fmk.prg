@@ -291,6 +291,8 @@ use ( ALLTRIM(gFaPrivDir) + "PRIPR" ) alias X_TBL
 if lOneByOne == .t. .and. RECCOUNT2() > 0
 	
 	msgbeep("priprema fakt nije prazna !")
+	select (245)
+	use
 	select (nTArea)
 	return
 		
@@ -317,9 +319,7 @@ cCust_desc := g_cust_desc( nCust_id )
 cCont_desc := g_cont_desc( nCont_id )
 
 O_T_DOCIT
-
-
-		
+	
 select (nADOCS)
 
 dDatDok := field->doc_date
