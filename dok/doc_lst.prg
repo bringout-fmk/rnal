@@ -701,13 +701,14 @@ do case
 		nRec := RECNO()
 		
 		nDoc_no := docs->doc_no
+
 		
 		// export dokumenta
 		m_export( nDoc_no, .f., .t. )
 		
 		go (nRec)
 		
-		return DE_REFRESH
+		return DE_CONT
 
 	// promjene na nalogu
 	case (UPPER(CHR(Ch)) == "P" )

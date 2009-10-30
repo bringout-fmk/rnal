@@ -178,7 +178,7 @@ do while !EOF()
 	cDoc_no := docno_str( field->doc_no )
 	cDoc_it_no := docit_str( field->doc_it_no )
 	
-	nQty := field->doc_it_qtty
+	nQty := field->deliver
 	nHeig := field->doc_it_height
 	nWidt := field->doc_it_width
 	

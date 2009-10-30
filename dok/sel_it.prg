@@ -29,8 +29,10 @@ go top
 Box(, nBoxX, nBoxY, .t.)
 
 cBoxOpt += "<SPACE> markiranje stavke"
-cBoxOpt += "    "
+cBoxOpt += " "
 cBoxOpt += "<ESC> izlaz"
+cBoxOpt += " "
+cBoxOpt += "<I> unos isporuke"
 
 @ m_x + nBoxX, m_y + 2 SAY cBoxOpt
 
@@ -66,8 +68,40 @@ do case
 			replace field->print with "D"
 		endif
 		return DE_REFRESH
+	case (UPPER(CHR(Ch))) == "I"
+		// unos isporuke
+		if set_deliver() = 0
+			return DE_CONT
+		else
+			return DE_REFRESH
+		endif
 endcase
 
+
+return nRet
+
+
+// ------------------------------------
+// unos isporuke
+// ------------------------------------
+static function set_deliver()
+local nRet := 1
+local GetList := {}
+local nDeliver := field->deliver
+
+Box(, 1, 25)
+	@ m_x + 1, m_y + 2 SAY "isporuceno ?" GET nDeliver PICT "9999999.99"
+	read
+BoxC()
+
+if LastKey() == K_ESC
+	nRet := 0
+	return nRet
+endif
+
+replace field->deliver with nDeliver
+// rekalkulisi podatke 
+recalc_pr()
 
 return nRet
 
@@ -82,6 +116,7 @@ aKol:={}
 AADD(aImeKol, {"nalog", {|| doc_no }, "doc_no", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"rbr", {|| PADR( ALLTRIM(STR(doc_it_no)),3) }, "doc_it_no", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {PADR("artikal",20), {|| PADR(g_art_desc(art_id,.t.,.f.),20) }, "art_id", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"ispor.", {|| STR(deliver,12,2) }, "deliver", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {PADR("dimenzije",20) , {|| PADR(_g_dim(doc_it_qtty, doc_it_height, doc_it_width),20) }, "doc_it_qtty", {|| .t.}, {|| .t.} })
 AADD(aImeKol, {"marker", {|| PADR(_g_st(print),3) }, "print", {|| .t.}, {|| .t.} })
 

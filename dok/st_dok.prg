@@ -94,7 +94,7 @@ next
 
 nCount := t_docit->(RecCount2())
 
-if nCount > 1 .and. pitanje(,"Odabrati stavke za stampu ? (D/N)","N") == "D"
+if nCount > 0 .and. pitanje(,"Odabrati stavke za stampu ? (D/N)","N") == "D"
 	sel_items()
 endif
 
@@ -107,6 +107,36 @@ o_tables( __temp )
 
 return DE_REFRESH
 
+
+
+// -------------------------------------
+// samo napuni pripremne tabale
+// -------------------------------------
+function st_pripr( lTemporary, nDoc_no )
+local lGn := .t.
+
+__temp := lTemporary
+__doc_no := nDoc_no
+
+// kreiraj print tabele
+t_rpt_create()
+// otvori tabele
+t_rpt_open()
+
+o_tables( __temp )
+
+// osnovni podaci naloga
+_fill_main()
+// stavke naloga
+_fill_items( lGn )
+// operacije
+_fill_aops()
+
+close all
+
+o_tables( __temp )
+
+return DE_REFRESH
 
 
 // -------------------------------------
@@ -1027,3 +1057,67 @@ st_nalpr(.f., nDoc_no)
 
 
 return
+
+
+// --------------------------------------------
+// rekalkulisanje vrijednosti T_DOCIT stavke
+// --------------------------------------------
+function recalc_pr()
+local aZpoGn := {}
+local nTArea := SELECT()
+
+// ukupno mm -> m2
+replace field->doc_it_total with ROUND( c_ukvadrat(field->deliver, ;
+	field->doc_it_height, field->doc_it_width), 2)
+	
+aZpoGN := {}
+		
+// zaokruzi vrijednosti....
+_art_set_descr( field->art_id, nil, nil, @aZpoGN, .t. )
+	
+select (nTArea)
+
+lBezZaokr := .f.
+
+if lBezZaokr == .f.
+	// da li je kaljeno ? kod kaljenog nema zaokruzenja
+	lBezZaokr := is_kaljeno( aZpoGN, field->doc_no, field->doc_it_no )
+endif
+
+if lBezZaokr == .f.
+	// da li je emajlirano ? isto nema zaokruzenja
+	lBezZaokr := is_emajl(aZpoGN, field->doc_no, field->doc_it_no )
+endif
+
+if lBezZaokr == .f.
+	// da li je vatroglas ? isto nema zaokruzenja
+	lBezZaokr := is_vglass( aZpoGN )
+endif
+
+if lBezZaokr == .f.
+	// da li je plexiglas ? isto nema zaokruzenja
+	lBezZaokr := is_plex( aZpoGN )
+endif
+	
+replace field->doc_it_zhe with ;
+	obrl_zaok( field->doc_it_height, aZpoGN, lBezZaokr )
+replace field->doc_it_zh2 with ;
+	obrl_zaok( field->doc_it_h2, aZpoGN, lBezZaokr )
+replace field->doc_it_zwi with ;
+	obrl_zaok( field->doc_it_width, aZpoGN, lBezZaokr )
+replace field->doc_it_zw2 with ;
+	obrl_zaok( field->doc_it_w2, aZpoGN, lBezZaokr )
+		
+// ako se zaokruzuje onda total ide po zaokr.vrijednostima
+replace field->doc_it_total with ROUND( c_ukvadrat( field->deliver, ;
+	field->doc_it_zhe, ;
+	field->doc_it_zwi, ;
+	field->doc_it_zh2, ;
+	field->doc_it_zw2 ), 2)
+		
+// izracunaj neto
+replace field->doc_it_neto with ROUND( obrl_neto( field->doc_it_total, aZpoGN ), 2)
+		
+return
+
+

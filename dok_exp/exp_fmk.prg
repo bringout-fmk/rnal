@@ -269,6 +269,15 @@ if lSumirati == nil
 	_g_sumbox( @lSumirati )
 endif
 
+if Pitanje(,"Promjeniti podatke isporuke ?", "N") == "D"
+	
+	// napuni pripremu
+	st_pripr( lTemp, nDoc_no )
+	// selektuj stavke
+	sel_items()
+
+endif
+
 if !FILE(ALLTRIM(gFaPrivDir) + "PRIPR.DBF")
 	msgbeep("Nije podesena lokacija FAKT ???")
 	select (nTarea)
@@ -307,6 +316,10 @@ nCont_id := field->cont_id
 cCust_desc := g_cust_desc( nCust_id )
 cCont_desc := g_cont_desc( nCont_id )
 
+O_T_DOCIT
+
+
+		
 select (nADOCS)
 
 dDatDok := field->doc_date
@@ -365,7 +378,7 @@ endif
 
 cIdVd := "12"
 cCtrlNo := "22"
-cBrDok := fa_new_doc( "10", cIdVd )
+cBrDok := fa_new_doc( "10", cCtrlNo )
 
 cFmkDoc := cIdVd + "-" + ALLTRIM(cBrdok)
 
@@ -417,24 +430,73 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	do while !EOF() .and. field->doc_no == nDoc_no ;
 			.and. field->art_id == nArt_id
 
+		// probaj izvuci podatak sa obracunskog lista ...
+		nDoc_it_no := field->doc_it_no
+		
+		select t_docit
+		go top
+		seek docno_str( nDoc_no ) + docit_str( nDoc_it_no )
+		
+		nDeliver := 0
+		if FOUND() .and. field->art_id == nArt_id
+			nDeliver := field->deliver
+		endif
+		
+		select (nADOC_IT)
+
 		// kolicina
 		nQty := field->doc_it_qtty
+
+		if nDeliver <> 0
+			nQty := nDeliver
+		endif
 		
 		// visina u mm
 		nHeig := field->doc_it_height
 		// sirina u mm
 		nWidt := field->doc_it_width
+
+		nH2 := field->doc_it_h2
+		nW2 := field->doc_it_w2
 		
 		// pa zaokruziti po GN-u ?????
 		
 		nZHeig := 0
 		nZWidt := 0
+		nZ2Heig := 0
+		nZ2Widt := 0
 	
-		nZHeig := obrl_zaok( nHeig, aZpoGN )
-		nZWidt := obrl_zaok( nWidt, aZpoGN )
+		lBezZaokr := .f.
+
+		if lBezZaokr == .f.
+			// da li je kaljeno ? kod kaljenog nema zaokruzenja
+			lBezZaokr := is_kaljeno( aZpoGN, field->doc_no, field->doc_it_no )
+		endif
+
+		if lBezZaokr == .f.
+			// da li je emajlirano ? isto nema zaokruzenja
+			lBezZaokr := is_emajl(aZpoGN, field->doc_no, field->doc_it_no )
+		endif
+
+		if lBezZaokr == .f.
+			// da li je vatroglas ? isto nema zaokruzenja
+			lBezZaokr := is_vglass( aZpoGN )
+		endif
+
+		if lBezZaokr == .f.
+			// da li je plexiglas ? isto nema zaokruzenja
+			lBezZaokr := is_plex( aZpoGN )	
+		endif
+
+		nZHeig := obrl_zaok( nHeig, aZpoGN, lBezZaokr )
+		nZWidt := obrl_zaok( nWidt, aZpoGN, lBezZaokr )
 		
+		nZ2Heig := obrl_zaok( nH2, aZpoGN, lBezZaokr )
+		nZ2Widt := obrl_zaok( nW2, aZpoGN, lBezZaokr )
+	
 		// izracunaj kvadrate
-		nM2 += ROUND( c_ukvadrat( nQty, nZHeig, nZWidt ) , 2)
+		nM2 += ROUND( c_ukvadrat( nQty, nZHeig, nZWidt, ;
+			nZ2Heig, nZ2Widt ) , 2)
 		
 		skip
 		

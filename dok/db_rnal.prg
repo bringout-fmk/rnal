@@ -93,6 +93,7 @@ AADD(aArr,{ "doc_it_zh2" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_neto" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_bruto" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_pos" , "C" ,  20 ,  0 })
+AADD(aArr,{ "deliver" , "N" ,  15 ,  5 })
 AADD(aArr,{ "print" , "C" ,  1 ,  0 })
 
 return
@@ -233,6 +234,7 @@ replace doc_it_desc with cDoc_it_desc
 // printanje stavki iz tabele "D" - printaj, "N" - ne printaj
 replace print with "D"
 replace doc_it_pos with cDoc_it_pos
+replace deliver with nDoc_it_qtty
 
 if nGNHeigh <> nil
 	replace doc_it_zheight with nGNHeigh
