@@ -699,7 +699,7 @@ do case
 
 	case UPPER(CHR(Ch)) == "E"
 
-		nRec := RECNO()
+		nTRec := RECNO()
 		
 		nDoc_no := docs->doc_no
 		
@@ -707,12 +707,9 @@ do case
 		m_export( nDoc_no, .f., .t. )
 		
 		select docs	
-		//set order to tag "1"
 		set_f_kol( cTmpFilter )
 		
-		go top
-
-		go (nRec)
+		go (nTRec)
 		
 		return DE_REFRESH
 

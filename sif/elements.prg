@@ -895,8 +895,6 @@ if !EMPTY(cType)
 	
 	endif
 
-	altd()
-
 	// ukloni "*" ako postoji...
 	cType := STRTRAN( cType, "*", "" )
 	
@@ -1026,8 +1024,6 @@ Box(,6,65)
 	else
 		@ m_x + 1, m_y + 2 SAY "Ispravka atributa elementa *******" COLOR cColor
 	endif
-
-	altd()
 
 	@ m_x + 3, m_y + 2 SAY PADL("izaberi atribut elementa", nLeft) GET _e_gr_at_id VALID {|| s_e_gr_att(@_e_gr_at_id, el_gr_id, nil, .t. ), show_it( g_gr_at_desc( _e_gr_at_id ) ) } WHEN lNewRec == .t.
 		

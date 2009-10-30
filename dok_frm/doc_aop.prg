@@ -28,8 +28,6 @@ local nRet := 0
 local nFuncRet := 0
 private GetList:={}
 
-altd()
-
 if nItem_no == nil
 	nItem_no := 0
 endif

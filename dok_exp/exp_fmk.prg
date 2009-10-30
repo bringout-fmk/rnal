@@ -1001,8 +1001,6 @@ select partn
 set order to tag "ID"
 seek cPart
 
-altd()
-
 if FOUND()
 	xRet := ALLTRIM( partn->naz )
 endif

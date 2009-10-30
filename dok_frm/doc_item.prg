@@ -70,7 +70,6 @@ do while .t.
 			
 			// operacije moguæe kopirati samo ako je isti 
 			// artikal i ako je redni broj <> 1
-			altd()
 
 			if _doc_it->doc_it_no <> 1
 				

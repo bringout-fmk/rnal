@@ -1207,8 +1207,6 @@ do while !EOF() .and. field->art_id == nArt_id
 		
 	enddo
 
-	altd()
-
 	// predji na dodatne operacije elemenata....
 	select e_aops
 	set order to tag "1"

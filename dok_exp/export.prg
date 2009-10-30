@@ -351,8 +351,6 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	select (nADOC_IT)
 	go (nTRec)
 
-	altd()
-
 	// napuni varijable
 	for ix := 1 to LEN( aArticles )
 		

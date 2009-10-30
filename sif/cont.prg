@@ -30,8 +30,6 @@ cHeader := "Kontakti /"
 
 select contacts
 
-altd()
-
 if cID == nil
 	// cont_desc
 	cTag := "4"
