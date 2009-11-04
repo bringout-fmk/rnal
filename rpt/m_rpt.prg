@@ -34,6 +34,11 @@ AADD(opcexe, {|| rpt_ral_calc( ) })
 AADD(opc, "P. pregled ucinka proizvodnje  ")
 AADD(opcexe, {|| m_get_rpro( ) })
 
+AADD(opc, "------------------------------------------- ")
+AADD(opcexe, {|| nil })
+
+AADD(opc, "K. kontrola prebacenih dokumenata  ")
+AADD(opcexe, {|| m_rpt_check( ) })
 
 Menu_SC("rpt_rnal")
 

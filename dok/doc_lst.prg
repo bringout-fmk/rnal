@@ -473,6 +473,17 @@ do case
 		
 		RETURN DE_CONT
 		
+	// ispravka veznih dokumenata
+	case ( UPPER(CHR(Ch)) == "O" )
+		
+		//select docs 
+		
+		otpr_edit( docs->fmk_doc )
+		
+		//select docs
+		
+		RETURN DE_REFRESH
+	
 	// brza pretraga naloga
 	case ( UPPER(CHR(Ch)) == "N" )
 		
@@ -752,6 +763,31 @@ do case
 endcase
 
 return DE_CONT
+
+
+// ----------------------------------------------------
+// ispravka veznih dokumenata
+// ----------------------------------------------------
+static function otpr_edit( cValue )
+local GetList:={}
+local nX := m_x
+local nY := m_y
+
+cValue := PADR( cValue, 150 )
+
+Box(,1, 50)
+	@ m_x + 1, m_y + 2 SAY "Vezni dokumenti:" GET cValue PICT "@S30"
+	read
+BoxC()
+
+if LastKey() <> K_ESC
+	replace field->fmk_doc with cValue
+endif
+
+m_x := nX
+m_y := nY
+
+return
 
 
 // --------------------------------------------------------------

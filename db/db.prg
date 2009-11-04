@@ -263,7 +263,7 @@ AADD(aDBf,{ "doc_sh_desc", "C", 100, 0 })
 AADD(aDBf,{ "doc_status", "N", 2, 0 })
 AADD(aDBf,{ "operater_id", "N", 3, 0 })
 AADD(aDBf,{ "doc_in_fmk", "N", 1, 0 })
-AADD(aDBf,{ "fmk_doc", "C", 15, 0 })
+AADD(aDBf,{ "fmk_doc", "C", 150, 0 })
 
 return aDbf
 

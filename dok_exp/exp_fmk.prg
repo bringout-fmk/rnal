@@ -527,8 +527,13 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	_kolicina := nM2
 	_dindem := "KM "
 	_zaokr := 2
-	// veza, broj naloga
-	_idpm := "RN-" + ALLTRIM(STR( nDoc_No ))
+
+	altd()
+
+	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
+		// veza, broj naloga
+		_dok_veza := _fmk_doc_upd( _dok_veza, ALLTRIM(STR( nDoc_No )) )
+	endif
 
 	// roba tip U - nista
 	a_to_txt( "", .t. )
@@ -701,10 +706,17 @@ enddo
 select (nADocs)
 seek docno_str(nDoc_no)
 replace doc_in_fmk with 1
-replace fmk_doc with cFmkDoc
+replace fmk_doc with _fmk_doc_upd( ALLTRIM( field->fmk_doc ), ;
+	ALLTRIM(cBrDok) )
 
 select (245)
 use
+
+// dodaj u p_dok_src
+//add_p_doksrc( "", "", ALLTRIM(STR(nDoc_no)), dDatDok, "KUPAC", ;
+//	"10", cIdVd, cBrDok, dDatDok, "", "", cPartn, "", ;
+//	PRIVPATH, .t. )
+//p_to_doksrc()
 
 if lOneByOne == .t.
 	msgbeep("export dokumenta zavrsen !")
@@ -714,7 +726,36 @@ select (nTArea)
 
 return
 
+// --------------------------------------------
+// dodaj dokument u listu 
+// --------------------------------------------
+static function _fmk_doc_upd( cField, cFmkDok )
+local cLista := ""
+local cSep := ";"
+local cTmp 
+local aTmp
+local cTmpVal := ""
+local nSeek
+local i
 
+cTmp := cField
+aTmp := TokToNiz( cTmp, cSep )
+nSeek := ASCAN( aTmp, { |xVal| xVal == cFmkDok } )
+
+if nSeek = 0
+	AADD( aTmp, cFmkDok  )
+	// sortiraj
+	ASORT( aTmp )
+endif
+
+// zatim daj u listu sve stavke
+for i := 1 to LEN( aTmp )
+	if !EMPTY( aTmp[i] )
+		cLista += aTmp[ i ] + cSep
+	endif
+next
+
+return cLista
 
 
 // ---------------------------------------

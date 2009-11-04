@@ -75,8 +75,12 @@ s_params()
 return nil
 
 
-
+// ------------------------------------------
+// startup metoda
+// ------------------------------------------
 method mStartUp()
+
+//cre_doksrc()
 
 if is_fmkrules()
 	// generisi standarne rnal rules
@@ -239,6 +243,8 @@ public gExpOutDir := PADR("c:\temp\", 150)
 public gExpAlwOvWrite := "N"
 public gFaKumDir := PADR( STRTRAN( KUMPATH, "\RNAL\", "\FAKT\" ), 150 )
 public gFaPrivDir := PADR( STRTRAN( PRIVPATH, "\RNAL\", "\FAKT\" ), 150 )
+public gPoKumDir := PADR( STRTRAN( KUMPATH, "\SIGMA\RNAL\", "\KASE\TOPS\" ), 150 )
+public gPoPrivDir := PADR( STRTRAN( PRIVPATH, "\SIGMA\RNAL\", "\KASE\TOPS\" ), 150 )
 public gAddToDim := 3
 
 // default joker glass type
@@ -287,6 +293,8 @@ Rpar( "ao", @gExpAlwOvWrite )
 Rpar( "ad", @gAddToDim )
 Rpar( "pd", @gFaPrivDir )
 Rpar( "kd", @gFaKumDir )
+Rpar( "tp", @gPoPrivDir )
+Rpar( "tk", @gPoKumDir )
 
 cSection := "1"
 

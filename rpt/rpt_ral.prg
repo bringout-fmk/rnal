@@ -20,7 +20,7 @@ endif
 _cre_report( dD_from, dD_to, nOper, cRalList, cColorList )
 
 // ispisi report
-_r_ral_calc()
+_r_ral_calc( dD_From, dD_to, nOper )
 
 return
 
@@ -251,7 +251,7 @@ return
 // ------------------------------------------------
 // ispis reporta
 // ------------------------------------------------
-static function _r_ral_calc()
+static function _r_ral_calc( dD_from, dD_to, nOper )
 local nCnt := 0
 
 select _tmp1
@@ -266,6 +266,8 @@ go top
 START PRINT CRET
 
 ? "Utrosak boja kod RAL obrade:"
+?
+? "Period od " + DTOC( dD_from ) + " do " + DTOC( dD_to )
 ? "---------------------------------------------------"
 ? "r.br * boja   * utrosak u kg            *"
 ? "----- -------- -------------------------"
