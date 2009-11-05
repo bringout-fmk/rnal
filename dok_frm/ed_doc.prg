@@ -291,6 +291,7 @@ local GetList := {}
 local nRec := RecNo()
 local nDocNoNew := 0
 local cDesc := ""
+local nArea
 
 do case 
 
@@ -617,6 +618,14 @@ do case
 		
 		select (nTArea)
 		go top
+
+		nRet := DE_CONT
+
+	case Ch == K_CTRL_R
+		
+		if ALIAS() == "_DOC_IT" .and. RECCOUNT2() <> 0 
+			box_it2( field->doc_no, field->doc_it_no )
+		endif
 
 		nRet := DE_CONT
 

@@ -27,6 +27,9 @@ set filter to
 select _doc_it
 set filter to
 
+select _doc_it2
+set filter to
+
 select _doc_ops
 set filter to
 
@@ -80,6 +83,9 @@ _docs_insert( __doc_no  )
 // azuriranje tabele _DOC_IT
 _doc_it_insert( __doc_no )
 
+// azuriranje tabele _DOC_IT2
+_doc_it2_insert( __doc_no )
+
 // azuriranje tabele _DOC_OPS
 _doc_op_insert( __doc_no )
 
@@ -96,6 +102,8 @@ endif
 select _docs
 zap
 select _doc_it
+zap
+select _doc_it2
 zap
 select _doc_ops
 zap
@@ -178,6 +186,38 @@ enddo
 
 return
 
+// ------------------------------------------
+// azuriranje tabele _DOC_IT2
+// ------------------------------------------
+static function _doc_it2_insert( nDoc_no )
+
+select _doc_it2
+
+if RECCOUNT2() == 0
+	return
+endif
+
+set order to tag "1"
+go top
+seek docno_str( nDoc_no )
+
+do while !EOF() .and. ( field->doc_no == nDoc_no )
+	
+	Scatter()
+	
+	select doc_it2
+	
+	append blank
+		
+	Gather()
+	
+	select _doc_it2
+	
+	skip
+	
+enddo
+
+return
 
 
 // ------------------------------------------
@@ -227,6 +267,8 @@ select docs
 set filter to
 select doc_it
 set filter to
+select doc_it2
+set filter to
 select doc_ops
 set filter to
 
@@ -258,6 +300,9 @@ _docs_erase( nDoc_no )
 
 // povrat stavki RNST
 _doc_it_erase( nDoc_no )
+
+// povrat stavki RNST
+_doc_it2_erase( nDoc_no )
 
 // povrat operacija RNOP
 _doc_op_erase( nDoc_no ) 
@@ -390,6 +435,42 @@ select doc_it
 return
 
 
+//----------------------------------------------
+// povrat tabele DOC_IT2
+//----------------------------------------------
+static function _doc_it2_erase( nDoc_no )
+
+select doc_it2
+set order to tag "1"
+go top
+
+seek docno_str( nDoc_no )
+
+if FOUND()
+	
+	// dodaj u pripremu dokument
+	do while !EOF() .and. ( field->doc_no == nDoc_no )
+	
+		select doc_it2
+		
+		Scatter()
+	
+		select _doc_it2
+		
+		APPEND BLANK
+		
+		Gather()
+	
+		select doc_it2
+		
+		skip
+	enddo
+endif
+
+select doc_it2
+
+return
+
 
 //----------------------------------------------
 // povrat tabele DOC_OP
@@ -444,6 +525,19 @@ endif
 
 // DOC_IT
 select doc_it
+set order to tag "1"
+go top
+seek docno_str( nDoc_no )
+
+if FOUND()
+	do while !eof() .and. (field->doc_no == nDoc_no)
+		DELETE
+		SKIP
+	enddo
+endif
+
+// DOC_IT2
+select doc_it2
 set order to tag "1"
 go top
 seek docno_str( nDoc_no )
@@ -628,6 +722,23 @@ Gather()
 
 // _DOC_IT
 select _doc_it
+set order to tag "1"
+go top
+do while !EOF()
+	
+	skip
+	nAPPRec := RecNo()
+	skip -1
+	
+	Scatter()
+	_doc_no := nDoc_no
+	Gather()
+	
+	go (nAPPRec)
+enddo
+
+// _DOC_IT2
+select _doc_it2
 set order to tag "1"
 go top
 do while !EOF()

@@ -83,6 +83,7 @@ endif
 fNul:=.f.
 Skloni(PRIVPATH,"_DOCS.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"_DOC_IT.DBF",cSezona,finverse,fda,fnul)
+Skloni(PRIVPATH,"_DOC_IT2.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"_DOC_OPS.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"PARAMS.DBF",cSezona,finverse,fda,fnul)
 Skloni(PRIVPATH,"FMK.INI",cSezona,finverse,fda,fnul)
@@ -108,6 +109,7 @@ endif
 // kumulativ
 Skloni(KUMPATH,"DOCS.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"DOC_IT.DBF",cSezona,finverse,fda,fnul)
+Skloni(KUMPATH,"DOC_IT2.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"DOC_OPS.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"DOC_LOG.DBF",cSezona,finverse,fda,fnul)
 Skloni(KUMPATH,"DOC_LIT.DBF",cSezona,finverse,fda,fnul)
@@ -129,6 +131,8 @@ Skloni(SIFPATH,"E_GROUPS.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"E_GR_ATT.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"E_GR_VAL.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"CUSTOMS.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"OBJECTS.DBF",cSezona,finverse,fda,fnul)
+Skloni(SIFPATH,"RAL.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"CONTACTS.DBF",cSezona,finverse,fda,fnul)
 Skloni(SIFPATH,"FMK.INI",cSezona,finverse,fda,fnul)
 
@@ -150,11 +154,13 @@ PUBLIC gaDBFs:={}
 // privpath
 AADD(gaDBFs, { F__DOCS, "_DOCS", P_PRIVPATH  } )
 AADD(gaDBFs, { F__DOC_IT, "_DOC_IT", P_PRIVPATH  } )
+AADD(gaDBFs, { F__DOC_IT2, "_DOC_IT2", P_PRIVPATH  } )
 AADD(gaDBFs, { F__DOC_OPS, "_DOC_OPS", P_PRIVPATH  } )
 
 // kumpath
 AADD(gaDBFs, { F_DOCS, "DOCS", P_KUMPATH  } )
 AADD(gaDBFs, { F_DOC_IT, "DOC_IT", P_KUMPATH  } )
+AADD(gaDBFs, { F_DOC_IT2, "DOC_IT2", P_KUMPATH  } )
 AADD(gaDBFs, { F_DOC_OPS, "DOC_OPS", P_KUMPATH  } )
 AADD(gaDBFs, { F_DOC_LOG, "DOC_LOG", P_KUMPATH  } )
 AADD(gaDBFs, { F_DOC_LIT, "DOC_LIT", P_KUMPATH  } )
@@ -172,6 +178,7 @@ AADD(gaDBFs, { F_E_ATT, "E_ATT", P_SIFPATH } )
 AADD(gaDBFs, { F_CUSTOMS, "CUSTOMS", P_SIFPATH } )
 AADD(gaDBFs, { F_CONTACTS, "CONTACTS", P_SIFPATH } )
 AADD(gaDBFs, { F_OBJECTS, "OBJECTS", P_SIFPATH } )
+AADD(gaDBFs, { F_RAL, "RAL", P_SIFPATH } )
 
 return
 
@@ -202,6 +209,8 @@ cre_tbls(nArea, "DOC_IT")
 cre_tbls(nArea, "_DOC_IT")
 cre_tbls(nArea, "DOC_OPS")
 cre_tbls(nArea, "_DOC_OPS")
+cre_tbls(nArea, "DOC_IT2")
+cre_tbls(nArea, "_DOC_IT2")
 cre_tbls(nArea, "DOC_LOG")
 cre_tbls(nArea, "DOC_LIT")
 cre_tbls(nArea, "ARTICLES")
@@ -291,6 +300,27 @@ AADD(aDBf,{ "doc_it_type",  "C", 1,  0 })
 AADD(aDBf,{ "doc_it_w2", "N", 15,  5 })
 AADD(aDBf,{ "doc_it_h2", "N", 15,  5 })
 AADD(aDBf,{ "doc_it_pos", "C", 20,  0 })
+
+return aDbf
+
+
+// ----------------------------------------------
+// vraca matricu sa strukturom tabele DOC_IT2
+//   aDBF := {...}
+// ----------------------------------------------
+function a_doc_it2()
+local aDbf
+
+aDbf:={}
+AADD(aDBf,{ "doc_no", "N", 10, 0 })
+AADD(aDBf,{ "doc_it_no", "N", 4, 0 })
+AADD(aDBf,{ "it_no", "N", 4, 0 })
+AADD(aDBf,{ "art_id", "C", 10, 0 })
+AADD(aDBf,{ "doc_it_qtt",  "N", 15,  5 })
+AADD(aDBf,{ "doc_it_q2",  "N", 15,  5 })
+AADD(aDBf,{ "doc_it_pri", "N", 15,  5 })
+AADD(aDBf,{ "sh_desc", "C", 100,  0 })
+AADD(aDBf,{ "desc", "C", 200,  0 })
 
 return aDbf
 
@@ -621,6 +651,10 @@ do case
 		nArea2 := F_DOC_IT
 	case cTable == "_DOC_IT"
 		nArea2 := F__DOC_IT
+	case cTable == "DOC_IT2"
+		nArea2 := F_DOC_IT2
+	case cTable == "_DOC_IT2"
+		nArea2 := F__DOC_IT2
 	case cTable == "DOC_OPS"
 		nArea2 := F_DOC_OPS
 	case cTable == "_DOC_OPS"
@@ -672,7 +706,15 @@ if (nArea==-1 .or. nArea == nArea2)
 		case cTable == "_DOC_IT"
 			aDbf := a_doc_it()
 			cPath := PRIVPATH
-			
+		
+		case cTable == "DOC_IT2"
+			aDbf := a_doc_it2()
+			cPath := KUMPATH
+
+		case cTable == "_DOC_IT2"
+			aDbf := a_doc_it2()
+			cPath := PRIVPATH
+		
 		case cTable == "DOC_OPS" 
 			aDbf := a_doc_ops()
 			cPath := KUMPATH
@@ -758,6 +800,11 @@ if (nArea==-1 .or. nArea == nArea2)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", cPath + cTable, .t.)
 			CREATE_INDEX("2", "STR(art_id,10)+STR(doc_no,10)+STR(doc_it_no,4)", cPath + cTable, .t.)
 			CREATE_INDEX("3", "STR(doc_no,10)+STR(art_id,10)", cPath + cTable, .t.)
+		case (nArea2 == F_DOC_IT2) .or. (nArea2 == F__DOC_IT2)
+			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(it_no,4)", cPath + cTable, .t.)
+			CREATE_INDEX("2", "art_id+STR(doc_no,10)+STR(doc_it_no,4)", cPath + cTable, .t.)
+			CREATE_INDEX("3", "STR(doc_no,10)+art_id", cPath + cTable, .t.)
+	
 		case (nArea2 == F_DOC_OPS) .or. (nArea2 == F__DOC_OPS)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_op_no,4)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_LOG)
@@ -849,6 +896,10 @@ if i==F_DOCS .or. i==F__DOCS
 endif
 
 if i==F_DOC_IT .or. i==F__DOC_IT
+	lIdiDalje:=.t.
+endif
+
+if i==F_DOC_IT2 .or. i==F__DOC_IT2
 	lIdiDalje:=.t.
 endif
 

@@ -36,6 +36,11 @@ if !used()
 	O_DOC_IT
 endif
 
+select F_DOC_IT2
+if !used()
+	O_DOC_IT2
+endif
+
 select F_DOC_OPS
 if !used()
 	O_DOC_OPS
@@ -61,6 +66,11 @@ if lTemporary == .t.
 	SELECT (F__DOC_IT)
 	if !used()
 		O__DOC_IT
+	endif
+	
+	SELECT (F__DOC_IT2)
+	if !used()
+		O__DOC_IT2
 	endif
 
 	SELECT (F__DOC_OPS)
@@ -145,6 +155,21 @@ endif
 select F_RAL
 if !used()
 	O_RAL
+endif
+
+select F_SIFK
+if !used()
+	O_SIFK
+endif
+
+select F_SIFV
+if !used()
+	O_SIFV
+endif
+
+select F_ROBA
+if !used()
+	O_ROBA
 endif
 
 return
