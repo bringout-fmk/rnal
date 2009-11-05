@@ -18,6 +18,49 @@ endif
 // napravi report
 _cre_report( dD_from, dD_to, nOper, cStatus )
 
+// rpt
+_gen_rpt( dD_from, dD_to, nOper )
+
+return
+
+
+
+// ------------------------------------------------------
+// stampa izvjestaja
+// ------------------------------------------------------
+static function _gen_rpt( dD_from, dD_to, nOper )
+
+START PRINT CRET
+
+?
+
+P_COND
+
+? "------------------------------"
+? "Dokumenti koji nisu obradjeni:"
+? "------------------------------"
+? "Datum od " + DTOC(dD_from) + " do " + DTOC(dD_to)
+? "---------------------------------------------------------------------------------------------"
+? "Broj nal. * Kupac                        * Datum  * Ispor. * otpr.    * racun    * mp racun *"
+? "---------------------------------------------------------------------------------------------"
+
+select _tmp1
+go top
+
+do while !EOF()
+	? field->doc_no
+	@ prow(), pcol()+1 SAY PADR( field->customer, 30 )
+	@ prow(), pcol()+1 SAY field->doc_date
+	@ prow(), pcol()+1 SAY field->dvr_date
+	@ prow(), pcol()+1 SAY field->fakt_d1
+	@ prow(), pcol()+1 SAY field->fakt_d2
+	@ prow(), pcol()+1 SAY field->pos_d1
+	skip
+enddo
+
+FF
+END PRINT
+
 return
 
 
@@ -65,10 +108,15 @@ do while !EOF()
 	// u izvjestaj ?
 
 	nDoc_no := field->doc_no
+	
+	@ m_x + 1, m_y + 2 SAY "obradjujem nalog: " + ALLTRIM(STR(nDoc_no))
+
 	dDoc_date := field->doc_date
 	dDvr_date := field->doc_dvr_date
-	cCustomer := ""
-
+	nCust := field->cust_id
+	nCont := field->cont_id
+	cCustomer := ALLTRIM( g_cust_desc( nCust ) )
+	cCustomer += "/" + ALLTRIM( g_cont_desc( nCont ) )
 	cFmk_doc := ALLTRIM( field->fmk_doc )
 
 	// idi dalje
@@ -82,7 +130,8 @@ do while !EOF()
 	// da li ga ima u FAKT-u ?
 	
 	cDokument := ALLTRIM(STR(nDoc_no)) + ";"
-	cF_doc := "?"
+	cF_doc1 := "?"
+	cF_doc2 := "?"
 
 	select f_dok
 	seek cFFirma + cFTipDok
@@ -96,15 +145,37 @@ do while !EOF()
 
 		// tu je !
 		if cDokument $ ALLTRIM( field->dok_veza )
-			cF_doc := field->brdok
+			cF_doc1 := field->brdok
 			exit
 		endif
 
 		skip
 	enddo
 
-	lPFound := .f.
-	cP_doc := "?"
+	// provjeri i fakture
+	cFTipDok := "10"
+
+	go top
+	seek cFFirma + cFTipDok
+	do while !EOF() .and. field->idfirma + field->idtipdok == ;
+		cFFirma + cFTipDok
+			
+		if EMPTY( field->dok_veza )
+			skip
+			loop
+		endif
+
+		// tu je !
+		if cDokument $ ALLTRIM( field->dok_veza )
+			cF_doc2 := field->brdok
+			exit
+		endif
+
+		skip
+	enddo
+
+
+	cP_doc1 := "?"
 	// ima li ga u POS ?
 	select p_dok
 	set order to tag "2"
@@ -112,13 +183,11 @@ do while !EOF()
 	seek "KUPAC" + cPFirma + cPTipDok + ALLTRIM(STR(nDoc_no))
 
 	if FOUND()
-		cP_doc := field->brdok
+		cP_doc1 := field->brdok
 	endif
 	
-	if cF_doc + cP_doc <> "??"
-		app_to_tmp1( nDoc_no, cCustomer, dDoc_date, dDvr_date, ;
-			cF_doc, "", cP_doc )
-	endif
+	app_to_tmp1( nDoc_no, cCustomer, dDoc_date, dDvr_date, ;
+			cF_doc1, cF_doc2, cP_doc1 )
 
 	// idemo dalje...
 	select docs
