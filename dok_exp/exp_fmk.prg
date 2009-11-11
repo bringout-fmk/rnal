@@ -255,6 +255,7 @@ function exp_2_fmk( nDoc_no, lTemp, lOneByOne, lSumirati )
 local nTArea := SELECT()
 local nADOCS := F_DOCS
 local nADOC_IT := F_DOC_IT
+local nADOC_IT2 := F_DOC_IT2
 local nADOC_OP := F_DOC_OPS
 local cFmkDoc
 local nCust_id
@@ -305,6 +306,7 @@ endif
 if lTemp == .t.
 	nADOCS := F__DOCS
 	nADOC_IT := F__DOC_IT
+	nADOC_IT2 := F__DOC_IT2
 	nADOC_OP := F__DOC_OPS
 endif
 
@@ -381,6 +383,93 @@ cCtrlNo := "22"
 cBrDok := fa_new_doc( "10", cCtrlNo )
 
 cFmkDoc := cIdVd + "-" + ALLTRIM(cBrdok)
+
+nRbr := 0
+
+// prvo prebaci robu iz doc_it2
+select (nADOC_IT2)
+set order to tag "1"
+seek docno_str( nDoc_no )
+
+do while !EOF() .and. field->doc_no == nDoc_no
+	
+	cArt_id := field->art_id
+	nQtty := field->doc_it_qtt
+	nPrice := field->doc_it_pri
+
+	if EMPTY( cArt_id )
+		skip
+		loop
+	endif
+
+	if nQtty = 0
+		skip
+		loop
+	endif
+
+	select X_TBL
+	
+	go bottom
+	skip -1
+
+	if !EMPTY( x_tbl->rbr )
+		nRbr := VAL( x_tbl->rbr )
+	endif
+	
+	append blank
+	
+	scatter()
+
+	_txt := ""
+	_rbr := STR( ++nRbr, 3 )
+	_idpartner := cPartn
+	_idfirma := "10"
+	_brdok := cBrDok
+	_idtipdok := cIdVd
+	_datdok := dDatDok
+	_idroba := cArt_id
+	_cijena := nPrice
+	_kolicina := nQtty
+	_dindem := "KM "
+	_zaokr := 2
+
+	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
+		// veza, broj naloga
+		_dok_veza := _fmk_doc_upd( _dok_veza, ALLTRIM(STR( nDoc_No )) )
+	endif
+
+	// roba tip U - nista
+	a_to_txt( "", .t. )
+	// dodatni tekst otpremnice - nista
+	a_to_txt( "", .t. )
+	// naziv partnera
+	a_to_txt( _g_pfmk_desc( cPartn ) , .t. )
+	// adresa
+	a_to_txt( _g_pfmk_addr( cPartn ) , .t. )
+	// ptt i mjesto
+	a_to_txt( _g_pfmk_place( cPartn ) , .t. )
+	// broj otpremnice
+	a_to_txt( "" , .t. )
+	// datum  otpremnice
+	a_to_txt( DTOC( dDatDok ) , .t. )
+	
+	// broj ugovora - nista
+	a_to_txt( "", .t. )
+	
+	// datum isporuke - nista
+	a_to_txt( "", .t. )
+	
+	// datum valute - nista
+	a_to_txt( "", .t. )
+
+	gather()
+
+	select (nADOC_IT2)
+
+	skip
+enddo
+
+// zatim artikle naloga
 
 select (nADOC_IT)
 set order to tag "3"
@@ -711,12 +800,6 @@ replace fmk_doc with _fmk_doc_upd( ALLTRIM( field->fmk_doc ), ;
 
 select (245)
 use
-
-// dodaj u p_dok_src
-//add_p_doksrc( "", "", ALLTRIM(STR(nDoc_no)), dDatDok, "KUPAC", ;
-//	"10", cIdVd, cBrDok, dDatDok, "", "", cPartn, "", ;
-//	PRIVPATH, .t. )
-//p_to_doksrc()
 
 if lOneByOne == .t.
 	msgbeep("export dokumenta zavrsen !")

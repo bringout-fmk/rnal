@@ -209,7 +209,7 @@ endif
 nX += 2
 
 @ m_x + nX, m_y + 2 SAY PADL("Stavka naloga (*)", nLeft) GET _doc_it_no ;
-	VALID {|| _it_no := inc_docit2( _doc_no, _doc_it_no ), .t. }
+	VALID {|| if(l_new_it, _it_no := inc_docit2( _doc_no, _doc_it_no ), .t.), .t. }
 
 nX += 1
 
@@ -217,7 +217,7 @@ nX += 1
 
 nX += 2
 
-@ m_x + nX, m_y + 2 SAY PADL("FMK ARTIKAL (*):", nLeft) GET _art_id VALID {|| p_roba( @_art_id ), show_it( g_roba_desc( _art_id ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "uzmi sifru iz FMK sifrarnika" )
+@ m_x + nX, m_y + 2 SAY PADL("FMK ARTIKAL (*):", nLeft) GET _art_id VALID {|| p_roba( @_art_id ), _doc_it_pri := g_roba_price( _art_id ), show_it( g_roba_desc( _art_id ) + ".." , 35 ) } WHEN set_opc_box( nBoxX, 50, "uzmi sifru iz FMK sifrarnika" )
 
 nX += 2
 	
@@ -295,4 +295,22 @@ endif
 select (nTArea)
 return cDescr
 
+
+// ----------------------------------------------
+// vraca cijenu robe
+// ----------------------------------------------
+function g_roba_price( cId )
+local nPrice
+local nTArea := SELECT()
+
+O_ROBA
+select roba
+seek cId
+
+if FOUND()
+	nPrice := roba->vpc
+endif
+
+select (nTArea)
+return nPrice
 

@@ -11,6 +11,10 @@ close all
 FErase(PRIVPATH + "T_DOCIT.DBF")
 FErase(PRIVPATH + "T_DOCIT.CDX")
 
+// t_docit2.dbf
+FErase(PRIVPATH + "T_DOCIT2.DBF")
+FErase(PRIVPATH + "T_DOCIT2.CDX")
+
 // t_docop.dbf
 FErase(PRIVPATH + "T_DOCOP.DBF")
 FErase(PRIVPATH + "T_DOCOP.CDX")
@@ -27,9 +31,11 @@ return 1
 // ------------------------------------
 function t_rpt_create()
 local cT_DOCIT := "T_DOCIT.DBF"
+local cT_DOCIT2 := "T_DOCIT2.DBF"
 local cT_DOCOP := "T_DOCOP.DBF"
 local cT_PARS := "T_PARS.DBF"
 local aT_DOCIT:={}
+local aT_DOCIT2:={}
 local aT_DOCOP:={}
 local aT_PARS:={}
 
@@ -43,6 +49,12 @@ endif
 if !FILE(PRIVPATH + cT_DOCIT)
 	g_docit_fields(@aT_DOCIT)
 	dbcreate2(PRIVPATH + cT_DOCIT, aT_DOCIT)
+endif
+
+// kreiraj T_DOCIT2
+if !FILE(PRIVPATH + cT_DOCIT2)
+	g_docit2_fields(@aT_DOCIT2)
+	dbcreate2(PRIVPATH + cT_DOCIT2, aT_DOCIT2)
 endif
 
 // kreiraj T_DOCOP
@@ -59,6 +71,7 @@ endif
 
 // kreiraj indexe
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
+CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(it_no,4)+art_id", PRIVPATH + "T_DOCIT2")
 CREATE_INDEX("2", "STR(doc_no,10)+STR(doc_gr_no,2)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_el_no,4)+STR(doc_op_no,4)", PRIVPATH + "T_DOCOP")
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
@@ -114,6 +127,19 @@ AADD(aArr,{ "doc_op_desc", "C" , 150 ,  0 })
 AADD(aArr,{ "aop_value", "C" , 150 ,  0 })
 AADD(aArr,{ "aop_vraw", "C" , 150 ,  0 })
 
+return
+
+
+// setovanje polja tabele T_DOCIT2
+static function g_docit2_fields(aArr)
+AADD(aArr,{ "doc_no"     , "N" ,  10 ,  0 })
+AADD(aArr,{ "doc_it_no"  , "N" ,   4 ,  0 })
+AADD(aArr,{ "it_no"      , "N" ,   4 ,  0 })
+AADD(aArr,{ "art_id"     , "C" ,  10 ,  0 })
+AADD(aArr,{ "art_desc"   , "C" , 250 ,  0 })
+AADD(aArr,{ "doc_it_qtty", "N" ,  15 ,  5 })
+AADD(aArr,{ "doc_it_price", "N" ,  15 ,  5 })
+AADD(aArr,{ "desc", 	    "C" ,  200 ,  5 })
 return
 
 
@@ -199,6 +225,27 @@ endif
 xRet := RTRIM(opis)
 
 return xRet
+
+
+// dodaj stavke u tabelu T_DOCIT2
+function a_t_docit2( nDoc_no, nDoc_it_no, nIt_no, cArt_id, cArt_desc, ;
+		    nDoc_it_qtty, nDoc_it_price, ;
+		    nDescr )
+
+O_T_DOCIT2
+select t_docit2
+append blank
+replace doc_no with nDoc_no
+replace doc_it_no with nDoc_it_no
+replace it_no with nIt_no
+replace art_id with cArt_id
+replace art_desc with cArt_desc
+replace doc_it_qtty with nDoc_it_qtty
+replace doc_it_price with nDoc_it_price
+replace desc with nDescr
+
+return
+
 
 
 // dodaj stavke u tabelu T_RNST

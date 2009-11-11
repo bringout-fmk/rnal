@@ -104,9 +104,9 @@ do while !EOF()
 	go top
 	seek artid_str(nArt_id)
 	
-	cL_desc := ALLTRIM( field->art_lab_desc )
+	cL_desc := strkzn( ALLTRIM( field->art_lab_desc ), "8", "U" )
    	cF_desc := strkzn( ALLTRIM( field->art_full_desc ), "8", "U" )
-   	cS_desc := ALLTRIM( field->art_desc )
+   	cS_desc := strkzn( ALLTRIM( field->art_desc ), "8", "U" )
 
 	if EMPTY(cL_desc)
 		cL_desc := cS_desc

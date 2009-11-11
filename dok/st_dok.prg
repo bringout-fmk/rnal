@@ -24,6 +24,8 @@ o_tables( __temp )
 _fill_main()
 // stavke naloga
 _fill_items()
+// dodatne stavke naloga
+_fill_it2()
 // operacije
 _fill_aops()
 
@@ -383,6 +385,68 @@ do while !EOF() .and. field->doc_no == __doc_no
 	
 	select ( nTable )
 	skip
+enddo
+	
+return
+
+
+// ----------------------------------
+// filuj tabele za stampu DOC_IT2
+// ----------------------------------
+static function _fill_it2()
+local nTable := F_DOC_IT2
+local cArt_id
+local cArt_desc
+local nDoc_it_no
+local nQtty
+
+if ( __temp == .t. )
+	nTable := F__DOC_IT2
+endif
+
+select (nTable)
+set order to tag "1"
+go top
+seek docno_str(__doc_no)
+
+// filuj stavke
+do while !EOF() .and. field->doc_no == __doc_no
+	
+	cArt_id := field->art_id
+	nDoc_it_no := field->doc_it_no
+	nDoc_no := field->doc_no
+	nIt_no := field->it_no
+	
+	// nadji artikal
+	select roba
+	hseek cArt_id
+
+	cArt_desc := ALLTRIM( roba->naz )
+	
+	select ( nTable )
+	
+	nQtty := field->doc_it_qtt
+	nPrice := field->doc_it_pri
+
+	cDesc := ALLTRIM( field->desc )
+	cSh_desc := ALLTRIM( field->sh_desc )
+
+	cDescription := ""
+	if !EMPTY( cSh_desc )
+		cDescrtiption += cSh_desc
+	endif
+
+	if !EMPTY( cDesc )
+		cDescription += ", " + cDesc
+	endif
+	
+	// dodaj u stavke
+	a_t_docit2( __doc_no, nDoc_it_no, nIt_no, cArt_id, cArt_desc , ;
+		  nQtty, nPrice, cDescription )
+	
+	select ( nTable )
+	skip
+
 enddo
 	
 return
