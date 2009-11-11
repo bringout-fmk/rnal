@@ -399,12 +399,20 @@ local cArt_id
 local cArt_desc
 local nDoc_it_no
 local nQtty
+local cFlag := "N"
 
 if ( __temp == .t. )
 	nTable := F__DOC_IT2
 endif
 
 select (nTable)
+
+if RECCOUNT2() > 0
+	if Pitanje(,"Stampati rekapitulaciju materijala ?", "D") == "D"
+		cFlag := "D"
+	endif
+endif
+
 set order to tag "1"
 go top
 seek docno_str(__doc_no)
@@ -448,7 +456,10 @@ do while !EOF() .and. field->doc_no == __doc_no
 	skip
 
 enddo
-	
+
+// upisi za rekapitulaciju u t_pars
+add_tpars("N20", cFlag )
+
 return
 
 

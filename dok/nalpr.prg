@@ -114,6 +114,8 @@ local i
 local nDocRbr := 0
 local nCount := 0
 local cDoc_it_type := ""
+local cRekPrint
+local lRekPrint := .f.
 
 nDuzStrKorekcija := 0
 lPrintedTotal := .f.
@@ -128,6 +130,11 @@ if lStartPrint
 endif
 
 nTTotal := VAL(g_t_pars_opis("N10"))
+
+cRekPrint := ALLTRIM(g_t_pars_opis("N20"))
+if cRekPrint == "D"
+	lRekPrint := .t.
+endif
 
 // zaglavlje naloga za proizvodnju
 nalpr_header( nGr_cnt, nGr_total )
@@ -534,6 +541,9 @@ s_nal_izdao()
 
 s_nal_footer()
 
+// stampa rekapitulacije
+s_nal_rekap( nDoc_no, lRekPrint )
+
 if lStartPrint
 	FF
 	EndPrint()
@@ -541,6 +551,73 @@ endif
 
 return
 
+
+// ---------------------------------------
+// stampa rekapitulacije na dnu naloga
+// ---------------------------------------
+static function s_nal_rekap( nDoc_no, lPrint )
+local cTmp
+
+if lPrint == .f.
+	return
+endif
+
+select t_docit2
+
+if RECCOUNT2() == 0
+	return
+endif
+
+?
+? RAZMAK + "rekapitulacija dodatnog materijala:"
+? RAZMAK + "-----------------------------------"
+
+if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	++nPage
+	Nstr_a4(nPage, .t.)
+endif	
+
+go top
+seek docno_str( nDoc_no )
+
+do while !EOF() .and. field->doc_no == nDoc_no
+	
+	nDoc_it_no := field->doc_it_no
+
+	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+		++nPage
+		Nstr_a4(nPage, .t.)
+	endif	
+	
+	? RAZMAK + "stavka: " + ALLTRIM(STR(nDoc_it_no))
+	? RAZMAK + "---------------"
+
+	do while !EOF() .and. field->doc_no == nDoc_no ;
+		.and. field->doc_it_no == nDoc_it_no
+		
+		cTmp := "("
+		cTmp += ALLTRIM(field->art_id)
+		cTmp += ")"
+		cTmp += " "
+		cTmp += ALLTRIM(field->art_desc)
+
+		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+			++nPage
+			Nstr_a4(nPage, .t.)
+		endif	
+
+		? RAZMAK
+		?? ALLTRIM(STR(field->it_no)) + "."
+		?? " "
+		?? PADR( cTmp, 40 )
+		?? " kol.=", ALLTRIM( STR( field->doc_it_qtty, 12, 2) )
+		
+		skip
+	enddo
+
+enddo
+
+return
 
 
 // -----------------------------------------

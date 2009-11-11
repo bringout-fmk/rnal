@@ -189,6 +189,10 @@ O_T_DOCIT
 select t_docit
 zap
 
+O_T_DOCIT2
+select t_docit2
+zap
+
 O_T_PARS
 select t_pars
 zap
@@ -201,6 +205,7 @@ function t_rpt_open()
 O_T_PARS
 O_T_DOCOP
 O_T_DOCIT
+O_T_DOCIT2
 return
 
 
