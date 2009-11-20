@@ -124,7 +124,7 @@ do while !EOF()
 	nQty := field->doc_it_qtty
 	
 	cPosition := ALLTRIM(field->doc_it_pos)
-	cCity := ALLTRIM( field->doc_acity )
+	cCity := strkzn( ALLTRIM( field->doc_acity ), "8", "U" )
 	cAltt := ALLTRIM( STR( field->doc_it_altt, 12 ) )
    
 	cArt_type := "-"
