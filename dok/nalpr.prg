@@ -555,7 +555,7 @@ return
 // ---------------------------------------
 // stampa rekapitulacije na dnu naloga
 // ---------------------------------------
-static function s_nal_rekap( nDoc_no, lPrint )
+function s_nal_rekap( nDoc_no, lPrint )
 local cTmp
 
 if lPrint == .f.

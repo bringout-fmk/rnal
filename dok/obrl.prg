@@ -172,7 +172,8 @@ do while !EOF()
 		skip
 		loop
 	endif
-
+	
+	nDoc_no := field->doc_no
 	nArt_id := field->art_id
 	
 	cDoc_no := docno_str( field->doc_no )
@@ -361,6 +362,9 @@ endif
 
 // prikazi GN tabelu.....
 s_gn_tbl()
+
+// prikazi rekapitulaciju dodatnog repromaterijala
+s_nal_rekap( nDoc_no, .t. )
 
 s_obrl_footer()
 

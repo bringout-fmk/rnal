@@ -91,6 +91,9 @@ for i:=1 to LEN( aOlDocs )
 	
 	// stavke naloga
 	_fill_items( lGN )
+	
+	// dodatne stavke naloga
+	_fill_it2()
 
 next
 
@@ -131,6 +134,8 @@ o_tables( __temp )
 _fill_main()
 // stavke naloga
 _fill_items( lGn )
+// dodatne stavke naloga
+_fill_it2()
 // operacije
 _fill_aops()
 
@@ -440,8 +445,9 @@ do while !EOF() .and. field->doc_no == __doc_no
 	cSh_desc := ALLTRIM( field->sh_desc )
 
 	cDescription := ""
+
 	if !EMPTY( cSh_desc )
-		cDescrtiption += cSh_desc
+		cDescription += cSh_desc
 	endif
 
 	if !EMPTY( cDesc )
