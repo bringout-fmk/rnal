@@ -617,8 +617,6 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	_dindem := "KM "
 	_zaokr := 2
 
-	altd()
-
 	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
 		// veza, broj naloga
 		_dok_veza := _fmk_doc_upd( _dok_veza, ALLTRIM(STR( nDoc_No )) )

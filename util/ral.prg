@@ -306,9 +306,6 @@ local nColor3 := 0.00000000000
 local nColor4 := 0.00000000000
 local aColor := {}
 
-
-altd()
-
 O_RAL
 go top
 seek STR(nRal, 5) + STR(nTick, 2)

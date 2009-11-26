@@ -120,8 +120,33 @@ cType := aArr[ nSeek, 5 ]
 return cType
 
 
+
+// -------------------------------------------------------
+// vraca debljinu stakla elementa unutar kompozicije
+// -------------------------------------------------------
+function g_gl_el_tick( aArr, nElement )
+local xRet := 0
+local nSeek
+
+nSeek := ASCAN( aArr, { |xVal| xVal[1] = nElement .and. ;
+	ALLTRIM( xVal[4] ) == ALLTRIM( gDefGlTick ) } )
+
+if nSeek <> 0
+	// pronasao sam debljinu !
+
+	xRet := glass_tick( aArr[ nSeek, 5 ] )
+endif
+
+return xRet
+
+
+
 // ------------------------------------------
 // vraca debljinu stakla
+// 
+// - ukupnu vrijednost ako je kompozicija
+//   ne zadaje se nGlass
+// - ako je zadat nGlass onda samo jedno
 // ------------------------------------------
 function g_gl_tickness( aArr, nGlass )
 local xRet := 0

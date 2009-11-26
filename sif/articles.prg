@@ -1280,6 +1280,77 @@ return nRet
 
 
 // ---------------------------------------------------------
+// vraca naziv elementa unutar kompozicije iz ARR
+// ---------------------------------------------------------
+function g_el_descr( aArr, nEl_no )
+local nTotElem
+local cElemCode 
+local i
+local xRet := ""
+local cTmp
+local nTmp
+local lInsLExtChar := .f.
+local cLExtraChar := ""
+
+if LEN(aArr) > 0
+	nTotElem := aArr[ LEN(aArr), 1 ]
+endif
+
+for i := 1 to nTotElem
+
+
+	// iscitaj code elementa
+	nTmp := ASCAN( aArr, {| xVar | xVar[1] == i })
+	
+	nTmp2 := aArr[ nTmp, 1 ]
+	
+	if nTmp2 <> nEl_no
+		loop
+	endif
+	
+	cElemCode := aArr[ nTmp, 2 ]
+
+	// uzmi pravilo <GL_TICK>#<GL_TYPE>.....
+	cRule := _get_rule( cElemCode )
+	// pa ga u matricu ......
+	aRule := TokToNiz( cRule, "#" )
+	
+	for nRule := 1 to LEN( aRule )
+	
+		// <GL_TICK>
+		cRuleDef := ALLTRIM( aRule[ nRule ] )
+
+		if LEFT( cRuleDef, 1 ) <> "<"
+		
+			cLExtraChar := LEFT( cRuleDef, 1 )
+			cRuleDef := STRTRAN( cRuleDef, cLExtraChar, "" )
+			
+			lInsLExtChar := .t.
+			
+		endif
+
+		nSeek := ASCAN(aArr, {| xVal | ;
+			xVal[1] == i .and. xVal[4] == cRuleDef })
+		
+		if nSeek > 0
+		
+			if lInsLExtChar == .t.
+				cArt_code += cLExtraChar
+				lInsLExtChar := .f.
+			endif
+	
+			xRet += ALLTRIM( aArr[ nSeek, 5 ] )
+				
+		endif
+	
+	next
+	
+next
+
+return xRet
+
+
+// ---------------------------------------------------------
 // setovanje naziva iz matrice aAttr prema pravilu
 // aArr - matrica sa podacima artikla
 // cArt_code - sifra artikla
