@@ -7,7 +7,7 @@ static __wo_id
 // -----------------------------------------
 // otvara sifrarnik dodatnih operacija
 // -----------------------------------------
-function s_aops(cId, cDesc, lwo_ID, dx, dy)
+function s_aops( cId, cDesc, lwo_ID, dx, dy )
 local nTArea
 local cHeader
 private ImeKol
@@ -27,6 +27,7 @@ endif
 __wo_id := lwo_ID
 
 select aops
+set filter to
 set order to tag "1"
 
 set_a_kol(@ImeKol, @Kol)
@@ -100,6 +101,10 @@ AADD(aImeKol, {PADC("Opis", 40), {|| PADR(aop_full_desc, 40)}, "aop_full_desc"})
 AADD(aImeKol, {PADC("Skr.opis (sifra)", 20), {|| PADR(aop_desc, 20)}, "aop_desc"})
 AADD(aImeKol, {PADC("Joker", 20), {|| PADR(aop_joker, 20)}, "aop_joker"})
 AADD(aImeKol, {PADC("u art.naz ( /*)", 15), {|| PADR(in_art_desc, 15)}, "in_art_desc"})
+
+if aops->(FIELDPOS("AOP_UNIT")) <> 0
+	AADD(aImeKol, {PADC("jed.mjere", 10), {|| aop_unit}, "aop_unit"})
+endif
 
 for i:=1 to LEN(aImeKol)
 	AADD(aKol, i)
@@ -229,5 +234,32 @@ select (nTArea)
 
 return cAopJoker
 
+
+// -------------------------------
+// get aop_unit by aop_id
+// -------------------------------
+function g_aop_unit( nAop_id )
+local cAopUnit := ""
+local nTArea := SELECT()
+
+if nAop_id = 0
+	return cAopUnit
+endif
+
+O_AOPS
+select aops
+set order to tag "1"
+go top
+seek aopid_str(nAop_id)
+
+if FOUND()
+	if aops->(FIELDPOS("AOP_UNIT")) <> 0 .and. !EMPTY(field->aop_unit)
+		cAopUnit := ALLTRIM(field->aop_unit)
+	endif
+endif
+
+select (nTArea)
+
+return cAopUnit
 
 

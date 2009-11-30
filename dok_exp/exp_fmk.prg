@@ -980,10 +980,12 @@ return aRet
 // ----------------------------------------------------
 // sracunaj kolicinu na osnovu vrijednosti polja
 // ----------------------------------------------------
-static function _g_kol( cValue, cQttyType, nKol, nQtty, ;
+function _g_kol( cValue, cQttyType, nKol, nQtty, ;
 		nHeigh1, nWidth1, nHeigh2, nWidth2 )
 
 local nTmp := 0
+
+altd()
 
 if nHeigh2 == nil
 	nHeigh2 := 0
@@ -994,7 +996,7 @@ if nWidth2 == nil
 endif
 
 // po metru
-if cQttyType == "M"	
+if UPPER(cQttyType) == "M"	
 
 	// po metru, znaèi uzmi sve stranice stakla
 	
@@ -1030,16 +1032,27 @@ if cQttyType == "M"
 endif
 
 // po m2
-if cQttyType == "M2"
+if UPPER(cQttyType) == "M2"
 	
 	nKol := c_ukvadrat( nQtty, nHeigh1, nWidth1 ) 
 	
 endif
 
 // po komadu
-if cQttyType == "KOM"
+if UPPER(cQttyType) == "KOM"
+	
+	// busenje
+	if "<A_BU>" $ cValue
 
-	nKol := nQtty
+		// broj rupa za busenje
+		cTmp := STRTRAN( ALLTRIM(cValue), "<A_BU>:#" )
+		aTmp := TokToNiz( cTmp, "#" )
+
+		nKol := LEN( aTmp )
+	
+	else
+		nKol := nQtty
+	endif
 
 endif
 
