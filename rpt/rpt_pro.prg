@@ -539,6 +539,7 @@ return
 static function _cre_sp_art( dD_from, dD_to, nOper, cArticle )
 local nDoc_no
 local cArt_id
+local nTick := 0
 local aArt := {}
 local nCount := 0
 local cCust_desc
@@ -557,6 +558,11 @@ index on STR(cust_id, 10, 0) + art_id + STR(tick, 10, 2) tag "2"
 
 // otvori potrebne tabele
 o_tables( .f. )
+
+select elements
+set order to tag "1"
+select e_aops
+set order to tag "1"
 
 select docs
 go top
@@ -677,6 +683,142 @@ do while !EOF()
 			nAop_11 := 0
 			nAop_12 := 0
 
+		// da li ovaj artikal ima u elementima operacija ?
+	
+		select elements
+		go top
+		seek artid_str( nArt_id )
+
+		cAopValue := ""
+
+		do while !EOF() .and. field->art_id = nArt_id
+			
+			nEl_id := field->el_id
+
+			select e_aops
+			go top
+			seek elid_str( nEl_id )
+
+			do while !EOF() .and. field->el_id = nEl_id
+			
+			  // operacija-1  .T. ?
+			  if _in_oper_( __op_1, field->aop_id )
+				nAop_1 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_1, __opu_1, cAopValue )
+			  endif
+	
+			  // operacija-2  .T. ?
+			  if _in_oper_( __op_2, field->aop_id )
+				nAop_2 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_2, __opu_2, cAopValue )
+			  endif
+	
+			  // operacija-3  .T. ?
+			  if _in_oper_( __op_3, field->aop_id )
+				nAop_3 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_3, __opu_3, cAopValue )
+			  endif
+		
+			  // operacija-4  .T. ?
+			  if _in_oper_( __op_4, field->aop_id )
+				nAop_4 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_4, __opu_4, cAopValue )
+			  endif
+			
+			  // operacija-5  .T. ?
+			  if _in_oper_( __op_5, field->aop_id )
+				nAop_5 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_5, __opu_5, cAopValue )
+			  endif
+			
+			  // operacija-6  .T. ?
+			  if _in_oper_( __op_6, field->aop_id )
+				nAop_6 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_6, __opu_6, cAopValue )
+			  endif
+		
+			  // operacija-7  .T. ?
+			  if _in_oper_( __op_7, field->aop_id )
+				nAop_7 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_7, __opu_7, cAopValue )
+			  endif
+			
+		 	  // operacija-8  .T. ?
+			  if _in_oper_( __op_8, field->aop_id )
+				nAop_8 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_8, __opu_8, cAopValue )
+			  endif
+
+		 	  // operacija-9  .T. ?
+			  if _in_oper_( __op_9, field->aop_id )
+				nAop_9 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_9, __opu_9, cAopValue )
+			  endif
+
+		 	  // operacija-10  .T. ?
+			  if _in_oper_( __op_10, field->aop_id )
+				nAop_10 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_10, __opu_10, cAopValue )
+			  endif
+
+			  // operacija-11  .T. ?
+			  if _in_oper_( __op_11, field->aop_id )
+				nAop_11 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_11, __opu_11, cAopValue )
+			  endif
+
+			  // operacija-12  .T. ?
+			  if _in_oper_( __op_12, field->aop_id )
+				nAop_12 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_12, __opu_12, cAopValue )
+			  endif
+
+			  if ( nAop_1 + nAop_2 + nAop_3 + ;
+				nAop_4 + nAop_5 + nAop_6 + ;
+				nAop_7 + nAop_8 + nAop_9 + ;
+				nAop_10 + nAop_11 + nAop_12 ) > 0
+
+			     _ins_op1( nCust_id, ;
+				cArt_id, ;
+				nTick, ;
+				nAop_1, ;
+				nAop_2, ;
+				nAop_3, ;
+				nAop_4, ;
+				nAop_5, ;
+				nAop_6, ;
+				nAop_7, ;
+				nAop_8, ;
+				nAop_9, ;
+				nAop_10, ;
+				nAop_11, ;
+				nAop_12 )
+	
+
+			  	// resetuj vrijednosti
+			  	nAop_1 := 0
+			  	nAop_2 := 0
+			  	nAop_3 := 0
+			  	nAop_4 := 0
+			  	nAop_5 := 0
+			  	nAop_6 := 0
+			  	nAop_7 := 0
+			  	nAop_8 := 0
+			  	nAop_9 := 0
+			  	nAop_10 := 0
+			  	nAop_11 := 0
+			 	nAop_12 := 0
+			     endif	
+			     
+			     select e_aops
+			     skip
+			enddo
+
+			select elements
+			skip
+		enddo
+
+
 		// prebaci se na operacije i vidi da li one zadovoljavaju
 		select doc_ops
 		seek docno_str( nDoc_no ) + docit_str( nDoc_it_no )
@@ -690,27 +832,7 @@ do while !EOF()
 
 			aElem := {}
 			nElem_no := 0
-			nTick := 0
 			
-			if nDoc_no = 5824
-				altd()
-			endif
-
-			//_g_art_elements( @aElem, nArt_id )
-	
-			// vrati broj elementa artikla (1, 2, 3 ...)
-			//_g_elem_no( aElem, nEl_no, @nElem_no )
-	
-			// sifra artikla - identifikator "4FL", "6O" itd...
-			//cArt_id := g_el_descr( aArt, nElem_no )
-	
-			// opis stavke
-			//cArt_desc := get_elem_desc( aElem, nEl_no, 30 )
-			//cArt_desc := ""
-
-			// debljina stakla
-			//nTick := g_gl_el_tick( aArt, nElem_no )
-	
 			// operacija-1  .T. ?
 			if _in_oper_( __op_1, field->aop_id )
 				nAop_1 := _calc_oper( nQtty, nWidth, nHeight, ;
@@ -1121,9 +1243,9 @@ cTxt2 += PADR("(mm)", 6)
 cTxt2 += SPACE(1)
 cTxt2 += PADR("(kom)", 12)
 cTxt2 += SPACE(1)
-cTxt2 += PADR("(mm)", 12)
+cTxt2 += PADR("(m)", 12)
 cTxt2 += SPACE(1)
-cTxt2 += PADR("(mm)", 12)
+cTxt2 += PADR("(m)", 12)
 cTxt2 += SPACE(1)
 cTxt2 += PADR("(m2)", 12)
 
@@ -1350,6 +1472,10 @@ if !FOUND()
 	replace field->tick with nTick
 
 endif
+
+// pretvori ove vrijednosti u metre
+nWidth := mm_2_m( nWidth )
+nHeight := mm_2_m( nHeight )
 
 replace field->width with ( field->width + nWidth )
 replace field->height with ( field->height + nHeight )

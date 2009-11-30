@@ -985,8 +985,6 @@ function _g_kol( cValue, cQttyType, nKol, nQtty, ;
 
 local nTmp := 0
 
-altd()
-
 if nHeigh2 == nil
 	nHeigh2 := 0
 endif
