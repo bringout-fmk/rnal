@@ -260,7 +260,7 @@ return nRet
 function arr_gn()
 local aGN:={}
 
-for i:=210 to 3060 step 30
+for i:=210 to 6000 step 30
 	AADD(aGN, {i})
 next
 
@@ -275,8 +275,8 @@ local nRet
 local nPom
 
 // gornji limit
-if nVal > 3060 
-	return 3060
+if nVal > 6000 
+	return 6000
 endif
 
 // donji limit
@@ -293,8 +293,6 @@ for i:=1 to LEN(aGN)
 next
 
 return nRet
-
-
 
 
 

@@ -366,6 +366,8 @@ s_gn_tbl()
 // prikazi rekapitulaciju dodatnog repromaterijala
 s_nal_rekap( nDoc_no, .t. )
 
+P_10CPI
+
 s_obrl_footer()
 
 if lStartPrint
@@ -380,21 +382,44 @@ return
 // prikaz GN tabele
 // ---------------------------------------------
 static function s_gn_tbl()
+local aGn := {}
+local cLine := SPACE(1) + REPLICATE("-", 125)
+local cTxt := SPACE(1) + "GN tabela (izrazena u mm):"
+local i
+local nTmp
+local nTmp2
+local nX
+local nY
+local nX_pos
+local nY_pos
+
+// napuni gn matricu
+aGn := arr_gn()
 
 P_COND2
+
 ?
-? " ------------------------------------------------------------------------"
-? " GN tabela (izrazena u mm):"
-? " ------------------------------------------------------------------------"
-? " 210 420 630 810 1020 1200 1410 1620 1800 2010 2220 2430 2640 2850"
-? " 240 450 660 840 1050 1230 1440 1650 1830 2040 2250 2460 2670 2880"
-? " 270 480 690 870 1080 1260 1470 1680 1860 2070 2280 2490 2700 2910"
-? " 300 510 720 900 1110 1290 1500 1710 1890 2100 2310 2520 2730 2940"
-? " 330 540 750 930 1140 1320 1530 1740 1920 2130 2340 2550 2760 2970"
-? " 360 570 780 960 1170 1350 1560 1770 1950 2160 2370 2580 2790 3000"
-? " 390 600     990      1380 1590      1980 2190 2400 2610 2820 3030 3060"
-? " ------------------------------------------------------------------------"
-P_10CPI
+? cLine
+? cTxt
+? cLine
+
+for i := 1 to LEN( aGn )
+	
+	if i = 1
+		? SPACE(1)
+	endif
+	
+	if i%25 = 0
+		? SPACE(1)
+	endif	
+
+	@ prow(), pcol() + 1 SAY ;
+		PADL( ALLTRIM( STR( aGn[ i, 1 ] )), 4 )
+
+next
+
+? cLine
+
 
 return
 

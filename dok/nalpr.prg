@@ -595,11 +595,16 @@ do while !EOF() .and. field->doc_no == nDoc_no
 	do while !EOF() .and. field->doc_no == nDoc_no ;
 		.and. field->doc_it_no == nDoc_it_no
 		
+		// sifra i naziv stavke
 		cTmp := "("
 		cTmp += ALLTRIM(field->art_id)
 		cTmp += ")"
 		cTmp += " "
 		cTmp += ALLTRIM(field->art_desc)
+		
+		// opis stavke
+		cTmp2 := ALLTRIM( field->desc )
+		aTmp2 := SjeciStr( cTmp2, 120 )
 
 		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 			++nPage
@@ -612,6 +617,25 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		?? PADR( cTmp, 40 )
 		?? " kol.=", ALLTRIM( STR( field->doc_it_qtty, 12, 2) )
 		
+		if !EMPTY( cTmp2 )
+			
+			? RAZMAK + SPACE(2) + "op: "
+			
+			for i := 1 to LEN( aTmp2 )
+				
+				if i > 1
+					? RAZMAK + SPACE(6)
+				endif
+				
+				?? aTmp2[ i ]
+
+				if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+					++nPage
+					Nstr_a4(nPage, .t.)
+				endif	
+			next
+		endif
+
 		skip
 	enddo
 
