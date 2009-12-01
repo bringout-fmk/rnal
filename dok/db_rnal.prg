@@ -71,6 +71,7 @@ endif
 
 // kreiraj indexe
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
+CREATE_INDEX("2", "STR(doc_no,10)+art_sh_desc", PRIVPATH + "T_DOCIT")
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(it_no,4)+art_id", PRIVPATH + "T_DOCIT2")
 CREATE_INDEX("2", "STR(doc_no,10)+STR(doc_gr_no,2)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_el_no,4)+STR(doc_op_no,4)", PRIVPATH + "T_DOCOP")
@@ -87,6 +88,7 @@ AADD(aArr,{ "doc_gr_no"  , "N" ,   2 ,  0 })
 AADD(aArr,{ "doc_no"     , "N" ,  10 ,  0 })
 AADD(aArr,{ "doc_it_no"  , "N" ,   4 ,  0 })
 AADD(aArr,{ "art_id"     , "N" ,  10 ,  0 })
+AADD(aArr,{ "art_sh_desc", "C" , 150 ,  0 })
 AADD(aArr,{ "art_desc"   , "C" , 250 ,  0 })
 AADD(aArr,{ "doc_it_qtty", "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_heigh" , "N" ,  15 ,  5 })
@@ -255,6 +257,7 @@ return
 
 // dodaj stavke u tabelu T_RNST
 function a_t_docit( nDoc_no, nDoc_gr_no, nDoc_it_no, nArt_id, cArt_desc, ;
+		    cArt_sh_desc, ;
 		    cDoc_it_schema, cDoc_it_desc, cDoc_it_type, ;
 		    nDoc_it_qtty, nDoc_it_heigh, nDoc_it_width, ;
 		    nDoc_it_h2, nDoc_it_w2, ;
@@ -272,6 +275,7 @@ replace doc_no with nDoc_no
 replace doc_it_no with nDoc_it_no
 replace art_id with nArt_id
 replace art_desc with cArt_desc
+replace art_sh_desc with cArt_sh_desc
 replace doc_it_qtty with nDoc_it_qtty
 replace doc_it_heigh with nDoc_it_heigh
 replace doc_it_h2 with nDoc_it_h2

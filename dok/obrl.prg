@@ -73,6 +73,7 @@ RAZMAK := SPACE(1)
 t_rpt_open()
 
 select t_docit
+set order to tag "2"
 go top
 
 // stampaj obracunski listic
@@ -136,7 +137,7 @@ endif
 ?
 
 select t_docit
-set order to tag "1"
+set order to tag "2"
 go top
 
 B_OFF
@@ -147,7 +148,7 @@ P_COND2
 s_tbl_header()
 
 select t_docit
-set order to tag "1"
+set order to tag "2"
 
 nPage := 1
 aArt_desc := {}
@@ -162,23 +163,52 @@ nUWidt := 0
 nUZHeig := 0
 nUZWidt := 0
 
+nTTotal := 0
+nTNeto := 0
+nTBruto := 0
+nTQty := 0
+nTHeig := 0
+nTWidt := 0
+nTZHeig := 0
+nTZWidt := 0
+
 cDocXX := "XX"
 
 // stampaj podatke 
 do while !EOF()
 
-	// da li se stavka stampa ili ne ?
-	if field->print == "N"
-		skip
-		loop
-	endif
+   nDoc_no := field->doc_no
+
+   do while !EOF() .and. field->doc_no == nDoc_no 
+
+     cArt_sh := field->art_sh_desc
 	
-	nDoc_no := field->doc_no
-	nArt_id := field->art_id
+     // da li se stavka stampa ili ne ?
+     if field->print == "N"
+ 	skip
+	loop
+     endif
 	
+     cDoc_no := docno_str( field->doc_no )
+     cDoc_it_no := docit_str( field->doc_it_no )
+
+     if cDocXX <> cDoc_no
+
+ 	? RAZMAK
+	
+	// nalog broj
+	?? "stavke naloga broj: " + ALLTRIM( cDoc_no )
+	
+     endif
+	
+     do while !EOF() .and. field->doc_no == nDoc_no ;
+			.and. field->art_sh_desc == cArt_sh
+
 	cDoc_no := docno_str( field->doc_no )
-	cDoc_it_no := docit_str( field->doc_it_no )
-	
+        cDoc_it_no := docit_str( field->doc_it_no )
+
+	nArt_id := field->art_id
+		
 	nQty := field->deliver
 	nHeig := field->doc_it_height
 	nWidt := field->doc_it_width
@@ -199,28 +229,28 @@ do while !EOF()
 	nUWidt += nWidt
 	nUZHeig += nZaHeig
 	nUZWidt += nZaWidt
+	
+	nTTotal += nTotal
+	nTNeto += nNeto
+	nTBruto += nBruto
+	nTQty += nQty
+	nTHeig += nHeig
+	nTWidt += nWidt
+	nTZHeig += nZaHeig
+	nTZWidt += nZaWidt
 
 	if EMPTY( field->art_desc )
 		cArt_desc := "-//-"
 	else
 		cArt_desc := ALLTRIM( field->art_desc )
 	endif
-	
+
 	aArt_desc := SjeciStr( cArt_desc, LEN_DESC )	
 	
 	// ------------------------------------------
 	// prvi red...
 	// ------------------------------------------
 	
-	if cDocXX <> cDoc_no
-
-		? RAZMAK
-	
-		// nalog broj
-		?? "stavke naloga broj: " + ALLTRIM( cDoc_no )
-	
-	endif
-
 	? RAZMAK + SPACE(10)
 
 	// r.br
@@ -230,7 +260,7 @@ do while !EOF()
 	
 	// proizvod, naziv robe, jmj
 	?? aArt_desc[1]
-	?? " "
+	?? "  "
 	
 	// kolicina
 	?? show_number(nQty, nil, -10 )
@@ -299,13 +329,81 @@ do while !EOF()
 				P_COND2
 			endif	
 		next
-		
 	endif
-	
-	cDocXX := cDoc_no
-
+      	
 	select t_docit
 	skip
+
+      enddo	
+
+      nTmp := LEN_IT_NO + LEN_DESC + 13
+      nRepl := 94
+
+      // ispis totala po istim artiklima
+      
+      ? SPACE( nTmp - 6 )
+
+      ?? REPLICATE( "-", nRepl )
+     
+      //B_ON
+
+      ? PADL( "total:", nTmp )
+
+      ?? " "
+
+      // kolicina
+      ?? show_number(nUQty, nil, -10 )
+      ?? " "
+	 
+      // sirina
+      ?? show_number(nUWidt, nil, -10 )
+      ?? " "
+
+      // visina
+      ?? show_number(nUHeig, nil, -10 )
+      ?? " "
+
+      // zaokruzenja po GN-u
+	
+      // sirina
+      ?? show_number(nUZWidt, nil, -10 )
+      ?? " "
+	
+      // visina
+      ?? show_number(nUZHeig, nil, -10 )
+      ?? " "
+
+      // neto
+      ?? show_number(nUNeto, nil, -10 )
+      ?? " "
+
+      // bruto
+      ?? PADR( "", 10  )
+      ?? " "
+
+      // ukupno m2
+      ?? show_number(nUTotal, nil, -10 )
+
+      //B_OFF
+      
+      ? SPACE( nTmp - 6 )
+      
+      ?? REPLICATE( "", nRepl )
+
+      // resetuj varijable totale
+
+      nUTotal := 0
+      nUNeto := 0
+      nUBruto := 0
+      nUQty := 0
+      nUHeig := 0
+      nUWidt := 0
+      nUZHeig := 0
+      nUZWidt := 0
+
+      cDocXX := cDoc_no
+
+   enddo
 
 enddo
 
@@ -321,34 +419,34 @@ endif
 ? RAZMAK
 	
 // r.br
-?? PADL( "U K U P N O : ", LEN_IT_NO + 11 + LEN_DESC )
+?? PADL( "U K U P N O : ", LEN_IT_NO + 12 + LEN_DESC )
 	
 ?? " "
 	
 // kolicina
-?? show_number(nUQty, nil, -10 )
+?? show_number(nTQty, nil, -10 )
 ?? " "
 	
 // sirina
-?? show_number(nUWidt, nil, -10 )
+?? show_number(nTWidt, nil, -10 )
 ?? " "
 
 // visina
-?? show_number(nUHeig, nil, -10 )
+?? show_number(nTHeig, nil, -10 )
 ?? " "
 
 // zaokruzenja po GN-u
 	
 // sirina
-?? show_number(nUZWidt, nil, -10 )
+?? show_number(nTZWidt, nil, -10 )
 ?? " "
 	
 // visina
-?? show_number(nUZHeig, nil, -10 )
+?? show_number(nTZHeig, nil, -10 )
 ?? " "
 
 // neto
-?? show_number(nUNeto, nil, -10 )
+?? show_number(nTNeto, nil, -10 )
 ?? " "
 
 // bruto
@@ -356,7 +454,7 @@ endif
 ?? " "
 
 // ukupno m2
-?? show_number(nUTotal, nil, -10 )
+?? show_number(nTTotal, nil, -10 )
 
 ? cLine
 

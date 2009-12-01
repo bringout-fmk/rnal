@@ -90,10 +90,13 @@ for i:=1 to LEN( aOlDocs )
 	_fill_main( cDocs )
 	
 	// stavke naloga
-	_fill_items( lGN )
+	_fill_items( lGN, 2 )
 	
 	// dodatne stavke naloga
 	_fill_it2()
+	
+	// operacije
+	_fill_aops()
 
 next
 
@@ -179,11 +182,14 @@ o_tables( __temp )
 return DE_REFRESH
 
 
-// ----------------------------------
+// -------------------------------------------------------
 // filuj tabele za stampu
-// ----------------------------------
-static function _fill_items( lZpoGN )
+// lZPoGn - zaokruzenje po GN .t. or .f.
+// nVar - varijanta 1, 2, 3... 1-nalog, 2-obrl. itd..
+// -------------------------------------------------------
+static function _fill_items( lZpoGN, nVar )
 local nTable := F_DOC_IT
+local nTOps := F_DOC_OPS
 local nArt_id
 local cArt_desc
 local cArt_full_desc
@@ -205,6 +211,12 @@ local lGroups := .f.
 local nGr1 
 local nGr2
 local cPosition
+local xx
+local nScan
+
+if nVar == nil
+	nVar := 1
+endif
 
 if lZpoGN == nil
 	lZPoGN := .f.
@@ -216,6 +228,7 @@ endif
 
 if ( __temp == .t. )
 	nTable := F__DOC_IT
+	nTOps := F__DOC_OPS
 endif
 
 select (nTable)
@@ -259,12 +272,57 @@ do while !EOF() .and. field->doc_no == __doc_no
 		
 	endif
 	
+	// u varijanti obracunskog lista uzmi i operacije za ovu stavku
+	if nVar = 2
+
+		cOper_desc := ""
+		aOper := {}
+		cTmp := ""
+		
+		select ( nTOps )
+		seek docno_str( nDoc_no ) + docit_str( nDoc_it_no )
+		do while !EOF() .and. field->doc_no = nDoc_no ;
+			.and. field->doc_it_no = nDoc_it_no
+			
+			cTmp := g_aop_desc( field->aop_id )
+			
+			nScan := ASCAN( aOper, {|xVar| xVar[1] = cTmp } )
+			
+			if nScan = 0
+				AADD( aOper, { cTmp } ) 
+			endif
+
+			skip
+		enddo
+
+		for xx := 1 to LEN( aOper )
+			
+			if !EMPTY( cOper_desc)
+				cOper_desc += ", "
+			endif
+			
+			cOper_desc += ALLTRIM( aOper[xx, 1] )
+		next
+
+		if !EMPTY( cOper_desc )
+			cOper_desc := ", " + cOper_desc
+		endif
+
+	endif
+
 	cArt_full_desc := ALLTRIM(articles->art_full_desc)
 	cArt_desc := ALLTRIM(articles->art_desc)
 	
+	cArt_sh := cArt_desc
+	cArt_sh += cOper_desc
+
 	// temporary
 	cArt_desc := "(" + cArt_desc + ")"
 	cArt_desc += " " + cArt_full_desc
+	
+	if nVar = 2
+		cArt_desc += cOper_desc
+	endif
 
 	// ako je artikal isti ne treba mu opis...
 	if ( nArt_Id == nArtTmp ) .and. ( cGrTmp == cDoc_gr_no )
@@ -350,7 +408,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nGr1 := VAL( SUBSTR(cDoc_gr_no, 1, 1) )
 
 	// dodaj u stavke
-	a_t_docit( __doc_no, nGr1, nDoc_it_no, nArt_id, cArt_desc , ;
+	a_t_docit( __doc_no, nGr1, nDoc_it_no, nArt_id, cArt_desc , cArt_sh, ;
 		  cDoc_it_schema, cDoc_it_desc, cDoc_it_Type, ;
 		  nQtty, nHeigh, nWidth, ;
 		  nHe2, nWi2, ;
@@ -372,7 +430,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 			loop
 		endif
 
-		a_t_docit( __doc_no, VAL(SUBSTR(cDoc_Gr_no, xx, 1)), nDoc_it_no, nArt_id, cArt_desc , ;
+		a_t_docit( __doc_no, VAL(SUBSTR(cDoc_Gr_no, xx, 1)), nDoc_it_no, nArt_id, cArt_desc , cArt_sh, ;
 		  cDoc_it_schema, cDoc_it_desc, cDoc_it_type, ;
 		  nQtty, nHeigh, nWidth, ;
 		  nHe2, nWi2, ;
