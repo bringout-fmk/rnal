@@ -2,6 +2,9 @@
 
 
 static __doc_no
+static __nvar1
+static __nvar2
+
 static __op_1 := 0
 static __op_2 := 0
 static __op_3 := 0
@@ -37,28 +40,27 @@ local dD_From := CTOD("")
 local dD_to := DATE()
 local nOper := 0
 local cArticle := SPACE(100)
-local nVar1
 
 o_sif_tables()
 
 // daj uslove izvjestaja
-if _g_vars( @dD_From, @dD_To, @nOper, @cArticle, @nVar1 ) == 0
+if _g_vars( @dD_From, @dD_To, @nOper, @cArticle ) == 0
  	return 
 endif
 
 do case
 
-	case nVar1 = 1
+	case __nvar1 = 1
 		// kreiraj specifikaciju po elementima
 		_cre_sp_el( dD_from, dD_to, nOper, cArticle )
-	case nVar1 = 2
+	case __nvar1 = 2
 		// kreiraj sp. po artiklima
 		_cre_sp_art( dD_from, dD_to, nOper, cArticle )
 
 endcase
 
 // printaj specifikaciju
-_p_rpt_spec()
+_p_rpt_spec( dD_from, dD_to )
 
 return
 
@@ -66,9 +68,8 @@ return
 
 // ------------------------------------------------------------------------
 // uslovi izvjestaja specifikacije
-// nVar1 - gledati rasclanjene sifre 1, gledati samo artikal - 2
 // ------------------------------------------------------------------------
-static function _g_vars( dDatFrom, dDatTo, nOperater, cArticle, nVar1 )
+static function _g_vars( dDatFrom, dDatTo, nOperater, cArticle )
 
 local nRet := 1
 local nBoxX := 17
@@ -79,12 +80,12 @@ local nOp7 := nOp8 := nOp9 := nOp10 := nOp11 := nOp12 := 0
 local cOp1 := cOp2 := cOp3 := cOp4 := cOp5 := cOp6 := SPACE(10)
 local cOp7 := cOp8 := cOp9 := cOp10 := cOp11 := cOp12 := SPACE(10)
 local nTArea := SELECT()
+local nVar1 := 1
+local cPartn := "N"
 private GetList := {}
 private cSection:="R"
 private cHistory:=" "
 private aHistory:={}
-
-nVar1 := 1
 
 O_PARAMS
 
@@ -210,8 +211,12 @@ Box(, nBoxX, nBoxY)
  	
 	@ m_x + nX, m_y + 2 SAY "Izvjestaj po (1) elementima (2) artiklima" ;
 		GET nVar1 VALID nVar1 > 0 .and. nVar1 < 3 PICT "9"
+	
+	nX += 1
+ 	
+	@ m_x + nX, m_y + 2 SAY "Izvjestaj se formira po partnerima (D/N)?" ;
+		GET cPartn VALID cPartn $ "DN" PICT "@!"
 
-	nX += 2
 	
 	read
 BoxC()
@@ -238,6 +243,14 @@ WPar("p2", cOp12)
 WPar("d1", dDatFrom)
 WPar("d2", dDatTo)
 WPar("v1", nVar1)
+
+// parametri staticki
+__nvar1 := nVar1
+__nvar2 := 2
+
+if cPartn == "D"
+	__nvar2 := 1
+endif
 
 // operacije
 __op_1 := nOp1
@@ -279,10 +292,11 @@ static function _cre_sp_el( dD_from, dD_to, nOper, cArticle )
 local nDoc_no
 local cArt_id
 local aArt := {}
-local nCount := 0
+local aElem := {}
 local cCust_desc
 local nAop_1 := nAop_2 := nAop_3 := nAop_4 := nAop_5 := nAop_6 := 0
 local nAop_7 := nAop_8 := nAop_9 := nAop_10 := nAop_11 := nAop_12 := 0
+local nEl_cnt
 
 // kreiraj tmp tabelu
 aField := _spec_fields()
@@ -291,13 +305,16 @@ cre_tmp1( aField )
 O__TMP1
 
 // kreiraj indekse
-index on art_id + STR(tick, 10, 2) tag "1"  
-index on STR(cust_id, 10, 0) + art_id + STR(tick, 10, 2) tag "2" 
+if __nvar2 = 2
+	index on art_id + STR(tick, 10, 2) tag "1"  
+else
+	index on STR(cust_id, 10, 0) + art_id + STR(tick, 10, 2) tag "1" 
+endif
 
 // otvori potrebne tabele
 o_tables( .f. )
 
-select doc_ops
+select docs
 go top
 
 Box(, 1, 50 )
@@ -305,12 +322,9 @@ Box(, 1, 50 )
 do while !EOF()
 
 	nDoc_no := field->doc_no
-	
+
 	@ m_x + 1, m_y + 2 SAY "... vrsim odabir stavki ... nalog: " + ALLTRIM( STR(nDoc_no) )
 	
-	select docs
-	seek docno_str( nDoc_no )
-
 	nCust_id := field->cust_id
 
 	// provjeri da li ovaj dokument zadovoljava kriterij
@@ -318,7 +332,6 @@ do while !EOF()
 	if field->doc_status > 1 
 		
 		// uslov statusa dokumenta
-		select doc_ops
 		skip
 		loop
 
@@ -328,7 +341,6 @@ do while !EOF()
 		DTOS( field->doc_date ) < DTOS( dD_From )
 	
 		// datumski period
-		select doc_ops
 		skip
 		loop
 
@@ -341,190 +353,380 @@ do while !EOF()
 		if ALLTRIM( STR( field->operater_id )) <> ;
 			ALLTRIM( STR( nOper ) )
 			
-			select doc_ops
 			skip
 			loop
 
 		endif
 	endif
 
-	select doc_ops
-	nDoc_it_no := field->doc_it_no
-
-	// pronadji stavku u items
-	// i daj osnovne parametre, kolicinu, sirinu, visinu...
-
+	// idi na stavke naloga
 	select doc_it
-	set order to tag "1"
-	go top
-	seek docno_str( nDoc_no ) + docit_str( nDoc_it_no ) 
+	seek docno_str( nDoc_no )
+
+	// prodji kroz stavke naloga
+	do while !EOF() .and. field->doc_no == nDoc_no
+
+		nDoc_it_no := field->doc_it_no
+		nArt_id := field->art_id
+	
+		nQtty := field->doc_it_qtty
+		nHeight := field->doc_it_height
+		nWidth := field->doc_it_width
+
+		// koliko kvadrata ?
+		//nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
 		
-	nArt_id := field->art_id
+		aArt := {}
+		aElem := {}
+
+		// artikal razlozi na elemente
+		_art_set_descr( nArt_id, nil, nil, @aArt, .t. )
+
+		// napuni elemente artikla
+		_g_art_elements( @aElem, nArt_id )
 		
-	nQtty := field->doc_it_qtty
-	nHeight := field->doc_it_height
-	nWidth := field->doc_it_width
-
-	// koliko kvadrata ?
-	nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
-
-	// setuj matricu artikla
-	_art_set_descr( nArt_id, nil, nil, @aArt, .t. )
-
-	// prebaci se na operacije i vidi da li one zadovoljavaju
-	select doc_ops
-	
-	// element artikla nad kojim je operacija izvrsena
-	nEl_no := field->doc_it_el_no
-	cAopValue := field->aop_value
-
-	aElem := {}
-	nElem_no := 0
-	
-	_g_art_elements( @aElem, nArt_id )
-	
-	// vrati broj elementa artikla (1, 2, 3 ...)
-	_g_elem_no( aElem, nEl_no, @nElem_no )
-	
-	// sifra artikla - identifikator "4FL", "6O" itd...
-	cArt_id := g_el_descr( aArt, nElem_no )
-	
-	// opis stavke
-	//cArt_desc := get_elem_desc( aElem, nEl_no, 30 )
-	cArt_desc := ""
-
-	// debljina stakla
-	nTick := g_gl_el_tick( aArt, nElem_no )
-	
-	// aArr[1] = { 1, "G", "staklo", "<GL_TYPE>", "FL", "FLOAT" }
-	// aArr[2] = { 1, "G", "staklo", "<GL_TICK>", "4", "4mm" }
-	// aArr[3] = { 2, "F", "distancer", "<FR_TYPE>", "A", "Aluminij" }
-
-	// operacija-1  .T. ?
-	if _in_oper_( __op_1, field->aop_id )
-		nAop_1 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_1, __opu_1, cAopValue )
-	endif
-	
-	// operacija-2  .T. ?
-	if _in_oper_( __op_2, field->aop_id )
-		nAop_2 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_2, __opu_2, cAopValue )
-	endif
-	
-	// operacija-3  .T. ?
-	if _in_oper_( __op_3, field->aop_id )
-		nAop_3 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_3, __opu_3, cAopValue )
-	endif
-	
-	// operacija-4  .T. ?
-	if _in_oper_( __op_4, field->aop_id )
-		nAop_4 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_4, __opu_4, cAopValue )
-	endif
-	
-	// operacija-5  .T. ?
-	if _in_oper_( __op_5, field->aop_id )
-		nAop_5 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_5, __opu_5, cAopValue )
-	endif
-	
-	// operacija-6  .T. ?
-	if _in_oper_( __op_6, field->aop_id )
-		nAop_6 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_6, __opu_6, cAopValue )
-	endif
-	
-	// operacija-7  .T. ?
-	if _in_oper_( __op_7, field->aop_id )
-		nAop_7 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_7, __opu_7, cAopValue )
-	endif
-
-	// operacija-8  .T. ?
-	if _in_oper_( __op_8, field->aop_id )
-		nAop_8 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_8, __opu_8, cAopValue )
-	endif
-
-	// operacija-9  .T. ?
-	if _in_oper_( __op_9, field->aop_id )
-		nAop_9 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_9, __opu_9, cAopValue )
-	endif
-
-	// operacija-10  .T. ?
-	if _in_oper_( __op_10, field->aop_id )
-		nAop_10 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_10, __opu_10, cAopValue )
-	endif
-
-	// operacija-11  .T. ?
-	if _in_oper_( __op_11, field->aop_id )
-		nAop_11 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_11, __opu_11, cAopValue )
-	endif
-
-	// operacija-12  .T. ?
-	if _in_oper_( __op_12, field->aop_id )
-		nAop_12 := _calc_oper( nQtty, nWidth, nHeight, ;
-				__op_12, __opu_12, cAopValue )
-	endif
-
-	//if ( nAop_1 + nAop_2 + nAop_3 + nAop_4 + nAop_5 + nAop_6 ) <> 0
-	// upisi u tabelu samo ako postoje operacije nad stavkom
-
-	// upisi u tabelu
-	
-	select customs
-	go top
-	seek custid_str( nCust_id )
-	cCust_desc := field->cust_desc
+		// prodji kroz elemente artikla i obradi svaki
+		for nEl_cnt := 1 to LEN( aElem )
 		
-	_ins_tmp1( nCust_id, ;
-		cCust_desc, ;
-		cArt_id, ;
-		cArt_desc, ;
-		nTick, ;
-		nWidth, ;
-		nHeight, ;
-		nQtty, ;
-		nTot_m2, ;
-		nAop_1, ;
-		nAop_2, ;
-		nAop_3, ;
-		nAop_4, ;
-		nAop_5, ;
-		nAop_6, ;
-		nAop_7, ;
-		nAop_8, ;
-		nAop_9, ;
-		nAop_10, ;
-		nAop_11, ;
-		nAop_12 )
-	
-	++ nCount
-	
-	//endif
+			// ukupna kvadratura
+			nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
+			
+			// element identifikator artikla 
+			nEl_no := aElem[ nEl_cnt, 1 ]
 
-	// resetuj vrijednosti
-	nAop_1 := 0
-	nAop_2 := 0
-	nAop_3 := 0
-	nAop_4 := 0
-	nAop_5 := 0
-	nAop_6 := 0
-	nAop_7 := 0
-	nAop_8 := 0
-	nAop_9 := 0
-	nAop_10 := 0
-	nAop_11 := 0
-	nAop_12 := 0
+			// broj elementa, 1, 2, 3 ...
+			nElem_no := aElem[ nEl_cnt, 3 ]
+			
+			// vrati opis za ovaj artikal
+			cArt_id := g_el_descr( aArt, nElem_no )
 
-	select doc_ops
+			// uslov po artiklu, ako je zadato
+			if !EMPTY( cArticle )
+
+				if ALLTRIM(cArt_id) $ cArticle
+					// ovo je ok
+				else
+					loop
+				endif
+			
+			endif
+
+			// opis artikla
+			cArt_desc := ALLTRIM( aElem[ nEl_cnt, 2 ] )
+			
+			// vidi o kojem se tipu elementa radi
+			nTmp := ASCAN( aArt, { |xVal| xVal[1] == nElem_no } )
+			
+			// je li "G" ili "F" ili ...
+			cEl_type := ALLTRIM( aArt[ nTmp, 2 ] )
+
+			nTick := 0
+
+			if cEl_type == "G"
+				// debljina stakla
+				nTick := g_gl_el_tick( aArt, nElem_no )
+			else
+				// debljina ostalih elemenata
+				nTick := g_el_tick( aArt, nElem_no )
+
+				// ako je frame, obracun je drugaciji
+				if cEl_type == "F"
+
+				  nTot_m2 := ( ( mm_2_m(nHeight) + ;
+				  	mm_2_m( nWidth ) ) * 2 ) * nQtty
+				
+				endif
+
+			endif
+
+			// upisi u tabelu ove vrijednosti
+			select customs
+			seek custid_str( nCust_id )
+			cCust_desc := field->cust_desc
+		
+			_ins_tmp1( nCust_id, ;
+				cCust_desc, ;
+				cArt_id, ;
+				cArt_desc, ;
+				nTick, ;
+				nWidth, ;
+				nHeight, ;
+				nQtty, ;
+				nTot_m2, ;
+				nAop_1, ;
+				nAop_2, ;
+				nAop_3, ;
+				nAop_4, ;
+				nAop_5, ;
+				nAop_6, ;
+				nAop_7, ;
+				nAop_8, ;
+				nAop_9, ;
+				nAop_10, ;
+				nAop_11, ;
+				nAop_12 )
+	
+
+			// da li ovaj artikal ima u elementima operacija ?
+	
+			select e_aops
+			go top
+			seek elid_str( nEl_no )
+
+			do while !EOF() .and. field->el_id = nEl_no
+			
+			  // operacija-1  .T. ?
+			  if _in_oper_( __op_1, field->aop_id )
+				nAop_1 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_1, __opu_1, cAopValue )
+			  endif
+	
+			  // operacija-2  .T. ?
+			  if _in_oper_( __op_2, field->aop_id )
+				nAop_2 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_2, __opu_2, cAopValue )
+			  endif
+	
+			  // operacija-3  .T. ?
+			  if _in_oper_( __op_3, field->aop_id )
+				nAop_3 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_3, __opu_3, cAopValue )
+			  endif
+		
+			  // operacija-4  .T. ?
+			  if _in_oper_( __op_4, field->aop_id )
+				nAop_4 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_4, __opu_4, cAopValue )
+			  endif
+			
+			  // operacija-5  .T. ?
+			  if _in_oper_( __op_5, field->aop_id )
+				nAop_5 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_5, __opu_5, cAopValue )
+			  endif
+			
+			  // operacija-6  .T. ?
+			  if _in_oper_( __op_6, field->aop_id )
+				nAop_6 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_6, __opu_6, cAopValue )
+			  endif
+		
+			  // operacija-7  .T. ?
+			  if _in_oper_( __op_7, field->aop_id )
+				nAop_7 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_7, __opu_7, cAopValue )
+			  endif
+			
+		 	  // operacija-8  .T. ?
+			  if _in_oper_( __op_8, field->aop_id )
+				nAop_8 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_8, __opu_8, cAopValue )
+			  endif
+
+		 	  // operacija-9  .T. ?
+			  if _in_oper_( __op_9, field->aop_id )
+				nAop_9 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_9, __opu_9, cAopValue )
+			  endif
+
+		 	  // operacija-10  .T. ?
+			  if _in_oper_( __op_10, field->aop_id )
+				nAop_10 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_10, __opu_10, cAopValue )
+			  endif
+
+			  // operacija-11  .T. ?
+			  if _in_oper_( __op_11, field->aop_id )
+				nAop_11 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_11, __opu_11, cAopValue )
+			  endif
+
+			  // operacija-12  .T. ?
+			  if _in_oper_( __op_12, field->aop_id )
+				nAop_12 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_12, __opu_12, cAopValue )
+			  endif
+
+			  if ( nAop_1 + nAop_2 + nAop_3 + ;
+				nAop_4 + nAop_5 + nAop_6 + ;
+				nAop_7 + nAop_8 + nAop_9 + ;
+				nAop_10 + nAop_11 + nAop_12 ) > 0
+
+			     _ins_op1( nCust_id, ;
+				cArt_id, ;
+				nTick, ;
+				nAop_1, ;
+				nAop_2, ;
+				nAop_3, ;
+				nAop_4, ;
+				nAop_5, ;
+				nAop_6, ;
+				nAop_7, ;
+				nAop_8, ;
+				nAop_9, ;
+				nAop_10, ;
+				nAop_11, ;
+				nAop_12 )
+	
+			    endif
+			    
+			    // resetuj vrijednosti
+			    nAop_1 := 0
+			    nAop_2 := 0
+			    nAop_3 := 0
+			    nAop_4 := 0
+			    nAop_5 := 0
+			    nAop_6 := 0
+			    nAop_7 := 0
+			    nAop_8 := 0
+			    nAop_9 := 0
+			    nAop_10 := 0
+			    nAop_11 := 0
+			    nAop_12 := 0
+			     
+			    select e_aops
+			    skip
+			
+			enddo
+
+			// provjeri da li ima operacija
+			select doc_ops
+			set order to tag "2"
+			seek docno_str( nDoc_no ) + docit_str( nDoc_it_no ) + ;
+				docno_str( nEl_no )
+
+			do while !EOF() .and. field->doc_no == nDoc_no ;
+				.and. field->doc_it_no == nDoc_it_no ;
+				.and. field->doc_it_el_no == nEl_no
+				
+			  // element artikla nad kojim je operacija 
+			  // izvrsena
+			  
+			  cAopValue := field->aop_value
+
+			  // operacija-1  .T. ?
+			  if _in_oper_( __op_1, field->aop_id )
+				nAop_1 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_1, __opu_1, cAopValue )
+			  endif
+	
+			  // operacija-2  .T. ?
+			  if _in_oper_( __op_2, field->aop_id )
+				nAop_2 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_2, __opu_2, cAopValue )
+			  endif
+	
+			  // operacija-3  .T. ?
+			  if _in_oper_( __op_3, field->aop_id )
+				nAop_3 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_3, __opu_3, cAopValue )
+			  endif
+		
+			  // operacija-4  .T. ?
+			  if _in_oper_( __op_4, field->aop_id )
+				nAop_4 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_4, __opu_4, cAopValue )
+			  endif
+			
+			  // operacija-5  .T. ?
+			  if _in_oper_( __op_5, field->aop_id )
+				nAop_5 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_5, __opu_5, cAopValue )
+			  endif
+			
+			  // operacija-6  .T. ?
+			  if _in_oper_( __op_6, field->aop_id )
+				nAop_6 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_6, __opu_6, cAopValue )
+			  endif
+		
+			  // operacija-7  .T. ?
+			  if _in_oper_( __op_7, field->aop_id )
+				nAop_7 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_7, __opu_7, cAopValue )
+			  endif
+			
+		 	  // operacija-8  .T. ?
+			  if _in_oper_( __op_8, field->aop_id )
+				nAop_8 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_8, __opu_8, cAopValue )
+			  endif
+
+			  // operacija-9  .T. ?
+			  if _in_oper_( __op_9, field->aop_id )
+				nAop_9 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_9, __opu_9, cAopValue )
+			  endif
+
+			  // operacija-10  .T. ?
+			  if _in_oper_( __op_10, field->aop_id )
+				nAop_10 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_10, __opu_10, cAopValue )
+			  endif
+
+			  // operacija-11  .T. ?
+			  if _in_oper_( __op_11, field->aop_id )
+				nAop_11 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_11, __opu_11, cAopValue )
+			  endif
+
+			  // operacija-12  .T. ?
+			  if _in_oper_( __op_12, field->aop_id )
+				nAop_12 := _calc_oper( nQtty, nWidth, nHeight, ;
+					__op_12, __opu_12, cAopValue )
+			  endif
+
+			  if ( nAop_1 + nAop_2 + nAop_3 + ;
+				nAop_4 + nAop_5 + nAop_6 + ;
+				nAop_7 + nAop_8 + nAop_9 + ;
+				nAop_10 + nAop_11 + nAop_12 ) > 0
+
+			     _ins_op1( nCust_id, ;
+				cArt_id, ;
+				nTick, ;
+				nAop_1, ;
+				nAop_2, ;
+				nAop_3, ;
+				nAop_4, ;
+				nAop_5, ;
+				nAop_6, ;
+				nAop_7, ;
+				nAop_8, ;
+				nAop_9, ;
+				nAop_10, ;
+				nAop_11, ;
+				nAop_12 )
+			 endif
+			 
+			 // resetuj vrijednosti
+			 nAop_1 := 0
+			 nAop_2 := 0
+			 nAop_3 := 0
+			 nAop_4 := 0
+			 nAop_5 := 0
+			 nAop_6 := 0
+			 nAop_7 := 0
+			 nAop_8 := 0
+			 nAop_9 := 0
+			 nAop_10 := 0
+			 nAop_11 := 0
+			 nAop_12 := 0
+
+			 select doc_ops
+			 skip
+
+			enddo
+
+		next
+		
+		select doc_it
+		skip
+	
+	enddo
+
+	select docs
 	skip
-	
+
 enddo
 
 BoxC()
@@ -553,8 +755,11 @@ cre_tmp1( aField )
 O__TMP1
 
 // kreiraj indekse
-index on art_id + STR(tick, 10, 2) tag "1"  
-index on STR(cust_id, 10, 0) + art_id + STR(tick, 10, 2) tag "2" 
+if __nvar2 = 2
+	index on art_id + STR(tick, 10, 2) tag "1"  
+else
+	index on STR(cust_id, 10, 0) + art_id + STR(tick, 10, 2) tag "1" 
+endif
 
 // otvori potrebne tabele
 o_tables( .f. )
@@ -632,6 +837,18 @@ do while !EOF()
 		seek artid_str( nArt_id )
 
 		cArt_id := field->art_desc
+		
+		// uslov po artiklu, ako postoji
+		if !EMPTY( cArticle )
+			if ALLTRIM( cArt_id ) $ cArticle
+				// ovo je ok
+			else
+				select doc_it
+				skip
+				loop
+			endif
+		endif
+		
 		cArt_desc := field->art_full_desc
 
 		select doc_it
@@ -690,7 +907,7 @@ do while !EOF()
 		seek artid_str( nArt_id )
 
 		cAopValue := ""
-
+		
 		do while !EOF() .and. field->art_id = nArt_id
 			
 			nEl_id := field->el_id
@@ -794,24 +1011,25 @@ do while !EOF()
 				nAop_11, ;
 				nAop_12 )
 	
-
-			  	// resetuj vrijednosti
-			  	nAop_1 := 0
-			  	nAop_2 := 0
-			  	nAop_3 := 0
-			  	nAop_4 := 0
-			  	nAop_5 := 0
-			  	nAop_6 := 0
-			  	nAop_7 := 0
-			  	nAop_8 := 0
-			  	nAop_9 := 0
-			  	nAop_10 := 0
-			  	nAop_11 := 0
-			 	nAop_12 := 0
-			     endif	
+			    endif
+			    
+			    // resetuj vrijednosti
+			    nAop_1 := 0
+			    nAop_2 := 0
+			    nAop_3 := 0
+			    nAop_4 := 0
+			    nAop_5 := 0
+			    nAop_6 := 0
+			    nAop_7 := 0
+			    nAop_8 := 0
+			    nAop_9 := 0
+			    nAop_10 := 0
+			    nAop_11 := 0
+			    nAop_12 := 0
 			     
-			     select e_aops
-			     skip
+			    select e_aops
+			    skip
+			
 			enddo
 
 			select elements
@@ -926,25 +1144,24 @@ do while !EOF()
 				nAop_11, ;
 				nAop_12 )
 	
+			 endif
+			 
+			 // resetuj vrijednosti
+			 nAop_1 := 0
+			 nAop_2 := 0
+			 nAop_3 := 0
+			 nAop_4 := 0
+			 nAop_5 := 0
+			 nAop_6 := 0
+			 nAop_7 := 0
+			 nAop_8 := 0
+			 nAop_9 := 0
+			 nAop_10 := 0
+			 nAop_11 := 0
+			 nAop_12 := 0
 
-			  // resetuj vrijednosti
-			  nAop_1 := 0
-			  nAop_2 := 0
-			  nAop_3 := 0
-			  nAop_4 := 0
-			  nAop_5 := 0
-			  nAop_6 := 0
-			  nAop_7 := 0
-			  nAop_8 := 0
-			  nAop_9 := 0
-			  nAop_10 := 0
-			  nAop_11 := 0
-			  nAop_12 := 0
-
-			endif
-
-			select doc_ops
-			skip
+			 select doc_ops
+			 skip
 
 		enddo
 	
@@ -1034,7 +1251,7 @@ return lRet
 // stampa specifikacije
 // stampa se iz _tmp0 tabele
 // ------------------------------------------
-static function _p_rpt_spec()
+static function _p_rpt_spec( dD1, dD2 )
 local nT_height := 0
 local nT_width := 0
 local nT_qtty := 0
@@ -1042,13 +1259,26 @@ local nT_um2 := 0
 local cLine := ""
 local nCount := 0
 
+local nT_aop1 := 0
+local nT_aop2 := 0
+local nT_aop3 := 0
+local nT_aop4 := 0
+local nT_aop5 := 0
+local nT_aop6 := 0
+local nT_aop7 := 0
+local nT_aop8 := 0
+local nT_aop9 := 0
+local nT_aop10 := 0
+local nT_aop11 := 0
+local nT_aop12 := 0
+
 START PRINT CRET
 
 ?
 P_COND2
 
 // naslov izvjestaja
-_rpt_descr()
+_rpt_descr( dD1, dD2 )
 // info operater, datum
 __rpt_info()
 // header
@@ -1067,10 +1297,20 @@ do while !EOF()
 	
 	// r.br
 	? PADL( ALLTRIM( STR(++nCount) ) + ".", 6)
+	
+	if __nvar2 = 1
+		// kupac
+		@ prow(), pcol() + 1 SAY PADR( ALLTRIM(field->cust_desc), 30 )
+	endif
+	
 	// artikal
 	@ prow(), pcol() + 1 SAY field->art_id
-	// debljina
-	@ prow(), pcol() + 1 SAY STR( field->tick, 6, 2 )
+	
+	if __nvar1 = 1
+		// debljina
+		@ prow(), pcol() + 1 SAY STR( field->tick, 6, 2 )
+	endif
+	
 	// kolicina
 	@ prow(), pcol() + 1 SAY STR( field->qtty, 12, 2 )
 	// sirina
@@ -1084,6 +1324,20 @@ do while !EOF()
 	nT_width += field->width
 	nT_um2 += field->total
 	nT_qtty += field->qtty
+
+	// totali operacija
+	nT_aop1 += field->aop_1
+	nT_aop2 += field->aop_2
+	nT_aop3 += field->aop_3
+	nT_aop4 += field->aop_4
+	nT_aop5 += field->aop_5
+	nT_aop6 += field->aop_6
+	nT_aop7 += field->aop_7
+	nT_aop8 += field->aop_8
+	nT_aop9 += field->aop_9
+	nT_aop10 += field->aop_10
+	nT_aop11 += field->aop_11
+	nT_aop12 += field->aop_12
 
 	// sada prikazi i operacije
 	if __op_1 <> 0
@@ -1152,9 +1406,21 @@ enddo
 
 ? cLine
 
-? PADR( "UKUPNO:", 35 )
-// debljina
-@ prow(), pcol() + 1 SAY PADR("", 8)
+if __nvar2 = 1
+	nLen := 66
+else
+	nLen := 35
+endif
+
+? PADR( "UKUPNO:", nLen )
+
+if __nvar1 = 1
+	// debljina
+	@ prow(), pcol() + 1 SAY PADR("", 8)
+else
+	@ prow(), pcol() + 1 SAY PADR("", 1)
+endif
+
 // kolicina
 @ prow(), pcol() + 1 SAY STR( nT_qtty, 12, 2 )
 // sirina
@@ -1163,6 +1429,44 @@ enddo
 @ prow(), pcol() + 1 SAY STR( nT_height, 12, 2 )
 // ukupno m2
 @ prow(), pcol() + 1 SAY STR( nT_um2, 12, 2 )
+
+// totali operacija
+if __op_1 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop1, 12, 2 )
+endif
+if __op_2 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop2, 12, 2 )
+endif
+if __op_3 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop3, 12, 2 )
+endif
+if __op_4 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop4, 12, 2 )
+endif
+if __op_5 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop5, 12, 2 )
+endif
+if __op_6 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop6, 12, 2 )
+endif
+if __op_7 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop7, 12, 2 )
+endif
+if __op_8 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop8, 12, 2 )
+endif
+if __op_9 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop9, 12, 2 )
+endif
+if __op_10 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop10, 12, 2 )
+endif
+if __op_11 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop11, 12, 2 )
+endif
+if __op_12 <> 0
+	@ prow(), pcol() + 1 SAY STR( nT_aop12, 12, 2 )
+endif
 
 ? cLine 
 
@@ -1189,10 +1493,22 @@ return lRet
 // ------------------------------------------------
 // ispisi naziv izvjestaja po varijanti
 // ------------------------------------------------
-static function _rpt_descr()
+static function _rpt_descr( dD1, dD2 )
 local cTmp := "rpt: "
 
-cTmp += "Pregled ucinka proizvodnje za period"
+cTmp += "Pregled ucinka proizvodnje za period "
+
+? cTmp
+
+cTmp := " - po "
+
+if __nvar1 = 1
+	cTmp += "elementima "
+else
+	cTmp += "artiklima "
+endif
+
+cTmp += "za period od " + DTOC( dD1 ) + " do " + DTOC( dD2 )
 
 ? cTmp
 
@@ -1209,10 +1525,20 @@ cTxt2 := ""
 
 cLine += REPLICATE("-", 6)
 cLine += SPACE(1)
+
+if __nvar2 = 1
+	cLine += REPLICATE("-", 30) 
+	cLine += SPACE(1)
+endif
+
 cLine += REPLICATE("-", 30) 
 cLine += SPACE(1)
-cLine += REPLICATE("-", 6)
-cLine += SPACE(1)
+
+if __nvar1 = 1
+	cLine += REPLICATE("-", 6)
+	cLine += SPACE(1)
+endif
+
 cLine += REPLICATE("-", 12)
 cLine += SPACE(1)
 cLine += REPLICATE("-", 12)
@@ -1223,31 +1549,51 @@ cLine += REPLICATE("-", 12)
 
 cTxt += PADR("r.br", 6)
 cTxt += SPACE(1)
+
+if __nvar2 = 1
+	cTxt += PADR("Partner", 30)
+	cTxt += SPACE(1)
+endif
+
 cTxt += PADR("Artikal / element", 30)
 cTxt += SPACE(1)
-cTxt += PADR("Deblj.", 6)
-cTxt += SPACE(1)
+
+if __nvar1 = 1
+	cTxt += PADR("Deblj.", 6)
+	cTxt += SPACE(1)
+endif
+
 cTxt += PADR("Kolicina", 12)
 cTxt += SPACE(1)
-cTxt += PADR("Sirina", 12)
+cTxt += PADR("Uk.sirina", 12)
 cTxt += SPACE(1)
-cTxt += PADR("Visina", 12)
+cTxt += PADR("Uk.visina", 12)
 cTxt += SPACE(1)
 cTxt += PADR("Ukupno", 12)
 
 cTxt2 += PADR("", 6)
 cTxt2 += SPACE(1)
+
+if __nvar2 = 1
+	cTxt2 += PADR("", 30)
+	cTxt2 += SPACE(1)
+endif
+
 cTxt2 += PADR("", 30)
 cTxt2 += SPACE(1)
-cTxt2 += PADR("(mm)", 6)
-cTxt2 += SPACE(1)
+
+if __nvar1 = 1
+	cTxt2 += PADR("(mm)", 6)
+	cTxt2 += SPACE(1)
+endif
+
 cTxt2 += PADR("(kom)", 12)
 cTxt2 += SPACE(1)
 cTxt2 += PADR("(m)", 12)
 cTxt2 += SPACE(1)
 cTxt2 += PADR("(m)", 12)
 cTxt2 += SPACE(1)
-cTxt2 += PADR("(m2)", 12)
+cTxt2 += PADR("(m2 | m)", 12)
 
 if __op_1 <> 0
 	
@@ -1457,7 +1803,11 @@ select _tmp1
 set order to tag "1"
 go top
 
-seek PADR( cArt_id, 30 ) + tick_str( nTick )
+if __nvar2 = 1
+	seek custid_str(nCust_id) + PADR( cArt_id, 30 ) + tick_str( nTick )
+else
+	seek PADR( cArt_id, 30 ) + tick_str( nTick )
+endif
 
 if !FOUND()
 	
@@ -1477,8 +1827,8 @@ endif
 nWidth := mm_2_m( nWidth )
 nHeight := mm_2_m( nHeight )
 
-replace field->width with ( field->width + nWidth )
-replace field->height with ( field->height + nHeight )
+replace field->width with ( field->width + ( nWidth * nQtty ) )
+replace field->height with ( field->height + ( nHeight * nQtty ) )
 replace field->qtty with ( field->qtty + nQtty )
 replace field->total with ( field->total + nTot_m2 )
 
@@ -1549,7 +1899,11 @@ select _tmp1
 set order to tag "1"
 go top
 
-seek PADR( cArt_id, 30 ) + tick_str( nTick )
+if __nvar2 = 1
+	seek custid_str( nCust_id ) + PADR( cArt_id, 30 ) + tick_str( nTick )
+else
+	seek PADR( cArt_id, 30 ) + tick_str( nTick )
+endif
 
 if __op_1 <> 0 .and. nAop_1 <> nil
 	replace field->aop_1 with ( field->aop_1 + nAop_1 )

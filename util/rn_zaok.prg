@@ -120,6 +120,23 @@ cType := aArr[ nSeek, 5 ]
 return cType
 
 
+// -------------------------------------------------------
+// vraca debljinu ostalih elemenata unutar kompozicije
+// -------------------------------------------------------
+function g_el_tick( aArr, nElement )
+local xRet := 0
+local nSeek
+
+nSeek := ASCAN( aArr, { |xVal| xVal[1] = nElement .and. ;
+	"TICK" $ ALLTRIM( xVal[4] ) } )
+
+if nSeek <> 0
+	// pronasao sam debljinu !
+	xRet := VAL( aArr[ nSeek, 5 ] )
+endif
+
+return xRet
+
 
 // -------------------------------------------------------
 // vraca debljinu stakla elementa unutar kompozicije

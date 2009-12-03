@@ -808,6 +808,7 @@ if (nArea==-1 .or. nArea == nArea2)
 	
 		case (nArea2 == F_DOC_OPS) .or. (nArea2 == F__DOC_OPS)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_op_no,4)", cPath + cTable, .t.)
+			CREATE_INDEX("2", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_it_el_no,10)", cPath + cTable, .t.)
 		case (nArea2 == F_DOC_LOG)
 			CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_log_no,10)+DTOS(doc_log_date)+doc_log_time", cPath + cTable, .t.)
 			CREATE_INDEX("2", "STR(doc_no,10)+doc_log_type+STR(doc_log_no,10)", cPath + cTable, .t.)
