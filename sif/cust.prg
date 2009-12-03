@@ -188,4 +188,38 @@ select (nTArea)
 return cCustDesc
 
 
+// ----------------------------------------------------
+// vraca ime kupca, ako je NN onda kontakt
+// ----------------------------------------------------
+function _cust_cont( nCust_id, nCont_id )
+local xRet := ""
+local nTArea := SELECT()
+local cTmp := ""
+
+select customs
+seek custid_str( nCust_id )
+
+if FOUND()
+	cTmp := ALLTRIM( field->cust_desc )
+endif
+
+// ako je NN onda potrazi kontakt
+if cTmp == "NN"
+	
+	select contacts
+	seek contid_str( nCont_id )
+	
+	if FOUND()
+		cTmp := ALLTRIM( field->cont_desc )
+	endif
+
+endif
+
+xRet := cTmp
+
+select (nTArea)
+
+return xRet
+
+
 

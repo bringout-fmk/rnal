@@ -4,6 +4,7 @@
 static __doc_no
 static __nvar1
 static __nvar2
+static __l_zaok := 0
 
 static __op_1 := 0
 static __op_2 := 0
@@ -72,7 +73,7 @@ return
 static function _g_vars( dDatFrom, dDatTo, nOperater, cArticle )
 
 local nRet := 1
-local nBoxX := 17
+local nBoxX := 20
 local nBoxY := 70
 local nX := 1
 local nOp1 := nOp2 := nOp3 := nOp4 := nOp5 := nOp6 := 0
@@ -82,6 +83,7 @@ local cOp7 := cOp8 := cOp9 := cOp10 := cOp11 := cOp12 := SPACE(10)
 local nTArea := SELECT()
 local nVar1 := 1
 local cPartn := "N"
+local cZaok := "N"
 private GetList := {}
 private cSection:="R"
 private cHistory:=" "
@@ -104,6 +106,8 @@ RPar("p2", @cOp12)
 RPar("d1", @dDatFrom)
 RPar("d2", @dDatTo)
 RPar("v1", @nVar1)
+RPar("v2", @cPartn)
+RPar("v3", @cZaok)
 
 Box(, nBoxX, nBoxY)
 
@@ -216,6 +220,11 @@ Box(, nBoxX, nBoxY)
  	
 	@ m_x + nX, m_y + 2 SAY "Izvjestaj se formira po partnerima (D/N)?" ;
 		GET cPartn VALID cPartn $ "DN" PICT "@!"
+	
+	nX += 1
+ 	
+	@ m_x + nX, m_y + 2 SAY "Zaokruzenje po GN-u (D/N)?" ;
+		GET cZaok VALID cZaok $ "DN" PICT "@!"
 
 	
 	read
@@ -243,13 +252,22 @@ WPar("p2", cOp12)
 WPar("d1", dDatFrom)
 WPar("d2", dDatTo)
 WPar("v1", nVar1)
+WPar("v2", cPartn)
+WPar("v3", cZaok)
 
 // parametri staticki
 __nvar1 := nVar1
 __nvar2 := 2
+__l_zaok := 0
 
+// partner
 if cPartn == "D"
 	__nvar2 := 1
+endif
+
+// zaokruzenje
+if cZaok == "D"
+	__l_zaok := 1
 endif
 
 // operacije
@@ -297,6 +315,8 @@ local cCust_desc
 local nAop_1 := nAop_2 := nAop_3 := nAop_4 := nAop_5 := nAop_6 := 0
 local nAop_7 := nAop_8 := nAop_9 := nAop_10 := nAop_11 := nAop_12 := 0
 local nEl_cnt
+local nCont_id
+local nCust_id
 
 // kreiraj tmp tabelu
 aField := _spec_fields()
@@ -308,7 +328,7 @@ O__TMP1
 if __nvar2 = 2
 	index on art_id + STR(tick, 10, 2) tag "1"  
 else
-	index on STR(cust_id, 10, 0) + art_id + STR(tick, 10, 2) tag "1" 
+	index on customer + art_id + STR(tick, 10, 2) tag "1" 
 endif
 
 // otvori potrebne tabele
@@ -326,6 +346,7 @@ do while !EOF()
 	@ m_x + 1, m_y + 2 SAY "... vrsim odabir stavki ... nalog: " + ALLTRIM( STR(nDoc_no) )
 	
 	nCust_id := field->cust_id
+	nCont_id := field->cont_id
 
 	// provjeri da li ovaj dokument zadovoljava kriterij
 	
@@ -359,6 +380,9 @@ do while !EOF()
 		endif
 	endif
 
+	// daj mi kupca
+	cCust_desc := _cust_cont( nCust_id, nCont_id )
+
 	// idi na stavke naloga
 	select doc_it
 	seek docno_str( nDoc_no )
@@ -367,15 +391,20 @@ do while !EOF()
 	do while !EOF() .and. field->doc_no == nDoc_no
 
 		nDoc_it_no := field->doc_it_no
+		cDoc_it_type := field->doc_it_type
 		nArt_id := field->art_id
 	
 		nQtty := field->doc_it_qtty
-		nHeight := field->doc_it_height
-		nWidth := field->doc_it_width
-
-		// koliko kvadrata ?
-		//nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
 		
+		nHeight := field->doc_it_height
+		nH_orig := nHeight
+		
+		nWidth := field->doc_it_width
+		nW_orig := nWidth
+
+		nH2 := field->doc_it_h2
+		nW2 := field->doc_it_w2
+
 		aArt := {}
 		aElem := {}
 
@@ -384,19 +413,49 @@ do while !EOF()
 
 		// napuni elemente artikla
 		_g_art_elements( @aElem, nArt_id )
-		
+	
+
 		// prodji kroz elemente artikla i obradi svaki
 		for nEl_cnt := 1 to LEN( aElem )
-		
-			// ukupna kvadratura
-			nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
 			
 			// element identifikator artikla 
 			nEl_no := aElem[ nEl_cnt, 1 ]
 
 			// broj elementa, 1, 2, 3 ...
 			nElem_no := aElem[ nEl_cnt, 3 ]
-			
+		
+			// provjeri zaokruzenja
+			if __l_zaok = 1
+		  
+		  	  l_woZaok := .f.
+		
+		  	  if l_woZaok == .f.
+			  	l_woZaok := is_kaljeno( aArt, ;
+					nDoc_no, nDoc_it_no, nEl_no )
+		  	  endif
+		
+		  	  if l_woZaok == .f.
+			    	l_woZaok := is_emajl( aArt, ;
+					nDoc_no, nDoc_it_no, nEl_no )
+		  	  endif
+		
+		  	  if l_woZaok == .f.
+		  		l_woZaok := is_vglass( aArt )
+		  	  endif
+		
+		  	  if l_woZaok == .f.
+		  		l_woZaok := is_plex( aArt )
+		  	  endif
+		
+		  	  // zaokruzi vrijednosti
+		  	  nHeight := obrl_zaok( nHeight, aArt, l_woZaok )
+		  	  nWidth := obrl_zaok( nWidth, aArt, l_woZaok )
+		
+			endif
+		
+			// ukupna kvadratura
+			nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
+		
 			// vrati opis za ovaj artikal
 			cArt_id := g_el_descr( aArt, nElem_no )
 
@@ -423,8 +482,10 @@ do while !EOF()
 			nTick := 0
 
 			if cEl_type == "G"
+				
 				// debljina stakla
 				nTick := g_gl_el_tick( aArt, nElem_no )
+
 			else
 				// debljina ostalih elemenata
 				nTick := g_el_tick( aArt, nElem_no )
@@ -432,20 +493,14 @@ do while !EOF()
 				// ako je frame, obracun je drugaciji
 				if cEl_type == "F"
 
-				  nTot_m2 := ( ( mm_2_m(nHeight) + ;
-				  	mm_2_m( nWidth ) ) * 2 ) * nQtty
-				
+				  	nTot_m2 := ( ( mm_2_m(nH_orig) + ;
+				  	  mm_2_m( nW_orig ) ) * 2 ) * nQtty
+
 				endif
 
 			endif
-
-			// upisi u tabelu ove vrijednosti
-			select customs
-			seek custid_str( nCust_id )
-			cCust_desc := field->cust_desc
 		
-			_ins_tmp1( nCust_id, ;
-				cCust_desc, ;
+			_ins_tmp1( cCust_desc, ;
 				cArt_id, ;
 				cArt_desc, ;
 				nTick, ;
@@ -552,7 +607,7 @@ do while !EOF()
 				nAop_7 + nAop_8 + nAop_9 + ;
 				nAop_10 + nAop_11 + nAop_12 ) > 0
 
-			     _ins_op1( nCust_id, ;
+			     _ins_op1( cCust_desc, ;
 				cArt_id, ;
 				nTick, ;
 				nAop_1, ;
@@ -681,7 +736,7 @@ do while !EOF()
 				nAop_7 + nAop_8 + nAop_9 + ;
 				nAop_10 + nAop_11 + nAop_12 ) > 0
 
-			     _ins_op1( nCust_id, ;
+			     _ins_op1( cCust_desc, ;
 				cArt_id, ;
 				nTick, ;
 				nAop_1, ;
@@ -734,6 +789,7 @@ BoxC()
 return
 
 
+
 // ----------------------------------------------
 // kreiraj specifikaciju po artiklima
 // izvjestaj se primarno puni u _tmp0 tabelu
@@ -747,6 +803,8 @@ local nCount := 0
 local cCust_desc
 local nAop_1 := nAop_2 := nAop_3 := nAop_4 := nAop_5 := nAop_6 := 0
 local nAop_7 := nAop_8 := nAop_9 := nAop_10 := nAop_11 := nAop_12 := 0
+local nCont_id
+local nCust_id
 
 // kreiraj tmp tabelu
 aField := _spec_fields()
@@ -758,7 +816,7 @@ O__TMP1
 if __nvar2 = 2
 	index on art_id + STR(tick, 10, 2) tag "1"  
 else
-	index on STR(cust_id, 10, 0) + art_id + STR(tick, 10, 2) tag "1" 
+	index on customer + art_id + STR(tick, 10, 2) tag "1" 
 endif
 
 // otvori potrebne tabele
@@ -781,6 +839,7 @@ do while !EOF()
 	@ m_x + 1, m_y + 2 SAY "... vrsim odabir stavki ... nalog: " + ALLTRIM( STR(nDoc_no) )
 	
 	nCust_id := field->cust_id
+	nCont_id := field->cont_id
 
 	// provjeri da li ovaj dokument zadovoljava kriterij
 	
@@ -814,10 +873,8 @@ do while !EOF()
 		endif
 	endif
 
-	select customs
-	go top
-	seek custid_str( nCust_id )
-	cCust_desc := field->cust_desc
+	// daj mi kupca
+	cCust_desc := _cust_cont( nCust_id, nCont_id )
 
 	// pronadji stavku u items
 	// i daj osnovne parametre, kolicinu, sirinu, visinu...
@@ -848,24 +905,57 @@ do while !EOF()
 				loop
 			endif
 		endif
-		
+	
 		cArt_desc := field->art_full_desc
-
+		
 		select doc_it
 	
 		nDoc_it_no := field->doc_it_no
+		cDoc_it_type := field->doc_it_type
 
 		nQtty := field->doc_it_qtty
+		
 		nHeight := field->doc_it_height
 		nWidth := field->doc_it_width
+		
+		// ako radis zaokruzenja
+		if __l_zaok = 1
+		
+		  // napuni matricu sa artiklom
+		  aArt := {}
+		  _art_set_descr( nArt_id, nil, nil, @aArt, .t. )
+	
+		  // bez zaokruzenja !
+		  l_woZaok := .f.
+		
+		  if l_woZaok == .f.
+			l_woZaok := is_kaljeno( aArt, nDoc_no, nDoc_it_no )
+		  endif
+		
+		  if l_woZaok == .f.
+			l_woZaok := is_emajl( aArt, nDoc_no, nDoc_it_no )
+		  endif
+		
+		  if l_woZaok == .f.
+			l_woZaok := is_vglass( aArt )
+		  endif
+		
+		  if l_woZaok == .f.
+			l_woZaok := is_plex( aArt )
+		  endif
+		
+		  // zaokruzi vrijednosti
+		  nHeight := obrl_zaok( nHeight, aArt, l_woZaok )
+		  nWidth := obrl_zaok( nWidth, aArt, l_woZaok )
+		
+		endif
 
 		// koliko kvadrata ?
 		nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
 		nTick := 0
 		
 		// upisi vrijednost
-		_ins_tmp1( nCust_id, ;
-			cCust_desc, ;
+		_ins_tmp1( cCust_desc, ;
 			cArt_id, ;
 			cArt_desc, ;
 			nTick, ;
@@ -995,7 +1085,7 @@ do while !EOF()
 				nAop_7 + nAop_8 + nAop_9 + ;
 				nAop_10 + nAop_11 + nAop_12 ) > 0
 
-			     _ins_op1( nCust_id, ;
+			     _ins_op1( cCust_desc, ;
 				cArt_id, ;
 				nTick, ;
 				nAop_1, ;
@@ -1128,7 +1218,7 @@ do while !EOF()
 				nAop_7 + nAop_8 + nAop_9 + ;
 				nAop_10 + nAop_11 + nAop_12 ) > 0
 
-			  _ins_op1( nCust_id, ;
+			  _ins_op1( cCust_desc, ;
 				cArt_id, ;
 				nTick, ;
 				nAop_1, ;
@@ -1300,7 +1390,7 @@ do while !EOF()
 	
 	if __nvar2 = 1
 		// kupac
-		@ prow(), pcol() + 1 SAY PADR( ALLTRIM(field->cust_desc), 30 )
+		@ prow(), pcol() + 1 SAY PADR( ALLTRIM(field->customer), 30 )
 	endif
 	
 	// artikal
@@ -1757,8 +1847,7 @@ return
 static function _spec_fields()
 local aDbf := {}
 
-AADD( aDbf, { "cust_id",  "N", 10, 0 })
-AADD( aDbf, { "cust_desc", "C", 100, 0 })
+AADD( aDbf, { "customer", "C", 100, 0 })
 AADD( aDbf, { "art_id",  "C", 30, 0 })
 AADD( aDbf, { "art_desc", "C", 100, 0 })
 AADD( aDbf, { "tick", "N", 10, 2 })
@@ -1792,7 +1881,7 @@ return STR( nTick, 10, 2 )
 // -----------------------------------------------------
 // insert into _tmp1
 // -----------------------------------------------------
-static function _ins_tmp1( nCust_id, cCust_desc, cArt_id, cArt_desc, ;
+static function _ins_tmp1( cCust_desc, cArt_id, cArt_desc, ;
 			nTick, nWidth, nHeight, nQtty, nTot_m2, ;
 			nAop_1, nAop_2, nAop_3, nAop_4, nAop_5, nAop_6, ;
 			nAop_7, nAop_8, nAop_9, nAop_10, nAop_11, nAop_12 )
@@ -1804,7 +1893,7 @@ set order to tag "1"
 go top
 
 if __nvar2 = 1
-	seek custid_str(nCust_id) + PADR( cArt_id, 30 ) + tick_str( nTick )
+	seek PADR( cCust_desc, 100 ) + PADR( cArt_id, 30 ) + tick_str( nTick )
 else
 	seek PADR( cArt_id, 30 ) + tick_str( nTick )
 endif
@@ -1813,8 +1902,7 @@ if !FOUND()
 	
 	APPEND BLANK
 	
-	replace field->cust_id with nCust_id
-	replace field->cust_desc with cCust_desc
+	replace field->customer with cCust_desc
 
 	replace field->art_id with cArt_id
 	replace field->art_desc with cArt_desc
@@ -1887,7 +1975,7 @@ return
 // -----------------------------------------------------
 // insert op. into _tmp1
 // -----------------------------------------------------
-static function _ins_op1( nCust_id, cArt_id, nTick, ;
+static function _ins_op1( cCust_desc, cArt_id, nTick, ;
 			nAop_1, nAop_2, nAop_3, ;
 			nAop_4, nAop_5, nAop_6, ;
 			nAop_7, nAop_8, nAop_9, ;
@@ -1900,7 +1988,7 @@ set order to tag "1"
 go top
 
 if __nvar2 = 1
-	seek custid_str( nCust_id ) + PADR( cArt_id, 30 ) + tick_str( nTick )
+	seek PADR( cCust_desc, 100 ) + PADR( cArt_id, 30 ) + tick_str( nTick )
 else
 	seek PADR( cArt_id, 30 ) + tick_str( nTick )
 endif
@@ -1955,5 +2043,10 @@ endif
 
 select (nTArea)
 return
+
+
+
+
+
 
 

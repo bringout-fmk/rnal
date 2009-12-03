@@ -186,7 +186,7 @@ return xRet
 
 
 // -------------------------------------
-// zaokruzi xVal po GNU tabeli
+// zaokruzi xVal po GN tabeli
 // -------------------------------------
 function dim_zaokruzi(xVal, nDebljina, nTipZaok)
 

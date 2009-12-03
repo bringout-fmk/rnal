@@ -73,7 +73,7 @@ RAZMAK := SPACE(1)
 t_rpt_open()
 
 select t_docit
-set order to tag "2"
+set order to tag "3"
 go top
 
 // stampaj obracunski listic
@@ -88,6 +88,7 @@ return
 function p_a4_obrl(lStartPrint)
 local lShow_zagl
 local i
+local nItem := 0
 
 nDuzStrKorekcija := 0
 lPrintedTotal := .f.
@@ -137,7 +138,7 @@ endif
 ?
 
 select t_docit
-set order to tag "2"
+set order to tag "3"
 go top
 
 B_OFF
@@ -148,7 +149,7 @@ P_COND2
 s_tbl_header()
 
 select t_docit
-set order to tag "2"
+set order to tag "3"
 
 nPage := 1
 aArt_desc := {}
@@ -178,6 +179,7 @@ cDocXX := "XX"
 do while !EOF()
 
    nDoc_no := field->doc_no
+   nItem := 0
 
    do while !EOF() .and. field->doc_no == nDoc_no 
 
@@ -188,7 +190,7 @@ do while !EOF()
  	skip
 	loop
      endif
-	
+     
      cDoc_no := docno_str( field->doc_no )
      cDoc_it_no := docit_str( field->doc_it_no )
 
@@ -203,6 +205,12 @@ do while !EOF()
 	
      do while !EOF() .and. field->doc_no == nDoc_no ;
 			.and. field->art_sh_desc == cArt_sh
+
+	// da li se stavka stampa ili ne ?
+        if field->print == "N"
+ 	   skip
+	   loop
+        endif
 
 	cDoc_no := docno_str( field->doc_no )
         cDoc_it_no := docit_str( field->doc_it_no )
@@ -251,10 +259,13 @@ do while !EOF()
 	// prvi red...
 	// ------------------------------------------
 	
+        ++ nItem
+	
 	? RAZMAK + SPACE(10)
 
 	// r.br
-	?? PADL(ALLTRIM(cDoc_it_no) + ")", LEN_IT_NO)
+	//?? PADL(ALLTRIM(cDoc_it_no) + ")", LEN_IT_NO)
+	?? PADL(ALLTRIM( STR(nItem) ) + ")", LEN_IT_NO)
 	
 	?? " "
 	

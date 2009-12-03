@@ -272,10 +272,11 @@ do while !EOF() .and. field->doc_no == __doc_no
 		
 	endif
 	
+	cOper_desc := ""
+
 	// u varijanti obracunskog lista uzmi i operacije za ovu stavku
 	if nVar = 2
 
-		cOper_desc := ""
 		aOper := {}
 		cTmp := ""
 		
@@ -1046,56 +1047,68 @@ return lRet
 
 
 
-// ---------------------------------------------
+// ------------------------------------------------------------
 // da li je staklo kaljeno ???
-// ---------------------------------------------
-function is_kaljeno( aArticle, nDoc_no, nDocit_no )
+// ------------------------------------------------------------
+function is_kaljeno( aArticle, nDoc_no, nDocit_no, nDoc_el_no )
 local lRet := .f.
 local cSrcJok := ALLTRIM( gAopKaljenje )
 
+if nDoc_el_no == nil
+	nDoc_el_no := 0
+endif
+
 // provjeri obradu iz matrice
 lRet := ck_obr( aArticle, cSrcJok )
 
 if lRet == .f.
 	// provjeri i tabelu DOC_OPS
-	lRet := ck_obr_aops( nDoc_no, nDocit_no, cSrcJok )
+	lRet := ck_obr_aops( nDoc_no, nDocit_no, nDoc_el_no, cSrcJok )
 endif
 
 return lRet 
 
 
-// ---------------------------------------------
+// -----------------------------------------------------------
 // da li je staklo emajlirano ???
-// ---------------------------------------------
-function is_emajl( aArticle, nDoc_no, nDocit_no )
+// -----------------------------------------------------------
+function is_emajl( aArticle, nDoc_no, nDocit_no, nDoc_el_no )
 local lRet := .f.
 local cSrcJok := "<A_E>"
 
+if nDoc_el_no == nil
+	nDoc_el_no := 0
+endif
+
 // provjeri obradu iz matrice
 lRet := ck_obr( aArticle, cSrcJok )
 
 if lRet == .f.
 	// provjeri i tabelu DOC_OPS
-	lRet := ck_obr_aops( nDoc_no, nDocit_no, cSrcJok )
+	lRet := ck_obr_aops( nDoc_no, nDocit_no, nDoc_el_no, cSrcJok )
 endif
 
 return lRet 
 
 
 
-// ---------------------------------------------
+// -------------------------------------------------------------
 // da li je staklo kaljeno ???
-// ---------------------------------------------
-function is_bruseno( aArticle, nDoc_no, nDocit_no )
+// -------------------------------------------------------------
+function is_bruseno( aArticle, nDoc_no, nDocit_no, nDoc_el_no )
 local lRet := .f.
 local cSrcJok := ALLTRIM( gAopBrusenje )
+
+if nDoc_el_no == nil
+	nDoc_el_no := 0
+endif
 
 // provjeri obradu iz matrice
 lRet := ck_obr( aArticle, cSrcJok )
 
 if lRet == .f.
 	// provjeri i tabelu DOC_OPS
-	lRet := ck_obr_aops( nDoc_no, nDocit_no, cSrcJok )
+	lRet := ck_obr_aops( nDoc_no, nDocit_no, nDoc_el_no, cSrcJok )
 endif
 
 return lRet 
@@ -1114,20 +1127,20 @@ endif
 return lRet
 
 
-// ---------------------------------------
+// ----------------------------------------------------------------------
 // provjeri obradu u tabeli DOC_OPS
 //   nDocIt_no - redni broj stavke naloga
 //   cSrcObrada - djoker obrade <AOP_K> .... 
 //                koju obradu trazimo
-// ---------------------------------------
-static function ck_obr_aops( nDoc_no, nDocit_no, cSrcObrada )
+// ----------------------------------------------------------------------
+static function ck_obr_aops( nDoc_no, nDocit_no, nDoc_el_no, cSrcObrada )
 local lRet := .f.
 local nTArea := SELECT()
 local nTable := F_DOC_OPS
 if __temp == .t.
 	nTable := F__DOC_OPS
 endif
-	
+
 // provjeri na osnovu DOC_AOP
 	
 select (nTable)
@@ -1138,7 +1151,15 @@ seek docno_str(nDoc_no) + docit_str(nDocit_no)
 	
 do while !EOF() .and. field->doc_no == nDoc_no .and. ;
 		field->doc_it_no == nDocit_no
-			
+
+	// provjeri po elementu
+	if nDoc_el_no > 0
+		if field->doc_it_el_no <> nDoc_el_no
+			skip
+			loop
+		endif
+	endif
+
 	nAop_id := field->aop_id
 
 	// idi u operacije pa vidi djoker

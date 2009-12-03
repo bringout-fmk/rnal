@@ -71,10 +71,15 @@ endif
 
 // kreiraj indexe
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
-CREATE_INDEX("2", "STR(doc_no,10)+art_sh_desc", PRIVPATH + "T_DOCIT")
-CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(it_no,4)+art_id", PRIVPATH + "T_DOCIT2")
+
 CREATE_INDEX("2", "STR(doc_no,10)+STR(doc_gr_no,2)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
+
+CREATE_INDEX("3", "STR(doc_no,10)+art_sh_desc", PRIVPATH + "T_DOCIT")
+
+CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(it_no,4)+art_id", PRIVPATH + "T_DOCIT2")
+
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_el_no,4)+STR(doc_op_no,4)", PRIVPATH + "T_DOCOP")
+
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
 
 return

@@ -1281,69 +1281,73 @@ return nRet
 
 // ---------------------------------------------------------
 // vraca naziv elementa unutar kompozicije iz ARR
+// aArr - matrica sa definicijom artikla
+// nEl_count - redni broj trazenog elementa 
 // ---------------------------------------------------------
-function g_el_descr( aArr, nEl_no )
+function g_el_descr( aArr, nEl_count )
 local nTotElem
 local cElemCode 
 local i
 local xRet := ""
 local cTmp
 local nTmp
+local nTmp2
+local nScan
 local lInsLExtChar := .f.
 local cLExtraChar := ""
 
-if LEN(aArr) > 0
+// ukupni broj elemenata
+if LEN( aArr ) > 0
 	nTotElem := aArr[ LEN(aArr), 1 ]
 endif
 
-for i := 1 to nTotElem
+if nEl_count > nTotElem
 
+	// ovo ne postoji
+	
+	xRet := "unknown"
+	return xRet
 
-	// iscitaj code elementa
-	nTmp := ASCAN( aArr, {| xVar | xVar[1] == i })
+endif
+
+// pozicioniraj se na taj element u matrici prvo
+nScan := ASCAN( aArr, { |xVal| xVal[1] = nEl_count } )
+// iscitaj code elementa
+cElemCode := aArr[ nScan, 2 ]
+
+// uzmi pravilo <GL_TICK>#<GL_TYPE>.....
+cRule := _get_rule( cElemCode )
+
+// pa ga u matricu ......
+aRule := TokToNiz( cRule, "#" )
 	
-	nTmp2 := aArr[ nTmp, 1 ]
+for nRule := 1 to LEN( aRule )
 	
-	if nTmp2 <> nEl_no
-		loop
+	// <GL_TICK>
+	cRuleDef := ALLTRIM( aRule[ nRule ] )
+
+	if LEFT( cRuleDef, 1 ) <> "<"
+		
+		cLExtraChar := LEFT( cRuleDef, 1 )
+		cRuleDef := STRTRAN( cRuleDef, cLExtraChar, "" )
+			
+		lInsLExtChar := .t.
+			
 	endif
-	
-	cElemCode := aArr[ nTmp, 2 ]
 
-	// uzmi pravilo <GL_TICK>#<GL_TYPE>.....
-	cRule := _get_rule( cElemCode )
-	// pa ga u matricu ......
-	aRule := TokToNiz( cRule, "#" )
-	
-	for nRule := 1 to LEN( aRule )
-	
-		// <GL_TICK>
-		cRuleDef := ALLTRIM( aRule[ nRule ] )
-
-		if LEFT( cRuleDef, 1 ) <> "<"
+	nSeek := ASCAN(aArr, {| xVal | ;
+		xVal[1] == nEl_count .and. xVal[4] == cRuleDef })
 		
-			cLExtraChar := LEFT( cRuleDef, 1 )
-			cRuleDef := STRTRAN( cRuleDef, cLExtraChar, "" )
-			
-			lInsLExtChar := .t.
-			
+	if nSeek > 0
+		
+		if lInsLExtChar == .t.
+			xRet += cLExtraChar
+			lInsLExtChar := .f.
 		endif
-
-		nSeek := ASCAN(aArr, {| xVal | ;
-			xVal[1] == i .and. xVal[4] == cRuleDef })
-		
-		if nSeek > 0
-		
-			if lInsLExtChar == .t.
-				cArt_code += cLExtraChar
-				lInsLExtChar := .f.
-			endif
 	
-			xRet += ALLTRIM( aArr[ nSeek, 5 ] )
+		xRet += ALLTRIM( aArr[ nSeek, 5 ] )
 				
-		endif
-	
-	next
+	endif
 	
 next
 
