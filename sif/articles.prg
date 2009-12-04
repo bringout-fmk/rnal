@@ -1312,6 +1312,15 @@ endif
 
 // pozicioniraj se na taj element u matrici prvo
 nScan := ASCAN( aArr, { |xVal| xVal[1] = nEl_count } )
+
+if nScan = 0
+	
+	// bound error greska
+	xRet := "unknown"
+	return xRet
+
+endif
+
 // iscitaj code elementa
 cElemCode := aArr[ nScan, 2 ]
 

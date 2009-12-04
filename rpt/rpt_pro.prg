@@ -41,6 +41,7 @@ local dD_From := CTOD("")
 local dD_to := DATE()
 local nOper := 0
 local cArticle := SPACE(100)
+local aError 
 
 o_sif_tables()
 
@@ -53,15 +54,76 @@ do case
 
 	case __nvar1 = 1
 		// kreiraj specifikaciju po elementima
-		_cre_sp_el( dD_from, dD_to, nOper, cArticle )
+		aError := _cre_sp_el( dD_from, dD_to, nOper, cArticle )
 	case __nvar1 = 2
 		// kreiraj sp. po artiklima
-		_cre_sp_art( dD_from, dD_to, nOper, cArticle )
+		aError := _cre_sp_art( dD_from, dD_to, nOper, cArticle )
 
 endcase
 
-// printaj specifikaciju
-_p_rpt_spec( dD_from, dD_to )
+lPrint := .t.
+
+if LEN( aError ) > 0
+	
+	// ima gresaka
+	_p_error( aError )
+
+	if Pitanje(,"Ipak pregledati izvjestaj (D/N) ?", "D") == "N"
+		lPrint := .f.
+	endif
+
+endif
+
+if lPrint == .t.
+	// printaj specifikaciju
+	_p_rpt_spec( dD_from, dD_to )
+endif
+
+return
+
+
+// ----------------------------------------
+// ispis gresaka
+// ----------------------------------------
+static function _p_error( aArr )
+local i
+local cLine
+local cTxt
+
+cLine := REPLICATE("-", 5)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 30)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 10)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 4)
+
+cTxt := PADR( "r.br", 5 )
+cTxt += SPACE(1)
+cTxt += PADR( "opis greske", 30 )
+cTxt += SPACE(1)
+cTxt += PADR( "dokument", 10 )
+cTxt += SPACE(1)
+cTxt += PADR( "st.", 4 )
+
+START PRINT CRET
+
+?
+? cLine
+? cTxt
+? cLine
+
+for i := 1 to LEN( aArr )
+
+	? PADL( ALLTRIM( STR ( i ) ), 4 ) + "."
+	@ prow(), pcol() + 1 SAY PADR( aArr[i, 1], 30 )
+	@ prow(), pcol() + 1 SAY docno_str( aArr[i, 2] )
+	@ prow(), pcol() + 1 SAY docit_str( aArr[i, 3] )
+
+next
+
+FF
+END PRINT
 
 return
 
@@ -317,6 +379,7 @@ local nAop_7 := nAop_8 := nAop_9 := nAop_10 := nAop_11 := nAop_12 := 0
 local nEl_cnt
 local nCont_id
 local nCust_id
+local aErr := {}
 
 // kreiraj tmp tabelu
 aField := _spec_fields()
@@ -394,6 +457,16 @@ do while !EOF()
 		cDoc_it_type := field->doc_it_type
 		nArt_id := field->art_id
 	
+		// artikal nedefinisan
+		if nArt_id == 0
+			
+			// dodaj u greske
+			AADD( aErr, { "artikal 0", nDoc_no, nDoc_it_no } )
+			
+			skip
+			loop
+		endif
+
 		nQtty := field->doc_it_qtty
 		
 		nHeight := field->doc_it_height
@@ -458,6 +531,17 @@ do while !EOF()
 		
 			// vrati opis za ovaj artikal
 			cArt_id := g_el_descr( aArt, nElem_no )
+			
+			if cArt_id == "unknown"
+				
+				// dodaj gresku
+				AADD( aErr, { "element unknown", nDoc_no, ;
+					nDoc_it_no } )
+				
+				// preskoci na sljedeci element
+				loop
+			
+			endif
 
 			// uslov po artiklu, ako je zadato
 			if !EMPTY( cArticle )
@@ -786,7 +870,7 @@ enddo
 
 BoxC()
 
-return
+return aErr
 
 
 
@@ -805,6 +889,7 @@ local nAop_1 := nAop_2 := nAop_3 := nAop_4 := nAop_5 := nAop_6 := 0
 local nAop_7 := nAop_8 := nAop_9 := nAop_10 := nAop_11 := nAop_12 := 0
 local nCont_id
 local nCust_id
+local aErr := {}
 
 // kreiraj tmp tabelu
 aField := _spec_fields()
@@ -889,6 +974,12 @@ do while !EOF()
 	do while !EOF() .and. field->doc_no = nDoc_no
 		
 		nArt_id := field->art_id
+
+		if nArt_id == 0
+			AADD( aErr, {"artikal 0", nDoc_no, nDoc_it_no } )
+			skip
+			loop
+		endif
 
 		select articles
 		seek artid_str( nArt_id )
@@ -1266,7 +1357,7 @@ enddo
 
 BoxC()
 
-return
+return aErr
 
 
 // --------------------------------------------------------------------

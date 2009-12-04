@@ -175,11 +175,12 @@ nTZWidt := 0
 
 cDocXX := "XX"
 
+nItem := 0
+
 // stampaj podatke 
 do while !EOF()
 
    nDoc_no := field->doc_no
-   nItem := 0
 
    do while !EOF() .and. field->doc_no == nDoc_no 
 

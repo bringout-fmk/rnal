@@ -31,6 +31,9 @@ AADD(opcexe, {|| m_get_spec( 1 ) })
 AADD(opc, "R. pregled utroska RAL sirovina  ")
 AADD(opcexe, {|| rpt_ral_calc( ) })
 
+AADD(opc, "O. pregled ucinka operatera  ")
+AADD(opcexe, {|| r_op_docs( ) })
+
 AADD(opc, "P. pregled ucinka proizvodnje  ")
 AADD(opcexe, {|| m_get_rpro( ) })
 
