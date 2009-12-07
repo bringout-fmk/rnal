@@ -9,17 +9,22 @@ local dD_from
 local dD_to
 local nOper
 local cStatus
+local nVar := 0
 
 // uslovi izvjestaja
 if std_vars( @dD_from, @dD_to, @nOper, @cStatus ) = 0
 	return
 endif
 
+if Pitanje(,"Prikazati samo naloge koji nisu prebaceni ? (D/N)", "D") == "D"
+	nVar := 1
+endif
+
 // napravi report
 _cre_report( dD_from, dD_to, nOper, cStatus )
 
 // rpt
-_gen_rpt( dD_from, dD_to, nOper )
+_gen_rpt( dD_from, dD_to, nOper, nVar )
 
 return
 
@@ -28,7 +33,8 @@ return
 // ------------------------------------------------------
 // stampa izvjestaja
 // ------------------------------------------------------
-static function _gen_rpt( dD_from, dD_to, nOper )
+static function _gen_rpt( dD_from, dD_to, nOper, nVar )
+local cLine
 
 START PRINT CRET
 
@@ -36,32 +42,87 @@ START PRINT CRET
 
 P_COND
 
-? "------------------------------"
-? "Dokumenti koji nisu obradjeni:"
-? "------------------------------"
-? "Datum od " + DTOC(dD_from) + " do " + DTOC(dD_to)
-? "---------------------------------------------------------------------------------------------"
-? "Broj nal. * Kupac                        * Datum  * Ispor. * otpr.    * racun    * mp racun *"
-? "---------------------------------------------------------------------------------------------"
+_rpt_head( @cLine, dD_from, dD_to )
 
 select _tmp1
 go top
 
 do while !EOF()
+
+	// samo prikazi one koji nisu prebaceni
+	if nVar = 1
+		if ALLTRIM( field->fakt_d1 ) + ;
+			ALLTRIM( field->pos_d1 ) <> "??"
+			
+			// preskoci ovaj zapis
+			skip
+			loop
+
+		endif
+	endif
+
 	? field->doc_no
 	@ prow(), pcol()+1 SAY PADR( field->customer, 30 )
 	@ prow(), pcol()+1 SAY field->doc_date
 	@ prow(), pcol()+1 SAY field->dvr_date
 	@ prow(), pcol()+1 SAY field->fakt_d1
-	@ prow(), pcol()+1 SAY field->fakt_d2
+	//@ prow(), pcol()+1 SAY field->fakt_d2
 	@ prow(), pcol()+1 SAY field->pos_d1
+	
 	skip
+
 enddo
+
+? cLine
 
 FF
 END PRINT
 
 return
+
+
+// -------------------------------------------------
+// header izvjestaja
+// -------------------------------------------------
+static function _rpt_head( cLine, dD_from, dD_to )
+local cTxt
+
+? "------------------------------"
+? "Dokumenti koji nisu obradjeni:"
+? "------------------------------"
+? "Datum od " + DTOC(dD_from) + " do " + DTOC(dD_to)
+
+cLine := REPLICATE("-", 10)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 30)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 8)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 8)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 10)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 6)
+
+cTxt := PADR("Broj nal.", 10)
+cTxt += SPACE(1)
+cTxt += PADR("Kupac", 30)
+cTxt += SPACE(1)
+cTxt += PADR("Datum", 8)
+cTxt += SPACE(1)
+cTxt += PADR("Ispor.", 8)
+cTxt += SPACE(1)
+cTxt += PADR("FAKT", 10)
+cTxt += SPACE(1)
+cTxt += PADR("POS", 6 )
+
+? cLine 
+? cTxt
+? cLine
+
+return
+
+
 
 
 // ---------------------------------------------------------------
@@ -153,34 +214,34 @@ do while !EOF()
 	enddo
 
 	// provjeri i fakture
-	cFTipDok := "10"
+	//cFTipDok := "10"
 
-	go top
-	seek cFFirma + cFTipDok
-	do while !EOF() .and. field->idfirma + field->idtipdok == ;
-		cFFirma + cFTipDok
+	//go top
+	//seek cFFirma + cFTipDok
+	//do while !EOF() .and. field->idfirma + field->idtipdok == ;
+	//	cFFirma + cFTipDok
 			
-		if EMPTY( field->dok_veza )
-			skip
-			loop
-		endif
+	//	if EMPTY( field->dok_veza )
+	//		skip
+	//		loop
+	//	endif
 
-		// tu je !
-		if cDokument $ ALLTRIM( field->dok_veza )
-			cF_doc2 := field->brdok
-			exit
-		endif
+	//	// tu je !
+	//	if cDokument $ ALLTRIM( field->dok_veza )
+	//		cF_doc2 := field->brdok
+	//		exit
+	//	endif
 
-		skip
-	enddo
-
+	//	skip
+	//enddo
 
 	cP_doc1 := "?"
 	// ima li ga u POS ?
 	select p_dok
 	set order to tag "2"
 	go top
-	seek "KUPAC" + cPFirma + cPTipDok + ALLTRIM(STR(nDoc_no))
+	seek PADR("KUPAC",10) + PADR(cPFirma, 2) + ;
+		PADR(cPTipDok, 2) + PADR( ALLTRIM(STR(nDoc_no)), 8 )
 
 	if FOUND()
 		cP_doc1 := field->brdok
@@ -257,7 +318,7 @@ cFilter += " .and. DTOS(doc_date) >= " + cm2str(DTOS(dDFrom))
 cFilter += " .and. DTOS(doc_date) <= " + cm2str(DTOS(dDTo))
 
 if nOper <> 0
-	cFilter += ".and. ALLTRIM(STR(operater_id)) == " + cm2str( ALLTRIM( STR( nOper ) ) )
+	cFilter += ".and. operater_i = " + STR( nOper, 3 )
 endif
 
 set filter to &cFilter

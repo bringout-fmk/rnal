@@ -4,6 +4,7 @@
 static _status
 static __sort
 static __filter
+static _operater
 
 // ------------------------------------------
 // lista dokumenata....
@@ -230,6 +231,8 @@ __sort := nSort
 if LastKey() == K_ESC
 	return 0
 endif
+
+_operater := nOperater
 
 // parametri - snimi
 private cSection:="L"
@@ -1023,22 +1026,98 @@ return 1
 
 
 
+// -------------------------------------------------------
+// ispisuje customer / contact u listi naloga
+// -------------------------------------------------------
+static function __sh_cust( cCust, cCont )
+local xRet := ""
+local cTmp
+local nPadR := 35
+
+cTmp := ALLTRIM( cCust )
+
+// ako je NN kupac
+if cTmp == "NN"
+	xRet := "(" + cTmp + ")"
+	xRet += " "
+	xRet += ALLTRIM( cCont )
+else
+	xRet := cTmp
+	xRet += "/"
+	xRet += ALLTRIM( cCont )
+endif
+
+return PADR( xRet, nPadR )
+
+
 
 // -------------------------------------------------------
 // setovanje kolona tabele za unos operacija
 // -------------------------------------------------------
-static function set_a_kol(aImeKol, aKol, nStatus)
+static function set_a_kol( aImeKol, aKol, nStatus )
 aImeKol := {}
 
-AADD(aImeKol, {"Narucioc / kontakt", {|| PADR(g_cust_desc(cust_id), 20) + "/" + PADR(g_cont_desc(cont_id), 15) }, "cust_id", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Datum", {|| doc_date }, "doc_date", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Dat.isp." , {|| doc_dvr_date }, "doc_dvr_date", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Vr.isp." , {|| doc_dvr_time }, "doc_dvr_time", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {PADC("Dok.br",10), {|| doc_no }, "doc_no", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Prioritet" , {|| PADR( s_priority(doc_priority) ,10) }, "doc_priority", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Vr.plac" , {|| PADR( s_pay_id(doc_pay_id) ,10) }, "doc_pay_id", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"Plac." , {|| PADR( doc_paid , 4) }, "doc_paid", {|| .t.}, {|| .t.} })
-AADD(aImeKol, {"FMK" , {|| fmk_doc }, "fmk_doc", {|| .t.}, {|| .t.} })
+AADD(aImeKol, {"Narucioc / kontakt", ;
+	{|| __sh_cust( g_cust_desc(cust_id), g_cont_desc(cont_id)) }, ;
+	"cust_id", ;
+	{|| .t.}, ;
+	{|| .t.} })
+
+AADD(aImeKol, {"Datum", ;
+	{|| doc_date }, ;
+	"doc_date", ;
+	{|| .t.}, ;
+	{|| .t.} })
+
+AADD(aImeKol, {"Dat.isp." , ;
+	{|| doc_dvr_date }, ;
+	"doc_dvr_date", ;
+	{|| .t.}, ;
+	{|| .t.} })
+
+AADD(aImeKol, {"Vr.isp." , ;
+	{|| doc_dvr_time }, ;
+	"doc_dvr_time", ;
+	{|| .t.}, ;
+	{|| .t.} })
+
+AADD(aImeKol, {PADC("Dok.br",10), ;
+	{|| doc_no }, ;
+	"doc_no", ;
+	{|| .t.}, ;
+	{|| .t.} })
+
+if _operater = 0
+   AADD(aImeKol, { "Operater", ;
+	{|| PADR( getusername(operater_id), 10) }, ;
+	"operater_id", ;
+	{|| .t.}, ;
+	{|| .t.} })
+endif
+
+AADD(aImeKol, {"Prioritet" , ;
+	{|| PADR( s_priority(doc_priority) ,10) }, ;
+	"doc_priority", ;
+	{|| .t.}, ;
+	{|| .t.} })
+
+AADD(aImeKol, {"Vr.plac" , ;
+	{|| PADR( s_pay_id(doc_pay_id) ,10) }, ;
+	"doc_pay_id", ;
+	{|| .t.}, ;
+	{|| .t.} })
+
+AADD(aImeKol, {"Plac." , ;
+	{|| PADR( doc_paid , 4) }, ;
+	"doc_paid", ;
+	{|| .t.}, ;
+	{|| .t.} })
+
+AADD(aImeKol, {"FMK" , ;
+	{|| fmk_doc }, ;
+	"fmk_doc", ;
+	{|| .t.}, ;
+	{|| .t.} })
 
 aKol:={}
 
