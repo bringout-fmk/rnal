@@ -142,13 +142,6 @@ else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
-AADD(opc, "E. export naloga u fmk ")
-if (ImaPravoPristupa(goModul:oDataBase:cName, "MAIN", "DOKEXP"))
-	AADD(opcexe, {|| m_gr_expfmk() })
-else
-	AADD(opcexe, {|| MsgBeep(cZabrana)})
-endif
-
 
 AADD(opc, "------------------------------------")
 AADD(opcexe, {|| nil})

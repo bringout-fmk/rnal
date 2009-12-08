@@ -718,7 +718,7 @@ do case
 		nDoc_no := docs->doc_no
 		
 		// export dokumenta
-		m_export( nDoc_no, .f., .t. )
+		m_export( nDoc_no, aDocs, .f., .t. )
 		
 		select docs	
 		set_f_kol( cTmpFilter )

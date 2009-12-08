@@ -1,242 +1,6 @@
 #include "rnal.ch"
 
 
-// ---------------------------------------------
-// export grupe naloga u FMK otpremnicu
-// ---------------------------------------------
-function m_gr_expfmk()
-local nCustomer
-local dDateFrom
-local dDateTo
-local cGens
-local lSumirati
-local cTBFilt := ""
-local lFilterAll := .f.
-
-private GetList := {}
-
-private ImeKol
-private Kol
-
-private _exp_dfrom
-private _exp_dto
-private _exp_customer
-
-o_tables( .f. )
-
-// setuj uslove generacije
-if _g_vars( @nCustomer, @dDateFrom, @dDateTo, @cGens, @lSumirati ) == .f.
-	return
-endif
-
-if cGens == "D"
-	lFilterAll := .t.
-endif
-
-Box(, 18, 77 )
-
-@ m_x + 17, m_y + 2 SAY "<SPACE> markiraj za generisanje"
-
-_exp_dto := dDateTo
-_exp_dfrom := dDateFrom
-_exp_customer := nCustomer
-
-select docs
-set order to tag "1"
-
-// setovanje kolona browse-a
-set_a_cols( @ImeKol, @Kol )
-
-// setuj filter....
-set_t_filter( lFilterAll )
-
-ObjDbedit("expnal", 18, 77, {|| _key_hand( ) }, "", "", , , , , 2)
-
-BoxC()
-
-if LastKey() == K_ESC
-
-	if Pitanje(, "Formirati otpremnicu na osnovu markiranih naloga?", "N" ) == "N"
-		return
-	endif
-
-	go top
-	
-	do while !EOF() .and. doc_in_fmk == 9
-		
-		// prebaci u FAKT
-
-		exp_2_fmk( doc_no, .f. , .f., lSumirati  )		
-		
-		select docs
-		
-		skip
-		
-	enddo
-
-endif
-
-
-return
-
-
-
-// ----------------------------------------------
-// key handler
-// ----------------------------------------------
-static function _key_hand(  )
-
-do case
-	// markiranje stavke....
-	case Ch == ASC(" ") .or. Ch==K_ENTER
-		
-		beep(1)
-		
-		if doc_in_fmk == 0 .or. doc_in_fmk == 1
-			
-			replace doc_in_fmk with 9
-			
-		else
-			
-			replace doc_in_fmk with 0
-			
-		endif
-		
-		return DE_REFRESH
-		
-endcase
-
-return DE_CONT
-
-
-
-
-// ------------------------------------------
-// setovanje filtera
-// ------------------------------------------
-static function set_t_filter( lAllDocs )
-local cFilter := ""
-
-if lAllDocs == nil
-	lAllDocs := .f.
-endif
-
-// doc_in_fmk = 0 - nije prenesen
-// doc_in_fmk = 1 - prenesen je
-// doc_in_fmk = 9 - marker / treba prenjeti
-
-cFilter += "( doc_date >= " + cm2str( _exp_dfrom )
-cFilter += " .and. "
-cFilter += "doc_date <= " + cm2str( _exp_dto  )
-cFilter += " ) .and. "
-cFilter += "cust_id == _exp_customer "
-
-if lAllDocs == .f.
-	cFilter += " .and. "
-	cFilter += "doc_in_fmk <> 1 "
-endif
-
-if !EMPTY( cFilter )
-	select docs
-	set filter to &cFilter
-	go top
-else
-	select docs
-	set filter to
-	go top
-endif
-
-return
-
-
-// -----------------------------------------------------
-// setovanje kolone pregleda dokumenata za prenos
-// -----------------------------------------------------
-static function set_a_cols( aImeKol, aKol )
-local i
-
-aImeKol := {}
-aKol := {}
-
-AADD( aImeKol, { "Br.nal", {|| doc_no }, "doc_no" })
-AADD( aImeKol, { "Dat.nal", {|| doc_date }, "doc_date" })
-AADD( aImeKol, { "kontakt / opis naloga", {|| PADR(g_cont_desc( cont_id ), 10) + "/" + PADR( doc_sh_desc, 15) + "/" + PADR( doc_desc, 15 ) + ".." }, "doc_sh_desc" })
-AADD( aImeKol, { "Marker", {|| _s_mark( doc_in_fmk ) }, "doc_in_fmk" })
-
-for i:=1 to LEN( aImeKol )
-	AADD( aKol, i )
-next
-
-return
-
-
-// -------------------------------------------
-// prikaz markera.... na browse-u
-// -------------------------------------------
-static function _s_mark( nMark )
-local xRet := " "
-
-if nMark == 0
-	xRet := " "
-elseif nMark == 1
-	xRet := "prenesen"
-else
-	xRet := "*"
-endif
-
-return xRet
-
-// ---------------------------------------------
-// uslovi za generaciju
-// ---------------------------------------------
-static function _g_vars( nCustomer, dDateFrom, dDateTo, cGens, lSumirati )
-local nX := 1
-
-nCustomer := 0
-cCustomer := SPACE(10)
-dDateFrom := DATE()-31
-dDateTo := DATE()
-cGens := "N"
-lSumirati := .t.
-cSumirati := "D"
-
-Box(, 10, 70 )
-	
-	@ m_x + nX, m_y + 2 SAY "Narucioc:" GET cCustomer VALID {|| s_customers( @cCustomer, cCustomer), set_var(@nCustomer, @cCustomer),  show_it( g_cust_desc(nCustomer) ) }
-
-	nX += 2
-
-	@ m_x + nX, m_y + 2 SAY "obuhvatiti naloge iz perioda...."
-	
-	nX += 1
-	
-	@ m_x + nX, m_y + 2 SAY "od:" GET dDateFrom
-	@ m_x + nX, col() + 1 SAY "do:" GET dDateTo
-	
-	nX += 2
-	
-	@ m_x + nX, m_y + 2 SAY "Uzeti u obzir vec prenesene dokumente ?" GET cGens VALID cGens $ "DN" PICT "@!"
-	
-	nX += 1
-
-	@ m_x + nX, m_y + 2 SAY "Sumirati iste artikle sa naloga ?" GET cSumirati VALID cSumirati $ "DN" PICT "@!"
-	
-
-	read
-BoxC()
-
-if LastKey() == K_ESC
-	return .f.
-endif
-
-if cSumirati == "N"
-	lSumirati := .f.
-endif
-
-
-return .t.
-
-
 // -----------------------------------------
 // box za upit sumiranja
 // -----------------------------------------
@@ -247,37 +11,36 @@ lReturn := Pitanje(,"Sumirati stavke sa naloga (D/N)","D") = "D"
 return
 
 
-
-// ------------------------------------------
-// export u FMK
-// ------------------------------------------
-function exp_2_fmk( nDoc_no, lTemp, lOneByOne, lSumirati )
+// --------------------------------------------------------
+// export u FMK v.2
+//
+// lTemp - .t. - stampa iz pripreme, .f. - kumulativ
+// nDoc_no - broj dokumenta
+// aDocList - matrica sa listom naloga za obradu
+//            ako je zadata, radit ce na osnovu
+//            vise naloga
+// --------------------------------------------------------
+function exp_2_fmk( lTemp, nDoc_no, aDocList )
 local nTArea := SELECT()
-local nADOCS := F_DOCS
-local nADOC_IT := F_DOC_IT
-local nADOC_IT2 := F_DOC_IT2
-local nADOC_OP := F_DOC_OPS
+local nADocs := F_DOCS
+local nADOC_IT := F_T_DOCIT
+local nADOC_IT2 := F_T_DOCIT2
+local nADOC_OP := F_T_DOCOP
 local cFmkDoc
 local nCust_id
 local i
+local lSumirati
 
-if lOneByOne == nil
-	lOneByOne := .t.
-endif
-
-if lSumirati == nil
-	// sumirati stavke da ili ne
-	_g_sumbox( @lSumirati )
-endif
+// napuni podatke za prenos
+st_pripr( lTemp, nDoc_no, aDocList )
 
 if Pitanje(,"Promjeniti podatke isporuke ?", "N") == "D"
-	
-	// napuni pripremu
-	st_pripr( lTemp, nDoc_no )
 	// selektuj stavke
 	sel_items()
-
 endif
+
+// sumirati stavke da ili ne
+_g_sumbox( @lSumirati )
 
 if !FILE(ALLTRIM(gFaPrivDir) + "PRIPR.DBF")
 	msgbeep("Nije podesena lokacija FAKT ???")
@@ -289,44 +52,35 @@ endif
 select (245)
 use ( ALLTRIM(gFaPrivDir) + "PRIPR" ) alias X_TBL
 
-if lOneByOne == .t. .and. RECCOUNT2() > 0
-	
+// provjeri da li je priprema FAKT prazna
+if RECCOUNT2() > 0
 	msgbeep("priprema fakt nije prazna !")
 	select (245)
 	use
 	select (nTArea)
 	return
-		
-endif
-
-if lTemp == nil
-	lTemp := .f.
 endif
 
 if lTemp == .t.
-	nADOCS := F__DOCS
-	nADOC_IT := F__DOC_IT
-	nADOC_IT2 := F__DOC_IT2
-	nADOC_OP := F__DOC_OPS
+	nADocs := F__DOCS
 endif
 
-select (nADOCS)
-set order to tag "1"
-seek docno_str( nDoc_no )
+t_rpt_open()
 
-nCust_id := field->cust_id
-nCont_id := field->cont_id
+// --------------------------------------------
+// 1 korak :
+// uzmi podatke partnera, dokumenta iz T_PARS
+// --------------------------------------------
+
+nCust_id := VAL( g_t_pars_opis( "P01" ) )
+nCont_id := VAL( g_t_pars_opis( "P10" ) )
 
 cCust_desc := g_cust_desc( nCust_id )
 cCont_desc := g_cont_desc( nCont_id )
 
-O_T_DOCIT
-	
-select (nADOCS)
+dDatDok := CTOD( g_t_pars_opis( "N02" ) )
 
-dDatDok := field->doc_date
-
-if nCust_id == 1
+if ALLTRIM( cCust_desc ) == "NN"
 	// ako je NN kupac u RNAL, dodaj ovo kao contacts....
 	cPartn := PADR( g_rel_val("1", "CONTACTS", "PARTN", ALLTRIM(STR(nCont_id)) ), 6 )
 else
@@ -337,7 +91,7 @@ endif
 // ako je partner prazno
 if EMPTY( cPartn )
 
-	if nCust_id == 1
+	if ALLTRIM( cCust_desc ) == "NN"
 		
 		// ako je NN kupac, presvicaj se na CONTACTS
 		
@@ -378,23 +132,40 @@ if EMPTY( cPartn )
 	endif
 endif
 
+
+// ----------------------------------------------
+// 2. korak 
+// prebaci robu iz doc_it2
+// ----------------------------------------------
+
 cIdVd := "12"
 cCtrlNo := "22"
 cBrDok := fa_new_doc( "10", cCtrlNo )
-
 cFmkDoc := cIdVd + "-" + ALLTRIM(cBrdok)
-
 nRbr := 0
 
-// prvo prebaci robu iz doc_it2
 select (nADOC_IT2)
-set order to tag "1"
-seek docno_str( nDoc_no )
+set order to tag "2"
+go top
 
-do while !EOF() .and. field->doc_no == nDoc_no
+do while !EOF()
 	
 	cArt_id := field->art_id
 	nQtty := field->doc_it_qtt
+	cDesc := field->desc
+
+	if lSumirati == .t.
+		
+		nQtty := 0
+
+		do while !EOF() .and. field->art_id == cArt_id
+			
+			nQtty += field->doc_it_qtt
+
+			skip
+		enddo
+	endif
+
 	nPrice := field->doc_it_pri
 
 	if EMPTY( cArt_id )
@@ -438,6 +209,10 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		_dok_veza := _fmk_doc_upd( _dok_veza, ALLTRIM(STR( nDoc_No )) )
 	endif
 
+	if x_tbl->(FIELDPOS("OPIS")) <> 0
+		_opis := cDesc
+	endif
+
 	// roba tip U - nista
 	a_to_txt( "", .t. )
 	// dodatni tekst otpremnice - nista
@@ -466,20 +241,36 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	select (nADOC_IT2)
 
-	skip
+	if lSumirati == .f.
+		skip
+	endif
+
 enddo
 
-// zatim artikle naloga
+// -----------------------------------------------
+// 3. korak :
+// prebaci sve iz T_DOCIT
+// -----------------------------------------------
 
 select (nADOC_IT)
-set order to tag "3"
-seek docno_str( nDoc_no )
+set order to tag "5"
+// index: art_sh_desc
+go top
 
 nRbr := 0
 
-do while !EOF() .and. field->doc_no == nDoc_no
+do while !EOF() 
+
+	nDoc_no := field->doc_no
 
 	nArt_id := field->art_id
+	
+	// ukupna kvadratura
+	nM2 := field->doc_it_total
+
+	// opis artikla (kratki)
+	cArt_sh := field->art_sh_desc
+	
 	cIdRoba := g_rel_val("1", "ARTICLES", "ROBA", ALLTRIM(STR(nArt_id)) )
 	
 	// uzmi cijenu robe iz sifrarnika robe
@@ -487,13 +278,6 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	// uzmi opis artikla
 	cArt_desc := g_art_desc( nArt_id )
-
-	aZpoGN := {}
-	
-	// zaokruzi vrijednosti....
-	_art_set_descr( nArt_id, nil, nil, @aZpoGN, .t. )
-	
-	select (nADOC_IT)
 
 	if EMPTY(cIdRoba)
 		
@@ -513,83 +297,23 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		endif
 	endif
 
-	nM2 := 0
-
-	// sracunaj m2
-	do while !EOF() .and. field->doc_no == nDoc_no ;
-			.and. field->art_id == nArt_id
-
-		// probaj izvuci podatak sa obracunskog lista ...
-		nDoc_it_no := field->doc_it_no
-		
-		select t_docit
-		go top
-		seek docno_str( nDoc_no ) + docit_str( nDoc_it_no )
-		
-		nDeliver := 0
-		if FOUND() .and. field->art_id == nArt_id
-			nDeliver := field->deliver
-		endif
-		
-		select (nADOC_IT)
-
-		// kolicina
-		nQty := field->doc_it_qtty
-
-		if nDeliver <> 0
-			nQty := nDeliver
-		endif
-		
-		// visina u mm
-		nHeig := field->doc_it_height
-		// sirina u mm
-		nWidt := field->doc_it_width
-
-		nH2 := field->doc_it_h2
-		nW2 := field->doc_it_w2
-		
-		// pa zaokruziti po GN-u ?????
-		
-		nZHeig := 0
-		nZWidt := 0
-		nZ2Heig := 0
-		nZ2Widt := 0
+	select (nADOC_IT)
 	
-		lBezZaokr := .f.
+	if lSumirati == .t.
 
-		if lBezZaokr == .f.
-			// da li je kaljeno ? kod kaljenog nema zaokruzenja
-			lBezZaokr := is_kaljeno( aZpoGN, field->doc_no, field->doc_it_no )
-		endif
+		nM2 := 0
 
-		if lBezZaokr == .f.
-			// da li je emajlirano ? isto nema zaokruzenja
-			lBezZaokr := is_emajl(aZpoGN, field->doc_no, field->doc_it_no )
-		endif
+		// sracunaj za iste artikle
+		do while !EOF() .and. field->art_sh_desc == cArt_sh
 
-		if lBezZaokr == .f.
-			// da li je vatroglas ? isto nema zaokruzenja
-			lBezZaokr := is_vglass( aZpoGN )
-		endif
+			// kolicina
+			nM2 += field->doc_it_total
+			
+			skip
 
-		if lBezZaokr == .f.
-			// da li je plexiglas ? isto nema zaokruzenja
-			lBezZaokr := is_plex( aZpoGN )	
-		endif
-
-		nZHeig := obrl_zaok( nHeig, aZpoGN, lBezZaokr )
-		nZWidt := obrl_zaok( nWidt, aZpoGN, lBezZaokr )
-		
-		nZ2Heig := obrl_zaok( nH2, aZpoGN, lBezZaokr )
-		nZ2Widt := obrl_zaok( nW2, aZpoGN, lBezZaokr )
+		enddo
 	
-		// izracunaj kvadrate
-		nM2 += ROUND( c_ukvadrat( nQty, nZHeig, nZWidt, ;
-			nZ2Heig, nZ2Widt ) , 2)
-		
-		skip
-		
-	enddo
+	endif	
 	
 	select X_TBL
 	
@@ -622,6 +346,10 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		_dok_veza := _fmk_doc_upd( _dok_veza, ALLTRIM(STR( nDoc_No )) )
 	endif
 
+	if x_tbl->(FIELDPOS("OPIS")) <> 0
+		_opis := cArt_sh
+	endif
+
 	// roba tip U - nista
 	a_to_txt( "", .t. )
 	// dodatni tekst otpremnice - nista
@@ -648,164 +376,32 @@ do while !EOF() .and. field->doc_no == nDoc_no
 
 	gather()
 
+	// setuj da je dokument prenesen u DOCS
+	select (nADocs)
+	seek docno_str(nDoc_no)
+	replace doc_in_fmk with 1
+	replace fmk_doc with _fmk_doc_upd( ALLTRIM( field->fmk_doc ), ;
+		ALLTRIM(cBrDok) )
+	
+	
 	select (nADOC_IT)
-	
-enddo
 
-
-// sada obradi i sve operacije ovog dokumenta
-select (nADOC_OP)
-set order to tag "1"
-go top
-
-// pretrazi po broju naloga
-seek docno_str(nDoc_no)
-
-nRbr := 0
-
-do while !EOF() .and. field->doc_no == nDoc_no
-
-	// uzmi joker atributa operacije, ako postoji
-	cJoker := ALLTRIM( g_aatt_joker( field->aop_att_id ) )
-
-	if EMPTY(cJoker) .or. AT( "<", cJoker ) == 0
-
-		// ako je prazan ili nema "<" 
-		// uzmi joker operacije... 
-		// npr: <A_BU>
-		
-		cJoker := g_aop_joker ( field->aop_id )
-	
+	if lSumirati == .f.
+		skip
 	endif
 	
-	select (nADOC_OP)
-	
-	// uzmi i vrijednost....
-	cValue := ALLTRIM( field->aop_value )
-
-	// uzmi podatke broj naloga i broj stavke	
-	nDoc_no := field->doc_no
-	nDoc_it := field->doc_it_no
-
-	// pronadji ih u stavkama naloga
-	select (nADOC_IT)
-	set order to tag "1"
-	go top
-	seek docno_str( nDoc_no ) + docit_str( nDoc_it )
-
-	nArt_id := field->art_id
-	nQtty := field->doc_it_qtty
-	nWidth := field->doc_it_width
-	nHeigh := field->doc_it_heigh
-	nW2 := field->doc_it_w2
-	nH2 := field->doc_it_h2
-	cItType := field->doc_it_type
-
-	select (nADOC_OP)
-
-	cIdRoba := ""
-	nPrice := 0
-	nKol := 0
-
-	// daj mi vrijednosti za fakt u pom.matricu ....
-	aTo_fakt := _g_fakt_values( cJoker, cValue, nArt_id, ;
-			nQtty, nWidth, nHeigh, nW2, nH2, cItType )
-
-
-	// upisi...
-	select X_TBL
-		
-	for i:=1 to LEN( aTo_fakt )
-	
-		set order to tag "1"
-		go bottom
-	
-		if !EMPTY( x_tbl->rbr )
-			nRbr := VAL( x_tbl->rbr )
-		endif
-	
-	   	if lSumirati == .t.
-		
-			// pronadji sifru...
-			set order to tag "3"
-			go top
-
-		
-			cIdRoba := aTo_fakt[ i, 1 ]
-			// pronadji da li ima u pripremi ova stavka pa samo 
-			// nadodaj
-		
-			select x_tbl 
-	
-			seek "10" + cIdRoba
-		
-			if FOUND()
-			
-				scatter()
-			
-				// samo uvecaj kolicinu...
-				_kolicina := _kolicina + aTo_fakt[ i, 2 ]
-			
-				gather()
-			
-				loop
-		
-			endif
-	    	endif
-
-		// cijena artikla
-		nPrice := g_art_price( PADR( cIdRoba, 10 ) )
-	
-		select x_tbl
-		set order to tag "1"
-		go top
-		
-		append blank
-		
-		scatter()
-
-		_txt := ""
-		_rbr := STR( ++nRbr, 3 )
-		_idpartner := cPartn
-		_idfirma := "10"
-		_brdok := cBrDok
-		_idtipdok := cIdVd
-		_datdok := dDatDok
-		_idroba := aTo_fakt[ i, 1 ]
-		
-		
-		_cijena := nPrice
-		_kolicina := aTo_fakt[ i, 2 ]
-		_dindem := "KM "
-		_zaokr := 2
-	
-		Gather()
-
-	next
-
-	// idi dalje
-	select (nADOC_OP)
-	skip
-
 enddo
 
-// setuj da je prenesen u fmk
-select (nADocs)
-seek docno_str(nDoc_no)
-replace doc_in_fmk with 1
-replace fmk_doc with _fmk_doc_upd( ALLTRIM( field->fmk_doc ), ;
-	ALLTRIM(cBrDok) )
 
 select (245)
 use
 
-if lOneByOne == .t.
-	msgbeep("export dokumenta zavrsen !")
-endif
+msgbeep("export dokumenta zavrsen !")
 
 select (nTArea)
 
 return
+
 
 // --------------------------------------------
 // dodaj dokument u listu 
@@ -837,143 +433,6 @@ for i := 1 to LEN( aTmp )
 next
 
 return cLista
-
-
-// ---------------------------------------
-// daj mi vrijednosti za fakt....
-// setuju se varijable:
-//    cIdRoba, nPrice, nKol 
-// ---------------------------------------
-static function _g_fakt_values( cJoker, cValue, nArt_id, nQtty, ;
-				nW1, nH1, nW2, nH2, cItType )
-
-local aArr := {}
-local aRet := {}
-local cQttyType := ""
-
-// standardne dimenzije
-local nHeigh1 := nH1
-local nWidth1 := nW1
-local nHeigh2 := nH2
-local nWidth2 := nW2
-
-// skontaj koje su dimenzije u pitanju
-if cItType == "R"
-	
-	// radijus - fi
-	nWidth1 := nW1
-	nHeigh1 := nH1
-	
-	if nHeigh1 == 0
-		nHeigh1 := nWidth
-	endif
-
-elseif cItType == "S"
-	
-	// shaped 
-	nHeigh1 := nH1
-	nWidth1 := nW1
-	nHeigh2 := nH2
-	nWidth2 := nW2
-	
-endif
-
-// uzmi u matricu artikal i njegove stavke
-_art_set_descr( nArt_id, nil, nil, @aArr, .t. )
-
-// broj elemenata...
-nElCount := aArr[ LEN( aArr ), 1 ]
-
-// debljina stakla
-nTickness := g_gl_tickness( aArr, 1 )
-
-// tip stakla
-cType := g_gl_type( aArr, 1 )
-
-
-// sada isprovjeravaj sve....
-
-// busenje rupa
-if cJoker == "<A_BU>"  .and. !EMPTY( cValue ) 
-
-	// vrijednost = "H1=5;H2=6;..."
-	// skontaj koliko ima rupa...
-	aTmp := {}
-	aTmp := TokToNiz( cValue, ":" )
-	// prvi dio je sam joker dakle gledamo drugi clan...
-	// #H1=15#H2=22# itd...
-	cTmp := aTmp[ 2 ]
-	aTmp := TokToNiz( cTmp, "#" )
-	
-	// atmp[1] = H1=15
-	// aTmp[2] = H2=25
-	
-	for i := 1 to LEN( aTmp )
-		
-		// za svaku rupu odredi koja je sifra .....
-		aTmp2 := {}
-		aTmp2 := TokToNiz( aTmp[i], "=" )
-		
-		// debljina rupe
-		nHoleTick := VAL( aTmp2[ 2 ] )
-		
-		// sifra artikla je ?
-		cIdRoba := rule_s_fmk( cJoker, nHoleTick, "", "", @cQttyType )
-		
-		AADD( aRet, { cIdRoba, 1, 0 })
-		
-	next
-
-elseif cJoker == "<A_B>" .and. !EMPTY( cValue ) 
-
-	// sifra artikla
-	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
-
-	// uzmi kolicinu
-	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh1, nWidth1, nHeigh2, ;
-			nWidth2 )
-	
-	AADD( aRet, { cIdRoba, nKol, 0 })
-
-elseif !EMPTY( cJoker ) .and. !EMPTY( cValue )
-	
-	// sifra artikla
-	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
-
-	// uzmi kolicinu
-	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh1, nWidth1, ;
-			nHeigh2, nWidth2 )
-	
-	AADD( aRet, { cIdRoba, nKol, 0 })
-
-	
-elseif !EMPTY(cJoker) .and. EMPTY( cValue )
-
-	// sifra artikla
-	cIdRoba := rule_s_fmk( cJoker, nTickness, "", "", @cQttyType )
-
-	// uzmi kolicinu
-	_g_kol( cValue, cQttyType, @nKol, nQtty, nHeigh1, nWidth1, ;
-			nHeigh2, nWidth2 )
-	
-	AADD( aRet, { cIdRoba, nKol, 0 })
-
-	
-elseif EMPTY(cJoker) .and. EMPTY( cValue )
-
-	cIdRoba := rule_s_fmk( cJoker, nTickness, cType, "", @cQttyType )
-
-	// kolicina se uzima sa naloga
-	
-	nKol := nQtty
-	
-	AADD( aRet, { cIdRoba, nKol, 0 } )
-	
-endif
-
-
-return aRet
-
 
 
 
@@ -1061,7 +520,6 @@ if EMPTY( cQttyType )
 endif
 
 return
-
 
 
 
@@ -1193,7 +651,7 @@ local nTArea := SELECT()
 local cPom
 local nPom
 
-select 240
+select 113
 use ( ALLTRIM(gFaKumDir) + "DOKS" ) alias FA_DOKS
 set order to tag "1"
 go top

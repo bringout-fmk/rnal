@@ -600,6 +600,19 @@ do while !EOF()
 	nDoc := field->doc_no
 	nDoc_it_no := field->doc_it_no
 
+	// da li se treba stampati ?
+	select t_docit
+	seek docno_str(nDoc) + docit_str(nDoc_it_no)
+	
+	if field->print == "N"
+		select t_docit2
+		skip
+		loop
+	endif
+	
+	// vrati se
+	select t_docit2
+
 	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 		++nPage
 		Nstr_a4(nPage, .t.)

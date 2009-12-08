@@ -70,16 +70,29 @@ if !FILE(PRIVPATH + cT_PARS)
 endif
 
 // kreiraj indexe
+// T_DOCIT
+// ---------------------------
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
 
 CREATE_INDEX("2", "STR(doc_no,10)+STR(doc_gr_no,2)+STR(doc_it_no,4)+STR(art_id,10)", PRIVPATH + "T_DOCIT")
 
 CREATE_INDEX("3", "STR(doc_no,10)+art_sh_desc", PRIVPATH + "T_DOCIT")
 
-CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(it_no,4)+art_id", PRIVPATH + "T_DOCIT2")
+CREATE_INDEX("4", "STR(art_id,10)", PRIVPATH + "T_DOCIT")
 
+CREATE_INDEX("5", "art_sh_desc", PRIVPATH + "T_DOCIT")
+
+// T_DOCIT2
+// -----------------------------
+CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(it_no,4)+art_id", PRIVPATH + "T_DOCIT2")
+CREATE_INDEX("2", "art_id", PRIVPATH + "T_DOCIT2")
+
+// T_DOCOP
+// -----------------------------
 CREATE_INDEX("1", "STR(doc_no,10)+STR(doc_it_no,4)+STR(doc_el_no,4)+STR(doc_op_no,4)", PRIVPATH + "T_DOCOP")
 
+// T_PARS
+// -----------------------------
 CREATE_INDEX("id_par", "id_par", PRIVPATH + "T_PARS")
 
 return
@@ -113,7 +126,6 @@ AADD(aArr,{ "doc_it_zh2" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_neto" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_bruto" , "N" ,  15 ,  5 })
 AADD(aArr,{ "doc_it_pos" , "C" ,  20 ,  0 })
-AADD(aArr,{ "deliver" , "N" ,  15 ,  5 })
 AADD(aArr,{ "print" , "C" ,  1 ,  0 })
 
 return
@@ -295,7 +307,6 @@ replace doc_it_desc with cDoc_it_desc
 // printanje stavki iz tabele "D" - printaj, "N" - ne printaj
 replace print with "D"
 replace doc_it_pos with cDoc_it_pos
-replace deliver with nDoc_it_qtty
 
 if nGNHeigh <> nil
 	replace doc_it_zheight with nGNHeigh

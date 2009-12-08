@@ -227,7 +227,7 @@ do while !EOF()
 
 	nArt_id := field->art_id
 		
-	nQty := field->deliver
+	nQty := field->doc_it_qtty
 	nHeig := field->doc_it_height
 	nWidt := field->doc_it_width
 	

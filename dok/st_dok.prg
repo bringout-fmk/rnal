@@ -142,11 +142,28 @@ return DE_REFRESH
 // -------------------------------------
 // samo napuni pripremne tabale
 // -------------------------------------
-function st_pripr( lTemporary, nDoc_no )
-local lGn := .t.
+function st_pripr( lTemporary, nDoc_no, aOlDocs )
+local lGN := .t.
+local i 
+local ii
+local cDocs := ""
+local cFlag := "N"
+
+if aOlDocs == nil .or. LEN( aOlDocs ) == 0
+	// dodaj onda ovaj nalog koji treba da se stampa
+	aOlDocs := {}
+	AADD(aOlDocs, { nDoc_no, "" })
+endif
+
+// setuj opis i dokumente 
+for ii:=1 to LEN(aOlDocs)
+	if !EMPTY(cDocs)
+		cDocs += ","
+	endif
+	cDocs += ALLTRIM( STR(aOlDocs[ii, 1] ))
+next
 
 __temp := lTemporary
-__doc_no := nDoc_no
 
 // kreiraj print tabele
 t_rpt_create()
@@ -155,20 +172,41 @@ t_rpt_open()
 
 o_tables( __temp )
 
-// osnovni podaci naloga
-_fill_main()
-// stavke naloga
-_fill_items( lGn )
-// dodatne stavke naloga
-_fill_it2()
-// operacije
-_fill_aops()
+// prosetaj kroz stavke za stampu !
+for i:=1 to LEN( aOlDocs ) 
+
+	if aOlDocs[i, 1] < 0
+		// ovakve stavke preskoci...
+		// jer su to brisane stavke !
+		loop
+	endif
+
+	__doc_no := aOlDocs[ i, 1 ] 
+
+	select docs
+	go top
+	seek docno_str( __doc_no )
+
+	// osnovni podaci naloga
+	_fill_main( cDocs )
+	
+	// stavke naloga
+	_fill_items( lGN, 2 )
+	
+	// dodatne stavke naloga
+	_fill_it2()
+	
+	// operacije
+	_fill_aops()
+
+next
 
 close all
 
 o_tables( __temp )
 
 return DE_REFRESH
+
 
 
 // -------------------------------------
@@ -202,6 +240,7 @@ close all
 o_tables( __temp )
 
 return DE_REFRESH
+
 
 
 // -------------------------------------------------------
@@ -1259,7 +1298,7 @@ local aZpoGn := {}
 local nTArea := SELECT()
 
 // ukupno mm -> m2
-replace field->doc_it_total with ROUND( c_ukvadrat(field->deliver, ;
+replace field->doc_it_total with ROUND( c_ukvadrat(field->doc_it_qtty, ;
 	field->doc_it_height, field->doc_it_width), 2)
 	
 aZpoGN := {}
@@ -1301,7 +1340,7 @@ replace field->doc_it_zw2 with ;
 	obrl_zaok( field->doc_it_w2, aZpoGN, lBezZaokr )
 		
 // ako se zaokruzuje onda total ide po zaokr.vrijednostima
-replace field->doc_it_total with ROUND( c_ukvadrat( field->deliver, ;
+replace field->doc_it_total with ROUND( c_ukvadrat( field->doc_it_qtty, ;
 	field->doc_it_zhe, ;
 	field->doc_it_zwi, ;
 	field->doc_it_zh2, ;
