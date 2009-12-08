@@ -91,6 +91,9 @@ local i
 local nItem := 0
 local lPrintRek := .f.
 local cPrintRek := "N"
+local cCust
+local nCust
+local nCont
 
 nDuzStrKorekcija := 0
 lPrintedTotal := .f.
@@ -116,8 +119,12 @@ cDoc_no := g_t_pars_opis("N01")
 cDoc_date := g_t_pars_opis("N02")
 cDoc_time := g_t_pars_opis("N12")
 cDocs := g_t_pars_opis("N14")
-cCust := g_t_pars_opis("P02")
+nCust := VAL(g_t_pars_opis("P01"))
+nCont := VAL(g_t_pars_opis("P10"))
 cObject := g_t_pars_opis("P21")
+
+// kupac ?
+cCust := _cust_cont( nCust, nCont )
 
 // stampa rekapitulacije
 cPrintRek := g_t_pars_opis("N20")
