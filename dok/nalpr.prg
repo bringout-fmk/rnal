@@ -542,7 +542,7 @@ s_nal_izdao()
 s_nal_footer()
 
 // stampa rekapitulacije
-s_nal_rekap( nDoc_no, lRekPrint )
+s_nal_rekap( lRekPrint, nDoc_no )
 
 if lStartPrint
 	FF
@@ -555,11 +555,16 @@ return
 // ---------------------------------------
 // stampa rekapitulacije na dnu naloga
 // ---------------------------------------
-function s_nal_rekap( nDoc_no, lPrint )
+function s_nal_rekap( lPrint, nDoc_no )
 local cTmp
+local nDoc
 
 if lPrint == .f.
 	return
+endif
+
+if nDoc_no == nil
+	nDoc_no := 0
 endif
 
 select t_docit2
@@ -578,10 +583,21 @@ if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 endif	
 
 go top
-seek docno_str( nDoc_no )
 
-do while !EOF() .and. field->doc_no == nDoc_no
-	
+if nDoc_no > 0
+	seek docno_str( nDoc_no )
+endif
+
+do while !EOF() 
+
+	if nDoc_no > 0
+		if field->doc_no <> nDoc_no
+			skip
+			loop
+		endif
+	endif
+
+	nDoc := field->doc_no
 	nDoc_it_no := field->doc_it_no
 
 	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
@@ -589,10 +605,11 @@ do while !EOF() .and. field->doc_no == nDoc_no
 		Nstr_a4(nPage, .t.)
 	endif	
 	
-	? RAZMAK + "stavka: " + ALLTRIM(STR(nDoc_it_no))
-	? RAZMAK + "---------------"
+	? RAZMAK + "nalog: " + ALLTRIM(STR(nDoc)) + ;
+		", stavka: " + ALLTRIM(STR(nDoc_it_no))
+	? RAZMAK + "----------------------------"
 
-	do while !EOF() .and. field->doc_no == nDoc_no ;
+	do while !EOF() .and. field->doc_no == nDoc ;
 		.and. field->doc_it_no == nDoc_it_no
 		
 		// sifra i naziv stavke

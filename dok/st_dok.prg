@@ -9,6 +9,8 @@ static __doc_no
 // stampa naloga, filovanje prn tabela
 // -------------------------------------
 function st_nalpr( lTemporary, nDoc_no )
+local cFlag := "N"
+local lFlag
 
 __temp := lTemporary
 __doc_no := nDoc_no
@@ -29,6 +31,15 @@ _fill_it2()
 // operacije
 _fill_aops()
 
+lFlag := _is_p_rekap()
+
+if lFlag == .t.
+	cFlag := "D"
+endif
+
+// upisi za rekapitulaciju u t_pars
+add_tpars("N20", cFlag )
+
 // printaj nalog
 nalpr_print( .t. )
 
@@ -48,6 +59,7 @@ local lGN := .t.
 local i 
 local ii
 local cDocs := ""
+local cFlag := "N"
 
 if aOlDocs == nil .or. LEN( aOlDocs ) == 0
 	// dodaj onda ovaj nalog koji treba da se stampa
@@ -105,6 +117,16 @@ nCount := t_docit->(RecCount2())
 if nCount > 0 .and. pitanje(,"Odabrati stavke za stampu ? (D/N)","N") == "D"
 	sel_items()
 endif
+
+// da li se stampa rekapitulacija repromaterijala
+lFlag := _is_p_rekap()
+
+if lFlag == .t.
+	cFlag := "D"
+endif
+
+// upisi za rekapitulaciju u t_pars
+add_tpars("N20", cFlag )
 
 // printaj obracunski list
 obrl_print( .t. )
@@ -454,6 +476,25 @@ enddo
 return
 
 
+// ---------------------------------------------------
+// da li printati rekapitulaciju repromaterijala
+// ---------------------------------------------------
+function _is_p_rekap()
+local lRet := .f.
+local nTArea := SELECT()
+
+select t_docit2
+
+if RECCOUNT2() > 0
+	if Pitanje(,"Stampati rekapitulaciju materijala ?", "D") == "D"
+		lRet := .t.
+	endif
+endif
+
+select ( nTArea )
+return lRet
+
+
 // ----------------------------------
 // filuj tabele za stampu DOC_IT2
 // ----------------------------------
@@ -463,19 +504,12 @@ local cArt_id
 local cArt_desc
 local nDoc_it_no
 local nQtty
-local cFlag := "N"
 
 if ( __temp == .t. )
 	nTable := F__DOC_IT2
 endif
 
 select (nTable)
-
-if RECCOUNT2() > 0
-	if Pitanje(,"Stampati rekapitulaciju materijala ?", "D") == "D"
-		cFlag := "D"
-	endif
-endif
 
 set order to tag "1"
 go top
@@ -522,8 +556,6 @@ do while !EOF() .and. field->doc_no == __doc_no
 
 enddo
 
-// upisi za rekapitulaciju u t_pars
-add_tpars("N20", cFlag )
 
 return
 

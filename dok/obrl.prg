@@ -89,6 +89,8 @@ function p_a4_obrl(lStartPrint)
 local lShow_zagl
 local i
 local nItem := 0
+local lPrintRek := .f.
+local cPrintRek := "N"
 
 nDuzStrKorekcija := 0
 lPrintedTotal := .f.
@@ -116,6 +118,13 @@ cDoc_time := g_t_pars_opis("N12")
 cDocs := g_t_pars_opis("N14")
 cCust := g_t_pars_opis("P02")
 cObject := g_t_pars_opis("P21")
+
+// stampa rekapitulacije
+cPrintRek := g_t_pars_opis("N20")
+
+if cPrintRek == "D"
+	lPrintRek := .t.
+endif
 
 // setuj len_ukupno
 LEN_TOTAL := LEN( cLine )
@@ -474,7 +483,7 @@ endif
 s_gn_tbl()
 
 // prikazi rekapitulaciju dodatnog repromaterijala
-s_nal_rekap( nDoc_no, .t. )
+s_nal_rekap( lPrintRek )
 
 P_10CPI
 
