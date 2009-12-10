@@ -72,8 +72,6 @@ if _doc_priority <> nDoc_priority
 	_doc_priority := nDoc_priority
 endif
 
-_operater_id := __oper_id
-
 Gather()
 
 skip
@@ -160,8 +158,6 @@ if _obj_id <> nObj_id
 	_obj_id := nObj_id
 endif
 
-_operater_id := __oper_id
-
 Gather()
 
 select docs
@@ -238,8 +234,6 @@ endif
 if _doc_pay_id <> nDoc_pay_id
 	_doc_pay_id := nDoc_pay_id
 endif
-
-_operater_id := __oper_id
 
 Gather()
 
@@ -319,8 +313,6 @@ endif
 if _cont_add_desc <> cCont_desc
 	_cont_add_desc := cCont_desc
 endif
-
-_operater_id := __oper_id
 
 Gather()
 

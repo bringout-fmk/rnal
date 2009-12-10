@@ -159,6 +159,37 @@ return xRet
 
 
 // ------------------------------------------
+// koliko elemenata ima u kompoziciji
+// 
+// ------------------------------------------
+function g_el_count( aArr )
+local xRet := 0
+
+xRet := aArr[ LEN( aArr ), 1 ]
+
+return xRet
+
+
+// ------------------------------------------
+// koliko stakala ima u kompoziciji
+// 
+// ------------------------------------------
+function g_gl_count( aArr )
+local xRet := 0
+local i
+
+for i := 1 to LEN( aArr )
+
+	if aArr[i, 2] == "G" .and. aArr[i, 4] == ALLTRIM(gDefGlTick)
+		xRet += 1
+	endif
+	
+next
+
+return xRet
+
+
+// ------------------------------------------
 // vraca debljinu stakla
 // 
 // - ukupnu vrijednost ako je kompozicija

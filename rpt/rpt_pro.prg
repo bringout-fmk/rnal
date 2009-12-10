@@ -5,6 +5,7 @@ static __doc_no
 static __nvar1
 static __nvar2
 static __l_zaok := 0
+static __dmg := 0
 
 static __op_1 := 0
 static __op_2 := 0
@@ -79,6 +80,8 @@ if lPrint == .t.
 	_p_rpt_spec( dD_from, dD_to )
 endif
 
+close all
+
 return
 
 
@@ -145,6 +148,7 @@ local cOp7 := cOp8 := cOp9 := cOp10 := cOp11 := cOp12 := SPACE(10)
 local nTArea := SELECT()
 local nVar1 := 1
 local cPartn := "N"
+local cDmg := "N"
 local cZaok := "N"
 private GetList := {}
 private cSection:="R"
@@ -170,6 +174,7 @@ RPar("d2", @dDatTo)
 RPar("v1", @nVar1)
 RPar("v2", @cPartn)
 RPar("v3", @cZaok)
+RPar("v4", @cDmg)
 
 Box(, nBoxX, nBoxY)
 
@@ -288,7 +293,11 @@ Box(, nBoxX, nBoxY)
 	@ m_x + nX, m_y + 2 SAY "Zaokruzenje po GN-u (D/N)?" ;
 		GET cZaok VALID cZaok $ "DN" PICT "@!"
 
-	
+	nX += 1
+ 	
+	@ m_x + nX, m_y + 2 SAY "Kontrolisati lom (D/N)?" ;
+		GET cDmg VALID cDmg $ "DN" PICT "@!"
+
 	read
 BoxC()
 
@@ -316,6 +325,7 @@ WPar("d2", dDatTo)
 WPar("v1", nVar1)
 WPar("v2", cPartn)
 WPar("v3", cZaok)
+WPar("v4", cDmg)
 
 // parametri staticki
 __nvar1 := nVar1
@@ -330,6 +340,10 @@ endif
 // zaokruzenje
 if cZaok == "D"
 	__l_zaok := 1
+endif
+
+if cDmg == "D"
+	__dmg := 1
 endif
 
 // operacije
@@ -458,7 +472,7 @@ do while !EOF()
 		nArt_id := field->art_id
 	
 		// artikal nedefinisan
-		if nArt_id == 0
+		if nArt_id = 0
 			
 			// dodaj u greske
 			AADD( aErr, { "artikal 0", nDoc_no, nDoc_it_no } )
@@ -525,10 +539,26 @@ do while !EOF()
 		  	  nWidth := obrl_zaok( nWidth, aArt, l_woZaok )
 		
 			endif
-		
+			
+			nDmg := 0
+
+			// lom 
+			if __dmg = 1
+				
+				// kalkulisi koliko je bilo lom-a
+				// po ovoj stavci
+				
+				nDmg := calc_dmg( nDoc_no, nDoc_it_no, ;
+					nArt_id, nElem_no )
+
+			endif
+
 			// ukupna kvadratura
 			nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
-		
+			
+			// ukupno duzinski
+			nTot_m := c_duzinski( nQtty, nWidth, nHeight )
+
 			// vrati opis za ovaj artikal
 			cArt_id := g_el_descr( aArt, nElem_no )
 			
@@ -577,8 +607,10 @@ do while !EOF()
 				// ako je frame, obracun je drugaciji
 				if cEl_type == "F"
 
-				  	nTot_m2 := ( ( mm_2_m(nH_orig) + ;
-				  	  mm_2_m( nW_orig ) ) * 2 ) * nQtty
+				  	nTot_m2 := 0
+					
+					//( ( mm_2_m(nH_orig) + ;
+				  	  //mm_2_m( nW_orig ) ) * 2 ) * nQtty
 
 				endif
 
@@ -591,6 +623,8 @@ do while !EOF()
 				nWidth, ;
 				nHeight, ;
 				nQtty, ;
+				nDmg, ;
+				nTot_m, ;
 				nTot_m2, ;
 				nAop_1, ;
 				nAop_2, ;
@@ -975,7 +1009,7 @@ do while !EOF()
 		
 		nArt_id := field->art_id
 
-		if nArt_id == 0
+		if nArt_id = 0
 			AADD( aErr, {"artikal 0", nDoc_no, nDoc_it_no } )
 			skip
 			loop
@@ -1009,13 +1043,22 @@ do while !EOF()
 		nHeight := field->doc_it_height
 		nWidth := field->doc_it_width
 		
+		// ostecenih stavki 
+		nDmg := 0
+
+		// napuni matricu sa artiklom
+		aArt := {}
+		_art_set_descr( nArt_id, nil, nil, @aArt, .t. )
+
+		// koliko stakala ima u artiklu
+		nGlass_cnt := g_gl_count( aArt )
+		
+		// koliko ima elemenenata
+		nElement_cnt := g_el_count( aArt )
+		
 		// ako radis zaokruzenja
 		if __l_zaok = 1
 		
-		  // napuni matricu sa artiklom
-		  aArt := {}
-		  _art_set_descr( nArt_id, nil, nil, @aArt, .t. )
-	
 		  // bez zaokruzenja !
 		  l_woZaok := .f.
 		
@@ -1041,8 +1084,19 @@ do while !EOF()
 		
 		endif
 
+		// kalkulisi ostecenja na staklu
+		if __dmg = 1
+			nDmg := calc_dmg( nDoc_no, nDoc_it_no, nArt_id )
+		endif
+
 		// koliko kvadrata ?
 		nTot_m2 := c_ukvadrat( nQtty, nWidth, nHeight )
+		nTot_m2 := nTot_m2 * nGlass_cnt
+		
+		// koliko duzinski ima stakla
+		nTot_m := c_duzinski( nQtty, nWidth, nHeight )
+		nTot_m := nTot_m * nGlass_cnt
+
 		nTick := 0
 		
 		// upisi vrijednost
@@ -1053,6 +1107,8 @@ do while !EOF()
 			nWidth, ;
 			nHeight, ;
 			nQtty, ;
+			nDmg, ;
+			nTot_m, ;
 			nTot_m2, ;
 			nAop_1, ;
 			nAop_2, ;
@@ -1437,6 +1493,8 @@ local nT_height := 0
 local nT_width := 0
 local nT_qtty := 0
 local nT_um2 := 0
+local nT_um := 0
+local nT_dmg := 0
 local cLine := ""
 local nCount := 0
 
@@ -1494,17 +1552,29 @@ do while !EOF()
 	
 	// kolicina
 	@ prow(), pcol() + 1 SAY STR( field->qtty, 12, 2 )
+	
+	if __dmg = 1
+		
+		// ostecenih stavki
+		@ prow(), pcol() + 1 SAY STR( field->dmg, 12, 2 )
+
+	endif
+	
 	// sirina
 	@ prow(), pcol() + 1 SAY STR( field->width, 12, 2 )
 	// visina
 	@ prow(), pcol() + 1 SAY STR( field->height, 12, 2 )
+	// ukupno m
+	@ prow(), pcol() + 1 SAY STR( field->tot_m, 12, 2 )
 	// ukupno m2
 	@ prow(), pcol() + 1 SAY STR( field->total, 12, 2 )
 
 	nT_height += field->height
 	nT_width += field->width
 	nT_um2 += field->total
+	nT_um += field->tot_m
 	nT_qtty += field->qtty
+	nT_dmg += field->dmg
 
 	// totali operacija
 	nT_aop1 += field->aop_1
@@ -1604,10 +1674,20 @@ endif
 
 // kolicina
 @ prow(), pcol() + 1 SAY STR( nT_qtty, 12, 2 )
+
+if __dmg = 1
+	
+	// kolicina
+	@ prow(), pcol() + 1 SAY STR( nT_dmg, 12, 2 )
+
+endif
+
 // sirina
 @ prow(), pcol() + 1 SAY STR( nT_width, 12, 2 )
 // visina
 @ prow(), pcol() + 1 SAY STR( nT_height, 12, 2 )
+// ukupno m
+@ prow(), pcol() + 1 SAY STR( nT_um, 12, 2 )
 // ukupno m2
 @ prow(), pcol() + 1 SAY STR( nT_um2, 12, 2 )
 
@@ -1722,6 +1802,16 @@ endif
 
 cLine += REPLICATE("-", 12)
 cLine += SPACE(1)
+
+if __dmg = 1
+
+	cLine += REPLICATE("-", 12)
+	cLine += SPACE(1)
+
+endif
+
+cLine += REPLICATE("-", 12)
+cLine += SPACE(1)
 cLine += REPLICATE("-", 12)
 cLine += SPACE(1)
 cLine += REPLICATE("-", 12)
@@ -1746,9 +1836,17 @@ endif
 
 cTxt += PADR("Kolicina", 12)
 cTxt += SPACE(1)
+
+if __dmg = 1
+	cTxt += PADR("Ostecenih", 12)
+	cTxt += SPACE(1)
+endif
+
 cTxt += PADR("Uk.sirina", 12)
 cTxt += SPACE(1)
 cTxt += PADR("Uk.visina", 12)
+cTxt += SPACE(1)
+cTxt += PADR("Ukupno", 12)
 cTxt += SPACE(1)
 cTxt += PADR("Ukupno", 12)
 
@@ -1770,11 +1868,19 @@ endif
 
 cTxt2 += PADR("(kom)", 12)
 cTxt2 += SPACE(1)
+
+if __dmg = 1
+	cTxt2 += PADR("(kom)", 12)
+	cTxt2 += SPACE(1)
+endif
+
 cTxt2 += PADR("(m)", 12)
 cTxt2 += SPACE(1)
 cTxt2 += PADR("(m)", 12)
 cTxt2 += SPACE(1)
-cTxt2 += PADR("(m2 | m)", 12)
+cTxt2 += PADR("(m)", 12)
+cTxt2 += SPACE(1)
+cTxt2 += PADR("(m2)", 12)
 
 if __op_1 <> 0
 	
@@ -1945,6 +2051,8 @@ AADD( aDbf, { "tick", "N", 10, 2 })
 AADD( aDbf, { "width", "N", 15, 5 })
 AADD( aDbf, { "height", "N", 15, 5 })
 AADD( aDbf, { "qtty", "N", 15, 5 })
+AADD( aDbf, { "dmg", "N", 15, 5 })
+AADD( aDbf, { "tot_m", "N", 15, 5 })
 AADD( aDbf, { "total", "N", 15, 5 })
 AADD( aDbf, { "aop_1", "N", 15, 5 })
 AADD( aDbf, { "aop_2", "N", 15, 5 })
@@ -1973,7 +2081,7 @@ return STR( nTick, 10, 2 )
 // insert into _tmp1
 // -----------------------------------------------------
 static function _ins_tmp1( cCust_desc, cArt_id, cArt_desc, ;
-			nTick, nWidth, nHeight, nQtty, nTot_m2, ;
+			nTick, nWidth, nHeight, nQtty, nDmg, nTot_m, nTot_m2, ;
 			nAop_1, nAop_2, nAop_3, nAop_4, nAop_5, nAop_6, ;
 			nAop_7, nAop_8, nAop_9, nAop_10, nAop_11, nAop_12 )
 
@@ -2010,6 +2118,8 @@ replace field->width with ( field->width + ( nWidth * nQtty ) )
 replace field->height with ( field->height + ( nHeight * nQtty ) )
 replace field->qtty with ( field->qtty + nQtty )
 replace field->total with ( field->total + nTot_m2 )
+replace field->tot_m with ( field->tot_m + nTot_m )
+replace field->dmg with ( field->dmg + nDmg )
 
 if __op_1 <> 0 .and. nAop_1 <> nil
 	replace field->aop_1 with ( field->aop_1 + nAop_1 )
@@ -2061,6 +2171,30 @@ endif
 
 select (nTArea)
 return
+
+
+// ----------------------------------------------------------
+// insert dmg value into _tmp1
+// ----------------------------------------------------------
+static function _ins_dmg( cCust_desc, cArt_id, nTick, nDmg )
+local nTArea := SELECT()
+
+select _tmp1
+set order to tag "1"
+go top
+
+if __nvar2 = 1
+	seek PADR( cCust_desc, 100 ) + PADR( cArt_id, 30 ) + tick_str( nTick )
+else
+	seek PADR( cArt_id, 30 ) + tick_str( nTick )
+endif
+
+replace field->dmg with ( field->dmg + nDmg )
+
+select (nTArea)
+return
+
+
 
 
 // -----------------------------------------------------

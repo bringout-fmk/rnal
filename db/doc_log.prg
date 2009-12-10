@@ -337,7 +337,11 @@ do while !EOF()
 	
 	_lit_21_insert( cAction, nDoc_no, nDoc_log_no, ;
 			field->art_id,  ;
-			field->art_desc )
+			field->art_desc, ;
+			field->glass_no, ;
+			field->doc_it_no, ;
+			field->doc_it_qtty, ;
+			field->damage )
 	
 	select _tmp1
 	skip
@@ -469,7 +473,8 @@ return
 // punjenje loga sa stavkama tipa 21
 // -----------------------------------
 function _lit_21_insert(cAction, nDoc_no, nDoc_log_no, ;
-			nArt_id, cArt_desc )
+			nArt_id, cArt_desc, nGlass_no, nDoc_it_no, ;
+			nQty, nDamage )
 local nDoc_lit_no
 
 nDoc_lit_no := _inc_lit_no( nDoc_no , nDoc_log_no )
@@ -482,6 +487,10 @@ replace doc_log_no with nDoc_log_no
 replace doc_lit_no with nDoc_lit_no
 replace art_id with nArt_id
 replace char_1 with cArt_desc
+replace num_1 with nQty
+replace num_2 with nDamage
+replace int_1 with nDoc_it_no
+replace int_2 with nGlass_no
 replace doc_lit_action with cAction
 
 return
@@ -1157,7 +1166,14 @@ seek docno_str(nDoc_no) + doclog_str(nDoc_log_no)
 do while !EOF() .and. field->doc_no == nDoc_no ;
 		.and. field->doc_log_no == nDoc_log_no
 
+	
+	cRet += "stavka: " + ALLTRIM( STR( field->int_1) ) 
+	cRet += "#"
 	cRet += ALLTRIM("artikal: " + PADR(g_art_desc( field->art_id ), 30))
+	cRet += "#"
+	cRet += "staklo br: " + ALLTRIM( STR( field->int_2) ) 
+	cRet += "#"
+	cRet += "lom komada: " + ALLTRIM( STR( field->num_2 ) )
 	cRet += "#"
 	cRet += "opis: " + ALLTRIM( field->char_1 )
 	
@@ -1371,6 +1387,7 @@ enddo
 select (nTArea)
 
 return cRet
+
 
 
 

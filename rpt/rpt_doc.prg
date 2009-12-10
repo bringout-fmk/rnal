@@ -26,6 +26,8 @@ _fill_op()
 // stampaj izvjestaj
 _p_op_docs( dD_from, dD_to )
 
+close all
+
 return
 
 
@@ -273,6 +275,10 @@ do while !EOF()
 	skip
 
 enddo
+
+BoxC()
+
+return
 
 
 // ------------------------------------------------
