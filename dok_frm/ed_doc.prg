@@ -628,7 +628,12 @@ do case
 		endif
 
 		nRet := DE_CONT
-
+	
+	case Ch == K_CTRL_L
+		
+		st_label( .t., _docs->doc_no )
+		
+		nRet := DE_CONT
 endcase
 
 m_x := nX
