@@ -64,6 +64,8 @@ AADD(aDbf, { "doc_it_no", "N", 4, 0 })
 AADD(aDbf, { "art_id", "N", 10, 0 })
 AADD(aDbf, { "glass_no", "N", 3, 0 })
 AADD(aDbf, { "doc_it_qtty", "N", 12, 2 })
+AADD(aDbf, { "doc_it_h", "N", 12, 2 })
+AADD(aDbf, { "doc_it_w", "N", 12, 2 })
 AADD(aDbf, { "damage", "N", 12, 2 })
 AADD(aDbf, { "art_marker", "C", 1, 0 })
 AADD(aDbf, { "art_desc", "C", 150, 0 })
@@ -94,6 +96,8 @@ do while !EOF() .and. field->doc_no == __doc_no
 	_doc_it_no := doc_it->doc_it_no
 	_art_id := doc_it->art_id
 	_doc_it_qtty := doc_it->doc_it_qtty
+	_doc_it_h := doc_it->doc_it_height
+	_doc_it_w := doc_it->doc_it_width
 	_damage := 0
 	_glass_no := 0
 	
@@ -182,7 +186,8 @@ aKol := {}
 AADD(aImeKol, {"rbr" , {|| docit_str( doc_it_no ) }, ;
 	"doc_it_no", {|| .t.}, {|| .t.} })
 
-AADD(aImeKol, {"artikal/kol" , {|| sh_article( art_id, doc_it_qtty ) }, ;
+AADD(aImeKol, {"artikal/kol" , {|| sh_article( art_id, doc_it_qtty, ;
+	doc_it_w, doc_it_h ) }, ;
 	"art_id", {|| .t.}, {|| .t.} })
 
 AADD(aImeKol, {"staklo" , {|| glass_no }, ;
@@ -206,28 +211,26 @@ return
 // -----------------------------------------
 // prikaz artikla u tabeli
 // -----------------------------------------
-static function sh_article( nArt_id , nQtty )
+static function sh_article( nArt_id , nQtty, nWidth, nHeight )
 local xRet := "???"
 local cTmp 
 local nTmp
 
-cTmp := ALLTRIM( g_art_desc( nArt_id ) )
-nTmp := LEN( cTmp )
+// dimenzije
+xRet := "("
+xRet += ALLTRIM( STR( nWidth, 12, 0 ) ) 
+xRet += "x" 
+xRet += ALLTRIM( STR( nHeight, 12, 0 ) )
+xRet += "x"
+xRet += ALLTRIM( STR( nQtty, 12, 0 ) )
+xRet += ")"
 
-if nTmp < 18
-	xRet := cTmp 
-else
-	xRet := PADR(cTmp, 15)
-endif
+// naziv
+cTmp := ALLTRIM( g_art_desc( nArt_id, .t., .f. ) )
 
-if !EMPTY(xRet)
+xRet := cTmp + " " + xRet
 
-	xRet += " /"
-	xRet += ALLTRIM( STR( nQtty, 12, 2 ) )
-	
-endif
-
-return PADR(xRet, 25)
+return PADR(xRet, 35)
 
 
 // ---------------------------------------

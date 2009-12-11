@@ -161,6 +161,8 @@ B_OFF
 // kondenzuj font
 P_COND2
 
+B_ON
+
 // print header tabele
 s_tbl_header()
 
@@ -485,6 +487,8 @@ endif
 ?? show_number(nTTotal, nil, -10 )
 
 ? cLine
+
+B_OFF
 
 // prikazi GN tabelu.....
 s_gn_tbl()
