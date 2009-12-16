@@ -334,6 +334,10 @@ do while !EOF() .and. field->doc_no == __doc_no
 	endif
 	
 	cOper_desc := ""
+	lPrepust := .f.
+
+	nHeigh := 0
+	nWidth := 0
 
 	// u varijanti obracunskog lista uzmi i operacije za ovu stavku
 	if nVar = 2
@@ -345,7 +349,17 @@ do while !EOF() .and. field->doc_no == __doc_no
 		seek docno_str( nDoc_no ) + docit_str( nDoc_it_no )
 		do while !EOF() .and. field->doc_no = nDoc_no ;
 			.and. field->doc_it_no = nDoc_it_no
+		
+			// ako je prepust, uzmi dimenzije
+			cTmp_val := ALLTRIM( field->aop_value )
+
+			if ( "<A_PREP>" $ cTmp_val ) .and. lPrepust == .f.
+				
+				lPrepust := .t.
+				prep_read( cTmp_val, @nWidth, @nHeigh )
 			
+			endif
+
 			cTmp := g_aop_desc( field->aop_id )
 			
 			nScan := ASCAN( aOper, {|xVar| xVar[1] = cTmp } )
@@ -396,12 +410,24 @@ do while !EOF() .and. field->doc_no == __doc_no
 	select ( nTable )
 	
 	nQtty := field->doc_it_qtty
-	nHeigh := field->doc_it_heigh
-	nWidth := field->doc_it_width
+	
+	// dimenzije stakla
+	if nHeigh < field->doc_it_heigh
+		nHeigh := field->doc_it_heigh
+	endif
+
+	if nWidth < field->doc_it_width
+		nWidth := field->doc_it_width
+	endif
 
 	// dimenzije ako je oblik SHAPE
 	nHe2 := field->doc_it_h2
 	nWi2 := field->doc_it_w2
+
+	// kod obracunskog lista
+	if nVar = 2
+		// prepust...
+	endif
 
 	// nadmorska visina
 	// samo ako je razlicita vrijednost od default-ne

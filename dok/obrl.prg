@@ -2,7 +2,12 @@
 
 
 static LEN_IT_NO := 4
-static LEN_DESC := 65
+static LEN_DESC := 95
+
+static LEN_LINE1 := 105
+
+static COL_RBR := 3
+static COL_ITEM := 15
 
 static LEN_QTTY := 10
 static LEN_DIMENSION := 10
@@ -34,10 +39,20 @@ local cLine
 
 // linija za obraèunski list
 cLine := RAZMAK
-cLine += REPLICATE("-", 10 ) 
-cLine += " " + REPLICATE("-", LEN_IT_NO ) 
-cLine += " " + REPLICATE("-", LEN_DESC)
-cLine += " " + REPLICATE("-", LEN_QTTY)
+cLine += REPLICATE("-", LEN_LINE1 ) 
+
+return cLine
+
+
+// ----------------------------------------------
+// definicija linije unutar glavne tabele
+// ----------------------------------------------
+static function g_line2( )
+local cLine
+
+// linija za obraèunski list
+cLine := SPACE( COL_ITEM )
+cLine += REPLICATE("-", LEN_QTTY)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
@@ -113,6 +128,7 @@ nTTotal := VAL(g_t_pars_opis("N10"))
 obrl_header()
 
 cLine := g_line(2)
+cLine2 := g_line2()
 
 // broj dokumenta.....
 cDoc_no := g_t_pars_opis("N01")
@@ -158,10 +174,10 @@ set order to tag "3"
 go top
 
 B_OFF
-// kondenzuj font
-P_COND2
 
-B_ON
+P_12CPI
+
+//P_COND
 
 // print header tabele
 s_tbl_header()
@@ -280,18 +296,43 @@ do while !EOF()
 	
         ++ nItem
 	
-	? RAZMAK + SPACE(10)
+	? RAZMAK + SPACE( COL_RBR )
 
 	// r.br
-	//?? PADL(ALLTRIM(cDoc_it_no) + ")", LEN_IT_NO)
 	?? PADL(ALLTRIM( STR(nItem) ) + ")", LEN_IT_NO)
 	
 	?? " "
-	
+
 	// proizvod, naziv robe, jmj
 	?? aArt_desc[1]
-	?? "  "
-	
+
+	// drugi red artikla
+	if LEN(aArt_desc) > 1
+		
+		for i:=2 to LEN(aArt_desc)
+		
+			? RAZMAK + SPACE( COL_RBR + LEN_IT_NO ) 
+			
+			?? " "
+			
+			?? aArt_desc[ i ]
+		
+			// provjeri za novu stranicu
+			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+				++ nPage
+				Nstr_a4(nPage, .t.)
+				P_COND2
+			endif	
+		next
+	endif
+      
+
+
+	// novi red
+	? SPACE( COL_ITEM )
+
+	nCol_item := pcol()
+
 	// kolicina
 	?? show_number(nQty, nil, -10 )
 	?? " "
@@ -335,38 +376,13 @@ do while !EOF()
 	
 	endif	
 
-	// ostatak naziva artikla....
-	if LEN(aArt_desc) > 1
-		
-		for i:=2 to LEN(aArt_desc)
-		
-			? RAZMAK
-			
-			?? PADL("", 10)
-			
-			?? " "
-
-			?? PADL("", LEN_IT_NO)
-			
-			?? " "
-			
-			?? aArt_desc[i]
-		
-			// provjeri za novu stranicu
-			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-				++ nPage
-				Nstr_a4(nPage, .t.)
-				P_COND2
-			endif	
-		next
-	endif
-      	
+	
 	select t_docit
 	skip
 
       enddo	
 
-      nTmp := LEN_IT_NO + LEN_DESC + 13
+      nTmp := COL_ITEM
       nRepl := 94
 
       // ispis totala po istim artiklima
@@ -379,7 +395,7 @@ do while !EOF()
 
       ? PADL( "total:", nTmp )
 
-      ?? " "
+      //?? " "
 
       // kolicina
       ?? show_number(nUQty, nil, -10 )
@@ -414,8 +430,6 @@ do while !EOF()
       // ukupno m2
       ?? show_number(nUTotal, nil, -10 )
 
-      //B_OFF
-      
       ? SPACE( nTmp - 6 )
       
       ?? REPLICATE( "", nRepl )
@@ -446,12 +460,10 @@ endif
 
 ? cLine
 
-? RAZMAK
-	
 // r.br
-?? PADL( "U K U P N O : ", LEN_IT_NO + 12 + LEN_DESC )
+? PADL( "U K U P N O : ", COL_ITEM )
 	
-?? " "
+//?? " "
 	
 // kolicina
 ?? show_number(nTQty, nil, -10 )
@@ -488,15 +500,13 @@ endif
 
 ? cLine
 
-B_OFF
-
 // prikazi GN tabelu.....
 s_gn_tbl()
 
 // prikazi rekapitulaciju dodatnog repromaterijala
 s_nal_rekap( lPrintRek )
 
-P_10CPI
+P_12CPI
 
 s_obrl_footer()
 
@@ -584,50 +594,32 @@ return
 // -----------------------------------------
 static function s_tbl_header()
 local cLine
+local cLine2
 local cRow1
 local cRow2
 
 cLine := g_line(2)
+cLine2 := g_line2()
 
 ? cLine
 
 cRow1 := RAZMAK 
-cRow2 := RAZMAK
+cRow2 := ""
 
-cRow1 += PADC("nalog", 10)
-cRow2 += PADC("broj", 10)
+cRow1 += PADR("nalog / artikal", 20)
 
-cRow1 += " " + PADC("r.br", LEN_IT_NO) 
-cRow2 += " " + PADC(SPACE(4), LEN_IT_NO)
-
-cRow1 += " " + PADR("Artikal (naziv,jmj)", LEN_DESC)
-cRow2 += " " + PADR(" ", LEN_DESC )
-
-cRow1 += " " + PADC("Kol.", LEN_QTTY)
-cRow2 += " " + PADC(" ", LEN_QTTY)
-
-cRow1 += " " + PADC("Sirina", LEN_DIMENSION)
-cRow2 += " " + PADC("(mm)", LEN_DIMENSION)
-
-cRow1 += " " + PADC("Visina", LEN_DIMENSION)
-cRow2 += " " + PADC("(mm)", LEN_DIMENSION)
-
-cRow1 += " " + PADC("Sir.GN", LEN_DIMENSION)
-cRow2 += " " + PADC("(mm)", LEN_DIMENSION)
-
-cRow1 += " " + PADC("Vis.GN", LEN_DIMENSION)
-cRow2 += " " + PADC("(mm)", LEN_DIMENSION)
-
-cRow1 += " " + PADC("Netto", LEN_VALUE)
-cRow2 += " " + PADC("(kg)", LEN_DIMENSION)
-
-cRow1 += " " + PADC("Bruto", LEN_VALUE)
-cRow2 += " " + PADC("(kg)", LEN_DIMENSION)
-
-cRow1 += " " + PADC("Ukupno", LEN_VALUE)
-cRow2 += " " + PADC("(m2)", LEN_DIMENSION)
+cRow2 += SPACE( COL_ITEM ) 
+cRow2 += PADC("Kol.", LEN_QTTY)
+cRow2 += " " + PADC("Sir. (mm)", LEN_DIMENSION)
+cRow2 += " " + PADC("Vis. (mm)", LEN_DIMENSION)
+cRow2 += " " + PADC("Sir.GN", LEN_DIMENSION)
+cRow2 += " " + PADC("Vis.GN", LEN_DIMENSION)
+cRow2 += " " + PADC("Neto (kg)", LEN_VALUE)
+cRow2 += " " + PADC("Bruto (kg)", LEN_VALUE)
+cRow2 += " " + PADC("Total (m2)", LEN_VALUE)
 
 ? cRow1
+? cLine2
 ? cRow2
 
 ? cLine
