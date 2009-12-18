@@ -175,9 +175,7 @@ go top
 
 B_OFF
 
-P_12CPI
-
-//P_COND
+P_COND
 
 // print header tabele
 s_tbl_header()
@@ -321,7 +319,7 @@ do while !EOF()
 			if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 				++ nPage
 				Nstr_a4(nPage, .t.)
-				P_COND2
+				P_COND
 			endif	
 		next
 	endif
@@ -372,7 +370,7 @@ do while !EOF()
 		++ nPage
 		Nstr_a4(nPage, .t.)
 		
-    		P_COND2
+    		P_COND
 	
 	endif	
 
@@ -455,7 +453,7 @@ enddo
 if prow() > LEN_PAGE - DSTR_KOREKCIJA()
 	++nPage
 	Nstr_a4(nPage, .t.)
-	P_COND2
+	P_COND
 endif	
 
 ? cLine
