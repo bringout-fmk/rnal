@@ -1054,7 +1054,7 @@ do while !EOF()
 		nGlass_cnt := g_gl_count( aArt )
 		
 		// koliko ima elemenenata
-		nElement_cnt := g_el_count( aArt )
+		//nElement_cnt := g_el_count( aArt )
 		
 		// ako radis zaokruzenja
 		if __l_zaok = 1

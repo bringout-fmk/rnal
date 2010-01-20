@@ -337,6 +337,12 @@ nX += 2
 
 @ m_x + nX, m_y+2 SAY PADL("Nadmorska visina (nv.m)", nLeft - 10) GET gDefNVM PICT "99999.99"
 
+nX += 1
+
+@ m_x + nX, m_y+2 SAY PADL("GN zaok. (min)", nLeft - 20) GET gGnMin ;
+	PICT "99999"
+@ m_x + nX, col()+1 SAY "(max)" GET gGnMax PICT "99999"
+@ m_x + nX, col()+1 SAY "korak" GET gGnStep PICT "9999"
 
 read
 
@@ -530,6 +536,10 @@ RPar("a5", @gDefNVM)
 
 RPar("to", @gInsTimeOut)
 
+RPar("g1", @gGnMin)
+RPar("g2", @gGnMax)
+RPar("g3", @gGnStep)
+
 close
 return
 
@@ -634,6 +644,10 @@ WPar("a4", gMaxHeigh )
 WPar("a5", gDefNVM )
 
 WPar("to", gInsTimeOut )
+
+WPar("g1", gGnMin )
+WPar("g2", gGnMax )
+WPar("g3", gGnStep )
 
 close
 

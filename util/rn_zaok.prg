@@ -307,8 +307,11 @@ return nRet
 // --------------------------------------
 function arr_gn()
 local aGN:={}
+local nMin := gGnMin
+local nMax := gGnMax
+local nStep := gGnStep
 
-for i:=210 to 6000 step 30
+for i:=nMin to nMax step nStep
 	AADD(aGN, {i})
 next
 
@@ -321,15 +324,17 @@ return aGN
 static function seek_gn(aGN, nVal)
 local nRet
 local nPom
+local nMin := gGnMin
+local nMax := gGnMax
 
 // gornji limit
-if nVal > 6000 
-	return 6000
+if nVal > nMax
+	return nMax
 endif
 
 // donji limit
-if nVal < 210
-	return 210
+if nVal < nMin
+	return nMin
 endif
 
 for i:=1 to LEN(aGN)

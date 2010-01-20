@@ -259,6 +259,10 @@ public gAopKaljenje
 // timeout kod azuriranja
 public gInsTimeOut := 150
 
+// gn.zaok min/max
+public gGnMin := 20
+public gGnMax := 6000
+public gGnStep := 30
 
 ::super:setTGVars()
 
@@ -277,6 +281,9 @@ Rpar( "a3", @gMaxWidth )
 Rpar( "a4", @gMaxHeigh )
 Rpar( "a5", @gDefNVM )
 Rpar( "to", @gInsTimeOut )
+Rpar( "g1", @gGnMin )
+Rpar( "g2", @gGnMax )
+Rpar( "g3", @gGnStep )
 
 
 // sekcija "E"
