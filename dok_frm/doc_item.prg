@@ -428,10 +428,11 @@ function cp_items()
 local nDocCopy
 local cQ_it
 local cQ_aops
+local cSeason
 local nRet := 1
 local nTArea := SELECT()
 
-nRet := _cp_box( @nDocCopy, @cQ_it, @cQ_aops )
+nRet := _cp_box( @nDocCopy, @cQ_it, @cQ_aops, @cSeason )
 
 // ako necu nista raditi - izlazim
 if nRet = 0
@@ -441,7 +442,7 @@ endif
 select _docs
 
 // imam parametre, idem na kopiranje
-__cp_items( _docs->doc_no, nDocCopy, cQ_it, cQ_aops )
+__cp_items( _docs->doc_no, nDocCopy, cQ_it, cQ_aops, cSeason )
 
 select (nTArea)
 
@@ -455,19 +456,22 @@ return nRet
 // cQ_it - pitanje za kopiranje stavki (d/n)
 // cQ_aops - pitanje za kopiranje operac. (d/n)
 // ----------------------------------------------
-static function _cp_box( nDoc, cQ_It, cQ_Aops )
+static function _cp_box( nDoc, cQ_It, cQ_Aops, cSeason )
 local nRet := 1
 local GetList := {}
 
 nDoc := 0
 cQ_it := "D"
 cQ_Aops := "D"
+cSeason := SPACE(4)
 
 Box(, 5, 55 )
 	
 	@ m_x + 1, m_y + 2 SAY "Nalog iz kojeg kopiramo:" GET nDoc ;
 		PICT "9999999999" VALID ( nDoc > 0 )
 
+	@ m_x + 1, col() + 2 SAY "sezona:" GET cSeason ;
+	
 	@ m_x + 3, m_y + 2 SAY "   Kopirati stavke naloga (D/N)" GET cQ_it ;
 		PICT "@!" VALID ( cQ_it $ "DN" )
 	
@@ -492,15 +496,38 @@ return nRet
 // nDoc - originalni dokument
 // nDocCopy - dokument s kojeg kopiramo
 // ---------------------------------------------------
-static function __cp_items( nDoc, nDocCopy, cQ_it, cQ_aops )
+static function __cp_items( nDoc, nDocCopy, cQ_it, cQ_aops, cSeason )
 local nTArea := SELECT()
 local nDocItCopy 
+local nT_Docit := F_DOC_IT
+local nT_Docops := F_DOC_OPS
+local lSeason := .f.
 
 if cQ_it == "N"
 	return
 endif
+
+cSeason := ALLTRIM( cSeason )
+
+if !EMPTY( cSeason ) .and. VAL( cSeason ) <> YEAR(DATE())
 	
-select doc_it
+	lSeason := .t.
+
+	// pozicioniraj se na tabele iz sezone
+	
+	select (nT_docit)
+	use
+	select (nT_docit)
+	use ( KUMPATH + cSeason + SLASH + "DOC_IT.DBF") alias doc_it
+	
+	select (nT_docops)
+	use
+	select (nT_docops)
+	use ( KUMPATH + cSeason + SLASH + "DOC_OPS.DBF") alias doc_ops
+
+endif
+
+select (nT_docit)
 set order to tag "1"
 go top
 seek docno_str( nDocCopy )
@@ -511,7 +538,7 @@ go bottom
 // redni broj
 nDoc_it_no := field->doc_it_no
 	
-select doc_it
+select (nT_docit)
 do while !EOF() .and. field->doc_no = nDocCopy
 
 	nDocItCopy := field->doc_it_no
@@ -530,13 +557,13 @@ do while !EOF() .and. field->doc_no = nDocCopy
 	// kopiraj i operacije ove stavke, ako je to uredu
 	if cQ_aops == "N"
 
-		select doc_it
+		select ( nT_docit )
 		skip
 		loop
 	
 	endif
 
-	select doc_ops
+	select ( nT_docops )
 	go top
 	seek docno_str( nDocCopy ) + docit_str( nDocItCopy )
 
@@ -554,15 +581,25 @@ do while !EOF() .and. field->doc_no = nDocCopy
 
 		gather()
 
-		select doc_ops				
+		select ( nT_docops )				
 		skip
 
 	enddo
 		
-	select doc_it
+	select ( nT_docit )
 	skip
 
 enddo
+
+if lSeason == .t.
+	// vrati se na stare tabele
+	select (nT_docit)
+	use
+	select (nT_docops)
+	use
+	O_DOC_IT
+	O_DOC_OPS
+endif
 
 select (nTArea)
 
