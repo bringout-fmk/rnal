@@ -10,6 +10,32 @@ lReturn := Pitanje(,"Sumirati stavke sa naloga (D/N)","D") = "D"
 
 return
 
+// ------------------------------------------
+// sta generisati, uslovi generacije
+// ------------------------------------------
+static function _vp_mp( cVpMp )
+local nX := 1
+local nRet := 1
+private GetList := {}
+
+Box(, 3, 65 )
+
+	@ m_x + nX, m_y + 2 SAY "Generisati:"
+	++ nX
+	@ m_x + nX, m_y + 2 SAY " [V] opremnicu vp (dok 12)"
+	++ nX
+	@ m_x + nX, m_y + 2 SAY " [M] otprenicu mp (dok 13)" GET cVpMp ;
+		VALID cVpMp $ "VM" PICT "@!" 
+	read
+BoxC()
+
+if LastKey() == K_ESC
+	nRet := 0
+endif
+
+return nRet
+
+
 
 // --------------------------------------------------------
 // export u FMK v.2
@@ -30,9 +56,16 @@ local cFmkDoc
 local nCust_id
 local i
 local lSumirati
+local cVpMp := "V"
 
 // napuni podatke za prenos
 st_pripr( lTemp, nDoc_no, aDocList )
+
+// generisati sta ?
+if _vp_mp( @cVpMp ) == 0
+	select (nTarea)
+	return
+endif
 
 if Pitanje(,"Promjeniti podatke isporuke ?", "N") == "D"
 	// selektuj stavke
@@ -138,9 +171,18 @@ endif
 // prebaci robu iz doc_it2
 // ----------------------------------------------
 
+cFirma := "10"
+
 cIdVd := "12"
 cCtrlNo := "22"
-cBrDok := fa_new_doc( "10", cCtrlNo )
+
+// ako je MP onda je drugi set
+if cVpMp == "M"
+	cIdVd := "13"
+	cCtrlNo := "23"
+endif
+
+cBrDok := fa_new_doc( cFirma, cCtrlNo )
 cFmkDoc := cIdVd + "-" + ALLTRIM(cBrdok)
 nRbr := 0
 
@@ -149,7 +191,8 @@ set order to tag "2"
 go top
 
 do while !EOF()
-	
+		
+	nDoc_no := field->doc_no
 	cArt_id := field->art_id
 	nQtty := field->doc_it_qtt
 	cDesc := field->desc
@@ -204,10 +247,6 @@ do while !EOF()
 	_dindem := "KM "
 	_zaokr := 2
 
-	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
-		// veza, broj naloga
-		_dok_veza := _fmk_doc_upd( _dok_veza, ALLTRIM(STR( nDoc_No )) )
-	endif
 
 	if x_tbl->(FIELDPOS("OPIS")) <> 0
 		_opis := cDesc
@@ -238,6 +277,17 @@ do while !EOF()
 	a_to_txt( "", .t. )
 
 	gather()
+
+	// sada ubaci vezu
+	go top
+	
+	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
+		// veza, broj naloga
+		replace field->dok_veza with ;
+			_fmk_doc_upd( field->dok_veza, ;
+			ALLTRIM(STR( nDoc_No )) )
+	endif
+
 
 	select (nADOC_IT2)
 
@@ -341,11 +391,7 @@ do while !EOF()
 	_dindem := "KM "
 	_zaokr := 2
 
-	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
-		// veza, broj naloga
-		_dok_veza := _fmk_doc_upd( _dok_veza, ALLTRIM(STR( nDoc_No )) )
-	endif
-
+	
 	if x_tbl->(FIELDPOS("OPIS")) <> 0
 		_opis := cArt_sh
 	endif
@@ -375,6 +421,17 @@ do while !EOF()
 	a_to_txt( "", .t. )
 
 	gather()
+
+	// sada ubaci broj veze, na prvi slog
+	go top
+
+	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
+		// veza, broj naloga
+		replace field->dok_veza with ;
+			_fmk_doc_upd( field->dok_veza, ;
+			  ALLTRIM(STR( nDoc_No )) )
+	endif
+
 
 	// setuj da je dokument prenesen u DOCS
 	select (nADocs)
