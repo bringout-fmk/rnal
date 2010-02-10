@@ -258,6 +258,7 @@ local nDoc_it_no
 local cDoc_gr_no := "0"
 local nQtty
 local nTotal
+local nTot_m
 local nHeigh
 local nHe2
 local nWidth
@@ -440,8 +441,13 @@ do while !EOF() .and. field->doc_no == __doc_no
 		cDocit_city := ""
 	endif
 	
+	altd()
+
 	// ukupno mm -> m2
 	nTotal := ROUND( c_ukvadrat(nQtty, nHeigh, nWidth), 2)
+	
+	// ukupno duzinski
+	nTot_m := ROUND( c_duzinski(nQtty, nHeigh, nWidth), 2)
 
 	cDoc_it_schema := field->doc_it_schema
 	// na napomene dodaj i poziciju ako postoji...
@@ -485,6 +491,8 @@ do while !EOF() .and. field->doc_no == __doc_no
 		// ako se zaokruzuje onda total ide po zaokr.vrijednostima
 		nTotal := ROUND( c_ukvadrat( nQtty, nZHeigh, nZWidth, nZH2, nZW2 ), 2)
 		
+		// duzinski
+		nTot_m := ROUND( c_duzinski( nQtty, nZHeigh, nZWidth, nZH2, nZW2 ), 2)
 		// izracunaj neto
 		nNeto := ROUND( obrl_neto( nTotal, aZpoGN ), 2)
 		
@@ -500,7 +508,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 		  cDoc_it_schema, cDoc_it_desc, cDoc_it_Type, ;
 		  nQtty, nHeigh, nWidth, ;
 		  nHe2, nWi2, ;
-		  nDocit_altt, cDocit_city, nTotal, ;
+		  nDocit_altt, cDocit_city, nTotal, nTot_m, ;
 		  nZHeigh, nZWidth, ;
 		  nZH2, nZW2, ;
 		  nNeto, nBruto, cDoc_it_pos )
@@ -522,7 +530,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 		  cDoc_it_schema, cDoc_it_desc, cDoc_it_type, ;
 		  nQtty, nHeigh, nWidth, ;
 		  nHe2, nWi2, ;
-		  nDocit_altt, cDocit_city, nTotal, ;
+		  nDocit_altt, cDocit_city, nTotal, nTot_m, ;
 		  nZHeigh, nZWidth, ;
 		  nZH2, nZW2, ;
 		  nNeto, nBruto, cDoc_it_pos )
@@ -1326,7 +1334,11 @@ local nTArea := SELECT()
 // ukupno mm -> m2
 replace field->doc_it_total with ROUND( c_ukvadrat(field->doc_it_qtty, ;
 	field->doc_it_height, field->doc_it_width), 2)
-	
+
+replace field->doc_it_tm with ROUND( c_duzinski(field->doc_it_qtty, ;
+	field->doc_it_height, field->doc_it_width), 2)
+
+
 aZpoGN := {}
 		
 // zaokruzi vrijednosti....
@@ -1371,7 +1383,12 @@ replace field->doc_it_total with ROUND( c_ukvadrat( field->doc_it_qtty, ;
 	field->doc_it_zwi, ;
 	field->doc_it_zh2, ;
 	field->doc_it_zw2 ), 2)
-		
+replace field->doc_it_tm with ROUND( c_duzinski( field->doc_it_qtty, ;
+	field->doc_it_zhe, ;
+	field->doc_it_zwi, ;
+	field->doc_it_zh2, ;
+	field->doc_it_zw2 ), 2)
+	
 // izracunaj neto
 replace field->doc_it_neto with ROUND( obrl_neto( field->doc_it_total, aZpoGN ), 2)
 		

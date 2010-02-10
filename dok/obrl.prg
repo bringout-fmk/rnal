@@ -4,7 +4,7 @@
 static LEN_IT_NO := 4
 static LEN_DESC := 95
 
-static LEN_LINE1 := 105
+static LEN_LINE1 := 115
 
 static COL_RBR := 3
 static COL_ITEM := 15
@@ -57,6 +57,7 @@ cLine += " " + REPLICATE("-", LEN_DIMENSION)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
 cLine += " " + REPLICATE("-", LEN_DIMENSION)
+cLine += " " + REPLICATE("-", LEN_VALUE)
 cLine += " " + REPLICATE("-", LEN_VALUE)
 cLine += " " + REPLICATE("-", LEN_VALUE)
 cLine += " " + REPLICATE("-", LEN_VALUE)
@@ -188,6 +189,7 @@ aArt_desc := {}
 nArt_id := 0
 nArt_tmp := 0
 nUTotal := 0
+nUTot_m := 0
 nUNeto := 0
 nUBruto := 0
 nUQty := 0
@@ -197,6 +199,7 @@ nUZHeig := 0
 nUZWidt := 0
 
 nTTotal := 0
+nTTot_m := 0
 nTNeto := 0
 nTBruto := 0
 nTQty := 0
@@ -261,8 +264,10 @@ do while !EOF()
 	nBruto := field->doc_it_bruto
 	
 	nTotal := field->doc_it_total
+	nTot_m := field->doc_it_tm
 
 	nUTotal += nTotal
+	nUTot_m += nTot_m
 	nUNeto += nNeto
 	nUBruto += nBruto
 	nUQty += nQty
@@ -272,6 +277,7 @@ do while !EOF()
 	nUZWidt += nZaWidt
 	
 	nTTotal += nTotal
+	nTTot_m += nTot_m
 	nTNeto += nNeto
 	nTBruto += nBruto
 	nTQty += nQty
@@ -363,6 +369,10 @@ do while !EOF()
 
 	// ukupno m2
 	?? show_number(nTotal, nil, -10 )
+	?? " "
+	
+	// ukupno m
+	?? show_number(nTot_m, nil, -10 )
 
 	// provjeri za novu stranicu
 	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
@@ -427,7 +437,11 @@ do while !EOF()
 
       // ukupno m2
       ?? show_number(nUTotal, nil, -10 )
+      ?? " "
 
+      // total m
+      ?? show_number(nUTot_m, nil, -10 )
+      
       ? SPACE( nTmp - 6 )
       
       ?? REPLICATE( "", nRepl )
@@ -435,6 +449,7 @@ do while !EOF()
       // resetuj varijable totale
 
       nUTotal := 0
+      nUTot_m := 0
       nUNeto := 0
       nUBruto := 0
       nUQty := 0
@@ -444,6 +459,16 @@ do while !EOF()
       nUZWidt := 0
 
       cDocXX := cDoc_no
+	
+      // provjeri za novu stranicu
+      if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	
+		++ nPage
+		Nstr_a4(nPage, .t.)
+		
+    		P_COND
+	
+      endif	
 
    enddo
 
@@ -495,6 +520,9 @@ endif
 
 // ukupno m2
 ?? show_number(nTTotal, nil, -10 )
+?? " "
+
+?? show_number(nTTot_m, nil, -10 )
 
 ? cLine
 
@@ -572,14 +600,6 @@ local cPom
 cPom := "Izdao: _________________"
 cPom += SPACE(10)
 cPom += "Primio: _________________"
-
-
-// provjeri za novu stranicu
-if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-	++ nPage
-	Nstr_a4(nPage, .t.)
-endif	
-
 ?
 ? RAZMAK + SPACE(5) + cPom
 
@@ -615,6 +635,7 @@ cRow2 += " " + PADC("Vis.GN", LEN_DIMENSION)
 cRow2 += " " + PADC("Neto (kg)", LEN_VALUE)
 cRow2 += " " + PADC("Bruto (kg)", LEN_VALUE)
 cRow2 += " " + PADC("Total (m2)", LEN_VALUE)
+cRow2 += " " + PADC("Total (m)", LEN_VALUE)
 
 ? cRow1
 ? cLine2

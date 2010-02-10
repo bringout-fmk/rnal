@@ -555,9 +555,13 @@ return
 // ---------------------------------------
 // stampa rekapitulacije na dnu naloga
 // ---------------------------------------
-function s_nal_rekap( lPrint, nDoc_no )
+function s_nal_rekap( lPrint, nDoc_no, lSpecif )
 local cTmp
 local nDoc
+
+if lSpecif == nil
+	lSpecif := .f.
+endif
 
 if lPrint == .f.
 	return
@@ -573,14 +577,16 @@ if RECCOUNT2() == 0
 	return
 endif
 
+P_COND
+
 ?
 ? RAZMAK + "rekapitulacija dodatnog materijala:"
 ? RAZMAK + "-----------------------------------"
 
-if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-	++nPage
-	Nstr_a4(nPage, .t.)
-endif	
+//if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+//	++nPage
+//	Nstr_a4(nPage, .t.)
+//endif	
 
 go top
 
@@ -613,10 +619,10 @@ do while !EOF()
 	// vrati se
 	select t_docit2
 
-	if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-		++nPage
-		Nstr_a4(nPage, .t.)
-	endif	
+	//if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+	//	++nPage
+	//	Nstr_a4(nPage, .t.)
+	//endif	
 	
 	? RAZMAK + "nalog: " + ALLTRIM(STR(nDoc)) + ;
 		", stavka: " + ALLTRIM(STR(nDoc_it_no))
@@ -636,10 +642,10 @@ do while !EOF()
 		cTmp2 := ALLTRIM( field->desc )
 		aTmp2 := SjeciStr( cTmp2, 120 )
 
-		if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-			++nPage
-			Nstr_a4(nPage, .t.)
-		endif	
+		//if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+		//	++nPage
+		//	Nstr_a4(nPage, .t.)
+		//endif	
 
 		? RAZMAK
 		?? ALLTRIM(STR(field->it_no)) + "."
@@ -659,10 +665,10 @@ do while !EOF()
 				
 				?? aTmp2[ i ]
 
-				if prow() > LEN_PAGE - DSTR_KOREKCIJA()
-					++nPage
-					Nstr_a4(nPage, .t.)
-				endif	
+				//if prow() > LEN_PAGE - DSTR_KOREKCIJA()
+				//	++nPage
+				//	Nstr_a4(nPage, .t.)
+				//endif	
 			next
 		endif
 

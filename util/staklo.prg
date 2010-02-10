@@ -29,10 +29,18 @@ return xRet
 // kalkulise duzinske metre
 // nDim1, nDim2 u mm
 // -----------------------------------------------------
-function c_duzinski(nKol, nDim1, nDim2)
+function c_duzinski( nKol, nDim1, nDim2, nDim3, nDim4 )
 local xRet
-xRet := ( ( nDim1 / 1000 ) + ( nDim2 / 1000 ) ) * 2
+
+if nDim3 == nil .and. nDim4 == nil
+	xRet := ( (( nDim1 / 1000 )  * 2 ) + (( nDim2 / 1000 ) * 2 ) )
+else
+	xRet := ( ( nDim1 / 1000 ) + ( nDim2 / 1000 ) + ;
+		( nDim3 / 1000 ) + ( nDim4 / 1000 ) )
+endif
+
 xRet := nKol * xRet
+
 return xRet
 
 

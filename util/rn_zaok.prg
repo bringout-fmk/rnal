@@ -18,6 +18,10 @@ local nSeek
 local nZaok := 1
 local xZaok := 0
 
+if nVal = 0
+	return 0
+endif
+
 if lBezZaokr == nil
 	lBezZaokr := .f.
 endif
