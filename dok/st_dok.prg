@@ -441,8 +441,6 @@ do while !EOF() .and. field->doc_no == __doc_no
 		cDocit_city := ""
 	endif
 	
-	altd()
-
 	// ukupno mm -> m2
 	nTotal := ROUND( c_ukvadrat(nQtty, nHeigh, nWidth), 2)
 	
