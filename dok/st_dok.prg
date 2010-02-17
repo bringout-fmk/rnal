@@ -489,8 +489,9 @@ do while !EOF() .and. field->doc_no == __doc_no
 		// ako se zaokruzuje onda total ide po zaokr.vrijednostima
 		nTotal := ROUND( c_ukvadrat( nQtty, nZHeigh, nZWidth, nZH2, nZW2 ), 2)
 		
+		// ovo ne treba da uzima po GN zaokruzenju
 		// duzinski
-		nTot_m := ROUND( c_duzinski( nQtty, nZHeigh, nZWidth, nZH2, nZW2 ), 2)
+		//nTot_m := ROUND( c_duzinski( nQtty, nZHeigh, nZWidth, nZH2, nZW2 ), 2)
 		// izracunaj neto
 		nNeto := ROUND( obrl_neto( nTotal, aZpoGN ), 2)
 		

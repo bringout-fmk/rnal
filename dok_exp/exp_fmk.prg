@@ -311,6 +311,12 @@ nRbr := 0
 
 do while !EOF() 
 
+	// da li je markirano za prenos
+	if field->print == "N"
+		skip
+		loop
+	endif
+
 	nDoc_no := field->doc_no
 
 	nArt_id := field->art_id
@@ -356,9 +362,11 @@ do while !EOF()
 		// sracunaj za iste artikle
 		do while !EOF() .and. field->art_sh_desc == cArt_sh
 
-			// kolicina
-			nM2 += field->doc_it_total
-			
+			if field->print == "D"
+				// kolicina
+				nM2 += field->doc_it_total
+			endif
+
 			skip
 
 		enddo
