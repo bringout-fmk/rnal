@@ -15,7 +15,9 @@ private izbor := 1
 AADD( opc, "1. rnal -> GPS.opt (Lisec)         ")
 AADD( opcexe, {|| exp_2_lisec( nDoc_no, lTemp, lWriteRel ), izbor := 0 } )
 AADD( opc, "2. rnal -> FMK    ")
-AADD( opcexe, {|| exp_2_fmk( lTemp, nDoc_no, aDocList, lWriteRel ), izbor := 0 } )
+AADD( opcexe, {|| exp_2_fmk( lTemp, nDoc_no, aDocList ), izbor := 0 } )
+AADD( opc, "3. rnal -> FMK (zadnja otpremnica) ")
+AADD( opcexe, {|| exp_2_fmk( lTemp, nDoc_no, aDocList, .t. ), izbor := 0 } )
 
 Menu_SC("export")
 

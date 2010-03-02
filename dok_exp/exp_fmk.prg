@@ -45,8 +45,9 @@ return nRet
 // aDocList - matrica sa listom naloga za obradu
 //            ako je zadata, radit ce na osnovu
 //            vise naloga
+// lNoGen - nemoj generisati ponovo stavke, vec postoje
 // --------------------------------------------------------
-function exp_2_fmk( lTemp, nDoc_no, aDocList )
+function exp_2_fmk( lTemp, nDoc_no, aDocList, lNoGen )
 local nTArea := SELECT()
 local nADocs := F_DOCS
 local nADOC_IT := F_T_DOCIT
@@ -58,8 +59,14 @@ local i
 local lSumirati
 local cVpMp := "V"
 
-// napuni podatke za prenos
-st_pripr( lTemp, nDoc_no, aDocList )
+if lNoGen == nil
+	lNoGen := .f.
+endif
+
+if lNoGen == .f.
+	// napuni podatke za prenos
+	st_pripr( lTemp, nDoc_no, aDocList )
+endif
 
 // generisati sta ?
 if _vp_mp( @cVpMp ) == 0
