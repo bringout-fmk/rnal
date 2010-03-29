@@ -35,6 +35,7 @@ _cre_spec( dD_from, dD_to, nGroup, nOper )
 // printaj specifikaciju
 _p_rpt_spec( nGroup )
 
+close all
 
 return
 
