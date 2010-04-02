@@ -465,6 +465,16 @@ do while !EOF()
 enddo
 
 
+// sredi redne brojeve pripreme
+select x_tbl
+set order to tag "0"
+go top
+nRbr := 0
+do while !EOF()
+	replace field->rbr with STR( ++nRbr, 3 )
+	skip
+enddo
+
 select (245)
 use
 
