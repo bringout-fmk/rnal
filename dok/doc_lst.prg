@@ -799,6 +799,9 @@ return
 static function s_ol_status( aArr )
 local cStr := ""
 local i
+local n
+local aStr := {}
+local cOpt
 
 if LEN(aArr) == 0
 	cStr := "! prazno !"
@@ -819,8 +822,19 @@ else
 	next
 endif
 
-@ 24, 2 SAY PADR("", 77) COLOR "W/G+"
-@ 24, 2 SAY "A-dodaj Y-brisi : " + cStr COLOR "W/G+"
+// dodaj u matricu tekst
+cOpt := "A-dodaj Y-brisi: "
+aStr := SjeciStr( cOpt + cStr, 70 )
+
+// prikaz idi u 2-3 reda
+
+@ 22, 2 SAY PADR("", 77) COLOR "W/G+"
+@ 23, 2 SAY PADR("", 77) COLOR "W/G+"
+
+for n := 1 to LEN( aStr )
+	
+	@ 21 + n, 2 SAY aStr[n] COLOR "W/G+"
+next
 
 return
 
