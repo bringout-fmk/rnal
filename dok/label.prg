@@ -214,6 +214,7 @@ xml_subnode("label", .t.)
 close_xml()
 
 cOdtName := ""
+cJavaStart := ALLTRIM( gJavaStart )
 
 // izaberi sablon
 if g_afile( "c:\", "_rg*.odt", @cOdtName ) = 0
@@ -237,7 +238,7 @@ if !EMPTY( gJODTemplate )
 endif
 
 // stampanje labele
-cCmdLine := "java -jar " + cJODRep + " " + ;
+cCmdLine := cJavaStart + " " + cJODRep + " " + ;
 	cPath + cOdtName + " c:\data.xml c:\rg-lab.odt"
 
 ? cCmdLine
