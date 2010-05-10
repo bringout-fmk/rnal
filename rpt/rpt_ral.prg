@@ -284,6 +284,8 @@ do while !EOF()
 
 enddo
 
+close all
+
 FF
 END PRINT
 

@@ -212,6 +212,8 @@ cDocXX := "XX"
 
 nItem := 0
 
+altd()
+
 // stampaj podatke 
 do while !EOF()
 
@@ -240,7 +242,8 @@ do while !EOF()
      endif
 	
      do while !EOF() .and. field->doc_no == nDoc_no ;
-			.and. field->art_sh_desc == cArt_sh
+			.and. PADR(field->art_sh_desc,150) == ;
+				PADR(cArt_sh,150)
 
 	// da li se stavka stampa ili ne ?
         if field->print == "N"
@@ -291,6 +294,12 @@ do while !EOF()
 	else
 		cArt_desc := ALLTRIM( field->art_desc )
 	endif
+
+	// redni broj u nalogu
+	cArt_desc := "(" + ALLTRIM(STR(field->doc_it_no)) + ") " + cArt_desc
+
+	// pozicija ako postotoji
+	cArt_desc += "; " + ALLTRIM( field->doc_it_desc )
 
 	aArt_desc := SjeciStr( cArt_desc, LEN_DESC )	
 	

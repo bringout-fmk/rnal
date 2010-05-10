@@ -80,8 +80,6 @@ if lPrint == .t.
 	_p_rpt_spec( dD_from, dD_to )
 endif
 
-close all
-
 return
 
 
@@ -1730,6 +1728,8 @@ if __op_12 <> 0
 endif
 
 ? cLine 
+
+close all
 
 FF
 END PRINT

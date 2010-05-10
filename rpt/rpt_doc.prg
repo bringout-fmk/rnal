@@ -26,8 +26,6 @@ _fill_op()
 // stampaj izvjestaj
 _p_op_docs( dD_from, dD_to )
 
-close all
-
 return
 
 
@@ -85,6 +83,8 @@ enddo
 @ prow(), pcol() + 1 SAY nT_to
 
 ? cLine
+
+close all
 
 FF
 END PRINT

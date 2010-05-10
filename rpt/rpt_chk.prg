@@ -26,8 +26,6 @@ _cre_report( dD_from, dD_to, nOper, cStatus )
 // rpt
 _gen_rpt( dD_from, dD_to, nOper, nVar )
 
-close all
-
 return
 
 
@@ -76,6 +74,8 @@ do while !EOF()
 enddo
 
 ? cLine
+
+close all
 
 FF
 END PRINT
