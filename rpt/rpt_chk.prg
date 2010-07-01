@@ -67,7 +67,6 @@ do while !EOF()
 	@ prow(), pcol()+1 SAY field->dvr_date
 	@ prow(), pcol()+1 SAY field->fakt_d1
 	//@ prow(), pcol()+1 SAY field->fakt_d2
-	@ prow(), pcol()+1 SAY field->pos_d1
 	
 	skip
 
@@ -103,8 +102,6 @@ cLine += SPACE(1)
 cLine += REPLICATE("-", 8)
 cLine += SPACE(1)
 cLine += REPLICATE("-", 10)
-cLine += SPACE(1)
-cLine += REPLICATE("-", 6)
 
 cTxt := PADR("Broj nal.", 10)
 cTxt += SPACE(1)
@@ -115,8 +112,6 @@ cTxt += SPACE(1)
 cTxt += PADR("Ispor.", 8)
 cTxt += SPACE(1)
 cTxt += PADR("FAKT", 10)
-cTxt += SPACE(1)
-cTxt += PADR("POS", 6 )
 
 ? cLine 
 ? cTxt
@@ -152,10 +147,7 @@ index on STR( doc_no, 10) tag "1"
 
 // napravi linkove sa fakt-om i pos-om
 select (240)
-use ( ALLTRIM(gFaKumDir) + "DOKS" ) alias "f_dok"
-set order to tag "1"
-select (241)
-use ( ALLTRIM(gPoKumDir) + "DOKSRC" ) alias "p_dok"
+use ( ALLTRIM(gFaKumDir) + "FAKT" ) alias "f_dok"
 set order to tag "1"
 
 // otvori potrebne tabele
@@ -188,66 +180,45 @@ do while !EOF()
 		loop
 	endif
 	
-	// ovaj nema unesene -veze-
-	
 	// da li ga ima u FAKT-u ?
 	
 	cDokument := ALLTRIM(STR(nDoc_no)) + ";"
 	cF_doc1 := "?"
 	cF_doc2 := "?"
+	cP_doc1 := "?"
 
 	select f_dok
 	seek cFFirma + cFTipDok
+
+	// resetuj memo vrijednost
+	aMemo := {}
+
 	do while !EOF() .and. field->idfirma + field->idtipdok == ;
 		cFFirma + cFTipDok
 			
-		if EMPTY( field->dok_veza )
+		// gledaj samo redni broj jedan fakture
+		if ALLTRIM( field->rbr ) <> "1"
 			skip
 			loop
 		endif
 
+		// uzmi memo polje
+		aMemo := ParsMemo( field->txt )	
+		
+		if LEN( aMemo ) > 18
+			cMemo := aMemo[ 19 ]
+		else
+			cMemo := ""
+		endif
+
 		// tu je !
-		if cDokument $ ALLTRIM( field->dok_veza )
+		if cDokument $ cMemo
 			cF_doc1 := field->brdok
 			exit
 		endif
 
 		skip
 	enddo
-
-	// provjeri i fakture
-	//cFTipDok := "10"
-
-	//go top
-	//seek cFFirma + cFTipDok
-	//do while !EOF() .and. field->idfirma + field->idtipdok == ;
-	//	cFFirma + cFTipDok
-			
-	//	if EMPTY( field->dok_veza )
-	//		skip
-	//		loop
-	//	endif
-
-	//	// tu je !
-	//	if cDokument $ ALLTRIM( field->dok_veza )
-	//		cF_doc2 := field->brdok
-	//		exit
-	//	endif
-
-	//	skip
-	//enddo
-
-	cP_doc1 := "?"
-	// ima li ga u POS ?
-	select p_dok
-	set order to tag "2"
-	go top
-	seek PADR("KUPAC",10) + PADR(cPFirma, 2) + ;
-		PADR(cPTipDok, 2) + PADR( ALLTRIM(STR(nDoc_no)), 8 )
-
-	if FOUND()
-		cP_doc1 := field->brdok
-	endif
 	
 	app_to_tmp1( nDoc_no, cCustomer, dDoc_date, dDvr_date, ;
 			cF_doc1, cF_doc2, cP_doc1 )
@@ -255,6 +226,7 @@ do while !EOF()
 	// idemo dalje...
 	select docs
 	skip
+
 enddo
 
 BoxC()
