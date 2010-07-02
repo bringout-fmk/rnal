@@ -259,6 +259,27 @@ do while !EOF()
 		_opis := cDesc
 	endif
 
+
+	gather()
+
+	// sada ubaci vezu
+	go top
+	
+	cTmp_veza := ""
+
+	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
+		
+		// veza, broj naloga
+
+		cTmp_veza := _fmk_doc_upd( field->dok_veza, ;
+			ALLTRIM(STR( nDoc_No )) )
+		replace field->dok_veza with cTmp_veza
+	endif
+
+	scatter()
+
+	_txt := ""
+
 	// roba tip U - nista
 	a_to_txt( "", .t. )
 	// dodatni tekst otpremnice - nista
@@ -280,21 +301,29 @@ do while !EOF()
 	// datum isporuke - nista
 	a_to_txt( "", .t. )
 	
-	// datum valute - nista
+	// 10. datum valute - nista
 	a_to_txt( "", .t. )
+	
+	// 11. 
+	a_to_txt( "", .t. )
+	// 12. 
+	a_to_txt( "", .t. )
+	// 13. 
+	a_to_txt( "", .t. )
+	// 14. 
+	a_to_txt( "", .t. )
+	// 15. 
+	a_to_txt( "", .t. )
+	// 16. 
+	a_to_txt( "", .t. )
+	// 17. 
+	a_to_txt( "", .t. )
+	// 18. 
+	a_to_txt( "", .t. )
+	// 19. 
+	a_to_txt( cTmp_veza, .t. )
 
 	gather()
-
-	// sada ubaci vezu
-	go top
-	
-	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
-		// veza, broj naloga
-		replace field->dok_veza with ;
-			_fmk_doc_upd( field->dok_veza, ;
-			ALLTRIM(STR( nDoc_No )) )
-	endif
-
 
 	select (nADOC_IT2)
 
@@ -405,11 +434,31 @@ do while !EOF()
 	_kolicina := nM2
 	_dindem := "KM "
 	_zaokr := 2
-
 	
 	if x_tbl->(FIELDPOS("OPIS")) <> 0
 		_opis := cArt_sh
 	endif
+
+
+	gather()
+
+	// sada ubaci broj veze, na prvi slog
+	go top
+	
+	cTmp_veza := ""
+
+	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
+		// veza, broj naloga
+		cTmp_veza := _fmk_doc_upd( field->dok_veza, ;
+			  ALLTRIM(STR( nDoc_No )) )
+
+		replace field->dok_veza with cTmp_veza
+	endif
+	
+	// dodaj i memo polje
+	scatter()
+	
+	_txt := ""
 
 	// roba tip U - nista
 	a_to_txt( "", .t. )
@@ -432,21 +481,29 @@ do while !EOF()
 	// datum isporuke - nista
 	a_to_txt( "", .t. )
 	
-	// datum valute - nista
+	// 10. datum valute - nista
 	a_to_txt( "", .t. )
+	
+	// 11. 
+	a_to_txt( "", .t. )
+	// 12. 
+	a_to_txt( "", .t. )
+	// 13. 
+	a_to_txt( "", .t. )
+	// 14. 
+	a_to_txt( "", .t. )
+	// 15. 
+	a_to_txt( "", .t. )
+	// 16. 
+	a_to_txt( "", .t. )
+	// 17. 
+	a_to_txt( "", .t. )
+	// 18. 
+	a_to_txt( "", .t. )
+	// 19. 
+	a_to_txt( cTmp_veza, .t. )
 
 	gather()
-
-	// sada ubaci broj veze, na prvi slog
-	go top
-
-	if x_tbl->(FIELDPOS("DOK_VEZA")) <> 0
-		// veza, broj naloga
-		replace field->dok_veza with ;
-			_fmk_doc_upd( field->dok_veza, ;
-			  ALLTRIM(STR( nDoc_No )) )
-	endif
-
 
 	// setuj da je dokument prenesen u DOCS
 	select (nADocs)
