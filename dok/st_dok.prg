@@ -960,6 +960,8 @@ do case
 		cGr := "LAMI-RG"
 	case nGr == 6
 		cGr := "emajlirano"
+	case nGr == 7
+		cGr := "buseno"
 	case nGr == -99
 		cGr := "!!! ARTICLE-ERROR !!!"
 endcase
@@ -975,6 +977,7 @@ local cGroup := ""
 local aArt := {}
 local lIsIZO := .f.
 local lIsBruseno := .f.
+local lIsBuseno := .f.
 local lIsKaljeno := .f.
 local lIsLamiG := .f.
 local lIsLami := .f.
@@ -995,6 +998,7 @@ lIsLami := is_lami( aArt )
 lIsLAMIG := is_lamig( aArt )
 
 lIsBruseno := is_bruseno( aArt, nDoc_no, nDocIt_no )
+lIsBuseno := is_buseno( aArt, nDoc_no, nDocIt_no )
 lIsKaljeno := is_kaljeno( aArt, nDoc_no, nDocIt_no )
 lIsEmajl := is_emajl( aArt, nDoc_no, nDocIt_no )
 
@@ -1005,6 +1009,7 @@ lIsEmajl := is_emajl( aArt, nDoc_no, nDocIt_no )
 // 4 - IZO
 // 5 - lami-rg
 // 6 - emajlirano
+// 7 - buseno
 
 if lIsEmajl == .t.
 	cGroup += "6"
@@ -1026,9 +1031,14 @@ if lIsLAMI == .t.
 	cGroup += "5"
 endif	
 
+if lIsBuseno == .t. 
+	cGroup += "7"
+endif		
+
 
 if ( lIsKaljeno == .f. ) .and. ;
 	(lIsBruseno == .f.) .and. ;
+	(lIsBuseno == .f.) .and. ;
 	(lIsIZO == .f.) .and. ;
 	(lIsEmajl == .f.) .and. ;
 	(lIsLami == .f. ) 
@@ -1216,6 +1226,30 @@ if lRet == .f.
 endif
 
 return lRet 
+
+
+
+// -------------------------------------------------------------
+// da li je staklo buseno ???
+// -------------------------------------------------------------
+function is_buseno( aArticle, nDoc_no, nDocit_no, nDoc_el_no )
+local lRet := .f.
+local cSrcJok := "<A_BU>"
+
+if nDoc_el_no == nil
+	nDoc_el_no := 0
+endif
+
+// provjeri obradu iz matrice
+lRet := ck_obr( aArticle, cSrcJok )
+
+if lRet == .f.
+	// provjeri i tabelu DOC_OPS
+	lRet := ck_obr_aops( nDoc_no, nDocit_no, nDoc_el_no, cSrcJok )
+endif
+
+return lRet 
+
 
 
 // ----------------------------------------------------
