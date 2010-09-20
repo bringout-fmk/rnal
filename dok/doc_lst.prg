@@ -211,9 +211,6 @@ nX += 1
 
 @ m_x + nX, m_y + 2 SAY " * (3) prioritet + datum isporuke + broj dokumenta" COLOR cColor1
 
-//nX += 1
-//@ m_x + nX, m_y + 2 SAY " * (4) ..." COLOR cColor1
-
 if _status == 2
 
 	nX += 2

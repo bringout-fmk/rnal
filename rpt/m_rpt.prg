@@ -43,6 +43,9 @@ AADD(opcexe, {|| nil })
 AADD(opc, "K. kontrola prebacenih dokumenata  ")
 AADD(opcexe, {|| m_rpt_check( ) })
 
+AADD(opc, "T. pretraga naloga po uslovima  ")
+AADD(opcexe, {|| r_fnd_docs() })
+
 Menu_SC("rpt_rnal")
 
 return
