@@ -146,6 +146,10 @@ box(,2, 60)
 	read
 boxc()
 
+if LastKey() == K_ESC
+	return
+endif
+
 // napravi linkove sa doks-om
 select (240)
 use ( ALLTRIM(gFaKumDir) + "FAKT" ) alias "f_dok"
