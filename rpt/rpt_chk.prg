@@ -119,6 +119,117 @@ cTxt += PADR("FAKT", 10)
 
 return
 
+// --------------------------------------------------------------
+// provjeri linkove sa maloprodajnim racunima
+// --------------------------------------------------------------
+function chk_dok_11()
+local dD_from := DATE()
+local dD_to := DATE()
+local aMemo
+local cMemo
+local aTmp
+local i
+local nNalog
+local cFaktDok
+local cReset := "N"
+
+private GetList:={}
+
+box(,2, 60)
+
+	@ m_x + 1, m_y + 2 SAY "za datum od" GET dD_from
+	@ m_x + 1, col() + 1 SAY "do" GET dD_to
+	
+	@ m_x + 2, m_y + 2 SAY "resetuj broj veze u RNAL (D/N)?" ;
+		GET cReset VALID cReset $ "DN" PICT "@!"
+
+	read
+boxc()
+
+// napravi linkove sa doks-om
+select (240)
+use ( ALLTRIM(gFaKumDir) + "FAKT" ) alias "f_dok"
+set order to tag "1"
+
+// otvori potrebne tabele
+o_tables( .f. )
+
+select f_dok
+go top
+
+msgo("Popunjavam veze ...")
+
+do while !EOF()
+	
+	// gledaj samo mp racune
+	if ( field->idtipdok <> "11" ) .or. ( ALLTRIM(field->rbr) <> "1" )
+		skip
+		loop
+	endif
+
+	// provjeri datum faktura
+	if ( field->datdok > dD_to ) .or. ( field->datdok < dD_from )
+		skip
+		loop
+	endif
+
+	cFaktDok := ALLTRIM( field->brdok )
+
+	// uzmi memo polje
+	aMemo := ParsMemo( field->txt )	
+		
+	if LEN( aMemo ) > 18
+		// ovo je polje koje sadrzi brojeve veza...
+		cMemo := aMemo[ 19 ]
+	else
+		cMemo := ""
+	endif
+
+	if !EMPTY( cMemo )
+
+		// ubaci u matricu...
+		aTmp := TokToNiz( cMemo, ";" )
+
+		// obradi svaki pojedinacni nalog
+		for i:=1 to len( aTmp )
+			
+			// evo broj naloga
+			nNalog := VAL( ALLTRIM(aTmp[i]) )
+			
+			// prekontrolisi ga sada u rnal-u
+			select docs
+			go top
+			seek docno_str( nNalog )
+
+			if FOUND()
+				
+			  if cReset == "D"
+			  	// resetuj polje fmk_doc prije svega
+				replace fmk_doc with ""
+			  endif
+
+			  replace fmk_doc with ;
+				_fmk_doc_upd( ;
+					ALLTRIM( field->fmk_doc ), ;
+					cFaktDok + "M" )
+			
+			endif
+
+		next
+	
+	endif
+
+	select f_dok
+	skip
+enddo
+
+msgc()
+
+// prekini vezu sa doks
+select (240)
+use
+
+return
 
 
 

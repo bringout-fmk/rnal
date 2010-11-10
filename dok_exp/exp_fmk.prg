@@ -545,7 +545,7 @@ return
 // --------------------------------------------
 // dodaj dokument u listu 
 // --------------------------------------------
-static function _fmk_doc_upd( cField, cFmkDok )
+function _fmk_doc_upd( cField, cFmkDok )
 local cLista := ""
 local cSep := ";"
 local cTmp 
@@ -559,9 +559,11 @@ aTmp := TokToNiz( cTmp, cSep )
 nSeek := ASCAN( aTmp, { |xVal| xVal == cFmkDok } )
 
 if nSeek = 0
+	
 	AADD( aTmp, cFmkDok  )
 	// sortiraj
 	ASORT( aTmp )
+
 endif
 
 // zatim daj u listu sve stavke

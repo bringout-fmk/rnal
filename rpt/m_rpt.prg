@@ -29,19 +29,21 @@ AADD(opc, "S. specifikacija naloga za poslovodje  ")
 AADD(opcexe, {|| m_get_spec( 1 ) })
 
 AADD(opc, "R. pregled utroska RAL sirovina  ")
-AADD(opcexe, {|| rpt_ral_calc( ) })
+AADD(opcexe, {|| rpt_ral_calc() })
 
 AADD(opc, "O. pregled ucinka operatera  ")
-AADD(opcexe, {|| r_op_docs( ) })
+AADD(opcexe, {|| r_op_docs() })
 
 AADD(opc, "P. pregled ucinka proizvodnje  ")
-AADD(opcexe, {|| m_get_rpro( ) })
+AADD(opcexe, {|| m_get_rpro() })
 
 AADD(opc, "------------------------------------------- ")
 AADD(opcexe, {|| nil })
 
 AADD(opc, "K. kontrola prebacenih dokumenata  ")
-AADD(opcexe, {|| m_rpt_check( ) })
+AADD(opcexe, {|| m_rpt_check() })
+AADD(opc, "Kp. popuni veze RNAL <> FAKT (dok.11) ")
+AADD(opcexe, {|| chk_dok_11() })
 
 AADD(opc, "T. pretraga naloga po uslovima  ")
 AADD(opcexe, {|| r_fnd_docs() })
