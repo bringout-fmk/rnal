@@ -172,6 +172,9 @@ do while !EOF()
 	  // <qtty>1</qtty>
 	  xml_node( "qtty", ALLTRIM(STR(1, 12)) )
 	  
+	  // <tqt>17</tqt>
+	  xml_node( "tqt", ALLTRIM(STR(nQty, 12)) )
+	  
 	  // <type>RAMA-TERM</type>
 	  xml_node( "type", cArt_type )	
 	  
