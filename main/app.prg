@@ -272,6 +272,7 @@ public gAopKaljenje
 public gInsTimeOut := 150
 
 // gn.zaok min/max
+public gGnUse := "D"
 public gGnMin := 20
 public gGnMax := 6000
 public gGnStep := 30
@@ -296,6 +297,7 @@ Rpar( "to", @gInsTimeOut )
 Rpar( "g1", @gGnMin )
 Rpar( "g2", @gGnMax )
 Rpar( "g3", @gGnStep )
+Rpar( "g0", @gGnUse )
 
 
 // sekcija "E"

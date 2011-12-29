@@ -351,6 +351,10 @@ nX += 2
 
 nX += 1
 
+@ m_x + nX, m_y+2 SAY PADL("Koristiti GN zaokruzenja ?", nLeft - 20) GET gGnUse ;
+	PICT "@!" VALID gGnUse $ "DN"
+nX += 1
+
 @ m_x + nX, m_y+2 SAY PADL("GN zaok. (min)", nLeft - 20) GET gGnMin ;
 	PICT "99999"
 @ m_x + nX, col()+1 SAY "(max)" GET gGnMax PICT "99999"
@@ -548,6 +552,7 @@ RPar("a5", @gDefNVM)
 
 RPar("to", @gInsTimeOut)
 
+RPar("g0", @gGnUse)
 RPar("g1", @gGnMin)
 RPar("g2", @gGnMax)
 RPar("g3", @gGnStep)
@@ -657,6 +662,7 @@ WPar("a5", gDefNVM )
 
 WPar("to", gInsTimeOut )
 
+WPar("g0", gGnUse )
 WPar("g1", gGnMin )
 WPar("g2", gGnMax )
 WPar("g3", gGnStep )
