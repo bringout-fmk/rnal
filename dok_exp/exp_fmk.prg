@@ -313,7 +313,7 @@ do while !EOF()
 	// 18. 
 	a_to_txt( "", .t. )
 	// 19. 
-	a_to_txt( cTmp_veza, .t. )
+	a_to_txt( "", .t. )
 
 	gather()
 
