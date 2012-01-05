@@ -144,7 +144,15 @@ do while !EOF()
 	if is_ramaterm( ALLTRIM(field->art_desc) )
 		cArt_type := "RAMA-TERM"
 	endif
-	
+
+	// pozicija labele
+	cIt_lab_p := field->it_lab_pos
+
+	if cIt_lab_p == "O"
+		cL_pos_def := "Vani"
+		cLe_pos_def := "Outside"
+	endif
+
 	// koliko stavki ima, toliko i labela
    	for lab_cnt := 1 to nQty
 	  
