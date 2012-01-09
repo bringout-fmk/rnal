@@ -443,12 +443,13 @@ return
 function cp_items()
 local nDocCopy
 local cQ_it
+local cQ_it2
 local cQ_aops
 local cSeason
 local nRet := 1
 local nTArea := SELECT()
 
-nRet := _cp_box( @nDocCopy, @cQ_it, @cQ_aops, @cSeason )
+nRet := _cp_box( @nDocCopy, @cQ_it, @cQ_it2, @cQ_aops, @cSeason )
 
 // ako necu nista raditi - izlazim
 if nRet = 0
@@ -458,7 +459,7 @@ endif
 select _docs
 
 // imam parametre, idem na kopiranje
-__cp_items( _docs->doc_no, nDocCopy, cQ_it, cQ_aops, cSeason )
+__cp_items( _docs->doc_no, nDocCopy, cQ_it, cQ_it2, cQ_aops, cSeason )
 
 select (nTArea)
 
@@ -472,16 +473,17 @@ return nRet
 // cQ_it - pitanje za kopiranje stavki (d/n)
 // cQ_aops - pitanje za kopiranje operac. (d/n)
 // ----------------------------------------------
-static function _cp_box( nDoc, cQ_It, cQ_Aops, cSeason )
+static function _cp_box( nDoc, cQ_It, cQ_it2, cQ_Aops, cSeason )
 local nRet := 1
 local GetList := {}
 
 nDoc := 0
 cQ_it := "D"
+cQ_it2 := "D"
 cQ_Aops := "D"
 cSeason := SPACE(4)
 
-Box(, 5, 55 )
+Box(, 6, 55 )
 	
 	@ m_x + 1, m_y + 2 SAY "Nalog iz kojeg kopiramo:" GET nDoc ;
 		PICT "9999999999" VALID ( nDoc > 0 )
@@ -491,7 +493,10 @@ Box(, 5, 55 )
 	@ m_x + 3, m_y + 2 SAY "   Kopirati stavke naloga (D/N)" GET cQ_it ;
 		PICT "@!" VALID ( cQ_it $ "DN" )
 	
-	@ m_x + 4, m_y + 2 SAY "Kopirati operacije naloga (D/N)" GET cQ_Aops ;
+	@ m_x + 4, m_y + 2 SAY "   Kopirati d.stav naloga (D/N)" GET cQ_it2 ;
+		PICT "@!" VALID ( cQ_it2 $ "DN" )
+
+	@ m_x + 5, m_y + 2 SAY "Kopirati operacije naloga (D/N)" GET cQ_Aops ;
 		PICT "@!" VALID ( cQ_Aops $ "DN" )
 
 	read
@@ -512,10 +517,11 @@ return nRet
 // nDoc - originalni dokument
 // nDocCopy - dokument s kojeg kopiramo
 // ---------------------------------------------------
-static function __cp_items( nDoc, nDocCopy, cQ_it, cQ_aops, cSeason )
+static function __cp_items( nDoc, nDocCopy, cQ_it, cQ_it2, cQ_aops, cSeason )
 local nTArea := SELECT()
 local nDocItCopy 
 local nT_Docit := F_DOC_IT
+local nT_Docit2 := F_DOC_IT2
 local nT_Docops := F_DOC_OPS
 local lSeason := .f.
 
@@ -535,11 +541,19 @@ if !EMPTY( cSeason ) .and. VAL( cSeason ) <> YEAR(DATE())
 	use
 	select (nT_docit)
 	use ( KUMPATH + cSeason + SLASH + "DOC_IT.DBF") alias doc_it
-	
+	set order to tag "1"
+
+	select (nT_docit2)
+	use
+	select (nT_docit2)
+	use ( KUMPATH + cSeason + SLASH + "DOC_IT2.DBF") alias doc_it2
+	set order to tag "1"
+
 	select (nT_docops)
 	use
 	select (nT_docops)
 	use ( KUMPATH + cSeason + SLASH + "DOC_OPS.DBF") alias doc_ops
+	set order to tag "1"
 
 endif
 
@@ -601,7 +615,40 @@ do while !EOF() .and. field->doc_no = nDocCopy
 		skip
 
 	enddo
+	
+	// kopiraj i dodatne stavke naloga, ako je to uredu
+	if cQ_it2 == "N"
+
+		select ( nT_docit )
+		skip
+		loop
+	
+	endif
+
+	select ( nT_docit2 )
+	go top
+	seek docno_str( nDocCopy ) + docit_str( nDocItCopy )
+
+	do while !EOF() .and. field->doc_no = nDocCopy ;
+			.and. field->doc_it_no = nDocItCopy
+				
+		scatter()
 		
+		select _doc_it2
+		append blank
+				
+		// samo ovo zamjeni sa trenutnim dokumentom
+		_doc_no := nDoc
+		_doc_it_no := nDoc_it_no
+
+		gather()
+
+		select ( nT_docit2 )				
+		skip
+
+	enddo
+
+
 	select ( nT_docit )
 	skip
 

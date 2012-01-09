@@ -546,7 +546,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 		  nDocit_altt, cDocit_city, nTotal, nTot_m, ;
 		  nZHeigh, nZWidth, ;
 		  nZH2, nZW2, ;
-		  nNeto, nBruto, cDoc_it_pos )
+		  nNeto, nBruto, cDoc_it_pos, cIt_lab_pos )
 
 	    next
 
