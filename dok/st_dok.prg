@@ -326,7 +326,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	cPosition := ""
 
 	if !EMPTY( cDoc_it_pos )
-		cPosition := "pozicija: " + cDoc_it_pos
+		cPosition := "pozicija: " + cDoc_it_pos + ", "
 	endif
 
 	// tip artikla
