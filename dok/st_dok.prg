@@ -666,7 +666,8 @@ local nAop_att_id
 local cAop_att_desc
 local cDoc_op_desc
 local cAop_Value
-
+local cRecord
+local cTmpRecord
 
 if ( __temp == .t. )
 	nTable := F__DOC_OPS
@@ -702,7 +703,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	nRec := RECNO()
 
 	cRecord := ""
-	
+
 	do while !EOF() .and. field->doc_no == __doc_no ;
 			.and. field->doc_it_no == nDoc_it_no
 	
@@ -716,6 +717,11 @@ do while !EOF() .and. field->doc_no == __doc_no
 		if !EMPTY( field->aop_value )
 			cRecord += ","
 			cRecord += ALLTRIM( field->aop_value )
+		endif
+		
+		if !EMPTY( ALLTRIM( field->doc_op_desc ) )
+			cRecord += ","
+			cRecord += ALLTRIM( field->doc_op_desc )
 		endif
 		
 		cRecord += "#"
@@ -737,7 +743,7 @@ do while !EOF() .and. field->doc_no == __doc_no
 	select (nTable)
 	
 	// ako su identicne operacije samo idi dalje....
-	if cRecord == cTmpRecord .and. nArticle == nTmpArticle
+	if ( cRecord == cTmpRecord ) .and. ( nArticle == nTmpArticle )
 		loop
 	endif
 
