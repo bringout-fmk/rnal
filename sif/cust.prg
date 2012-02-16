@@ -39,6 +39,8 @@ endif
 
 set_a_kol(@ImeKol, @Kol)
 
+altd()
+
 if VALTYPE(cId) == "C"
 	//try to validate
 	if VAL(cId) <> 0
@@ -48,7 +50,7 @@ if VALTYPE(cId) == "C"
 endif
 
 // postavi filter...
-set_f_kol(cCustDesc)	
+set_f_kol( cCustDesc, @cId )	
 
 cRet := PostojiSifra(F_CUSTOMS, cTag, 12, 70, cHeader, @cId, dx, dy, {|| key_handler(Ch) })
 
@@ -71,14 +73,22 @@ return cRet
 // --------------------------------------------------
 // setovanje filtera nad tabelom customers
 // --------------------------------------------------
-static function set_f_kol(cCustDesc)
+static function set_f_kol( cCustDesc, cId )
 local cFilter := ""
 
 if !EMPTY(cCustDesc)
 	
 	cCustDesc := ALLTRIM(cCustDesc)
-	cFilter += "ALLTRIM(UPPER(cust_desc)) = " + cm2str( UPPER(cCustDesc) )
-	
+
+	if RIGHT( cCustDesc, 1 ) == "$"
+		// skloni djoker
+		cCustDesc := LEFT( cCustDesc, LEN(cCustDesc) - 1 )
+		// vrati i cId varijablu u normalno stanje
+		cId := cCustDesc
+		cFilter += cm2str( UPPER( cCustDesc) ) + " $ UPPER(ALLTRIM(cust_desc))"
+	else
+		cFilter += "ALLTRIM(UPPER(cust_desc)) = " + cm2str( UPPER(cCustDesc) )
+	endif
 endif
 
 if !EMPTY(cFilter)
