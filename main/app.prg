@@ -277,6 +277,9 @@ public gGnMin := 20
 public gGnMax := 6000
 public gGnStep := 30
 
+// pretraga dokumenta otpremnice po prefiksu
+public gPoPrefiks := "N"
+
 ::super:setTGVars()
 
 O_KPARAMS
@@ -285,6 +288,7 @@ O_KPARAMS
 cSection := "1"
 Rpar( "ff", @gFirma )
 Rpar( "fn", @gNFirma )
+
 
 // sekcija "5"
 cSection := "5"
@@ -309,6 +313,7 @@ Rpar( "pd", @gFaPrivDir )
 Rpar( "kd", @gFaKumDir )
 Rpar( "tp", @gPoPrivDir )
 Rpar( "tk", @gPoKumDir )
+Rpar( "oP", @gPoPrefiks )
 
 cSection := "1"
 

@@ -201,7 +201,7 @@ if cVpMp == "M"
 	cCtrlNo := "23"
 endif
 
-cBrDok := fa_new_doc( cFirma, cCtrlNo )
+cBrDok := fa_new_doc( cFirma, cCtrlNo, cIdVd )
 cFmkDoc := cIdVd + "-" + ALLTRIM(cBrdok)
 nRbr := 0
 
@@ -912,6 +912,39 @@ select (nTArea)
 return xRet
 
 
+// ---------------------------------------------------
+// pretraga dokumenta po prefiksu
+// ---------------------------------------------------
+static function po_prefix( _firma, _tip_dok )
+local _broj := ""
+local _prefix
+local _srch_tag
+
+_prefix := PADL( ALLTRIM( STR( GetUserId() ) ), 2, "0" )
+
+// pretraga po prefiksu
+if !EMPTY( _prefix )
+    
+    	_srch_tag := _prefix + "-"
+
+	seek _firma + _tip_dok + _srch_tag + "È"
+ 	skip -1
+    
+   	if fa_doks->idfirma == _firma .and. fa_doks->idtipdok == _tip_dok .and. LEFT( fa_doks->brdok, 3 ) == _srch_tag
+    
+        	_broj := UBrojDok( VAL( RIGHT( ALLTRIM( fa_doks->brdok ), 5 ) ) + 1, 5, "" )
+        
+
+    	else
+		_broj := UBrojDok( 1, 5, "" )
+	endif 
+
+        _broj := PADR( _srch_tag + _broj, 8 )
+
+endif
+
+return _broj
+
 
 
 // ----------------------------------------------
@@ -922,11 +955,26 @@ local cDokBr := REPLICATE("9", 8)
 local nTArea := SELECT()
 local cPom
 local nPom
+local _ret
 
 select 113
 use ( ALLTRIM(gFaKumDir) + "DOKS" ) alias FA_DOKS
 set order to tag "1"
 go top
+
+// trazi po prefiksu
+if gPoPrefiks == "D"
+	
+	_ret := po_prefix( cFaFirma, cFaTipDok )
+
+	if !EMPTY( _ret )
+	
+		select (nTArea)
+		return _ret
+
+	endif
+endif
+
 seek cFaFirma + cFaTipDok + CHR(254)
 skip -1
 
@@ -940,6 +988,7 @@ endif
 cDokBr := PADL( ALLTRIM(STR( nPom + 1 )), 5, "0" )
 
 select (nTArea)
+
 return cDokBr
 
 

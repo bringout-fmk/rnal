@@ -199,6 +199,10 @@ nX += 1
 
 @ m_x + nX, m_y + 2 SAY PADL("POS privatni:", 20) GET gPoPrivDir PICT "@S45"
 
+nX += 1
+
+@ m_x + nX, m_y + 2 SAY PADL("Otpremnice sa prefiksom", 20) GET gPoPrefiks PICT "@!" VALID gPoPrefiks $ "DN"
+
 nX += 2
 
 @ m_x + nX, m_y + 2 SAY PADL("****** ostali parametri", nLeft)
@@ -522,6 +526,7 @@ RPar("pd", @gFaPrivDir)
 RPar("kd", @gFaKumDir)
 RPar("tp", @gPoPrivDir)
 RPar("tk", @gPoKumDir)
+RPar("oP", @gPoPrefiks)
 
 close
 return
@@ -633,6 +638,7 @@ WPar("pd", gFaPrivDir)
 WPar("kd", gFaKumDir)
 WPar("tp", gPoPrivDir)
 WPar("tk", gPoKumDir)
+WPar("oP", gPoPrefiks)
 
 close
 
