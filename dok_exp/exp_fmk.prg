@@ -925,7 +925,7 @@ _prefix := PADL( ALLTRIM( STR( GetUserId() ) ), 2, "0" )
 // pretraga po prefiksu
 if !EMPTY( _prefix )
     
-    	_srch_tag := _prefix + "-"
+    	_srch_tag := _prefix + "/"
 
 	seek _firma + _tip_dok + _srch_tag + "È"
  	skip -1
