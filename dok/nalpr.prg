@@ -201,7 +201,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	
 	//lSh_art_desc := .f.
 	
-	//nArt_id := field->art_id
+	nArt_id := field->art_id
 	
 	//if nArt_tmp <> nArt_id 
 		
@@ -498,7 +498,9 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 		
 		lSh_it_desc := .f.
 		
-		if ALLTRIM(cTmpItDesc) <> ALLTRIM(cItDesc)
+		if ALLTRIM(cTmpItDesc) <> ALLTRIM(cItDesc) .or. ;
+			( nArt_tmp <> nArt_id )
+
 			lSh_it_desc := .t.
 		endif
 	
@@ -532,6 +534,7 @@ do while !EOF() .and. field->doc_no == nDoc_no .and. field->doc_gr_no == nDoc_gr
 	skip
 
 	cTmpItDesc := cItDesc
+	nArt_tmp := nArt_id
 	
 	++ nCount 
 	
