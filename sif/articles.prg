@@ -1556,6 +1556,7 @@ if FOUND()
 			_art_desc := cArt_desc
 			_match_code := cArt_mcode
 			_art_full_desc := cArt_full_desc
+			_art_lab_desc := cArt_lab_desc
 			
 			Gather()
 		
