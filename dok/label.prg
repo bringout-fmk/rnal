@@ -60,12 +60,12 @@ if lDirectPrint == nil
 endif
 
 // daj mi osnovne podatke o dokumentu
-cC_desc := strkzn( g_t_pars_opis("P02"), "8", "U" )
+cC_desc := strkznutf8( g_t_pars_opis("P02"), "8" )
 cC_tel := g_t_pars_opis("P04")
-cC_addr := strkzn( g_t_pars_opis("P03"), "8", "U" )
-cCn_desc := strkzn( g_t_pars_opis("P11"), "8", "U" )
+cC_addr := strkznutf8( g_t_pars_opis("P03"), "8" )
+cCn_desc := strkznutf8( g_t_pars_opis("P11"), "8" )
 cCn_tel := g_t_pars_opis("P12")
-cCn_addr := strkzn( g_t_pars_opis("P13"), "8", "U" )
+cCn_addr := strkznutf8( g_t_pars_opis("P13"), "8" )
 
 if ALLTRIM( cC_desc ) == "NN"
 	cC_desc := cCn_desc
@@ -73,7 +73,7 @@ if ALLTRIM( cC_desc ) == "NN"
 	cC_addr := cCn_addr
 endif
 
-cObject := strkzn( g_t_pars_opis("P21"), "8", "U" )
+cObject := strkznutf8( g_t_pars_opis("P21"), "8" )
 
 // otvori xml za upis
 open_xml("c:\data.xml")
@@ -116,9 +116,9 @@ do while !EOF()
 	go top
 	seek artid_str(nArt_id)
 	
-	cL_desc := strkzn( ALLTRIM( field->art_lab_desc ), "8", "U" )
-   	cF_desc := strkzn( ALLTRIM( field->art_full_desc ), "8", "U" )
-   	cS_desc := strkzn( ALLTRIM( field->art_desc ), "8", "U" )
+	cL_desc := strkznutf8( ALLTRIM( field->art_lab_desc ), "8" )
+   	cF_desc := strkznutf8( ALLTRIM( field->art_full_desc ), "8" )
+   	cS_desc := strkznutf8( ALLTRIM( field->art_desc ), "8" )
 
 	if EMPTY(cL_desc)
 		cL_desc := cS_desc
@@ -135,9 +135,9 @@ do while !EOF()
 
 	nQty := field->doc_it_qtty
 	
-	cPosition := strkzn( ALLTRIM(field->doc_it_pos), "8", "U" )
-	cCity := strkzn( ALLTRIM( field->doc_acity ), "8", "U" )
-	cAltt := strkzn( ALLTRIM( STR( field->doc_it_altt, 12 ) ), "8", "U" )
+	cPosition := strkznutf8( ALLTRIM(field->doc_it_pos), "8" )
+	cCity := strkznutf8( ALLTRIM( field->doc_acity ), "8" )
+	cAltt := strkznutf8( ALLTRIM( STR( field->doc_it_altt, 12 ) ), "8" )
    
 	cArt_type := "-"
 
@@ -236,6 +236,9 @@ xml_subnode("label", .t.)
 // zatvori xml za upis
 close_xml()
 
+// pobrisi izlazni fajl prije stampe
+FERASE( "c:" + SLASH + "rg-lab.odt" )
+
 cOdtName := ""
 cJavaStart := ALLTRIM( gJavaStart )
 
@@ -272,6 +275,12 @@ run &cCmdLine
 // zaustavi se da vidis o cemu se radi
 if lCheckErr == .t.
 	inkey(0)
+endif
+
+if !FILE( "c:" + SLASH + "rg-lab.odt")
+	MsgBeep("Doslo je do greske kod generisanja naljepnice.")
+	restore screen from cScreen
+	return
 endif
 
 clear screen
